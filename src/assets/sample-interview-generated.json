@@ -1,0 +1,266 @@
+[
+  {
+    "output": {
+      "role_summary": {
+        "mission": "To meticulously manage and execute end-to-end accounting operations, ensuring the integrity and compliance of financial reporting, and providing actionable financial insights to support business objectives.",
+        "key_responsibilities": [
+          "Prepare and finalize accurate financial statements in accordance with relevant accounting standards.",
+          "Maintain and reconcile the general ledger, overseeing month-end and year-end closing processes.",
+          "Ensure strict adherence to statutory and tax compliance requirements, including filings and reconciliations.",
+          "Conduct comprehensive financial analysis, budgeting, and forecasting to inform strategic decisions.",
+          "Support internal and external audits, and proactively identify and implement improvements in internal controls and processes."
+        ],
+        "team_structure": "Operates within the finance department, collaborating with various internal stakeholders and external auditors/tax advisors."
+      },
+      "evaluation_pillars": [
+        {
+          "pillar_name": "Core Accounting & Reporting",
+          "description": "Fundamental competencies in managing financial records and generating accurate financial reports.",
+          "evaluation_criteria": [
+            {
+              "skill_name": "Financial Statement Preparation & Finalization",
+              "context": "Core responsibility ensuring accurate external and internal financial reporting.",
+              "required_proficiency": "Expert (hands-on experience in full cycle preparation)",
+              "interview_focus_areas": [
+                "Application of IFRS/GAAP principles to complex scenarios",
+                "Consolidation principles for multi-entity structures",
+                "Detailed understanding of cash flow statement preparation (direct vs. indirect)",
+                "Key disclosure requirements and notes to financial statements"
+              ],
+              "integrates_with": [
+                "General Ledger Management",
+                "Month-End & Year-End Closing Cycles",
+                "Fundamental Accounting Principles (GAAP/IFRS)",
+                "Local Accounting Standards",
+                "ERP Systems",
+                "Accounting Software"
+              ]
+            },
+            {
+              "skill_name": "General Ledger Management",
+              "context": "The foundation for all accounting records and financial data integrity.",
+              "required_proficiency": "Hands-On Experience",
+              "interview_focus_areas": [
+                "Chart of accounts design and maintenance for scalability",
+                "Complex journal entry processing and approvals",
+                "Automated vs. manual account reconciliation processes",
+                "Handling suspense accounts and intercompany transactions",
+                "Period-end closing journal entries (accruals, deferrals)"
+              ],
+              "integrates_with": [
+                "Financial Statement Preparation & Finalization",
+                "Month-End & Year-End Closing Cycles",
+                "ERP Systems",
+                "Accounting Software"
+              ]
+            },
+            {
+              "skill_name": "Month-End & Year-End Closing Cycles",
+              "context": "Critical process for timely and accurate periodic financial reporting.",
+              "required_proficiency": "Hands-On Experience (demonstrable leadership/significant contribution)",
+              "interview_focus_areas": [
+                "Streamlining closing processes for efficiency",
+                "Managing accruals, deferrals, and provisions",
+                "Ensuring proper cut-off procedures and revenue recognition",
+                "Variance analysis between actuals and budget/prior periods",
+                "Reconciliation of balance sheet accounts and sub-ledgers"
+              ],
+              "integrates_with": [
+                "Financial Statement Preparation & Finalization",
+                "General Ledger Management",
+                "Fundamental Accounting Principles (GAAP/IFRS)",
+                "ERP Systems",
+                "Accounting Software"
+              ]
+            },
+            {
+              "skill_name": "Fundamental Accounting Principles (GAAP/IFRS)",
+              "context": "Underlying knowledge base for all financial reporting and accounting decisions.",
+              "required_proficiency": "Required (strong conceptual understanding and practical application)",
+              "interview_focus_areas": [
+                "Distinction and application of different revenue recognition models",
+                "Complex expense matching principles (e.g., long-term contracts)",
+                "Asset valuation methods and impairment testing",
+                "Principles of lease accounting (ASC 842/IFRS 16)",
+                "Impact of accounting policy choices on financial statements"
+              ],
+              "integrates_with": [
+                "Financial Statement Preparation & Finalization",
+                "Month-End & Year-End Closing Cycles",
+                "Statutory & Tax Compliance (Filings & Reconciliations)"
+              ]
+            },
+            {
+              "skill_name": "Local Accounting Standards",
+              "context": "Ensures compliance with jurisdiction-specific financial reporting regulations.",
+              "required_proficiency": "Required (specific to operating regions)",
+              "interview_focus_areas": [
+                "Specific local reporting requirements (e.g., statutory accounts)",
+                "Key differences between local GAAP and IFRS/US GAAP",
+                "Recent updates or changes in local accounting regulations",
+                "Treatment of specific local transactions or industry nuances"
+              ],
+              "integrates_with": [
+                "Financial Statement Preparation & Finalization",
+                "Statutory & Tax Compliance (Filings & Reconciliations)"
+              ]
+            }
+          ]
+        },
+        {
+          "pillar_name": "Compliance & Controls",
+          "description": "Expertise in navigating regulatory requirements, managing audits, and establishing robust internal control environments.",
+          "evaluation_criteria": [
+            {
+              "skill_name": "Statutory & Tax Compliance (Filings & Reconciliations)",
+              "context": "Essential for legal and regulatory adherence, avoiding penalties.",
+              "required_proficiency": "Hands-On Experience",
+              "interview_focus_areas": [
+                "Comprehensive knowledge of VAT/GST, corporate income tax, payroll taxes, sales tax",
+                "Process for preparing and filing various tax returns",
+                "Managing tax provisions and deferred tax calculations",
+                "Experience with tax reconciliations and managing tax audits",
+                "Interaction with tax authorities and external advisors"
+              ],
+              "integrates_with": [
+                "Financial Statement Preparation & Finalization",
+                "Local Accounting Standards",
+                "ERP Systems",
+                "Accounting Software"
+              ]
+            },
+            {
+              "skill_name": "Internal & External Audit Support",
+              "context": "Facilitates transparent financial reporting and provides assurance to stakeholders.",
+              "required_proficiency": "Hands-On Experience",
+              "interview_focus_areas": [
+                "Preparing detailed audit schedules and documentation packages",
+                "Effectively responding to auditor queries and managing information flow",
+                "Understanding audit materiality and risk assessment",
+                "Experience with different types of audits (financial, operational)",
+                "Implementing audit recommendations and remediation plans"
+              ],
+              "integrates_with": [
+                "All Core Accounting & Reporting skills",
+                "Internal Controls & Process Improvements"
+              ]
+            },
+            {
+              "skill_name": "Internal Controls & Process Improvements",
+              "context": "Safeguards company assets, ensures data integrity, and enhances operational efficiency.",
+              "required_proficiency": "Hands-On Experience (demonstrable contribution to improvement)",
+              "interview_focus_areas": [
+                "Application of the COSO framework and key control components",
+                "Designing and implementing controls (e.g., segregation of duties, approval matrices)",
+                "Documenting processes and identifying control weaknesses",
+                "Experience with process automation and technology-driven improvements",
+                "Measuring the effectiveness of internal controls and continuous monitoring"
+              ],
+              "integrates_with": [
+                "General Ledger Management",
+                "ERP Systems",
+                "Accounting Software"
+              ]
+            }
+          ]
+        },
+        {
+          "pillar_name": "Financial Analysis & Systems",
+          "description": "Ability to leverage financial data for insights, planning, and effective use of business tools.",
+          "evaluation_criteria": [
+            {
+              "skill_name": "Advanced Spreadsheet Functions (e.g., Excel)",
+              "context": "Ubiquitous tool for detailed analysis, reconciliations, and ad-hoc reporting.",
+              "required_proficiency": "Expert (highly proficient in complex functions and data manipulation)",
+              "interview_focus_areas": [
+                "Mastery of PivotTables, VLOOKUP/XLOOKUP, INDEX/MATCH, SUMIFS/COUNTIFS",
+                "Use of financial functions (e.g., NPV, IRR, PMT)",
+                "Data validation, conditional formatting, and error handling",
+                "Developing and auditing complex financial models",
+                "Basic understanding or experience with Macros (VBA) for automation"
+              ],
+              "integrates_with": [
+                "Financial Analysis",
+                "Budgeting & Forecasting"
+              ]
+            },
+            {
+              "skill_name": "ERP Systems (e.g., SAP, Oracle, NetSuite)",
+              "context": "Central system for managing financial data and core accounting operations.",
+              "required_proficiency": "Operational Experience (proficient user)",
+              "interview_focus_areas": [
+                "Navigation and data extraction across key modules (GL, AP, AR, FA)",
+                "Generating standard and custom financial reports",
+                "Understanding of master data management within the ERP",
+                "Experience with transaction processing workflows and approvals",
+                "User access controls and segregation of duties within the ERP environment"
+              ],
+              "integrates_with": [
+                "General Ledger Management",
+                "Financial Statement Preparation & Finalization",
+                "Month-End & Year-End Closing Cycles",
+                "Statutory & Tax Compliance (Filings & Reconciliations)"
+              ]
+            },
+            {
+              "skill_name": "Accounting Software (e.g., QuickBooks, Xero, Sage)",
+              "context": "Specific software used for core accounting tasks, often in smaller or specialized environments.",
+              "required_proficiency": "Operational Experience (proficient user)",
+              "interview_focus_areas": [
+                "Proficiency in daily data entry and transaction recording",
+                "Customizing and generating various financial reports",
+                "Executing bank reconciliations and multi-currency transactions",
+                "Managing invoicing, accounts payable, and accounts receivable functions",
+                "Integration with payroll or other operational systems"
+              ],
+              "integrates_with": [
+                "General Ledger Management",
+                "Financial Statement Preparation & Finalization",
+                "Statutory & Tax Compliance (Filings & Reconciliations)"
+              ]
+            },
+            {
+              "skill_name": "Financial Analysis",
+              "context": "Provides valuable insights for business performance evaluation and strategic decision-making.",
+              "required_proficiency": "Hands-On Experience",
+              "interview_focus_areas": [
+                "Conducting ratio analysis (liquidity, solvency, profitability, efficiency)",
+                "Performing trend analysis and identifying key performance indicators (KPIs)",
+                "In-depth variance analysis (actual vs. budget, prior year)",
+                "Cost-benefit analysis and profitability by product/service line",
+                "Working capital management and cash flow optimization"
+              ],
+              "integrates_with": [
+                "Financial Statement Preparation & Finalization",
+                "Budgeting & Forecasting",
+                "Advanced Spreadsheet Functions (e.g., Excel)"
+              ]
+            },
+            {
+              "skill_name": "Budgeting & Forecasting",
+              "context": "Guides future financial performance, resource allocation, and strategic planning.",
+              "required_proficiency": "Hands-On Experience",
+              "interview_focus_areas": [
+                "Developing comprehensive budget models from scratch",
+                "Applying various forecasting methodologies (e.g., rolling forecasts, zero-based)",
+                "Conducting scenario planning and sensitivity analysis",
+                "Analyzing and explaining budget variances to stakeholders",
+                "Experience with capital budgeting and investment appraisal"
+              ],
+              "integrates_with": [
+                "Financial Analysis",
+                "Advanced Spreadsheet Functions (e.g., Excel)"
+              ]
+            }
+          ]
+        }
+      ],
+      "qualifying_questions": [
+        "Describe your experience leading or significantly contributing to month-end and year-end closing cycles. What specific challenges did you face, and how did you resolve them?",
+        "Can you provide a detailed example of how you've used advanced spreadsheet functions or an ERP system to streamline a complex accounting process or perform in-depth financial analysis?",
+        "How do you ensure continuous compliance with both fundamental accounting principles (like GAAP/IFRS) and specific local tax/statutory requirements in your daily work? Illustrate with an example."
+      ],
+      "ideal_candidate_profile": "A meticulous and technically proficient Accountant with end-to-end expertise in core financial operations, including robust experience in financial statement preparation, general ledger management, and closing cycles. This candidate possesses a strong grasp of fundamental accounting principles and local compliance standards, coupled with practical skills in ERP systems, advanced spreadsheets, and financial analysis. They are proactive in strengthening internal controls, driving process improvements, and are adept at supporting audit processes while providing valuable financial insights to inform strategic decisions."
+    }
+  }
+]

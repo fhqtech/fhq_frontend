@@ -1,0 +1,778 @@
+{
+  "name": "AI Interviewer System - Complete Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "interview-created",
+        "options": {}
+      },
+      "id": "interview-creation-webhook",
+      "name": "Interview Creation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "interview_id",
+              "value": "={{$json.id}}"
+            },
+            {
+              "name": "title",
+              "value": "={{$json.title}}"
+            },
+            {
+              "name": "type",
+              "value": "={{$json.type}}"
+            },
+            {
+              "name": "status",
+              "value": "active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "process-interview-data",
+      "name": "Process Interview Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "interviews",
+        "columns": "id, title, type, description, duration, voice_type, voice_speed, accent, email_enabled, phone_enabled, sms_enabled, status, created_at",
+        "additionalFields": {}
+      },
+      "id": "create-interview-record",
+      "name": "Create Interview Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "candidate-upload",
+        "options": {}
+      },
+      "id": "candidate-upload-webhook",
+      "name": "Candidate Upload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.upload_method}}",
+              "operation": "equal",
+              "value2": "google_sheets"
+            }
+          ]
+        }
+      },
+      "id": "check-upload-method",
+      "name": "Check Upload Method",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "range": "A1:G1000",
+        "options": {}
+      },
+      "id": "google-sheets-import",
+      "name": "Google Sheets Import",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process uploaded Excel/CSV file\nconst fileData = $input.all();\nconst candidates = [];\n\nfor (const item of fileData) {\n  if (item.json.name && item.json.email) {\n    candidates.push({\n      name: item.json.name,\n      email: item.json.email,\n      phone: item.json.phone || '',\n      position: item.json.position || '',\n      experience: item.json.experience || 0,\n      resume_url: item.json.resume_url || '',\n      interview_id: item.json.interview_id,\n      status: 'pending',\n      created_at: new Date().toISOString()\n    });\n  }\n}\n\nreturn candidates.map(candidate => ({ json: candidate }));"
+      },
+      "id": "process-file-upload",
+      "name": "Process File Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 600]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "candidates",
+        "columns": "name, email, phone, position, experience, resume_url, interview_id, status, created_at",
+        "additionalFields": {}
+      },
+      "id": "store-candidates",
+      "name": "Store Candidates",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "trigger": "schedule",
+        "interval": 5
+      },
+      "id": "interview-scheduler",
+      "name": "Interview Scheduler",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 800]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.*, i.title as interview_title, i.type FROM candidates c JOIN interviews i ON c.interview_id = i.id WHERE c.status = 'pending' AND c.invitation_sent = false"
+      },
+      "id": "get-pending-candidates",
+      "name": "Get Pending Candidates",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [460, 800]
+    },
+    {
+      "parameters": {
+        "subject": "Interview Invitation - {{$json.interview_title}}",
+        "message": "Dear {{$json.name}},\n\nYou have been invited to participate in an AI-powered interview for the {{$json.position}} position.\n\nInterview Details:\n- Type: {{$json.type}}\n- Duration: Approximately 30 minutes\n- Link: {{$json.interview_link}}\n\nPlease complete your interview at your earliest convenience.\n\nBest regards,\nAI Interviewer Team",
+        "options": {}
+      },
+      "id": "send-interview-invitation",
+      "name": "Send Interview Invitation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 800]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "interview-completed",
+        "options": {}
+      },
+      "id": "interview-completion-webhook",
+      "name": "Interview Completion Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 1100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI Scoring Algorithm\nconst interviewData = $json;\n\n// Calculate scores based on interview responses\nlet technicalScore = 0;\nlet communicationScore = 0;\nlet problemSolvingScore = 0;\n\n// Analyze transcript for technical keywords\nconst transcript = interviewData.transcript || '';\nconst technicalKeywords = ['algorithm', 'database', 'API', 'framework', 'optimization'];\nconst communicationIndicators = ['clear', 'articulate', 'explain', 'understand'];\n\n// Technical assessment\ntechnicalKeywords.forEach(keyword => {\n  if (transcript.toLowerCase().includes(keyword)) {\n    technicalScore += 20;\n  }\n});\n\n// Communication assessment\ncommunicationIndicators.forEach(indicator => {\n  if (transcript.toLowerCase().includes(indicator)) {\n    communicationScore += 25;\n  }\n});\n\n// Problem-solving assessment based on response time and complexity\nproblemSolvingScore = Math.min(100, (interviewData.correct_answers || 0) * 25);\n\n// Overall score calculation\nconst overallScore = Math.round(\n  (technicalScore * 0.4 + communicationScore * 0.3 + problemSolvingScore * 0.3)\n);\n\n// Determine status based on score\nlet status = 'under-review';\nif (overallScore >= 75) {\n  status = 'shortlisted';\n} else if (overallScore < 50) {\n  status = 'rejected';\n}\n\nreturn [{\n  json: {\n    candidate_id: interviewData.candidate_id,\n    overall_score: Math.min(100, overallScore),\n    technical_score: Math.min(100, technicalScore),\n    communication_score: Math.min(100, communicationScore),\n    problem_solving_score: Math.min(100, problemSolvingScore),\n    status: status,\n    completed_at: new Date().toISOString(),\n    transcript: transcript,\n    duration: interviewData.duration || 0,\n    fitment_eligible: overallScore >= 75\n  }\n}];"
+      },
+      "id": "ai-scoring-engine",
+      "name": "AI Scoring Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 1100]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "candidates",
+        "updateKey": "id",
+        "columns": "overall_score, technical_score, communication_score, problem_solving_score, status, completed_at, transcript, duration, fitment_eligible",
+        "additionalFields": {}
+      },
+      "id": "update-candidate-scores",
+      "name": "Update Candidate Scores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [680, 1100]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "create-fitment-interview",
+        "options": {}
+      },
+      "id": "fitment-creation-webhook",
+      "name": "Fitment Creation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 1400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Job Description Analysis\nconst jdText = $json.job_description || '';\nconst fitmentName = $json.fitment_name || 'Fitment Interview';\n\n// Extract key requirements from JD\nconst requiredSkills = [];\nconst experienceLevel = 'mid';\nconst roleType = 'technical';\n\n// Simple keyword extraction (in real scenario, use NLP)\nconst skillKeywords = {\n  'javascript': ['javascript', 'js', 'node.js', 'react', 'vue', 'angular'],\n  'python': ['python', 'django', 'flask', 'pandas', 'numpy'],\n  'database': ['sql', 'mysql', 'postgresql', 'mongodb', 'database'],\n  'cloud': ['aws', 'azure', 'gcp', 'cloud', 'docker', 'kubernetes'],\n  'leadership': ['lead', 'manage', 'team', 'leadership', 'mentor']\n};\n\nObject.keys(skillKeywords).forEach(skill => {\n  const keywords = skillKeywords[skill];\n  const found = keywords.some(keyword => \n    jdText.toLowerCase().includes(keyword.toLowerCase())\n  );\n  if (found) {\n    requiredSkills.push(skill);\n  }\n});\n\n// Generate fitment questions based on JD\nconst fitmentQuestions = [\n  {\n    question: \"How would you approach the key responsibilities mentioned in this role?\",\n    category: \"role_fit\",\n    weight: 30\n  },\n  {\n    question: \"Describe your experience with the technologies mentioned in the job description.\",\n    category: \"technical_fit\",\n    weight: 40\n  },\n  {\n    question: \"What interests you most about this specific position and company?\",\n    category: \"cultural_fit\",\n    weight: 30\n  }\n];\n\nreturn [{\n  json: {\n    fitment_name: fitmentName,\n    job_description: jdText,\n    required_skills: requiredSkills,\n    experience_level: experienceLevel,\n    role_type: roleType,\n    questions: fitmentQuestions,\n    created_at: new Date().toISOString(),\n    status: 'active'\n  }\n}];"
+      },
+      "id": "analyze-job-description",
+      "name": "Analyze Job Description",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 1400]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "fitment_interviews",
+        "columns": "name, job_description, required_skills, experience_level, role_type, questions, status, created_at",
+        "additionalFields": {}
+      },
+      "id": "create-fitment-interview",
+      "name": "Create Fitment Interview",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [680, 1400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.auto_shortlist}}",
+              "operation": "equal",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "id": "check-auto-shortlist",
+      "name": "Check Auto Shortlist",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 1400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM candidates WHERE interview_id = {{$json.interview_id}} AND fitment_eligible = true AND overall_score >= 75"
+      },
+      "id": "auto-shortlist-candidates",
+      "name": "Auto Shortlist Candidates",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1120, 1300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Manual candidate selection processing\nconst selectedCandidates = $json.selected_candidates || [];\nconst fitmentInterviewId = $json.fitment_interview_id;\n\nconst processedCandidates = selectedCandidates.map(candidateId => ({\n  json: {\n    candidate_id: candidateId,\n    fitment_interview_id: fitmentInterviewId,\n    status: 'pending',\n    created_at: new Date().toISOString()\n  }\n}));\n\nreturn processedCandidates;"
+      },
+      "id": "process-manual-selection",
+      "name": "Process Manual Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 1500]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "fitment_candidates",
+        "columns": "candidate_id, fitment_interview_id, status, created_at",
+        "additionalFields": {}
+      },
+      "id": "assign-fitment-candidates",
+      "name": "Assign Fitment Candidates",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1340, 1400]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fitment-completed",
+        "options": {}
+      },
+      "id": "fitment-completion-webhook",
+      "name": "Fitment Completion Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 1700]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fitment Score Calculation\nconst fitmentData = $json;\nconst transcript = fitmentData.transcript || '';\nconst jdRequirements = fitmentData.required_skills || [];\n\nlet roleFitScore = 0;\nlet technicalFitScore = 0;\nlet culturalFitScore = 0;\n\n// Role fit analysis\nconst roleKeywords = ['responsibility', 'experience', 'manage', 'lead', 'develop'];\nroleKeywords.forEach(keyword => {\n  if (transcript.toLowerCase().includes(keyword)) {\n    roleFitScore += 20;\n  }\n});\n\n// Technical fit analysis based on JD requirements\njdRequirements.forEach(skill => {\n  if (transcript.toLowerCase().includes(skill.toLowerCase())) {\n    technicalFitScore += 25;\n  }\n});\n\n// Cultural fit analysis\nconst culturalKeywords = ['team', 'collaborate', 'culture', 'values', 'mission'];\nculturalKeywords.forEach(keyword => {\n  if (transcript.toLowerCase().includes(keyword)) {\n    culturalFitScore += 20;\n  }\n});\n\n// Calculate overall fitment percentage\nconst fitmentPercentage = Math.round(\n  (roleFitScore * 0.4 + technicalFitScore * 0.4 + culturalFitScore * 0.2)\n);\n\n// Determine fitment status\nlet fitmentStatus = 'under-review';\nif (fitmentPercentage >= 80) {\n  fitmentStatus = 'high-fit';\n} else if (fitmentPercentage >= 60) {\n  fitmentStatus = 'medium-fit';\n} else {\n  fitmentStatus = 'low-fit';\n}\n\nreturn [{\n  json: {\n    candidate_id: fitmentData.candidate_id,\n    fitment_interview_id: fitmentData.fitment_interview_id,\n    fitment_percentage: Math.min(100, fitmentPercentage),\n    role_fit_score: Math.min(100, roleFitScore),\n    technical_fit_score: Math.min(100, technicalFitScore),\n    cultural_fit_score: Math.min(100, culturalFitScore),\n    fitment_status: fitmentStatus,\n    completed_at: new Date().toISOString(),\n    transcript: transcript\n  }\n}];"
+      },
+      "id": "calculate-fitment-score",
+      "name": "Calculate Fitment Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 1700]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "fitment_candidates",
+        "updateKey": "candidate_id,fitment_interview_id",
+        "columns": "fitment_percentage, role_fit_score, technical_fit_score, cultural_fit_score, fitment_status, completed_at, transcript",
+        "additionalFields": {}
+      },
+      "id": "update-fitment-scores",
+      "name": "Update Fitment Scores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [680, 1700]
+    },
+    {
+      "parameters": {
+        "trigger": "schedule",
+        "interval": 1
+      },
+      "id": "dashboard-updater",
+      "name": "Dashboard Updater",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 2000]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COUNT(CASE WHEN status = 'active' THEN 1 END) as active_interviews,\n  COUNT(DISTINCT candidate_id) as total_candidates,\n  COUNT(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN 1 END) as weekly_interviews,\n  AVG(duration) as avg_duration,\n  (COUNT(CASE WHEN status = 'completed' THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0)) as completion_rate\nFROM interviews i\nLEFT JOIN candidates c ON i.id = c.interview_id"
+      },
+      "id": "calculate-dashboard-stats",
+      "name": "Calculate Dashboard Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [460, 2000]
+    },
+    {
+      "parameters": {
+        "url": "https://your-app-domain.com/api/dashboard/update",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "update-dashboard-api",
+      "name": "Update Dashboard API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 2000]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zapier-integration",
+        "options": {}
+      },
+      "id": "zapier-webhook-handler",
+      "name": "Zapier Integration Handler",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 2300]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.webhook_url}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "candidate_name",
+              "value": "={{$json.candidate_name}}"
+            },
+            {
+              "name": "interview_score",
+              "value": "={{$json.overall_score}}"
+            },
+            {
+              "name": "fitment_percentage",
+              "value": "={{$json.fitment_percentage}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.status}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-zapier-webhook",
+      "name": "Trigger Zapier Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 2300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "interview-action",
+        "options": {}
+      },
+      "id": "interview-action-webhook",
+      "name": "Interview Action Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 2600]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.action}}",
+              "operation": "equal",
+              "value2": "pause"
+            }
+          ]
+        }
+      },
+      "id": "check-action-type",
+      "name": "Check Action Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 2600]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "interviews",
+        "updateKey": "id",
+        "columns": "status",
+        "additionalFields": {
+          "status": "paused"
+        }
+      },
+      "id": "pause-interview",
+      "name": "Pause Interview",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [680, 2500]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "interviews",
+        "updateKey": "id",
+        "columns": "status",
+        "additionalFields": {
+          "status": "active"
+        }
+      },
+      "id": "resume-interview",
+      "name": "Resume Interview",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [680, 2700]
+    },
+    {
+      "parameters": {
+        "message": "Interview {{$json.action}} completed successfully for Interview ID: {{$json.interview_id}}",
+        "additionalFields": {
+          "channel": "#recruitment"
+        }
+      },
+      "id": "notify-slack",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [900, 2600]
+    }
+  ],
+  "connections": {
+    "Interview Creation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Interview Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Interview Data": {
+      "main": [
+        [
+          {
+            "node": "Create Interview Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidate Upload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Upload Method",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Upload Method": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets Import",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process File Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Import": {
+      "main": [
+        [
+          {
+            "node": "Store Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process File Upload": {
+      "main": [
+        [
+          {
+            "node": "Store Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview Scheduler": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Candidates": {
+      "main": [
+        [
+          {
+            "node": "Send Interview Invitation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview Completion Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Scoring Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Scoring Engine": {
+      "main": [
+        [
+          {
+            "node": "Update Candidate Scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fitment Creation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze Job Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Job Description": {
+      "main": [
+        [
+          {
+            "node": "Create Fitment Interview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Fitment Interview": {
+      "main": [
+        [
+          {
+            "node": "Check Auto Shortlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Auto Shortlist": {
+      "main": [
+        [
+          {
+            "node": "Auto Shortlist Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process Manual Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Shortlist Candidates": {
+      "main": [
+        [
+          {
+            "node": "Assign Fitment Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Manual Selection": {
+      "main": [
+        [
+          {
+            "node": "Assign Fitment Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fitment Completion Webhook": {
+      "main": [
+        [
+          {
+            "node": "Calculate Fitment Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Fitment Score": {
+      "main": [
+        [
+          {
+            "node": "Update Fitment Scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dashboard Updater": {
+      "main": [
+        [
+          {
+            "node": "Calculate Dashboard Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Dashboard Stats": {
+      "main": [
+        [
+          {
+            "node": "Update Dashboard API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zapier Integration Handler": {
+      "main": [
+        [
+          {
+            "node": "Trigger Zapier Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview Action Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Action Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Action Type": {
+      "main": [
+        [
+          {
+            "node": "Pause Interview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resume Interview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause Interview": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Interview": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/demo-form",
+      "destination": "https://n8n-service-zbkb.onrender.com/webhook/demo-form"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

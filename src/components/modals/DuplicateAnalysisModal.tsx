@@ -1,0 +1,465 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, X, Info, ArrowsClockwise, Users, Warning } from 'phosphor-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { DuplicateAnalysis } from '@/services/duplicateDetectionApi';
+
+interface DuplicateAnalysisModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onContinue: () => void;
+  onCancel: () => void;
+  selectedListIds: string[];
+  availableLists: Array<{ id: string; name: string; totalCandidates: number }>;
+  analyzeDuplicates: (listIds: string[]) => Promise<DuplicateAnalysis>;
+}
+
+interface AnalysisStage {
+  id: string;
+  title: string;
+  description: string;
+  duration: number; // in milliseconds
+}
+
+const analysisStages: AnalysisStage[] = [
+  {
+    id: 'initializing',
+    title: 'Initializing Analysis',
+    description: 'Preparing to scan candidate lists...',
+    duration: 500
+  },
+  {
+    id: 'scanning',
+    title: 'Scanning Email Addresses',
+    description: 'Reading candidate data from selected lists...',
+    duration: 1500
+  },
+  {
+    id: 'detecting',
+    title: 'Detecting Duplicates',
+    description: 'Analyzing email addresses for duplicates...',
+    duration: 1200
+  },
+  {
+    id: 'generating',
+    title: 'Generating Report',
+    description: 'Compiling analysis results...',
+    duration: 300
+  }
+];
+
+export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
+  isOpen,
+  onClose,
+  onContinue,
+  onCancel,
+  selectedListIds,
+  availableLists,
+  analyzeDuplicates
+}) => {
+  const [currentStage, setCurrentStage] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [analysisResult, setAnalysisResult] = useState<DuplicateAnalysis | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<'analyzing' | 'results'>('analyzing');
+  const [showDetails, setShowDetails] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen && !hasStarted) {
+      setCurrentStage(0);
+      setProgress(0);
+      setAnalysisResult(null);
+      setError(null);
+      setStep('analyzing');
+      setShowDetails(false);
+      setHasStarted(true);
+      startAnalysis();
+    }
+
+    // Reset hasStarted when modal closes
+    if (!isOpen) {
+      setHasStarted(false);
+    }
+  }, [isOpen, hasStarted]);
+
+  const startAnalysis = async () => {
+    try {
+      // Start actual API call immediately in parallel
+      const analysisPromise = analyzeDuplicates(selectedListIds);
+
+      // Run through analysis stages with animations (in parallel with API call)
+      for (let i = 0; i < analysisStages.length; i++) {
+        setCurrentStage(i);
+
+        // Animate progress for this stage
+        const startProgress = (i / analysisStages.length) * 100;
+        const endProgress = ((i + 1) / analysisStages.length) * 100;
+
+        await animateProgress(startProgress, endProgress, analysisStages[i].duration);
+      }
+
+      // Wait for the API call to complete (if not already done)
+      const result = await analysisPromise;
+      setAnalysisResult(result);
+      setStep('results');
+
+      // If no duplicates found, auto-close after 2 seconds
+      if (result.totalDuplicates === 0) {
+        setTimeout(() => {
+          onContinue();
+        }, 2000);
+      }
+
+    } catch (err) {
+      setError('Failed to analyze duplicates. Please try again.');
+      console.error('Duplicate analysis error:', err);
+    }
+  };
+
+  const animateProgress = (start: number, end: number, duration: number): Promise<void> => {
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const currentProgress = start + (end - start) * progress;
+        setProgress(currentProgress);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          resolve();
+        }
+      };
+
+      requestAnimationFrame(animate);
+    });
+  };
+
+  const getTotalCandidates = () => {
+    return selectedListIds.reduce((total, listId) => {
+      const list = availableLists.find(l => l.id === listId);
+      return total + (list?.totalCandidates || 0);
+    }, 0);
+  };
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.95,
+      y: 20,
+      transition: { duration: 0.2 }
+    }
+  };
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 }
+  };
+
+  const progressVariants = {
+    hidden: { scaleX: 0 },
+    visible: { scaleX: 1 }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        variants={overlayVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        {/* Backdrop */}
+        <motion.div
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          onClick={step === 'results' ? onCancel : undefined}
+        />
+
+        {/* Modal */}
+        <motion.div
+          className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 uppercase tracking-wider">
+                {step === 'analyzing' ? 'Analyzing Candidate Lists' : 'Duplicate Analysis Results'}
+              </h2>
+              {step === 'results' && (
+                <button
+                  onClick={onCancel}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-6 py-6">
+            {step === 'analyzing' ? (
+              <div className="space-y-6">
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 uppercase tracking-wider">
+                      Step {currentStage + 1} of {analysisStages.length}
+                    </span>
+                    <span className="text-gray-600 font-medium">{Math.round(progress)}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+                      style={{ width: `${progress}%` }}
+                      transition={{ duration: 0.1 }}
+                    />
+                  </div>
+                </div>
+
+                {/* Current Stage */}
+                <div className="text-center space-y-4">
+                  <motion.div
+                    key={currentStage}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex justify-center">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      >
+                        <ArrowsClockwise className="w-8 h-8 text-blue-500" />
+                      </motion.div>
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wider">
+                      {analysisStages[currentStage]?.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {analysisStages[currentStage]?.description}
+                    </p>
+                  </motion.div>
+
+                  {/* Lists being analyzed */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider">Analyzing {selectedListIds.length} lists:</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {selectedListIds.map((listId) => {
+                        const list = availableLists.find(l => l.id === listId);
+                        return (
+                          <motion.div
+                            key={listId}
+                            className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs"
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: Math.random() }}
+                          >
+                            {list?.name || 'Unknown List'}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 bg-red-50 border border-red-200 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Warning className="w-5 h-5 text-red-600" />
+                      <span className="text-sm text-red-800">{error}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            ) : (
+              // Results Step
+              <div className="space-y-6">
+                {analysisResult && analysisResult.totalDuplicates === 0 ? (
+                  // No Duplicates Found
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center space-y-4"
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                      className="flex justify-center"
+                    >
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-10 h-10 text-green-600" />
+                      </div>
+                    </motion.div>
+
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900 mb-2 uppercase tracking-wider">
+                        Great! No Duplicates Detected
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        All {analysisResult.uniqueCandidates} candidates have unique email addresses.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        🎉 Continuing to interview details...
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  // Duplicates Found
+                  analysisResult && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4"
+                    >
+                      <div className="text-center">
+                        <div className="flex justify-center mb-4">
+                          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                            <Info className="w-10 h-10 text-amber-600" />
+                          </div>
+                        </div>
+
+                        <h3 className="text-base font-semibold text-gray-900 mb-2 uppercase tracking-wider">
+                          Duplicate Email Addresses Detected
+                        </h3>
+
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                          <div className="text-center">
+                            <div className="text-4xl font-bold text-gray-900">{analysisResult.totalCandidates}</div>
+                            <div className="text-[10px] text-gray-600 uppercase tracking-wider">Total Candidates</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-4xl font-bold text-amber-600">{analysisResult.totalDuplicates}</div>
+                            <div className="text-[10px] text-gray-600 uppercase tracking-wider">Duplicates</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-4xl font-bold text-green-600">{analysisResult.uniqueCandidates}</div>
+                            <div className="text-[10px] text-gray-600 uppercase tracking-wider">Unique Candidates</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-sm text-amber-800">
+                          <strong>{analysisResult.duplicateRate}%</strong> of candidates have duplicate email addresses.
+                          You'll be sending invitations to <strong>{analysisResult.uniqueCandidates} unique candidates</strong>.
+                        </p>
+                      </div>
+
+                      {analysisResult.recommendations.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wider">Recommendations:</h4>
+                          <ul className="space-y-1">
+                            {analysisResult.recommendations.slice(0, 3).map((recommendation, index) => (
+                              <li key={index} className="text-xs text-gray-600 flex items-start gap-2">
+                                <span className="text-amber-500 mt-0.5">•</span>
+                                {recommendation}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {analysisResult.duplicateGroups && analysisResult.duplicateGroups.length > 0 && (
+                        <div>
+                          <button
+                            onClick={() => setShowDetails(!showDetails)}
+                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                          >
+                            {showDetails ? 'Hide' : 'Show'} duplicate details
+                          </button>
+
+                          <AnimatePresence>
+                            {showDetails && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-2 p-3 bg-gray-50 rounded-lg text-xs space-y-2 max-h-32 overflow-y-auto"
+                              >
+                                {analysisResult.duplicateGroups.slice(0, 5).map((group, index) => (
+                                  <div key={index} className="flex justify-between">
+                                    <span className="text-gray-600">{group.duplicateKey}</span>
+                                    <span className="text-amber-600">{group.count} times</span>
+                                  </div>
+                                ))}
+                                {analysisResult.duplicateGroups.length > 5 && (
+                                  <p className="text-gray-500 text-center">
+                                    ... and {analysisResult.duplicateGroups.length - 5} more
+                                  </p>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </motion.div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          {step === 'results' && analysisResult && analysisResult.totalDuplicates > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={onCancel}
+                  className="uppercase rounded-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={onContinue}
+                  className="uppercase rounded-sm text-white font-medium transition-all duration-200"
+                  style={{
+                    backgroundColor: '#222831',
+                    boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+                >
+                  Continue Anyway
+                </Button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};

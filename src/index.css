@@ -1,0 +1,213 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AI Recruiter Dashboard Design System - Professional & Modern */
+
+@layer base {
+  :root {
+    /* Background & Surface */
+    --background: 210 20% 98%;
+    --surface: 0 0% 100%;
+    --surface-elevated: 210 40% 99%;
+    
+    /* Text Colors */
+    --foreground: 210 24% 16%;
+    --foreground-muted: 210 12% 52%;
+    --foreground-subtle: 210 8% 72%;
+
+    /* Brand Colors - Professional Blue Palette */
+    --brand-primary: 203 64% 54%;
+    --brand-primary-dark: 203 64% 47%;
+    --brand-primary-light: 203 64% 94%;
+    --brand-secondary: 32 95% 55%;
+    
+    /* Semantic Colors */
+    --success: 142 76% 36%;
+    --success-light: 142 76% 95%;
+    --warning: 38 92% 50%;
+    --warning-light: 38 92% 95%;
+    --error: 0 84% 60%;
+    --error-light: 0 84% 95%;
+    --info: 210 100% 56%;
+    --info-light: 210 100% 95%;
+
+    /* Component Tokens */
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --card-elevated: var(--surface-elevated);
+
+    --popover: var(--surface);
+    --popover-foreground: var(--foreground);
+
+    --primary: var(--brand-primary);
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 16% 93%;
+    --secondary-foreground: var(--foreground);
+
+    --muted: 210 12% 96%;
+    --muted-foreground: var(--foreground-muted);
+
+    --accent: 32 95% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: var(--error);
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 16% 90%;
+    --input: var(--border);
+    --ring: var(--brand-primary);
+
+    --radius: 0.75rem;
+
+    /* Status Colors */
+    --status-pending: 38 92% 50%;
+    --status-pending-light: 38 92% 95%;
+    --status-completed: var(--success);
+    --status-completed-light: var(--success-light);
+    --status-in-progress: var(--info);
+    --status-in-progress-light: var(--info-light);
+    --status-cancelled: var(--error);
+    --status-cancelled-light: var(--error-light);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%);
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(142 76% 44%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(210 24% 16% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(210 24% 16% / 0.1), 0 2px 4px -1px hsl(210 24% 16% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(210 24% 16% / 0.1), 0 4px 6px -2px hsl(210 24% 16% / 0.05);
+    --shadow-brand: 0 10px 25px -5px hsl(var(--brand-primary) / 0.25);
+
+    /* Animation Durations */
+    --animation-fast: 0.15s;
+    --animation-normal: 0.3s;
+    --animation-slow: 0.5s;
+
+    --sidebar-background: hsl(var(--surface));
+    --sidebar-foreground: hsl(var(--foreground-muted));
+    --sidebar-primary: hsl(var(--brand-primary));
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent));
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: hsl(var(--border));
+    --sidebar-ring: hsl(var(--brand-primary));
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Radix UI Dialog/Modal Overlay Styles */
+@layer components {
+  /* Dialog Overlay - the dark backdrop */
+  [data-radix-dialog-overlay],
+  [data-overlay],
+  .radix-dialog-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
+    z-index: 9999 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    position: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Dialog Content positioning */
+  [data-radix-dialog-content] {
+    @apply fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+    @apply w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg;
+    @apply duration-200;
+    z-index: 10000 !important;
+  }
+
+  /* Animation states for Dialog */
+  [data-radix-dialog-overlay][data-state="open"] {
+    @apply animate-in fade-in-0;
+  }
+
+  [data-radix-dialog-overlay][data-state="closed"] {
+    @apply animate-out fade-out-0;
+  }
+
+  [data-radix-dialog-content][data-state="open"] {
+    @apply animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%];
+  }
+
+  [data-radix-dialog-content][data-state="closed"] {
+    @apply animate-out fade-out-0 zoom-out-95 slide-out-to-left-1/2 slide-out-to-top-[48%];
+  }
+
+  /* Ensure dialogs are above other content */
+  [data-radix-popper-content-wrapper] {
+    @apply z-50;
+  }
+
+  /* Flip animation for stats numbers */
+  @keyframes flipIn {
+    0% {
+      transform: rotateX(-90deg);
+      opacity: 0;
+    }
+    50% {
+      transform: rotateX(-45deg);
+      opacity: 0.5;
+    }
+    100% {
+      transform: rotateX(0deg);
+      opacity: 1;
+    }
+  }
+}

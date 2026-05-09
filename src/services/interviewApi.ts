@@ -1,0 +1,400 @@
+/**
+ * Interview API Service - Project-scoped interview management
+ */
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
+
+export interface Interview {
+  id: string;
+  title: string;
+  type: string;
+  description: string;
+  duration: number;
+  status: string;
+  voiceType?: string;
+  voiceSpeed?: string;
+  voiceAccent?: string;
+  communications?: {
+    email: boolean;
+    phone: boolean;
+    sms: boolean;
+  };
+  lists: string[];
+  candidateCount: number;
+  duplicateAnalysis?: any;
+  emailsSent: boolean;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+}
+
+export interface CreateInterviewRequest {
+  title: string;
+  type: string;
+  description: string;
+  duration: number;
+  voiceType?: string;
+  voiceSpeed?: string;
+  voiceAccent?: string;
+  communications?: {
+    email: boolean;
+    phone: boolean;
+    sms: boolean;
+  };
+  selectedListIds?: string[];
+  duplicateAnalysis?: any;
+}
+
+export interface UpdateInterviewRequest {
+  title?: string;
+  type?: string;
+  description?: string;
+  duration?: number;
+  status?: string;
+  voiceType?: string;
+  voiceSpeed?: string;
+  voiceAccent?: string;
+  communications?: {
+    email: boolean;
+    phone: boolean;
+    sms: boolean;
+  };
+  selectedListIds?: string[];
+  duplicateAnalysis?: any;
+}
+
+class InterviewApiService {
+  private getAuthHeaders() {
+    const token = localStorage.getItem('auth_token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  }
+
+  /**
+   * Create a new interview
+   */
+  async createInterview(
+    workspaceId: string,
+    projectId: string,
+    interviewData: CreateInterviewRequest
+  ): Promise<Interview> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(interviewData)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create interview');
+    }
+
+    const data = await response.json();
+    return data.interview;
+  }
+
+  /**
+   * Get all interviews for a project
+   */
+  async getInterviews(
+    workspaceId: string,
+    projectId: string,
+    filters?: {
+      page?: number;
+      limit?: number;
+      status?: string[];
+      type?: string;
+      search?: string;
+      start_date?: string;
+      end_date?: string;
+      min_candidates?: number;
+      max_candidates?: number;
+    }
+  ): Promise<{ interviews: Interview[]; pagination: any }> {
+    const queryParams = new URLSearchParams();
+
+    if (filters) {
+      if (filters.page) queryParams.append('page', filters.page.toString());
+      if (filters.limit) queryParams.append('limit', filters.limit.toString());
+      if (filters.status) filters.status.forEach(s => queryParams.append('status', s));
+      if (filters.type) queryParams.append('type', filters.type);
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.start_date) queryParams.append('start_date', filters.start_date);
+      if (filters.end_date) queryParams.append('end_date', filters.end_date);
+      if (filters.min_candidates) queryParams.append('min_candidates', filters.min_candidates.toString());
+      if (filters.max_candidates) queryParams.append('max_candidates', filters.max_candidates.toString());
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews?${queryParams}`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get interviews');
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Get a single interview by ID
+   */
+  async getInterview(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string
+  ): Promise<Interview> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get interview');
+    }
+
+    const data = await response.json();
+    return data.interview || data;
+  }
+
+  /**
+   * Update an interview
+   */
+  async updateInterview(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string,
+    updateData: UpdateInterviewRequest
+  ): Promise<Interview> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}`,
+      {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(updateData)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update interview');
+    }
+
+    const data = await response.json();
+    return data.interview;
+  }
+
+  /**
+   * Delete an interview
+   */
+  async deleteInterview(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string
+  ): Promise<void> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}`,
+      {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete interview');
+    }
+  }
+
+  /**
+   * Get interview configuration
+   */
+  async getInterviewConfiguration(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/configuration`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get interview configuration');
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Get interview candidates
+   */
+  async getInterviewCandidates(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/candidates?page=${page}&limit=${limit}`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get interview candidates');
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Get interview stats
+   */
+  async getInterviewStats(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/stats`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get interview stats');
+    }
+
+    const data = await response.json();
+    return data.stats;
+  }
+
+  /**
+   * Get interview blueprint
+   */
+  async getInterviewBlueprint(
+    workspaceId: string,
+    projectId: string,
+    interviewId: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/blueprint`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get interview blueprint');
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Generate blueprint for an interview
+   */
+  async generateBlueprint(
+    workspaceId: string,
+    projectId: string,
+    data: { id: string; title: string; description: string }
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/generate-blueprint`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to generate blueprint');
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Create a new fitment interview
+   */
+  async createFitmentInterview(
+    workspaceId: string,
+    projectId: string,
+    fitmentData: {
+      title: string;
+      jobDescription: string;
+      lists: string[];
+    }
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/fitment-interviews`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(fitmentData)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create fitment interview');
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Get all fitment interviews for a project
+   */
+  async getFitmentInterviews(
+    workspaceId: string,
+    projectId: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/fitment-interviews`,
+      {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get fitment interviews');
+    }
+
+    return await response.json();
+  }
+}
+
+export const interviewApi = new InterviewApiService();
