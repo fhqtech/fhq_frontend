@@ -32,6 +32,7 @@ import {
   Heart,
   X
 } from "lucide-react";
+import { extractFromResume } from "@/services/resumeExtractApi";
 
 interface InvitationDetails {
   invitation: {
@@ -136,6 +137,7 @@ export default function CandidateRegistration() {
   const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isExtractingResume, setIsExtractingResume] = useState(false);
   const [bonusQuestionIndex, setBonusQuestionIndex] = useState(0);
   const [consentChecked, setConsentChecked] = useState(false);
 
@@ -502,6 +504,34 @@ export default function CandidateRegistration() {
 
     setFormData(prev => ({ ...prev, resumeFile: file, resume_url: "" }));
     setFormErrors(prev => ({ ...prev, resume: "" }));
+
+    // Fire-and-forget auto-extract: parse the resume and prefill any fields the
+    // candidate hasn't already filled. Soft-fails — never blocks the form.
+    autoFillFromResume(file);
+  };
+
+  const autoFillFromResume = async (file: File) => {
+    try {
+      setIsExtractingResume(true);
+      const data = await extractFromResume(file);
+      setFormData(prev => ({
+        ...prev,
+        // Only fill blank fields — never overwrite candidate input.
+        phone: prev.phone?.trim() ? prev.phone : data.phone,
+        jobTitle: prev.jobTitle?.trim() ? prev.jobTitle : data.jobTitle,
+        experienceYears:
+          prev.experienceYears?.trim?.()
+            ? prev.experienceYears
+            : (data.experienceYears > 0 ? String(data.experienceYears) : prev.experienceYears),
+        location: prev.location?.trim() ? prev.location : data.location,
+        linkedin: prev.linkedin?.trim() ? prev.linkedin : data.linkedin,
+        portfolioUrl: prev.portfolioUrl?.trim() ? prev.portfolioUrl : data.portfolioUrl,
+      }));
+    } catch (err) {
+      console.warn('[autoFillFromResume] failed:', err);
+    } finally {
+      setIsExtractingResume(false);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -1180,6 +1210,12 @@ export default function CandidateRegistration() {
                             <div className="text-center">
                               <p className="text-slate-900 font-semibold text-sm">{formData.resumeFile.name}</p>
                               <p className="text-xs text-slate-600 mt-1">{(formData.resumeFile.size / 1024).toFixed(2)} KB</p>
+                              {isExtractingResume && (
+                                <p className="text-[11px] text-blue-600 mt-1 inline-flex items-center gap-1">
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                  Reading your resume to pre-fill the form…
+                                </p>
+                              )}
                             </div>
                             <button
                               type="button"
