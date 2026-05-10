@@ -8,10 +8,10 @@ export default defineConfig(() => ({
     host: "::",
     port: 8080,
     proxy: {
+      // Demo form now routes to FastAPI backend (Phase 6: N8N removed).
       '/api/demo-form': {
-        target: 'https://n8n-service-zbkb.onrender.com',
+        target: 'http://localhost:8082',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/demo-form/, '/webhook-test/demo-form'),
       },
     },
   },
