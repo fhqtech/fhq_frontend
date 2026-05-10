@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen:api": "openapi-typescript http://127.0.0.1:8082/openapi.json -o src/types/api.gen.ts",
+    "gen:api:from-file": "openapi-typescript ../recruiter-assist-backend/openapi-snapshot.json -o src/types/api.gen.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -86,6 +88,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
+    "openapi-typescript": "^7.13.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",

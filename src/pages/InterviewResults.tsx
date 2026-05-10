@@ -8,7 +8,7 @@ import { RatingPanel } from "@/components/interview/RatingPanel";
 import { WalkingLoader } from "@/components/ui/WalkingLoader";
 import { useAuth } from "@/contexts/AuthContext";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8082';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
 // --- INTERFACES matching Interview Reviewer Agent output ---
 interface SkillScore {
