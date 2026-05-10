@@ -331,6 +331,32 @@ export default function InterviewDetails() {
   const [loadingSources, setLoadingSources] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Bumps on every SSE 'update' event from the backend; triggers a refetch
+  // of interview + stats so the NBA card recomputes live.
+  const [liveRevision, setLiveRevision] = useState(0);
+
+  // Live updates via Server-Sent Events. Backend emits an 'update' event
+  // whenever the interview's status / blueprintStatus / candidate counts /
+  // participation rate change. We bump liveRevision to retrigger refetch.
+  useEffect(() => {
+    if (!id) return;
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
+    const url = `${apiBase}/api/interviews/${id}/events?token=${encodeURIComponent(token)}`;
+    const es = new EventSource(url);
+    es.addEventListener('update', () => setLiveRevision((r) => r + 1));
+    es.addEventListener('not_found', () => es.close());
+    es.onerror = () => {
+      // EventSource auto-reconnects on transient failures; close to avoid loops
+      // if the server explicitly closes the stream (e.g. 401 / 404).
+      if (es.readyState === EventSource.CLOSED) {
+        // already closed
+      }
+    };
+    return () => es.close();
+  }, [id]);
+
   // Start interview modal states (similar to ManageInterviewsEnhanced)
   const [startModalOpen, setStartModalOpen] = useState(false);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
@@ -505,7 +531,7 @@ export default function InterviewDetails() {
     };
 
     loadInterviewData();
-  }, [id, currentWorkspace, currentProject]);
+  }, [id, currentWorkspace, currentProject, liveRevision]);
 
   // Load stats data
   useEffect(() => {
@@ -525,7 +551,7 @@ export default function InterviewDetails() {
     };
 
     loadStatsData();
-  }, [id, currentWorkspace, currentProject]);
+  }, [id, currentWorkspace, currentProject, liveRevision]);
 
 
 
@@ -792,7 +818,7 @@ export default function InterviewDetails() {
     };
 
     checkBlueprint();
-  }, [id, currentWorkspace, currentProject]);
+  }, [id, currentWorkspace, currentProject, liveRevision]);
 
   // Auto-refresh blueprint status when generating
   useEffect(() => {
