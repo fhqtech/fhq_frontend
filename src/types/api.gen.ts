@@ -470,6 +470,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/lists/{list_id}/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Candidates in a list, enriched with scores (Phase 5 analytics)
+         * @description Returns candidates from the list, joined with their candidate_scores
+         *     (from Phase 1's Firestore collection). Frontend uses this for the
+         *     list detail dashboard (KPIs, table, drawer).
+         */
+        get: operations["get_list_candidates_with_scores_api_lists__list_id__candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/lists/{list_id}/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * KPI aggregates over a list's candidates (Phase 5 analytics)
+         * @description Aggregates: total, byStage counts, topPerformers, eligible, averageScore.
+         *     Reads the same candidate set as /candidates above and computes stats
+         *     over it (single fetch with limit=200 is fine for typical list sizes).
+         */
+        get: operations["get_list_analytics_api_lists__list_id__analytics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate_id}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detailed candidate profile (Phase 5 analytics)
+         * @description Returns the full candidate object the analytics drawer expects.
+         *     Reuses CandidateProfileService.get_overview_by_id (already in Phase 2e),
+         *     then enriches with the latest score doc.
+         */
+        get: operations["get_candidate_profile_for_analytics_api_candidates__candidate_id__profile_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -485,6 +551,69 @@ export interface components {
             total_candidates: number;
             /** Scores */
             scores: components["schemas"]["ScoreRow"][];
+        };
+        /** AnalyticsCandidatesResponse */
+        AnalyticsCandidatesResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Candidates */
+            candidates: {
+                [key: string]: unknown;
+            }[];
+            /** Total */
+            total: number;
+        };
+        /** AnalyticsStatsResponse */
+        AnalyticsStatsResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            stats: components["schemas"]["CandidateListStats"];
+        };
+        /** CandidateListStats */
+        CandidateListStats: {
+            /** Total */
+            total: number;
+            /** Bystage */
+            byStage?: {
+                [key: string]: number;
+            };
+            /**
+             * Topperformers
+             * @default 0
+             */
+            topPerformers: number;
+            /**
+             * Eligible
+             * @default 0
+             */
+            eligible: number;
+            /**
+             * Averagescore
+             * @default 0
+             */
+            averageScore: number;
+            /** Skillsdistribution */
+            skillsDistribution?: {
+                [key: string]: number;
+            };
+        };
+        /** CandidateProfileResponse */
+        CandidateProfileResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Candidate */
+            candidate?: {
+                [key: string]: unknown;
+            } | null;
         };
         /** GoogleTokenBody */
         GoogleTokenBody: {
@@ -1445,6 +1574,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_list_candidates_with_scores_api_lists__list_id__candidates_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                list_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsCandidatesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_list_analytics_api_lists__list_id__analytics_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                list_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsStatsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_candidate_profile_for_analytics_api_candidates__candidate_id__profile_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateProfileResponse"];
                 };
             };
             /** @description Validation Error */
