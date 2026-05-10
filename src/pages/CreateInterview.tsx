@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
+import { suggestFromTitle, type InterviewSuggestion } from "@/services/suggestionsApi";
 import { ArrowLeft, FloppyDisk as Save, Users, Robot as Bot, SpeakerHigh as Volume2, Envelope as Mail, Phone, ChatCircle as MessageSquare, Upload, Download, FileXls as FileSpreadsheet, Gear as Settings, Calculator, Receipt, Briefcase, ArrowsOut, CheckCircle, Info, Play, Stop, CircleNotch, Trash, X, Plus, ArrowsClockwise, CloudArrowUp, ClockCounterClockwise, AddressBook, CaretLeft, CaretRight } from "phosphor-react";
 import aiAvatar from "@/assets/ai-avatar.png";
 import blueprintGuideImg1 from "@/assets/create-interview-guide/interview-blueprint.png";
@@ -181,7 +182,11 @@ export default function CreateInterview() {
   const [isLoadingInterview, setIsLoadingInterview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  
+
+  // AI suggestion state — populated by debounced fetch on title typing.
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [lastSuggestedTitle, setLastSuggestedTitle] = useState<string>('');
+
   // Progress modal states
   const [progressModalOpen, setProgressModalOpen] = useState(false);
   const [progressSteps, setProgressSteps] = useState([]);
@@ -1385,6 +1390,47 @@ export default function CreateInterview() {
     }
   }, [isEditMode, showTypeSelection, stepper.currentStep, hasClosedBlueprintGuide]);
 
+  // AI auto-fill: when the recruiter pauses typing the title (≥4 chars) on Step 1
+  // in create mode, fetch suggested description / type / duration / voice settings.
+  // Only overwrites fields the recruiter hasn't already filled — never clobbers
+  // user input. Re-runs only when the title changes substantively.
+  useEffect(() => {
+    if (isEditMode || showTypeSelection || stepper.currentStep !== 0) return;
+    const trimmed = formData.title?.trim() ?? '';
+    if (trimmed.length < 4) return;
+    if (trimmed === lastSuggestedTitle) return;
+
+    const controller = new AbortController();
+    const handle = setTimeout(async () => {
+      try {
+        setIsSuggesting(true);
+        const s: InterviewSuggestion = await suggestFromTitle(trimmed, controller.signal);
+        setLastSuggestedTitle(trimmed);
+        setFormData((prev) => ({
+          ...prev,
+          // Only fill blank fields; never overwrite recruiter input.
+          description: prev.description?.trim() ? prev.description : s.description,
+          type: prev.type || s.type,
+          duration: prev.duration || s.duration_minutes,
+          voiceType: prev.voiceType || s.voice_type,
+          voiceAccent: prev.voiceAccent || s.voice_accent,
+          voiceSpeed: prev.voiceSpeed || s.voice_speed,
+        }));
+      } catch (err: any) {
+        if (err?.name !== 'AbortError') {
+          console.warn('[suggestFromTitle] failed:', err);
+        }
+      } finally {
+        setIsSuggesting(false);
+      }
+    }, 600);
+
+    return () => {
+      controller.abort();
+      clearTimeout(handle);
+    };
+  }, [formData.title, isEditMode, showTypeSelection, stepper.currentStep, lastSuggestedTitle]);
+
   const handleNext = () => {
     const success = stepper.goToNextStep(formData);
     if (!success && stepper.stepValidations[stepper.currentStep]) {
@@ -2287,7 +2333,14 @@ export default function CreateInterview() {
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Title */}
                 <div className="lg:col-span-2">
-                  <Label htmlFor="title" className="uppercase text-xs tracking-wider">Interview Title <span className="text-red-600">*</span></Label>
+                  <Label htmlFor="title" className="uppercase text-xs tracking-wider flex items-center gap-2">
+                    Interview Title <span className="text-red-600">*</span>
+                    {isSuggesting && (
+                      <span className="text-[10px] font-mono normal-case text-blue-600 inline-flex items-center gap-1">
+                        <CircleNotch className="w-3 h-3 animate-spin" /> AI is filling defaults…
+                      </span>
+                    )}
+                  </Label>
                   <Input
                     id="title"
                     placeholder="e.g., Senior Accountant Assessment"
