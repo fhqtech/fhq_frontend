@@ -1325,6 +1325,9 @@ export default function CreateInterview() {
   }, [audioRef]);
 
   // Stepper configuration
+  // Streamlined wizard — Voice + Communications now use smart defaults; recruiters
+  // can fine-tune them later via Edit Interview. This collapses the create flow
+  // from 4 steps to 2.
   const steps: Step[] = [
     {
       id: "basic",
@@ -1335,16 +1338,6 @@ export default function CreateInterview() {
       id: "candidates",
       title: "Candidates",
       description: "Upload candidate data"
-    },
-    {
-      id: "voice",
-      title: "Voice & AI",
-      description: "Customize AI settings"
-    },
-    {
-      id: "communications",
-      title: "Communications",
-      description: "Notification settings"
     }
   ];
 

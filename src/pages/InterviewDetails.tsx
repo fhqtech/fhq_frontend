@@ -46,6 +46,8 @@ import { ShortlistActionCard } from "@/components/interview/ShortlistActionCard"
 import { CandidateCard } from "@/components/interview/CandidateCard";
 import { cn } from "@/lib/utils";
 import { BlueprintViewModal } from "@/components/views/BlueprintViewModal";
+import { NextBestActionCard } from "@/components/dashboard/NextBestActionCard";
+import { computeInterviewNBA, type InterviewSnapshot, type InterviewStats as NBAStats } from "@/lib/nextBestAction";
 
 // Counter animation component
 function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
@@ -1609,27 +1611,39 @@ export default function InterviewDetails() {
               </>
             )}
           </div>
-          <div className="flex gap-3">
-            {/* COMMENTED OUT - Create Fitment Interview Button */}
-            {/* <div title={interview?.status === 'draft' ? "Start the interview first to enable fitment interviews" : ""}>
-              <Button
-                disabled={interview?.status === 'draft'}
-                className="rounded-sm uppercase font-bold"
-                style={{
-                  boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
-                  backgroundColor: '#222831'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
-                onClick={openCreateFitmentModal}
-              >
-                <Target className="w-4 h-4 mr-2" />
-                Create Fitment Interview
-              </Button>
-            </div> */}
-          </div>
         </div>
       </div>
+
+      {/* Next Best Action — single CTA driven by interview state */}
+      {interview && (
+        <NextBestActionCard
+          nba={computeInterviewNBA(
+            {
+              id: interview.id ?? id ?? '',
+              status: interview.status,
+              candidateCount: stats?.totalCandidates ?? candidates.length,
+              blueprintStatus: blueprintStatus ?? interview.blueprintStatus,
+              startedAt: interview.startedAt,
+            } as InterviewSnapshot,
+            {
+              totalCandidates: stats?.totalCandidates ?? candidates.length,
+              completedCandidates: stats?.completedCandidates ?? completedCandidates.length,
+              participationRate: stats?.participationRate ?? participationRate,
+            } as NBAStats,
+          )}
+          onAddCandidates={() => navigate(`/interviews/create?edit=${id}`)}
+          onStart={handleStartInterview}
+          onShare={async () => {
+            try {
+              const url = `${window.location.origin}/swipe/${id}`;
+              await navigator.clipboard.writeText(url);
+              toast({ title: 'Invite link copied', description: url });
+            } catch {
+              toast({ title: 'Copy failed', description: 'Try again or copy from the address bar.', variant: 'destructive' });
+            }
+          }}
+        />
+      )}
 
       {/* Overview Cards - Compact & Translucent */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1720,22 +1734,6 @@ export default function InterviewDetails() {
           )}
         </div>
 
-        {/* Duplicate Records - Commented out for now */}
-        {/* <Card className="border-l-4 border-l-amber-500 bg-white/50 backdrop-blur-sm hover:shadow-md transition-all hover:bg-white/70 overflow-hidden">
-          {loadingSources ? (
-            <div className="p-4"><ShimmerCard /></div>
-          ) : (
-            <div className="flex items-center gap-3 p-4">
-              <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-sm shrink-0">
-                <AlertTriangle className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-2xl font-bold text-foreground animate-[flipIn_0.5s_ease-out] leading-none mb-0.5">{duplicateRecords}</p>
-                <p className="text-xs font-medium text-foreground-muted leading-none">Duplicate Records</p>
-              </div>
-            </div>
-          )}
-        </Card> */}
       </div>
 
       {/* Interview Configuration */}
@@ -1766,12 +1764,18 @@ export default function InterviewDetails() {
                       <FileCheck className="w-3.5 h-3.5 text-blue-600" />
                       <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Ready</span>
                       <Button
-                        onClick={() => {
-                          console.log('[VIEW Button] Clicked! Template ID:', interview?.template_id, 'Workspace ID:', currentWorkspace?.id);
+                        type="button"
+                        onPointerDown={(e) => {
+                          console.log('[VIEW Button] PointerDown', { tid: interview?.template_id, id: interview?.id, ws: currentWorkspace?.id });
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('[VIEW Button] Clicked! Template ID:', interview?.template_id, 'Interview ID:', interview?.id, 'Workspace ID:', currentWorkspace?.id);
                           setShowBlueprintModal(true);
                         }}
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 text-xs h-7 rounded-sm uppercase font-bold"
+                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 text-xs h-7 rounded-sm uppercase font-bold relative z-[60] pointer-events-auto"
                       >
                         View
                       </Button>
@@ -1965,8 +1969,8 @@ export default function InterviewDetails() {
         </div>
       </div>
 
-      {/* Candidate Sources */}
-      {interview && (
+      {/* Candidate Sources — only show when sources exist or are loading. */}
+      {interview && (loadingCandidateSources || candidateSources.length > 0) && (
         <div
           className="rounded-sm bg-white"
           style={{
@@ -2103,112 +2107,6 @@ export default function InterviewDetails() {
         </div>
       )}
 
-      {/* COMMENTED OUT - Linked Fitment Interviews Section */}
-      {/* <Card className="shadow-md rounded-sm">
-        <CardHeader className="pb-3">
-          <div>
-            <CardTitle className="text-lg uppercase tracking-wider flex items-center gap-2">
-              <Link className="w-5 h-5" />
-              Linked Fitment Interviews
-            </CardTitle>
-            <CardDescription className="text-xs uppercase tracking-wider">
-              Fitment assessments created from this interview's candidates
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loadingLinkedFitment ? (
-            <div className="space-y-2">
-              <Shimmer className="h-12 w-full" />
-              <Shimmer className="h-12 w-full" />
-            </div>
-          ) : linkedFitmentInterviews.length === 0 ? (
-            <div className="text-center py-6">
-              <Target className="w-8 h-8 text-foreground-muted mx-auto mb-2 opacity-50" />
-              <h3 className="text-sm font-medium text-foreground mb-1 uppercase tracking-wider">No Fitment Interviews</h3>
-              <p className="text-xs text-foreground-muted mb-3 uppercase tracking-wider">
-                No fitment assessments have been created from this interview yet.
-              </p>
-              <div className="flex gap-2 justify-center">
-                <Button
-                  onClick={openCreateFitmentModal}
-                  disabled={interview?.status === 'draft'}
-                  size="sm"
-                  className="h-8 text-xs px-4 py-2 rounded-sm uppercase font-bold bg-[#222831] text-white hover:bg-[#393E46]"
-                >
-                  <Plus className="w-3 h-3 mr-1" />
-                  Create Fitment Interview
-                </Button>
-                <Button
-                  onClick={() => setIsLinkExistingOpen(true)}
-                  disabled={interview?.status === 'draft'}
-                  size="sm"
-                  className="h-8 text-xs px-4 py-2 rounded-sm uppercase font-bold bg-[#222831] text-white hover:bg-[#393E46]"
-                >
-                  <Link className="w-3 h-3 mr-1" />
-                  Link Existing
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
-              {linkedFitmentInterviews.map((fitmentInterview: any, index: number) => (
-                <div
-                  key={`${fitmentInterview.id}-${index}`}
-                  onClick={() => navigate(`/fitment-interviews/${fitmentInterview.id}`)}
-                  className="p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 flex-shrink-0 relative overflow-hidden group hover:text-white"
-                  style={{
-                    border: 'none',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    backgroundColor: 'transparent',
-                    boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#5a6c7d';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="mb-3">
-                      <h4 className="font-medium text-sm transition-colors group-hover:text-white">{fitmentInterview.title}</h4>
-                      <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1 transition-colors group-hover:text-white/60">
-                        #{fitmentInterview.id}
-                      </p>
-                    </div>
-                    <div className="mt-auto flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground transition-colors group-hover:text-white/70">
-                          {fitmentInterview.candidateCount} candidates
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground transition-colors group-hover:text-white/70 uppercase">
-                          {fitmentInterview.listsCount} {fitmentInterview.listsCount === 1 ? 'List' : 'Lists'}
-                        </span>
-                        {fitmentInterview.createdAt && (
-                          <div className="flex items-center gap-1">
-                            <ClockCounterClockwise
-                              size={10}
-                              className="text-gray-500 transition-colors group-hover:text-white/60"
-                            />
-                            <span className="text-[8px] text-gray-500 transition-colors group-hover:text-white/60">
-                              {new Date(fitmentInterview.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card> */}
-
       {/* Candidates Table - Only show if interview is started */}
       {interview?.status === 'draft' ? (
         <div className="text-center py-12 space-y-4">
@@ -2225,8 +2123,10 @@ export default function InterviewDetails() {
         </div>
       ) : (
         <>
-          {/* Swipe QR Code Section */}
-          <SwipeQRSection interviewId={id!} />
+          {/* Swipe QR Code Section — only while interview is actively collecting responses */}
+          {(interview?.status === 'active' || interview?.status === 'running' || interview?.status === 'paused') && (
+            <SwipeQRSection interviewId={id!} />
+          )}
 
           {/* Shortlist Action Card */}
           <ShortlistActionCard interviewId={id!} interviewName={interview?.title || 'Interview'} />

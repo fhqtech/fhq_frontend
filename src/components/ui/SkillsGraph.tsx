@@ -36,7 +36,7 @@ const generateLayoutFromData = (skills: BlueprintSkill[], skillLayout?: SkillLay
     skillIdToIndex.set(skill.skill_id, index);
   });
 
-  if (!skillLayout) {
+  if (!skillLayout || !skillLayout.core_skills || !skillLayout.derived_skills) {
     return skills.map((_, index) => ({
       x: DEFAULT_POSITIONS[index]?.x ?? 50,
       y: DEFAULT_POSITIONS[index]?.y ?? 50,
@@ -127,8 +127,9 @@ const SkillNode: React.FC<SkillNodeProps> = ({
   onHover,
   onClick
 }) => {
-  const words = skill.shortName.split(' ');
-  const maxWordLength = Math.max(...words.map(w => w.length));
+  const label = skill.shortName || skill.name || '';
+  const words = label.split(' ');
+  const maxWordLength = Math.max(...words.map(w => w.length), 0);
   const numWords = words.length;
   const nodeRadius = Math.max(28, 20 + maxWordLength * 2.5 + (numWords > 1 ? 5 : 0));
   const fontSize = maxWordLength > 6 ? 7 : maxWordLength > 4 ? 8 : 9;
@@ -208,7 +209,9 @@ interface ProficiencyOrbsProps {
 }
 
 const ProficiencyOrbs: React.FC<ProficiencyOrbsProps> = ({ skill, x, y, nodeRadius, selectedLevel, onSelectLevel }) => {
-  const numLevels = skill.proficiency_levels.length;
+  const proficiencyLevels = skill.proficiency_levels || [];
+  const numLevels = proficiencyLevels.length;
+  if (numLevels === 0) return null;
   const orbitRadius = nodeRadius + 25;
 
   const handleOrbClick = (level: number) => {
@@ -232,7 +235,7 @@ const ProficiencyOrbs: React.FC<ProficiencyOrbsProps> = ({ skill, x, y, nodeRadi
         strokeDasharray="4 4"
         className="opacity-50"
       />
-      {skill.proficiency_levels.map((level, i) => {
+      {proficiencyLevels.map((level, i) => {
         const startAngle = -Math.PI / 2;
         const angle = startAngle + (i * (2 * Math.PI) / numLevels);
         const orbX = x + Math.cos(angle) * orbitRadius;
@@ -299,8 +302,9 @@ export const SkillsGraph: React.FC<SkillsGraphProps> = ({
   const layout = useMemo(() => generateLayoutFromData(skills, skillLayout), [skills, skillLayout]);
 
   const calculateNodeRadius = (skill: BlueprintSkill) => {
-    const words = skill.shortName.split(' ');
-    const maxWordLength = Math.max(...words.map(w => w.length));
+    const label = skill.shortName || skill.name || '';
+    const words = label.split(' ');
+    const maxWordLength = Math.max(...words.map(w => w.length), 0);
     const numWords = words.length;
     return Math.max(28, 20 + maxWordLength * 2.5 + (numWords > 1 ? 5 : 0));
   };

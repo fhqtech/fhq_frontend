@@ -171,6 +171,21 @@ export const InterviewPreCheck = ({
     };
   }, []);
 
+  // Passive device checks — kick off mic test as soon as the precheck step renders;
+  // speaker test fires automatically once mic is verified. Removes two click-through
+  // gates from the candidate experience (per UX simplification spec).
+  useEffect(() => {
+    if (currentStep === 1 && microphoneStatus === 'idle') {
+      testMicrophone();
+    }
+  }, [currentStep, microphoneStatus]);
+
+  useEffect(() => {
+    if (microphoneStatus === 'success' && speakerStatus === 'idle') {
+      testSpeaker();
+    }
+  }, [microphoneStatus, speakerStatus]);
+
   const testMicrophone = async () => {
     setMicrophoneStatus('testing');
 

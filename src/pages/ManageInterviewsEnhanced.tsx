@@ -655,22 +655,12 @@ export default function ManageInterviewsEnhanced() {
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toast({
-                                  title: "Edit Disabled",
-                                  description: "Interview editing is currently disabled. Please create a new interview instead.",
-                                  variant: "destructive"
-                                });
+                                handleEditInterview(interview.id);
                               }}
-                              disabled
-                              className="cursor-not-allowed opacity-50 text-xs py-1.5"
+                              className="cursor-pointer text-xs py-1"
                             >
-                              <div className="flex items-start gap-1.5 w-full">
-                                <Edit className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                                <div className="flex flex-col gap-0">
-                                  <span>Edit Interview</span>
-                                  <span className="text-[10px] text-muted-foreground leading-tight">(Disabled)</span>
-                                </div>
-                              </div>
+                              <Edit className="mr-1.5 h-3 w-3" />
+                              Edit Interview
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={(e) => {
