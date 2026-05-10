@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import { suggestFromTitle, type InterviewSuggestion } from "@/services/suggestionsApi";
+import { BlueprintPreviewRail } from "@/components/create-interview/BlueprintPreviewRail";
 import { ArrowLeft, FloppyDisk as Save, Users, Robot as Bot, SpeakerHigh as Volume2, Envelope as Mail, Phone, ChatCircle as MessageSquare, Upload, Download, FileXls as FileSpreadsheet, Gear as Settings, Calculator, Receipt, Briefcase, ArrowsOut, CheckCircle, Info, Play, Stop, CircleNotch, Trash, X, Plus, ArrowsClockwise, CloudArrowUp, ClockCounterClockwise, AddressBook, CaretLeft, CaretRight } from "phosphor-react";
 import aiAvatar from "@/assets/ai-avatar.png";
 import blueprintGuideImg1 from "@/assets/create-interview-guide/interview-blueprint.png";
@@ -2069,7 +2070,7 @@ export default function CreateInterview() {
       <div className="flex-1 overflow-y-auto pl-4 pr-2 py-4">
         <div className="max-w-6xl mx-auto">
         {stepper.currentStep === 0 && (
-          <div key="step-0">
+          <div key="step-0" className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
           <Card
             className="border-0"
             style={{
@@ -2588,6 +2589,13 @@ export default function CreateInterview() {
               </div>
             </CardContent>
           </Card>
+          {!isEditMode && (
+            <BlueprintPreviewRail
+              title={formData.title}
+              type={formData.type}
+              description={formData.description}
+            />
+          )}
           </div>
         )}
 
