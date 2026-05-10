@@ -765,45 +765,64 @@ export default function CreateInterview() {
     return `/${accent}_${speed}.wav`;
   };
 
+  // Build the personalized greeting the AI interviewer will use.
+  const personalizedGreeting = (): string => {
+    const role = formData.title?.trim() || "this role";
+    return `Hi there, I'm Flowy. I'll be helping you with the ${role} interview today. Ready when you are.`;
+  };
+
+  // Try browser SpeechSynthesis first (personalized line). Fall back to the
+  // static accent/speed WAV file if the browser doesn't support TTS or the
+  // requested voice isn't installed.
   const playAudioPreview = () => {
-    if (audioRef) {
-      audioRef.pause();
-      setIsPlayingAudio(false);
+    stopAudioPreview();
+
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+    if (synth && 'SpeechSynthesisUtterance' in window) {
+      try {
+        const utter = new SpeechSynthesisUtterance(personalizedGreeting());
+        utter.rate = formData.voiceSpeed === 'slow' ? 0.85 : formData.voiceSpeed === 'fast' ? 1.15 : 1.0;
+        utter.pitch = formData.voiceType === 'professional-male' ? 0.85 : 1.05;
+        // Pick a voice matching the requested gender + accent if installed.
+        const voices = synth.getVoices();
+        const accentTag = formData.voiceAccent === 'british' ? 'en-GB' : formData.voiceAccent === 'indian' ? 'en-IN' : 'en-US';
+        const wantMale = formData.voiceType === 'professional-male';
+        const match = voices.find(v => v.lang?.startsWith(accentTag) && (wantMale ? /male/i.test(v.name) : /female/i.test(v.name)))
+                   || voices.find(v => v.lang?.startsWith(accentTag))
+                   || voices.find(v => v.lang?.startsWith('en'));
+        if (match) utter.voice = match;
+        utter.onstart = () => setIsPlayingAudio(true);
+        utter.onend = () => setIsPlayingAudio(false);
+        utter.onerror = () => setIsPlayingAudio(false);
+        synth.speak(utter);
+        return;
+      } catch {
+        // fall through to WAV fallback
+      }
     }
 
+    // Fallback: original generic WAV preview
     const audioFile = getAudioFile(formData.voiceAccent, formData.voiceSpeed);
     const audio = new Audio(audioFile);
-    
     setAudioRef(audio);
     setIsPlayingAudio(true);
-
-    audio.onended = () => {
-      setIsPlayingAudio(false);
-      setAudioRef(null);
-    };
-
+    audio.onended = () => { setIsPlayingAudio(false); setAudioRef(null); };
     audio.onerror = () => {
       setIsPlayingAudio(false);
       setAudioRef(null);
-      toast({
-        title: "Error",
-        description: "Could not play audio preview",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Could not play audio preview", variant: "destructive" });
     };
-
     audio.play().catch(() => {
       setIsPlayingAudio(false);
       setAudioRef(null);
-      toast({
-        title: "Error",
-        description: "Could not play audio preview",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Could not play audio preview", variant: "destructive" });
     });
   };
 
   const stopAudioPreview = () => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch {}
+    }
     if (audioRef) {
       audioRef.pause();
       audioRef.currentTime = 0;
@@ -2511,7 +2530,31 @@ export default function CreateInterview() {
                   </Dialog>
                 </div>
               </div>
-              
+
+              {/* Preview the AI interviewer's greeting — uses formData.title for personalization. */}
+              {formData.title?.trim().length >= 4 && (
+                <div className="mt-4 flex items-center gap-3 p-3 bg-blue-50/40 border border-blue-100 rounded-sm">
+                  <Volume2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-gray-600 mb-0.5">Voice preview</p>
+                    <p className="text-xs text-gray-700 truncate italic">"{personalizedGreeting()}"</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={isPlayingAudio ? stopAudioPreview : playAudioPreview}
+                    className="rounded-sm uppercase font-bold flex-shrink-0"
+                  >
+                    {isPlayingAudio ? (
+                      <><Stop className="w-3 h-3 mr-1" /> Stop</>
+                    ) : (
+                      <><Play className="w-3 h-3 mr-1" /> Preview</>
+                    )}
+                  </Button>
+                </div>
+              )}
+
               {/* Navigation */}
               <div className="flex items-start justify-between pt-8 border-t border-gray-100 mt-6">
                 <div className="pt-6">
