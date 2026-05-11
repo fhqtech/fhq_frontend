@@ -905,16 +905,16 @@ export default function CandidateRegistration() {
 
         {/* Step 1: All Form Fields in One View */}
         {currentStep === 1 && (
-          <Card className="border border-slate-300 rounded-none shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden w-[95%] mx-auto">
-            <CardContent className="p-8 md:p-10">
+          <Card className="border border-slate-300 rounded-none shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden w-full md:w-[95%] mx-auto">
+            <CardContent className="p-4 md:p-10">
               <div className="mb-10">
-                <h2 className="text-3xl font-bold text-slate-900 mb-2 uppercase tracking-widest">Tell Us About Yourself</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 uppercase tracking-widest">Tell Us About Yourself</h2>
                 <p className="text-slate-600 uppercase tracking-wide">The essentials that make you, you!</p>
               </div>
 
               <div className="space-y-6">
-                <div className="flex gap-6">
-                  <div className="w-[70%] space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6">
+                  <div className="space-y-6">
                     {/* Professional Info Card */}
                     <div className="bg-slate-50 rounded-2xl p-4">
                     <div className="mb-3">
@@ -1150,8 +1150,8 @@ export default function CandidateRegistration() {
                     </div>
                   </div>
 
-                  {/* Right Side Box - 30% - Resume Upload */}
-                  <div className="w-[30%]">
+                  {/* Right Side Box - resume upload (stacks below on mobile) */}
+                  <div>
                     <div className="bg-slate-50 rounded-2xl p-4 h-full flex flex-col">
                       <Label className="uppercase text-xs tracking-wider mb-2 block">Upload Resume <span className="text-slate-500">(Optional)</span></Label>
 
