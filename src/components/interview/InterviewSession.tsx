@@ -675,6 +675,31 @@ export const InterviewSession = ({
     };
   }, []);
 
+  // P0 #8: if a required env var is missing, render a candidate-facing
+  // setup-error screen instead of silently failing to connect. This was
+  // previously logged to the console only — invisible to the candidate.
+  if (!WEBSOCKET_URL || !BACKEND_URL) {
+    return (
+      <div className="min-h-screen w-screen bg-slate-900 text-slate-100 flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <WifiOff className="w-8 h-8 text-amber-400" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">Interview setup error</h1>
+            <p className="text-sm text-slate-300">
+              We can't reach the interview servers right now. This is on us, not you.
+              Please contact your recruiter or try again in a few minutes.
+            </p>
+            <p className="text-xs text-slate-500">
+              Reference: {sessionId.slice(-8)}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-screen h-screen bg-black overflow-hidden">
       {/* 3D Particle Sphere - Full Screen Canvas */}

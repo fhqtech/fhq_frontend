@@ -603,6 +603,13 @@ export default function CandidateRegistration() {
       // Add psych assessment data
       submitData.append('psychAssessment', JSON.stringify(formData.psychAssessment));
 
+      // P0 #5: persist consent metadata (GDPR audit trail). consentChecked
+      // was gated at the entry of step 1, so it's true by the time the
+      // candidate reaches this submit.
+      submitData.append('consented', 'true');
+      submitData.append('consentedAt', new Date().toISOString());
+      submitData.append('consentVersion', '2026-05-11');
+
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/register/${token}`, {
         method: 'POST',
         body: submitData
@@ -875,25 +882,51 @@ export default function CandidateRegistration() {
 
                 {/* CTA Button */}
                 <div className="flex justify-end">
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="flex flex-col items-end gap-2 w-full">
+                    {/* P0 #5: Real consent capture — checkbox state must
+                        be true before the candidate can proceed. Backend
+                        persists {consented, consentedAt} on registration. */}
+                    <label className="flex items-start gap-2 text-xs text-slate-600 text-left cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={consentChecked}
+                        onChange={(e) => setConsentChecked(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                      />
+                      <span>
+                        I agree to the{' '}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          terms of service
+                        </a>{' '}
+                        and{' '}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          privacy policy
+                        </a>
+                        . I understand my interview will be recorded and analyzed by AI.
+                      </span>
+                    </label>
                     <Button
+                      disabled={!consentChecked}
                       onClick={() => {
                         setIsTransitioning(true);
-                        // Update step indicator halfway through the animation
-                        setTimeout(() => {
-                          setCurrentStep(1);
-                        }, 500);
-                        // Complete transition
-                        setTimeout(() => {
-                          setIsTransitioning(false);
-                        }, 1000);
+                        setTimeout(() => setCurrentStep(1), 500);
+                        setTimeout(() => setIsTransitioning(false), 1000);
                       }}
-                      className="gap-2 h-10 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-md hover:shadow-lg transition-all px-8 uppercase tracking-wider text-xs font-semibold w-full"
+                      className="gap-2 h-10 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-md hover:shadow-lg transition-all px-8 uppercase tracking-wider text-xs font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Begin Registration
                       <ArrowRight className="w-4 h-4" />
                     </Button>
-                    <p className="text-xs text-slate-500 text-right">By continuing, you agree to our <span className="text-blue-600">terms of service</span> & <span className="text-blue-600">privacy policy</span>.</p>
                   </div>
                 </div>
               </div>
