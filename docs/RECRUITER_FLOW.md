@@ -1,7 +1,7 @@
 # FunnelHQ — Recruiter Portal Flow & Status Reference
 
 **Audience:** Product · Design · Engineering — single source of truth for what happens, when, and to whom.
-**Last updated:** 2026-05-11
+**Last updated:** 2026-05-11 (post pipe-reconnect: blueprint auto-fires, invitations at-create, evaluation results sync to candidate doc)
 
 ---
 
@@ -43,9 +43,9 @@ The product collapses into **3 mental models**:
 | 3 | Click "Create New Interview" | `Dashboard.tsx:112` | none yet | Navigate `/interviews/create` |
 | 4 | Pick interview type (Screening or Fitment) | `CreateInterview.tsx` Step 0 | `GET /api/projects/{pid}/available-templates?template_type={t}` | Loads template chooser |
 | 5 | Configure title + duration + voice; AI auto-fills description | `CreateInterview.tsx` Steps 1-2 | `POST /api/suggestions` (live preview), `POST /api/blueprint-preview` | Right-rail preview updates as user types |
-| 6 | Save & generate blueprint | `CreateInterview.tsx` Step 3 | `POST /api/workspaces/{wid}/projects/{pid}/interviews` | Interview row created, status `draft`, blueprintStatus `generating` → `ready` (async) |
-| 7 | Add candidates (CSV / Google Sheet / manual / list) | `CreateInterview.tsx` candidate-sources | `POST /api/interviews/{id}/candidate-sources`, `POST /api/upload-file`, `POST /api/validate-google-sheet` | Candidates queued; invitation tokens generated |
-| 8 | Click "Start" on draft interview | `ManageInterviewsEnhanced.tsx:251-334` | `POST /api/workspaces/{wid}/projects/{pid}/interviews/{id}/start` | Status `draft` → `active`, invitation emails sent via SES |
+| 6 | Save & generate blueprint | `CreateInterview.tsx` Step 3 | `POST /api/workspaces/{wid}/projects/{pid}/interviews` | Interview row created, status `draft`. For non-template: `blueprintStatus='generating'` immediately + LangGraph agent fires as a FastAPI BackgroundTask → resolves to `'completed'` (or `'failed'`) in ~10-20s. For template: `blueprintStatus='ready'` synchronously copied from template. (F1) |
+| 7 | (Bundled into step 6) Candidates fanned out | — | (same POST) | Every candidate from `selectedListIds` gets a row in `candidate_invitations` with `status='pending'` and `invitation_sent=false`. Idempotent — re-running create skips already-invited candidates. `interview.candidateCount` set. Stats endpoint reads from here, so TOTAL CANDIDATES is correct from page-load #1. (F2) |
+| 8 | Click "Start" on draft interview | `ManageInterviewsEnhanced.tsx:251-334` | `POST /api/workspaces/{wid}/projects/{pid}/interviews/{id}/start` | Status `draft` → `active`, **existing** invitation rows flipped to `invitation_sent=true`, SES emails go out. No new rows created (already done at create). |
 | 9 | Monitor: pause / resume / stop | `ManageInterviewsEnhanced.tsx:348-391` | `POST .../interviews/{id}/{pause,resume,stop}` | Status transitions, candidate portal access changes |
 | 10 | Review results | `InterviewDetails.tsx` (screening) or `FitmentInterviewDetails.tsx` (fitment) | `GET /api/interviews/{id}/candidates`, `GET /api/sessions/{id}/results` | Transcripts, scores, recordings; export to qualified-list |
 
@@ -126,6 +126,11 @@ stateDiagram-v2
 - Per-interview detail: `GET /api/interviews/{id}/events` — InterviewDetails subscribes via inline `EventSource`, bumps `liveRevision`, refetch effects re-run.
 - Workspace-level list: `GET /api/workspaces/{wid}/projects/{pid}/interviews/events` — Dashboard + ManageInterviews subscribe via `useInterviewListLiveUpdates` hook (`src/hooks/useInterviewListLiveUpdates.ts`).
 - Both streams: 5s poll, diff-only emit, 25s heartbeat to defeat proxy idle timeouts. Auth via JWT query param (EventSource limitation).
+
+**Evaluation result fan-out (F3):**
+- Reviewer agent writes canonical results to `interview_results/{session_id}` (full skill breakdown, graph, transferables).
+- Same agent step then patches `candidates/{candidate_id}` with summary fields the curated-list card already reads: `overallScore`, `scores.{screening|fitment|prelims}`, `keyStrengths`, `matchedRoles` (skills ≥ 75), `recommendation`, `evaluationStatus='evaluated'`, `lastEvaluatedAt`. Zero frontend change required — the existing `CandidateCard.tsx:231-239` reads these paths.
+- Non-fatal: patch failure logs but the canonical results write is the source of truth.
 
 **No real-time gaps remain in the recruiter portal.** Candidate-side surfaces still poll/refresh on action — fine because candidates trigger their own state changes.
 
@@ -216,10 +221,14 @@ The NBA card is the single most important UI element on the dashboard — it abs
 ## 8) Known UX gaps (input to next planning round)
 
 1. ~~**Stale participation counts**~~ — ✅ **FIXED** via workspace-level SSE in Dashboard + Manage.
-2. **Slow blueprint document fetches** — backend logs show `Get interview document: 13536ms` on cold reads. Fix: Firestore composite index for the lookup pattern in `candidate_invitation_service.get_invitation_by_token`.
+2. ~~**Slow blueprint document fetches**~~ — ✅ **FIXED** via `collection_group('interviews')` query + backfill in `get_invitation_by_token`.
 3. ~~**No bulk shortlist**~~ — ✅ **FIXED** with one-click "Shortlist N" green banner on InterviewDetails when ≥1 candidate scored ≥75%. Reuses existing AddToQualifiedListModal.
 4. ~~**Candidate "expired" status has no recovery path"**~~ — ✅ **FIXED** via `POST /api/interviews/{id}/resend-invitations` endpoint + amber "Re-invite" banner on InterviewDetails for scheduling/expired/invited candidates.
 5. **`fitment` interviews historically routed to wrong details page** — ✅ fixed; but the duplication of InterviewDetails / FitmentInterviewDetails (~2000 + ~1275 LOC, ~30% overlap) is technical debt. Consider unifying with a common base + type-specific extensions.
+6. ~~**Blueprint stuck at "Not Found" after create**~~ — ✅ **FIXED** (F1): `create_interview` sets `blueprintStatus='generating'` for non-template path and schedules the LangGraph blueprint agent as a FastAPI BackgroundTask. Existing polling loop in InterviewDetails:698 converges automatically.
+7. ~~**TOTAL CANDIDATES = 0 after create**~~ — ✅ **FIXED** (F2): `prepare_invitations_for_lists` runs during `create_interview` and writes invitation rows for every list member (without emailing). Stats endpoint reads from there so the page reflects the correct count from page-load #1.
+8. ~~**Evaluation results never surface on curated list**~~ — ✅ **FIXED** (F3): reviewer agent additionally patches `candidates/{candidate_id}` with score + tags right after the canonical write to `interview_results`. CandidateCard reads from there; no frontend change.
+9. ~~**"Add to List" success without UI update**~~ — ✅ **FIXED** (F4): ListDetail's onSuccess hook now calls `loadListData()` so the post-add view reflects the new state.
 
 ---
 
