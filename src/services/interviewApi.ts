@@ -190,12 +190,16 @@ class InterviewApiService {
     );
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update interview');
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || error.detail || 'Failed to update interview');
     }
 
-    const data = await response.json();
-    return data.interview;
+    // Backend returns the interview dict directly (not wrapped in {interview:…}).
+    // Tolerate both shapes so a future change can't break the page.
+    const data: any = await response.json();
+    if (data?.interview) return data.interview as Interview;
+    if (data?.id || data?.title) return data as Interview;
+    return data as Interview;
   }
 
   /**

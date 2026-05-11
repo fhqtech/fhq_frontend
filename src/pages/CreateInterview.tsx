@@ -660,17 +660,26 @@ export default function CreateInterview() {
     console.log('🔄 Starting fetchInterviewData for:', interviewId);
     try {
       const userToken = localStorage.getItem('auth_token');
-      console.log('🔑 User token exists:', !!userToken);
-      
-      // Fetch interview data (using lists-based approach)
-      console.log('📡 Fetching interview data...');
-      const interviewResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/interviews/${interviewId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(userToken && { 'Authorization': `Bearer ${userToken}` })
+
+      // Edit mode requires a workspace + project context — the only
+      // existing backend route is the workspace-scoped one. Bail out
+      // gracefully if context isn't ready yet (the parent useEffect
+      // will retrigger once it loads).
+      if (!currentWorkspace?.id || !currentProject?.id) {
+        console.log('⏸ fetchInterviewData waiting for workspace/project context');
+        return;
+      }
+
+      const interviewResponse = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/workspaces/${currentWorkspace.id}/projects/${currentProject.id}/interviews/${interviewId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(userToken && { 'Authorization': `Bearer ${userToken}` })
+          }
         }
-      });
+      );
 
       console.log('📥 Interview response status:', interviewResponse.status);
       
