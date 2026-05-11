@@ -511,24 +511,32 @@ export default function CandidatePortal() {
   };
 
   const fetchPortalData = async (portalToken: string) => {
+    // H9: client-side timeout. Even with the H2 backend slow-path fix
+    // (collection_group + backfill), Firestore can still degrade and
+    // leave the portal hanging on an unbounded fetch. Cap at 10s and
+    // surface a clear retry path.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidate-portal/${portalToken}`, {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
+      const headers = { 'Content-Type': 'application/json' };
+
+      const response = await fetch(`${apiBase}/api/candidate-portal/${portalToken}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers,
+        signal: controller.signal,
       });
 
       if (!response.ok) {
         // Fallback to registration endpoint if portal endpoint doesn't exist yet
-        const fallbackResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/register/${portalToken}`, {
+        const fallbackResponse = await fetch(`${apiBase}/api/register/${portalToken}`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers,
+          signal: controller.signal,
         });
 
         if (!fallbackResponse.ok) {
@@ -558,8 +566,13 @@ export default function CandidatePortal() {
       }
     } catch (err) {
       console.error('Error fetching portal data:', err);
-      setError("Failed to load your portal. Please check your invitation link.");
+      if ((err as Error)?.name === 'AbortError') {
+        setError("This is taking longer than expected. Check your connection and try again.");
+      } else {
+        setError("Failed to load your portal. Please check your invitation link.");
+      }
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   };
