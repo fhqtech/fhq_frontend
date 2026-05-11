@@ -217,7 +217,7 @@ The NBA card is the single most important UI element on the dashboard — it abs
 
 1. ~~**Stale participation counts**~~ — ✅ **FIXED** via workspace-level SSE in Dashboard + Manage.
 2. **Slow blueprint document fetches** — backend logs show `Get interview document: 13536ms` on cold reads. Fix: Firestore composite index for the lookup pattern in `candidate_invitation_service.get_invitation_by_token`.
-3. **No bulk shortlist** — recruiter can shortlist one candidate at a time; NBA suggests it but the action is single-row.
+3. ~~**No bulk shortlist**~~ — ✅ **FIXED** with one-click "Shortlist N" green banner on InterviewDetails when ≥1 candidate scored ≥75%. Reuses existing AddToQualifiedListModal.
 4. ~~**Candidate "expired" status has no recovery path"**~~ — ✅ **FIXED** via `POST /api/interviews/{id}/resend-invitations` endpoint + amber "Re-invite" banner on InterviewDetails for scheduling/expired/invited candidates.
 5. **`fitment` interviews historically routed to wrong details page** — ✅ fixed; but the duplication of InterviewDetails / FitmentInterviewDetails (~2000 + ~1275 LOC, ~30% overlap) is technical debt. Consider unifying with a common base + type-specific extensions.
 
