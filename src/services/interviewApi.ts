@@ -286,17 +286,21 @@ class InterviewApiService {
       `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/stats`,
       {
         method: 'GET',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
+        cache: 'no-store',
       }
     );
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to get interview stats');
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || error.detail || 'Failed to get interview stats');
     }
 
-    const data = await response.json();
-    return data.stats;
+    // Backend returns the stats object directly (not wrapped in {stats:…}).
+    // Tolerate either shape — same defensive pattern as templates/update fixes.
+    const data: any = await response.json();
+    if (data?.stats) return data.stats;
+    return data;
   }
 
   /**
