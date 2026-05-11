@@ -46,15 +46,17 @@ export const checkBlueprintExists = async (
       }
 
       const data = await response.json();
-      console.log('Blueprint check response:', data);
 
-      // Check if we have blueprint data
-      if (data && data.blueprint) {
-        return { exists: true, blueprint: data.blueprint };
-      } else {
-        console.log('No blueprint data in response');
-        return { exists: false };
+      // F8: Backend returns the blueprint dict directly (not wrapped in
+      // {blueprint:…}). Accept either shape — defensive against future
+      // backend wrapping changes. A real blueprint has a `skills` array
+      // and a `role`/`title` field; that's our heuristic for "real data".
+      if (!data) return { exists: false };
+      if (data.blueprint) return { exists: true, blueprint: data.blueprint };
+      if (Array.isArray(data.skills) || data.role || data.title) {
+        return { exists: true, blueprint: data };
       }
+      return { exists: false };
 
     } catch (error) {
       // Retry on network errors
@@ -90,6 +92,8 @@ export const fetchInterviewBlueprint = async (workspaceId: string, projectId: st
     throw new Error('Failed to fetch blueprint');
   }
 
-  const data: BlueprintResponse = await response.json();
-  return data.blueprint;
+  // F8: Backend returns the blueprint dict directly. Accept either shape.
+  const data: any = await response.json();
+  if (data?.blueprint) return data.blueprint;
+  return data;
 };

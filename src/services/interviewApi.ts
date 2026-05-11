@@ -94,8 +94,12 @@ class InterviewApiService {
       throw new Error(error.error || 'Failed to create interview');
     }
 
-    const data = await response.json();
-    return data.interview;
+    // F8: Backend currently returns {message, interview, interviewId}.
+    // Accept either shape so a wrapper change can't break creates.
+    const data: any = await response.json();
+    if (data?.interview) return data.interview as Interview;
+    if (data?.id || data?.title) return data as Interview;
+    return data as Interview;
   }
 
   /**
