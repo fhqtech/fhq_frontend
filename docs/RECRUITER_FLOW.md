@@ -62,9 +62,9 @@ The product collapses into **3 mental models**:
 | 3 | Register or log in (if new) | `CandidateRegistration.tsx` | `POST /api/register/{token}`, AI extracts resume | Candidate row created/linked; profile pre-filled from resume |
 | 4 | Open candidate portal | `CandidatePortal.tsx` | `GET /api/candidate-portal/{token}` | Portal data: candidate profile + list of assigned interviews + interview details |
 | 5 | Click "Start interview" on assigned card | `CandidatePortal.tsx` | navigate `/interview/{id}/pre-check` | — |
-| 6 | Pre-check: mic + speaker + camera | `interview/InterviewPreCheckPage.tsx` | `POST /api/agent-sessions/prepare` | sessionId minted; resume preprocessed for AI context |
-| 7 | Take live AI interview (~10-25 min) | `interview/InterviewSessionPage.tsx` + `components/interview/InterviewSession.tsx` | WebSocket: `wss://.../ws` (STT) + `POST /api/interview-prelims-agent` (LLM turns) + Cartesia TTS | Conversation history streamed; recording uploaded chunked |
-| 8 | Submit / time-out → Thank you | `interview/InterviewThankYouPage.tsx` | `POST /api/sessions/{id}/complete` | LangGraph reviewer agent triggered async; recruiter NBA updates via SSE |
+| 6 | Pre-check: mic + speaker | `interview/InterviewPreCheckPage.tsx` | `POST /api/agent-sessions/prepare` | sessionId minted; resume preprocessed for AI context. Audio-only since S1 (camera removed). |
+| 7 | Take live AI interview (~10-25 min) | `interview/InterviewSessionPage.tsx` + `components/interview/InterviewSession.tsx` | AssemblyAI streaming (STT, browser→AssemblyAI) + `POST /api/interview-prelims-agent` (LangGraph PrelimsAgent turn) + Cartesia TTS | Audio-only. Each user→agent turn persisted to `interview_sessions/{sid}.conversation_history` immediately (S4 — survives browser crashes). |
+| 8 | Submit / time-out → Thank you | `interview/InterviewThankYouPage.tsx` | `POST /api/candidate-sessions/{id}/complete` | LangGraph ReviewerAgent triggered async; recruiter NBA updates via SSE |
 
 ---
 
@@ -256,3 +256,66 @@ Single source of truth. No more 0-vs-2 surprises.
 - SSE subscription: `src/pages/Dashboard.tsx` (look for `EventSource`)
 - LangGraph reviewer trigger: `services/interview_session_service/interview_session_service.py::trigger_n8n_review` (despite the legacy name, this calls LangGraph now)
 - Blueprint generation: `services/blueprint_service/blueprint_agent_service.py`
+
+---
+
+## 10) Interview pipeline architecture (post audio-only simplification)
+
+The candidate-side interview pipeline was modernized in May 2026 (S1-S4). Single source of truth:
+
+```
+[Candidate browser]
+   ├── AssemblyAI streaming (audio → transcript text, browser↔AssemblyAI direct)
+   └── POST /api/interview-prelims-agent  (per turn)
+         │
+         ▼
+[FastAPI route — funnelhq_api/routers/prelims_agent.py]
+   ├── Invoke LangGraph PrelimsAgent (Smriti)
+   └── S4: Append {user, ai} turn to interview_sessions/{sid}.conversation_history
+         │
+         ▼
+[LangGraph PrelimsAgent — Gemini 2.5 Flash]
+   ├── System prompt: funnelhq_api/agents/prelims/prompt.md
+   ├── Context (loaded at session-start):
+   │     - candidate name + full resume text
+   │     - blueprint dict (skills + pillars + role)
+   │     - template_type
+   └── Returns: [{output: {response, type}}]   (legacy envelope shape)
+
+[Session start — POST /api/candidate-sessions/start]
+   ├── shared.utils.find_interview_doc(iid)               (collection_group walk)
+   ├── shared.utils.find_interview_blueprint_doc(iid)     (screening_/fitment_)
+   ├── If either fails → 503 → frontend shows "Try again" screen
+   └── Else: cache context in PrelimsAgent session, return 201
+
+[On /complete]
+   └── Auto-fire LangGraph ReviewerAgent
+         ├── Reads interview_sessions/{sid}.conversation_history
+         ├── Tools: fetch_blueprint, save_results, patch_candidate_summary (F3)
+         └── Writes interview_results/{sid} + patches candidate doc with TAGs
+```
+
+### What changed (May 2026)
+
+| Stage | Before | After |
+|---|---|---|
+| Pre-check | Mic + speaker + **camera test** | Mic + speaker. No camera. |
+| Live session | Webcam recorded + chunked upload to GCS | Audio-only. No video. |
+| Agent backend | Vertex Reasoning Engine (PRELIMS_AGENT_ID), brittle | LangGraph PrelimsAgent (Gemini 2.5 Flash), in-repo |
+| Blueprint fetch | `db.collection('interviews').document(iid)` — root collection — wrong path, silently fell back to "no context" | `find_interview_doc()` + `find_interview_blueprint_doc()` — project-scoped + blueprint-collection-aware; raises `InterviewContextError` on miss |
+| Failure mode | Agent improvised an apology ("can't pull up the details — will reschedule") | Route returns 503; candidate sees "Hold on — almost ready" with a Try Again button |
+| Transcript persistence | Atomic on `/complete` — browser crash = lost interview | Incremental per-turn via Firestore `ArrayUnion` — browser crash = partial transcript preserved |
+
+### Deleted/retired files
+
+- `src/components/interview/VideoRecorder.tsx`
+- `src/components/interview/CameraFeed.tsx`
+- `src/utils/videoUpload.ts`
+- `src/utils/videoTimingManager.ts`
+- `src/types/videoTiming.ts`
+- 600+ lines of Vertex-specific code in `services/prelims_agent_service/prelims_agent_service.py` (now a 60-line delegation shim)
+
+### Environment variables
+
+- `PRELIMS_ENGINE=langgraph` (required). The Vertex path is deprecated.
+- `PRELIMS_AGENT_ID` is no longer read. Safe to remove from `.env`.

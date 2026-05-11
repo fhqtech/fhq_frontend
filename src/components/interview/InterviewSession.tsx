@@ -2,17 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AssemblyAIStreamer from './AssemblyAIStreamer';
 import CartesiaSpeaker, { CartesiaSpeakerHandle } from './CartesiaSpeaker';
-import { CameraFeed } from './CameraFeed';
 import { CalibrationScreen } from './CalibrationScreen';
 import { ParticleSphere } from './ParticleSphere';
 import { TranscriptBox, TranscriptMessage } from './TranscriptBox';
 import { useConversationOrchestrator } from '@/hooks/useConversationOrchestrator';
 import { ConversationState } from '@/types/interview';
 import { StreamMetrics } from './AssemblyAIStreamer';
-import { VideoTimingManager } from '@/utils/videoTimingManager';
-import { VideoTiming } from '@/types/videoTiming';
-import VideoRecorder from './VideoRecorder';
-import { videoUploadManager } from '@/utils/videoUpload';
 import { Mic, MicOff, Settings, ChevronDown, Wifi, WifiOff, Clock, RefreshCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 
@@ -140,10 +135,6 @@ export const InterviewSession = ({
     }
   );
 
-  // Initialize simple video timing manager
-  const videoTimingRef = useRef<VideoTimingManager>(new VideoTimingManager());
-  const pendingVideoTimings = useRef<Map<number, VideoTiming>>(new Map());
-
   // Audio and UI state
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -182,20 +173,11 @@ export const InterviewSession = ({
   // Voice accent from interview config
   const voiceAccent = (interviewConfig as any).voiceAccent === "american" ? "american" : "indian";
 
-  // Camera feed control
-  const [showCameraFeed, setShowCameraFeed] = useState(true);
-
   // Calibration control
   const [showCalibration, setShowCalibration] = useState(false);
 
   // End interview loading state
   const [isEndingInterview, setIsEndingInterview] = useState(false);
-
-  // Video recording state
-  const [isVideoRecording, setIsVideoRecording] = useState(false);
-  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
-  const [videoDuration, setVideoDuration] = useState<number>(0);
-  const [videoUploadStatus, setVideoUploadStatus] = useState<'idle' | 'uploading' | 'completed' | 'error'>('idle');
 
   // Inactivity detection state
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
@@ -442,39 +424,26 @@ export const InterviewSession = ({
     }, 30000); // 30 seconds
   }, [isSpeaking, isInitialized, conversationState, isEndingInterview]);
 
+  // Tracks whether the user is mid-utterance, so we only fire the
+  // interruption / echo-cancel logic on the leading edge of speech (not
+  // on every partial transcript that arrives during ongoing speech).
+  const isUserSpeakingRef = useRef(false);
+
   const handleTranscriptUpdate = (transcript: string, isFinal: boolean) => {
-    // Reset inactivity timer when user speaks
     if (transcript.trim()) {
       resetInactivityTimer();
     }
 
-    // Track user speech start on first transcript update
-    if (!isFinal && transcript.trim() && videoTimingRef.current.getCurrentSpeaker() !== 'USER') {
-      const wasInterruption = videoTimingRef.current.userSpeakingStarted();
-
-      // ECHO CANCELLATION: Stop AI speaking if user interrupts
-      if (wasInterruption && isSpeakingRef.current) {
-        // Handle AI interruption
-        const aiTiming = videoTimingRef.current.aiWasInterrupted();
-        if (aiTiming) {
-          // Store timing for last AI message
-          const lastAIMessageIndex = messages.length - 1;
-          if (lastAIMessageIndex >= 0) {
-            pendingVideoTimings.current.set(lastAIMessageIndex, aiTiming);
-          }
-        }
-
-        // Get partial text spoken before interruption
+    // Leading-edge: user just started speaking. If the AI was talking, cut it.
+    if (!isFinal && transcript.trim() && !isUserSpeakingRef.current) {
+      isUserSpeakingRef.current = true;
+      if (isSpeakingRef.current) {
         const partialText = speakerRef.current?.stop();
         console.log('[Interview] AI interrupted. Partial text:', partialText);
-
-        // Store truncated AI message for sending to backend
         if (partialText && partialText.trim()) {
           truncatedAIMessageRef.current = partialText + "...";
         }
-
         setIsSpeaking(false);
-        // Brief mute to prevent feedback loops
         streamerRef.current?.setMuted(true);
         setTimeout(() => {
           if (streamerRef.current && isMicOn) {
@@ -484,40 +453,19 @@ export const InterviewSession = ({
       }
     }
 
-    // AssemblyAI provides clean transcripts - no stitching needed!
-    // Display partial transcripts as they come
     if (!isFinal) {
       setCurrentUtterance(transcript);
       return;
     }
 
-    // Handle final transcripts - these are immutable and complete
     if (isFinal && transcript.trim()) {
       const receiveTime = Date.now();
-      console.log(`[AssemblyAIStreamer - Transcript] [${receiveTime}] ========================================`);
-      console.log(`[AssemblyAIStreamer - Transcript] [${receiveTime}] 📝 isFinal=true received`);
-      console.log(`[AssemblyAIStreamer - Transcript] [${receiveTime}] Text: "${transcript}"`);
-      console.log(`[AssemblyAIStreamer - Transcript] [${receiveTime}] → Triggering LLM call...`);
+      console.log(`[Interview] [${receiveTime}] 📝 Final transcript: "${transcript}"`);
 
-      // Track user speech end and get video timing
-      const userTiming = videoTimingRef.current.userSpeakingEnded();
-
-      // Show the final complete transcript briefly before clearing
+      isUserSpeakingRef.current = false;
       setCurrentUtterance(transcript);
-
-      // Send the complete, final transcript
       sendChatMessage({ message: transcript });
-
-      // Clear the utterance display after a brief moment (so user sees the complete text)
-      setTimeout(() => {
-        setCurrentUtterance("");
-      }, 500);
-
-      // Store timing for this user message
-      if (userTiming) {
-        const futureMessageIndex = messages.length;
-        pendingVideoTimings.current.set(futureMessageIndex, userTiming);
-      }
+      setTimeout(() => setCurrentUtterance(""), 500);
     }
   };
 
@@ -631,47 +579,6 @@ export const InterviewSession = ({
     streamerRef.current?.setMuted(false);
   };
 
-  // Refs to track video recording state immediately (bypass React state delays)
-  const videoRecordingStateRef = useRef({
-    isRecording: false,
-    blob: null as Blob | null,
-    duration: 0
-  });
-
-  // Video recording handlers
-  const handleVideoRecordingStart = () => {
-    console.log('🎥 [Interview] ✅ VIDEO RECORDING STARTED');
-    videoRecordingStateRef.current.isRecording = true;
-    setIsVideoRecording(true);
-  };
-
-
-  const handleVideoRecordingStop = (videoBlob: Blob, duration: number) => {
-    console.log('🎥 [Interview] ✅ VIDEO RECORDING STOPPED:', {
-      size: videoBlob.size,
-      duration,
-      type: videoBlob.type,
-      sizeInMB: (videoBlob.size / 1024 / 1024).toFixed(2) + ' MB'
-    });
-
-    // Update refs immediately (no React state delay)
-    videoRecordingStateRef.current.isRecording = false;
-    videoRecordingStateRef.current.blob = videoBlob;
-    videoRecordingStateRef.current.duration = duration;
-
-    // Update React state for UI
-    setIsVideoRecording(false);
-    setVideoBlob(videoBlob);
-    setVideoDuration(duration);
-  };
-
-  const handleVideoRecordingError = (error: Error) => {
-    console.error('[Interview] Video recording error:', error);
-    videoRecordingStateRef.current.isRecording = false;
-    setIsVideoRecording(false);
-    onInterviewError(new Error(`Video recording failed: ${error.message}`));
-  };
-
   const handleManualCalibration = () => {
     // Pause everything and show the calibration modal
     if (isSpeaking) {
@@ -681,70 +588,15 @@ export const InterviewSession = ({
     setShowCalibration(true);
   };
 
-  // Background processing function for video upload and session storage
-  const processVideoAndResults = async (historyWithTiming: any[]) => {
+  // Audio-only mode: fire-and-forget session completion. No video to wait on.
+  const completeSessionInBackground = async (conversationHistory: any[]) => {
     try {
-      // Wait for video blob to be available (up to 8 more seconds)
-      let waitCount = 0;
-      while (!videoRecordingStateRef.current.blob && waitCount < 80) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        waitCount++;
-      }
-
-      // Upload video if recording was successful
-      let videoUploadResult = null;
-      console.log('🎥 [Background] VIDEO UPLOAD CHECK:', {
-        hasVideoBlob: !!videoRecordingStateRef.current.blob,
-        videoBlobSize: videoRecordingStateRef.current.blob ? videoRecordingStateRef.current.blob.size : 0,
-        videoDuration: videoRecordingStateRef.current.duration,
-        sessionId,
-        interviewId
-      });
-
-      if (videoRecordingStateRef.current.blob && videoRecordingStateRef.current.duration > 0) {
-        console.log('🎥 [Background] ✅ STARTING VIDEO UPLOAD TO GCS...');
-        setVideoUploadStatus('uploading');
-
-        try {
-          videoUploadResult = await videoUploadManager.uploadVideoWithRetry(
-            videoRecordingStateRef.current.blob!,
-            sessionId,
-            interviewId,
-            videoRecordingStateRef.current.duration
-          );
-
-          if (videoUploadResult.success) {
-            console.log('[Background] Video uploaded successfully:', videoUploadResult.url);
-            setVideoUploadStatus('completed');
-          } else {
-            console.error('[Background] Video upload failed:', videoUploadResult.error);
-            setVideoUploadStatus('error');
-            // Surface to operators — candidate has already navigated to the
-            // thank-you page by the time we reach here, so a toast won't
-            // render. Recruiter still has the transcript; this is monitoring.
-            Sentry.captureMessage('Video upload failed after retries', {
-              level: 'warning',
-              tags: { sessionId, interviewId },
-              extra: { error: videoUploadResult.error, blobSize: videoRecordingStateRef.current.blob?.size },
-            });
-          }
-        } catch (error) {
-          console.error('[Background] Video upload error:', error);
-          setVideoUploadStatus('error');
-          Sentry.captureException(error, {
-            tags: { sessionId, interviewId, stage: 'video_upload' },
-          });
-        }
-      } else {
-        console.log('🎥 [Background] ❌ SKIPPING VIDEO UPLOAD - No video blob or zero duration');
-      }
-
-      // Store session completion and generate results in database
-      const storeResult = await storeSessionCompletion(historyWithTiming);
-      console.log('[Background] Session completion stored:', !!storeResult);
-
+      await storeSessionCompletion(conversationHistory);
     } catch (error) {
-      console.error('[Background] Error in background processing:', error);
+      console.error('[Background] Error storing session completion:', error);
+      Sentry.captureException(error, {
+        tags: { sessionId, interviewId, stage: 'session_completion' },
+      });
     }
   };
 
@@ -765,38 +617,9 @@ export const InterviewSession = ({
       // Cleanup conversation orchestrator
       cleanupOrchestrator();
 
-      // Brief wait for video recording to stop (max 2 seconds)
-      if (isVideoRecording || videoRecordingStateRef.current.isRecording) {
-        console.log('🎥 [Interview] Brief wait for video recording to stop...');
-        let waitCount = 0;
-        while (videoRecordingStateRef.current.isRecording && waitCount < 20) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          waitCount++;
-        }
-        console.log('🎥 [Interview] Video recording stop wait completed');
-      }
-
-      // Convert messages to history format for results page
+      // Audio-only mode — no video to wait on.
       const historyForResults = conversationOrchestrator.convertToHistoryFormat(messages);
 
-      // Add video timing to conversation history
-      const historyWithTiming = historyForResults.map((entry, index) => {
-        const timing = pendingVideoTimings.current.get(index);
-        if (timing) {
-          return {
-            ...entry,
-            video_start: timing.video_start,
-            video_end: timing.video_end,
-            was_interrupted: timing.was_interrupted
-          };
-        }
-        return entry;
-      });
-
-      console.log('[Interview] Enhanced conversation history with video timing:',
-        historyWithTiming.filter(h => h.video_start).length, 'entries have timing');
-
-      // Calculate session data for immediate navigation
       const endTime = new Date();
       const duration = Math.floor((endTime.getTime() - sessionStartTimeRef.current) / 1000);
 
@@ -809,23 +632,19 @@ export const InterviewSession = ({
           silenceDuration: 0,
           totalSpeechTime: duration
         },
-        videoMetrics: null, // Will be updated in background
         completedAt: endTime.toISOString(),
         candidateName: candidateData.name,
         candidateEmail: candidateData.email,
-        results: null // Will be updated in background
+        results: null
       };
 
-      console.log('[Interview] Ending interview - navigating immediately');
       onInterviewComplete(sessionData);
 
-      // Continue processing in background (don't await). Candidate has
-      // already navigated to thank-you; failures here are operator
-      // visibility only.
-      processVideoAndResults(historyWithTiming).catch(error => {
-        console.error('[Interview] Background processing error:', error);
+      // Persist completion in background — candidate is already on thank-you page.
+      completeSessionInBackground(historyForResults).catch(error => {
+        console.error('[Interview] Background completion error:', error);
         Sentry.captureException(error, {
-          tags: { sessionId, interviewId, stage: 'background_processing' },
+          tags: { sessionId, interviewId, stage: 'background_completion' },
         });
       });
 
@@ -858,16 +677,6 @@ export const InterviewSession = ({
 
   return (
     <div className="relative w-screen h-screen bg-black overflow-hidden">
-      {/* Video Recording Component - hidden but active */}
-      <VideoRecorder
-        sessionId={sessionId}
-        interviewId={interviewId}
-        isRecording={isInitialized && !isEndingInterview}
-        onRecordingStart={handleVideoRecordingStart}
-        onRecordingStop={handleVideoRecordingStop}
-        onError={handleVideoRecordingError}
-      />
-
       {/* 3D Particle Sphere - Full Screen Canvas */}
       <ParticleSphere
         conversationState={conversationState}
@@ -914,16 +723,8 @@ export const InterviewSession = ({
         </div>
       </div>
 
-      {/* Camera Feed Tile - Top Right */}
-      <div className="absolute top-6 right-6 w-72 h-52 z-10">
-        <CameraFeed
-          isVisible={showCameraFeed}
-          className="w-full h-full"
-        />
-      </div>
-
-      {/* Transcript Box - Below Camera Feed */}
-      <div className="absolute top-[248px] right-6 w-72 h-[400px] z-10">
+      {/* Transcript Box - Right Side (audio-only mode; was below the camera tile) */}
+      <div className="absolute top-6 right-6 w-72 h-[calc(100vh-120px)] z-10">
         <TranscriptBox
           messages={transcriptMessages}
           currentUtterance={currentUtterance}
@@ -1082,20 +883,7 @@ export const InterviewSession = ({
         onAudioLevel={setTtsAudioLevel}
         onComplete={() => {
           console.log('[Interview] Speaking completed, transitioning to listening');
-          // Track AI speech end and get video timing
-          const aiTiming = videoTimingRef.current.aiSpeakingEnded();
-
-          // Store timing for the most recent AI message
-          if (aiTiming) {
-            const lastAIMessageIndex = messages.length - 1;
-            if (lastAIMessageIndex >= 0) {
-              pendingVideoTimings.current.set(lastAIMessageIndex, aiTiming);
-            }
-          }
-
           completeSpeaking();
-
-          // Resume inactivity timer after AI finishes speaking
           resetInactivityTimer();
         }}
       />
