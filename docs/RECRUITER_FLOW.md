@@ -119,10 +119,15 @@ stateDiagram-v2
 | Candidate accepts invitation | C → R | `POST /workspaces/{wid}/invitations/{id}/accept` | **Polling** (recruiter must refresh ManageInterviews) | Manage table candidate count |
 | Candidate completes registration | C → R | `POST /register/{token}` | **Polling** | InterviewDetails participants list |
 | Candidate enters interview session | C → R | session created in Firestore | **Polling** | InterviewDetails activity timeline |
-| Candidate submits interview | C → R | `POST /sessions/{id}/complete` → LangGraph reviewer (async) | ✅ **SSE** (Dashboard NBA only) | Dashboard NBA card refreshes; Manage table participation rate stays stale until reload |
+| Candidate submits interview | C → R | `POST /sessions/{id}/complete` → LangGraph reviewer (async) | ✅ **SSE** (Dashboard + Manage + InterviewDetails) | NBA, stats, table, and per-candidate row all refresh live within 5s |
 | Recruiter shortlists / rejects | R → C | `POST /lists/{id}/candidates`, `PATCH /candidates/{id}/status` | none → email if configured | Candidate portal status badge changes on next open |
 
-**Real-time gap:** Only the Dashboard NBA card subscribes to SSE (`POST /api/interview-events/stream`, added in v1.1). The Manage table and InterviewDetails participation counts still poll on mount. Future work: extend SSE to those views to remove the manual refresh ritual.
+**Real-time coverage (current):**
+- Per-interview detail: `GET /api/interviews/{id}/events` — InterviewDetails subscribes via inline `EventSource`, bumps `liveRevision`, refetch effects re-run.
+- Workspace-level list: `GET /api/workspaces/{wid}/projects/{pid}/interviews/events` — Dashboard + ManageInterviews subscribe via `useInterviewListLiveUpdates` hook (`src/hooks/useInterviewListLiveUpdates.ts`).
+- Both streams: 5s poll, diff-only emit, 25s heartbeat to defeat proxy idle timeouts. Auth via JWT query param (EventSource limitation).
+
+**No real-time gaps remain in the recruiter portal.** Candidate-side surfaces still poll/refresh on action — fine because candidates trigger their own state changes.
 
 ---
 
@@ -210,11 +215,11 @@ The NBA card is the single most important UI element on the dashboard — it abs
 
 ## 8) Known UX gaps (input to next planning round)
 
-1. **Stale participation counts** — Manage table polls only on mount; recruiter sees outdated numbers until refresh. Fix: extend SSE from Dashboard NBA to include interview-level events.
+1. ~~**Stale participation counts**~~ — ✅ **FIXED** via workspace-level SSE in Dashboard + Manage.
 2. **Slow blueprint document fetches** — backend logs show `Get interview document: 13536ms` on cold reads. Fix: Firestore composite index for the lookup pattern in `candidate_invitation_service.get_invitation_by_token`.
 3. **No bulk shortlist** — recruiter can shortlist one candidate at a time; NBA suggests it but the action is single-row.
 4. **Candidate "expired" status has no recovery path** — re-invite CTA is missing in UI; backend supports it but frontend never exposes.
-5. **`fitment` interviews historically routed to wrong details page** — fixed in this commit, but the duplication of InterviewDetails / FitmentInterviewDetails (2008 + 1275 LOC, ~30% overlap) is technical debt. Consider unifying with a common base + type-specific extensions.
+5. **`fitment` interviews historically routed to wrong details page** — ✅ fixed; but the duplication of InterviewDetails / FitmentInterviewDetails (~2000 + ~1275 LOC, ~30% overlap) is technical debt. Consider unifying with a common base + type-specific extensions.
 
 ---
 
