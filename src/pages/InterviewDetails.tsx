@@ -43,6 +43,7 @@ import { qualifiedListsApi } from "@/services/qualifiedListsApi";
 import { SwipeQRSection } from "@/components/interview/SwipeQRSection";
 import { ShortlistActionCard } from "@/components/interview/ShortlistActionCard";
 import { CandidateCard } from "@/components/interview/CandidateCard";
+import { AddToQualifiedListModal } from "@/components/modals/AddToQualifiedListModal";
 import { cn } from "@/lib/utils";
 import { BlueprintViewModal } from "@/components/views/BlueprintViewModal";
 import { NextBestActionCard } from "@/components/dashboard/NextBestActionCard";
@@ -224,6 +225,9 @@ export default function InterviewDetails() {
 
   // Re-invite (resend invitation email) state
   const [isResendingInvites, setIsResendingInvites] = useState(false);
+
+  // Bulk shortlist modal state
+  const [showShortlistModal, setShowShortlistModal] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -1901,6 +1905,23 @@ export default function InterviewDetails() {
                 </div>
               )}
 
+              {/* Bulk shortlist top performers */}
+              {eligibleForShortlist.length > 0 && (
+                <div className="flex items-center justify-between p-3 mb-2 mt-4 rounded-sm bg-emerald-50 border border-emerald-200">
+                  <div className="text-sm text-emerald-900">
+                    {eligibleForShortlist.length} candidate(s) scored ≥75%. Add them to a qualified list in one click.
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowShortlistModal(true)}
+                    className="rounded-sm uppercase font-bold text-xs h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    <UserCheck className="w-3.5 h-3.5 mr-1.5" />
+                    Shortlist {eligibleForShortlist.length}
+                  </Button>
+                </div>
+              )}
+
               {/* Card Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                 {paginatedCandidates.map((candidate) => {
@@ -2061,6 +2082,23 @@ export default function InterviewDetails() {
           templateTitle={interview?.title || interview?.role || "Interview Blueprint"}
         />
       )}
+
+      {/* Bulk Shortlist Modal */}
+      <AddToQualifiedListModal
+        isOpen={showShortlistModal}
+        onClose={() => setShowShortlistModal(false)}
+        selectedCandidates={eligibleForShortlist.map((c) => ({
+          id: String(c.candidateId || c.id),
+          name: c.name,
+          email: c.email,
+        }))}
+        onSuccess={() => {
+          toast({
+            title: 'Candidates shortlisted',
+            description: `${eligibleForShortlist.length} candidate(s) added to your qualified list.`,
+          });
+        }}
+      />
     </div>
   );
 }
