@@ -319,3 +319,77 @@ The candidate-side interview pipeline was modernized in May 2026 (S1-S4). Single
 
 - `PRELIMS_ENGINE=langgraph` (required). The Vertex path is deprecated.
 - `PRELIMS_AGENT_ID` is no longer read. Safe to remove from `.env`.
+
+---
+
+## 11) Domain architecture (T0-T5, May 2026)
+
+FunnelHQ is positioned as **finance-only** today (per funnelhq.co) but the app is built **domain-pluggable** so we can add Legal, Healthcare, Consulting later without code changes.
+
+### Flow
+
+```
+[Recruiter creates interview]
+   ↓ (POST /interviews with optional `domain` field; default = "finance")
+[Interview persisted with domain="finance"]
+   ↓
+[Blueprint agent]
+   ├── base prompt: funnelhq_api/agents/blueprint/prompt.md
+   └── overlay:    funnelhq_api/agents/domain_packs/finance/blueprint_prompt.md
+                   + canonical skills from taxonomy.json
+   ↓
+[Prelims agent (Smriti)]
+   ├── base prompt: funnelhq_api/agents/prelims/prompt.md
+   └── overlay:    funnelhq_api/agents/domain_packs/finance/prelims_prompt.md
+   ↓
+[Reviewer agent]
+   ├── base prompt: funnelhq_api/agents/reviewer/prompt.md
+   ├── overlay:    funnelhq_api/agents/domain_packs/finance/reviewer_prompt.md
+   └── output: interview_results with domain="finance" + graph_data (nodes + edges)
+   ↓
+[TAG viewer]  (src/components/tag/TalentAnalysisGraph.tsx)
+   reads graph_data, renders interactive radial SVG with click-to-evidence panel.
+[Pool TAG dashboard]  (src/pages/PoolDashboard.tsx)
+   aggregates across candidates in a list: quality distribution, top skills,
+   filter + shortlist.
+```
+
+### Domain pack contract
+
+Each domain ships as a directory at `funnelhq_api/agents/domain_packs/<name>/`:
+
+| File | Purpose |
+|---|---|
+| `taxonomy.json` | Canonical skill names, role archetypes, transferable-skill examples, critical-gap rules, trusted employers list. |
+| `blueprint_prompt.md` | Overlay appended to the blueprint agent's system prompt. Encodes domain-specific role archetypes + must-have skills. |
+| `prelims_prompt.md` | Overlay for Smriti. Domain-fluent acronyms, depth-probing phrasing, the six-question intake. |
+| `reviewer_prompt.md` | Overlay for the reviewer. Critical-gap rules, pedigree credibility signal, transferable-skill detection, scoring rubric. |
+
+### Loader
+
+`shared/domains.py` exposes:
+
+- `SUPPORTED_DOMAINS` — tuple of allowed domain names.
+- `DEFAULT_DOMAIN` — fallback (currently `"finance"`).
+- `normalize_domain(name)` — validates + canonicalizes; raises `ValueError` on unsupported.
+- `get_taxonomy(domain)` — returns parsed `taxonomy.json` for the domain.
+- `with_domain_overlay(base, domain, agent)` — appends the overlay file to a base prompt.
+
+Each agent's `_system_prompt()` calls `with_domain_overlay()` with the relevant agent name. Cached via `lru_cache`.
+
+### To add a new domain (e.g. Legal)
+
+1. `mkdir funnelhq_api/agents/domain_packs/legal/`
+2. Write the 4 files above with legal-specific content.
+3. Add `"legal"` to `SUPPORTED_DOMAINS` in `shared/domains.py`.
+4. Update `src/i18n/finance.ts` → split into per-domain modules + a `useDomainStrings()` hook.
+5. Show a domain selector in CreateInterview (one-line UI change).
+
+**No other code change is required.** Schemas already include the `domain` field; the route accepts it; the agents respect it.
+
+### Verify
+
+- `POST /interviews` without `domain` → defaults to `"finance"`.
+- `POST /interviews` with `domain="legal"` → 400 "Unsupported domain. Available: ['finance']".
+- All three agents' `_system_prompt('finance')` returns a string containing both the base prompt and `## DOMAIN OVERLAY (finance)` followed by the overlay file contents.
+- Reviewer output includes `"domain": "finance"` field for downstream pool-stats filtering.

@@ -2381,7 +2381,7 @@ export default function CreateInterview() {
                   </Label>
                   <Input
                     id="title"
-                    placeholder="e.g., Senior Accountant Assessment"
+                    placeholder="e.g. Senior Tax Manager · Financial Controller · FP&A Lead"
                     value={formData.title}
                     onChange={(e) => {
                       clearBlueprintOnEdit();
@@ -2500,7 +2500,7 @@ export default function CreateInterview() {
                 <div className="relative">
                   <Textarea
                     id="description"
-                    placeholder="Describe the interview objectives and what candidates can expect..."
+                    placeholder="Describe the finance role: vertical (accounting / taxation / advisory), seniority, must-have technical depth, regulatory frameworks involved..."
                     value={formData.description}
                     onChange={(e) => {
                       clearBlueprintOnEdit();

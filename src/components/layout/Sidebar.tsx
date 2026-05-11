@@ -35,19 +35,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
+// T4: rebrand "Interviews" → "TAGs" to mirror funnelhq.co's product language.
+// Submenu items keep their action-oriented labels (Create / Screening / Fitment)
+// so recruiter mental models around the workflow stay intact.
 const menuItems = [
-  // { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }, // Hidden - users go directly to Manage Interviews
   { title: "Quick Tour", url: "/quick-tour", icon: Play },
   {
-    title: "Interviews",
+    title: "TAGs",
     icon: Briefcase,
     subItems: [
-      { title: "Create Interview", url: "/interviews/create" },
-      { title: "Screening", url: "/interviews/manage" },
-      { title: "Role Fitment", url: "/interviews/fitment" }
+      { title: "Create TAG", url: "/interviews/create" },
+      { title: "Screening TAGs", url: "/interviews/manage" },
+      { title: "Fitment TAGs", url: "/interviews/fitment" }
     ]
   },
-  { title: "Candidate Pools", url: "/lists", icon: Users },
+  { title: "Talent Pools", url: "/lists", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings }
 ];
 
@@ -56,7 +58,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false }: SidebarProps) {
-  const [openMenus, setOpenMenus] = useState<string[]>(["Interviews"]);
+  const [openMenus, setOpenMenus] = useState<string[]>(["TAGs"]);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();

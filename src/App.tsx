@@ -13,6 +13,7 @@ import MarketingLanding from "./pages/MarketingLanding";
 import ProductLanding from "./pages/ProductLanding";
 import Dashboard from "./pages/Dashboard";
 import PilotDashboard from "./pages/PilotDashboard";
+import PoolDashboard from "./pages/PoolDashboard";
 import CreateInterview from "./pages/CreateInterview";
 import ManageInterviews from "./pages/ManageInterviewsEnhanced";
 import InterviewDetails from "./pages/InterviewDetails";
@@ -100,6 +101,15 @@ const App = () => (
               <TourGuard>
                 <MainLayout>
                   <PilotDashboard />
+                </MainLayout>
+              </TourGuard>
+            } />
+
+            {/* T3: Pool TAG dashboard — aggregate view of a qualified list. */}
+            <Route path="/lists/:listId/pool" element={
+              <TourGuard>
+                <MainLayout>
+                  <PoolDashboard />
                 </MainLayout>
               </TourGuard>
             } />

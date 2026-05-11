@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Bot, Users, UserCheck, TrendingUp } from "lucide-react";
 import { PageSkeleton } from "@/components/ui/shimmer";
 import { useInterviewListLiveUpdates } from "@/hooks/useInterviewListLiveUpdates";
+import { FINANCE_STRINGS } from "@/i18n/finance";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -110,15 +111,16 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
+          {/* T4: brand-mirroring hero. Matches funnelhq.co primary headline. */}
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+            {FINANCE_STRINGS.dashboard.heroHeadline}
           </h1>
-          <p className="text-foreground-muted mt-2">
+          <p className="text-foreground-muted mt-2 max-w-2xl">
             {loading
-              ? "Loading your interviews…"
+              ? "Loading your TAGs…"
               : interviews.length === 0
-              ? "Let's create your first interview."
-              : `${interviews.length} interview${interviews.length === 1 ? "" : "s"} so far.`}
+              ? FINANCE_STRINGS.dashboard.heroSubcopy
+              : `Welcome${user?.name ? `, ${user.name.split(" ")[0]}` : ""}. ${interviews.length} TAG${interviews.length === 1 ? "" : "s"} generated so far.`}
           </p>
         </div>
         <Button

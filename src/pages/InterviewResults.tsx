@@ -7,6 +7,7 @@ import { CheckCircle, AlertTriangle, Lightbulb, TrendingDown, MessageSquareQuote
 import { RatingPanel } from "@/components/interview/RatingPanel";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
+import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentAnalysisGraph";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
@@ -679,6 +680,26 @@ export default function InterviewResults() {
             </div>
           </div>
         </Card>
+
+        {/* T2: Talent Analysis Graph — interactive radial view of the
+            reviewer's graph_data. Always rendered when graph_data exists
+            (which is the post-S3 LangGraph default). */}
+        {rawResults?.graph_data?.nodes && rawResults.graph_data.nodes.length > 0 && (
+          <Card className="p-4 mb-6 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold text-foreground">
+                Talent Analysis Graph
+              </h2>
+              <span className="text-xs uppercase tracking-wider text-slate-500">
+                Click any node for evidence
+              </span>
+            </div>
+            <TalentAnalysisGraph
+              roleTitle={(rawResults as any).role || "Role"}
+              nodes={rawResults.graph_data.nodes as TagGraphNode[]}
+            />
+          </Card>
+        )}
 
         {/* Skills Chart + Stats Layout */}
         <div className="grid gap-6 lg:grid-cols-4 items-start mb-6">

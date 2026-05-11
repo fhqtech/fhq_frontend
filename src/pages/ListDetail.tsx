@@ -342,7 +342,15 @@ export default function ListDetail() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 <span className="uppercase tracking-wider text-sm font-semibold">Back to Lists</span>
               </Button>
-              <h1 className="text-2xl font-bold uppercase tracking-tight">{listDetails.name}</h1>
+              <h1 className="text-2xl font-bold uppercase tracking-tight flex-1">{listDetails.name}</h1>
+              {/* T3: jump into the aggregate Pool TAG view */}
+              <Button
+                variant="default"
+                onClick={() => navigate(`/lists/${listId}/pool`)}
+                className="bg-slate-900 text-white hover:bg-slate-800"
+              >
+                <span className="uppercase tracking-wider text-xs font-semibold">Pool TAG view →</span>
+              </Button>
             </div>
           )}
 
