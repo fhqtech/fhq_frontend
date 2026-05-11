@@ -129,8 +129,13 @@ class TemplateApiService {
       throw new Error(error.error || 'Failed to fetch available templates');
     }
 
+    // Backend returns the array directly (not wrapped in {templates: [...]}).
+    // Be defensive: also accept the legacy wrapped shape, and always return
+    // an array so callers can safely .length/.map without guards.
     const data = await response.json();
-    return data.templates;
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.templates)) return data.templates;
+    return [];
   }
 
   /**

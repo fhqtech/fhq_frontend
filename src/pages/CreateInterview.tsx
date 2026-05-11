@@ -317,10 +317,10 @@ export default function CreateInterview() {
           currentWorkspace.id,
           templateType
         );
-        setAvailableTemplates(templates);
+        setAvailableTemplates(Array.isArray(templates) ? templates : []);
       } catch (error) {
         console.error('Failed to fetch templates:', error);
-        // Don't show error toast - templates are optional
+        setAvailableTemplates([]); // Templates are optional — empty array unblocks the UI.
       } finally {
         setIsLoadingTemplates(false);
       }
