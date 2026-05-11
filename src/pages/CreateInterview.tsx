@@ -1710,6 +1710,11 @@ export default function CreateInterview() {
             description: `"${formData.title}" is now active and ready for candidates.`,
           });
 
+          // P1 U7: clear the stale localStorage form data so a future
+          // "Create New Interview" click starts from a clean slate
+          // (don't re-fill the user's title/JD from a 2-week-old draft).
+          try { localStorage.removeItem('createInterviewForm'); } catch {}
+
           // Navigate to interview details page
           setTimeout(() => {
             navigate(`/interviews/${interviewId}`);
@@ -1778,6 +1783,12 @@ export default function CreateInterview() {
             title: `Interview ${isEditMode ? 'Updated' : 'Created'} Successfully!`,
             description: `"${formData.title}" has been ${isEditMode ? 'updated' : 'created'}${!isEditMode ? '. Blueprint generation started and will be ready shortly.' : ''}`,
           });
+
+          // P1 U7: clear stale draft on successful create (not on edit —
+          // edit always loads from backend so localStorage isn't reused).
+          if (!isEditMode) {
+            try { localStorage.removeItem('createInterviewForm'); } catch {}
+          }
 
           // Navigate to interview details page (both edit and create modes)
           setTimeout(() => {

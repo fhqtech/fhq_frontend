@@ -183,6 +183,10 @@ export const InterviewSession = ({
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
   const [inactivityCountdown, setInactivityCountdown] = useState(60);
 
+  // P1 R6/R7: surface real-time stream failures (TTS down, STT reconnecting).
+  // null = healthy; set string = show banner.
+  const [streamWarning, setStreamWarning] = useState<string | null>(null);
+
   const streamerRef = useRef<AssemblyAIStreamer | null>(null);
   const speakerRef = useRef<CartesiaSpeakerHandle>(null);
   const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -567,11 +571,29 @@ export const InterviewSession = ({
   const handleReconnect = () => {
     console.log('[Interview] Attempting to reconnect STT...');
     setConnectionStatus('idle');
+    setStreamWarning('Reconnecting to audio servers…');
     // Small delay to ensure cleanup, then restart
     setTimeout(() => {
       handleStart();
     }, 500);
   };
+
+  // P1 R7: auto-reconnect once after a 3s delay if the STT websocket dies.
+  // Manual reconnect button is still there for repeat failures.
+  const autoReconnectAttempted = useRef(false);
+  useEffect(() => {
+    if (connectionStatus === 'error' && !autoReconnectAttempted.current && !isEndingInterview) {
+      autoReconnectAttempted.current = true;
+      setStreamWarning('Audio connection dropped — reconnecting automatically…');
+      const t = setTimeout(() => handleReconnect(), 3000);
+      return () => clearTimeout(t);
+    }
+    if (connectionStatus === 'connected') {
+      autoReconnectAttempted.current = false;
+      // Clear the reconnect/warning banner on successful (re)connect.
+      setStreamWarning((prev) => (prev && prev.toLowerCase().includes('reconnect') ? null : prev));
+    }
+  }, [connectionStatus, isEndingInterview]);
 
   const handleCalibrationComplete = () => {
     setShowCalibration(false);
@@ -748,6 +770,16 @@ export const InterviewSession = ({
         </div>
       </div>
 
+      {/* P1 R6/R7: stream warning banner (TTS down / STT reconnecting) */}
+      {streamWarning && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-20 max-w-md">
+          <div className="bg-amber-500/20 border border-amber-500/50 text-amber-200 px-4 py-2 rounded text-xs flex items-center gap-2 shadow-lg">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+            <span>{streamWarning}</span>
+          </div>
+        </div>
+      )}
+
       {/* Transcript Box - Right Side (audio-only mode; was below the camera tile) */}
       <div className="absolute top-6 right-6 w-72 h-[calc(100vh-120px)] z-10">
         <TranscriptBox
@@ -910,6 +942,19 @@ export const InterviewSession = ({
           console.log('[Interview] Speaking completed, transitioning to listening');
           completeSpeaking();
           resetInactivityTimer();
+        }}
+        onError={(reason) => {
+          // P1 R6: TTS failed. Tell the candidate so they don't sit in
+          // silence wondering if the interview hung. The interview keeps
+          // running (transcripts are captured via AssemblyAI regardless).
+          console.warn('[Interview] TTS error:', reason);
+          Sentry.captureMessage(`Cartesia TTS failure: ${reason}`, {
+            level: 'warning',
+            tags: { sessionId, interviewId },
+          });
+          setStreamWarning(
+            'Audio temporarily unavailable. Your answers are still being recorded. You can read the AI’s message in the transcript on the right.'
+          );
         }}
       />
     </div>

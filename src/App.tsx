@@ -12,6 +12,7 @@ import TourGuard from "@/components/tour/TourGuard";
 import MarketingLanding from "./pages/MarketingLanding";
 import ProductLanding from "./pages/ProductLanding";
 import Dashboard from "./pages/Dashboard";
+import PilotDashboard from "./pages/PilotDashboard";
 import CreateInterview from "./pages/CreateInterview";
 import ManageInterviews from "./pages/ManageInterviewsEnhanced";
 import InterviewDetails from "./pages/InterviewDetails";
@@ -90,6 +91,15 @@ const App = () => (
               <TourGuard>
                 <MainLayout>
                   <Dashboard />
+                </MainLayout>
+              </TourGuard>
+            } />
+
+            {/* P1 O5: pilot operational dashboard (recruiter-only) */}
+            <Route path="/admin/pilot" element={
+              <TourGuard>
+                <MainLayout>
+                  <PilotDashboard />
                 </MainLayout>
               </TourGuard>
             } />

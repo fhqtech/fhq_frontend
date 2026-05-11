@@ -313,14 +313,22 @@ export default function CandidatePortal() {
   // Periodic status checking
   useEffect(() => {
     if (enhancedInterviews.length > 0) {
-      // Initial check after interviews are loaded
       refreshInterviewStatuses();
 
-      // Set up interval to check every 30 seconds
-      const interval = setInterval(refreshInterviewStatuses, 30000);
+      // P1 U6: jittered poll so 100 concurrent candidates don't all hit
+      // the backend at the same 30s mark. Random 25-35s window keeps the
+      // average load identical while spreading the spike.
+      let timeoutId: NodeJS.Timeout;
+      const scheduleNext = () => {
+        const jittered = 25000 + Math.random() * 10000;
+        timeoutId = setTimeout(async () => {
+          await refreshInterviewStatuses();
+          scheduleNext();
+        }, jittered);
+      };
+      scheduleNext();
 
-      // Cleanup on unmount or dependency change
-      return () => clearInterval(interval);
+      return () => clearTimeout(timeoutId);
     }
   }, [enhancedInterviews.length]); // Only depends on length to avoid infinite loops
 
@@ -1232,15 +1240,10 @@ export default function CandidatePortal() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => toast({ title: "Profile settings coming soon!" })}>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast({ title: "Settings coming soon!" })}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {/* P1 U5: removed "Profile settings coming soon" and
+                    "Settings coming soon" fake buttons — they made the
+                    candidate portal look unfinished. Sign Out is the
+                    only real item, so it stands alone. */}
                 <DropdownMenuItem onClick={() => navigate('/')}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out

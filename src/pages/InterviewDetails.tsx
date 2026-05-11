@@ -693,64 +693,66 @@ export default function InterviewDetails() {
     checkBlueprint();
   }, [id, currentWorkspace, currentProject, liveRevision]);
 
-  // Auto-refresh blueprint status when generating
+  // Auto-refresh blueprint status when generating.
+  // P1 U3: exponential backoff after 3 consecutive errors so a flaky
+  // network doesn't hammer the API at 5s intervals forever.
   useEffect(() => {
     if (blueprintStatus !== 'generating' || !id) return;
+    if (!currentWorkspace || !currentProject) return;
 
     console.log('📡 Starting auto-refresh for blueprint status (generating)');
+    let cancelled = false;
+    let consecutiveErrors = 0;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-    const pollInterval = setInterval(async () => {
+    const tick = async () => {
+      if (cancelled) return;
       try {
-        if (!currentWorkspace || !currentProject) return;
-
-        console.log('🔄 Polling blueprint status...');
         const interviewData = await fetchInterviewData(currentWorkspace.id, currentProject.id, id);
+        consecutiveErrors = 0;
 
         if (interviewData && interviewData.blueprintStatus) {
           const newStatus = interviewData.blueprintStatus;
-          console.log('📊 Blueprint status update:', newStatus);
-
           setBlueprintStatus(newStatus);
           setBlueprintError(interviewData.blueprintError || null);
 
-          // Stop polling when status changes to completed or failed
           if (newStatus === 'completed' || newStatus === 'failed') {
-            console.log('✅ Blueprint generation finished:', newStatus);
-            clearInterval(pollInterval);
-
-            // Show toast notification
             if (newStatus === 'completed') {
               toast({
-                title: "Blueprint Ready",
-                description: "Interview blueprint has been generated successfully!",
+                title: 'Blueprint Ready',
+                description: 'Interview blueprint has been generated successfully!',
               });
-              // Refresh blueprint data
-              if (!currentWorkspace || !currentProject) return;
               const result = await checkBlueprintExists(currentWorkspace.id, currentProject.id, id);
               setBlueprintExists(result.exists);
-              if (result.exists && result.blueprint) {
-                setBlueprintData(result.blueprint);
-              }
-            } else if (newStatus === 'failed') {
+              if (result.exists && result.blueprint) setBlueprintData(result.blueprint);
+            } else {
               toast({
-                title: "Blueprint Generation Failed",
-                description: "Please update the job description with more specific details and try again.",
-                variant: "destructive",
+                title: 'Blueprint Generation Failed',
+                description: 'Please update the job description with more specific details and try again.',
+                variant: 'destructive',
               });
             }
+            return; // stop polling
           }
         }
       } catch (error) {
-        console.error('Error polling blueprint status:', error);
+        consecutiveErrors += 1;
+        console.error(`Error polling blueprint status (errors=${consecutiveErrors}):`, error);
       }
-    }, 5000); // Poll every 5 seconds
 
-    // Cleanup on unmount or status change
-    return () => {
-      console.log('🛑 Stopping blueprint status polling');
-      clearInterval(pollInterval);
+      // 5s normal cadence; after 3 errors, back off: 10s, 20s, 40s, capped at 60s.
+      const delay = consecutiveErrors < 3
+        ? 5000
+        : Math.min(5000 * Math.pow(2, consecutiveErrors - 2), 60000);
+      timeoutId = setTimeout(tick, delay);
     };
-  }, [blueprintStatus, id]);
+
+    timeoutId = setTimeout(tick, 5000);
+    return () => {
+      cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [blueprintStatus, id, currentWorkspace, currentProject]);
 
   // Check blueprint again (retry)
   const handleCheckBlueprint = async () => {

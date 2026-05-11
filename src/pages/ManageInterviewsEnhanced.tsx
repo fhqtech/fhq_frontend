@@ -604,7 +604,10 @@ export default function ManageInterviewsEnhanced() {
                   {paginatedInterviews.map((interview) => (
                     <TableRow
                       key={interview.id}
-                      className="cursor-pointer hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+                      // P1 U8: disable row interactions while a destructive
+                      // action (delete) is in flight to prevent double-fires
+                      // from impatient clicks.
+                      className={`cursor-pointer hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary ${isDeletingInterview ? 'opacity-50 pointer-events-none' : ''}`}
                       role="link"
                       tabIndex={0}
                       aria-label={`Open interview ${interview.title}`}

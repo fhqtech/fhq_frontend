@@ -15,10 +15,15 @@ interface CartesiaSpeakerProps {
   onSpeakingStateChange?: (isSpeaking: boolean) => void;
   onComplete?: () => void; // MOCKTAGON: Completion callback
   onAudioLevel?: (level: number) => void; // Audio level callback (0-1) for reactive animations
+  // P1 R6: surface TTS failures to the parent. Today a WebSocket error
+  // calls onComplete (silently), so the interview state machine thinks
+  // the agent "finished speaking" successfully. The parent now sees the
+  // distinction and can toast the candidate + log to Sentry.
+  onError?: (reason: 'missing_api_key' | 'websocket' | 'close_before_audio') => void;
 }
 
 const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
-  ({ text, trigger = false, mode = "full", speechRate = "normal", voiceAccent = "indian", onSpeakingStateChange, onComplete, onAudioLevel }, ref) => {
+  ({ text, trigger = false, mode = "full", speechRate = "normal", voiceAccent = "indian", onSpeakingStateChange, onComplete, onAudioLevel, onError }, ref) => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const audioCtxRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
@@ -240,7 +245,8 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
         console.error("[Cartesia] Missing VITE_CARTESIA_API_KEY in your .env file!");
         setIsSpeaking(false);
         onSpeakingStateChange?.(false);
-        onComplete?.(); // MOCKTAGON: Call completion callback on API key error
+        onError?.('missing_api_key');  // P1 R6
+        onComplete?.();
         return;
       }
 
@@ -344,7 +350,8 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
         console.error("[Cartesia] WebSocket error:", err);
         setIsSpeaking(false);
         onSpeakingStateChange?.(false);
-        onComplete?.(); // MOCKTAGON: Call completion callback on WebSocket error
+        onError?.('websocket');  // P1 R6
+        onComplete?.();
       };
 
       ws.onclose = () => {

@@ -141,6 +141,10 @@ export default function CandidateRegistration() {
   const [extractionFailed, setExtractionFailed] = useState(false);
   const [bonusQuestionIndex, setBonusQuestionIndex] = useState(0);
   const [consentChecked, setConsentChecked] = useState(false);
+  // P1 S1: Cloudflare Turnstile captcha. Enabled only when the site key
+  // env var is set; harmless no-op otherwise.
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // Fetch invitation details on component mount
   useEffect(() => {
@@ -148,6 +152,31 @@ export default function CandidateRegistration() {
       fetchInvitationDetails(token);
     }
   }, [token]);
+
+  // P1 S1: load Turnstile script + render widget once when sitekey is set.
+  useEffect(() => {
+    if (!turnstileSiteKey) return;
+    const existing = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
+    if (!existing) {
+      const s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+    // Callback name set on window so the global onload can invoke us.
+    (window as any).onTurnstileLoad = () => {
+      const el = document.getElementById('cf-turnstile-mount');
+      if (el && (window as any).turnstile) {
+        (window as any).turnstile.render('#cf-turnstile-mount', {
+          sitekey: turnstileSiteKey,
+          callback: (tok: string) => setTurnstileToken(tok),
+          'error-callback': () => setTurnstileToken(null),
+          'expired-callback': () => setTurnstileToken(null),
+        });
+      }
+    };
+  }, [turnstileSiteKey]);
 
   // Confetti effect for success state
   useEffect(() => {
@@ -610,6 +639,11 @@ export default function CandidateRegistration() {
       submitData.append('consentedAt', new Date().toISOString());
       submitData.append('consentVersion', '2026-05-11');
 
+      // P1 S1: Turnstile token (no-op for backend when secret unset).
+      if (turnstileToken) {
+        submitData.append('turnstileToken', turnstileToken);
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/register/${token}`, {
         method: 'POST',
         body: submitData
@@ -883,6 +917,8 @@ export default function CandidateRegistration() {
                 {/* CTA Button */}
                 <div className="flex justify-end">
                   <div className="flex flex-col items-end gap-2 w-full">
+                    {/* P1 S1: Cloudflare Turnstile (no-op when sitekey unset) */}
+                    {turnstileSiteKey && <div id="cf-turnstile-mount" className="my-2" />}
                     {/* P0 #5: Real consent capture — checkbox state must
                         be true before the candidate can proceed. Backend
                         persists {consented, consentedAt} on registration. */}
@@ -916,7 +952,7 @@ export default function CandidateRegistration() {
                       </span>
                     </label>
                     <Button
-                      disabled={!consentChecked}
+                      disabled={!consentChecked || (!!turnstileSiteKey && !turnstileToken)}
                       onClick={() => {
                         setIsTransitioning(true);
                         setTimeout(() => setCurrentStep(1), 500);
