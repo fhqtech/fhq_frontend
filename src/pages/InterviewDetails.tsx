@@ -84,8 +84,14 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 
 // API functions for backend integration
 const fetchInterviewData = async (workspaceId: string, projectId: string, interviewId: string) => {
-  const data = await interviewApi.getInterviewConfiguration(workspaceId, projectId, interviewId);
-  return data.interview || null;
+  // Backend returns the configuration object directly (not wrapped). Tolerate
+  // both shapes so a future wrapping change can't break the page.
+  const data: any = await interviewApi.getInterviewConfiguration(workspaceId, projectId, interviewId);
+  if (!data) return null;
+  if (data.interview) return data.interview;
+  // Heuristic: a real config dict has at least an id or a title.
+  if (data.id || data.title) return data;
+  return null;
 };
 
 const fetchCandidates = async (workspaceId: string, projectId: string, interviewId: string, page: number = 1, limit: number = 20) => {
