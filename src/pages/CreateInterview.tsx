@@ -1035,38 +1035,33 @@ export default function CreateInterview() {
     const hasMultipleLists = formData.selectedListIds.length >= 2;
     const needsAnalysis = needsDuplicateAnalysis();
 
-    console.log('🔧 Button Config Debug:', {
-      selectedListsCount: formData.selectedListIds.length,
-      duplicateAnalysisCompleted,
-      hasSelectedLists,
-      hasSingleList,
-      hasMultipleLists,
-      needsAnalysis,
-      storedAnalysis: !!formData.duplicateAnalysis
-    });
+    // Candidates is the LAST step in the create wizard (2 steps total).
+    // The proceed action submits the interview, not "next" — without this
+    // the button silently no-ops because stepper.goToNextStep refuses to
+    // advance past the last step.
+    const isLastStep = stepper.currentStep === steps.length - 1;
+    const proceedAction = isLastStep ? "submit" : "next";
+    const proceedText = isLastStep
+      ? (isEditMode ? "Update Interview" : (selectedTemplate ? "Create & Start Interview" : "Create Interview"))
+      : "Next";
 
     if (!hasSelectedLists) {
-      console.log('🔧 → No lists selected');
-      return { text: "Next", action: "next", disabled: true };
+      return { text: proceedText, action: proceedAction, disabled: true };
     }
 
     if (hasSingleList) {
-      console.log('🔧 → Single list selected');
-      return { text: "Next", action: "next", disabled: false };
+      return { text: proceedText, action: proceedAction, disabled: false };
     }
 
     if (needsAnalysis) {
-      console.log('🔧 → Multiple lists, analysis needed');
       return { text: "Check for Duplicates", action: "analyze", disabled: false };
     }
 
     if (hasMultipleLists && !needsAnalysis) {
-      console.log('🔧 → Multiple lists, analysis up to date');
-      return { text: "Next", action: "next", disabled: false };
+      return { text: proceedText, action: proceedAction, disabled: false };
     }
 
-    console.log('🔧 → Fallback case');
-    return { text: "Next", action: "next", disabled: true };
+    return { text: proceedText, action: proceedAction, disabled: true };
   };
 
   // Handle button click for candidates step
@@ -1076,8 +1071,11 @@ export default function CreateInterview() {
     if (config.action === "analyze") {
       // Open duplicate analysis modal
       setShowDuplicateModal(true);
+    } else if (config.action === "submit") {
+      // Last step — actually create / update the interview
+      handleSubmit();
     } else if (config.action === "next") {
-      // Proceed to next step
+      // Proceed to next step (only reached if there are >2 wizard steps)
       handleNext();
     }
   };
