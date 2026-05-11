@@ -680,6 +680,12 @@ export default function ListDetail() {
             });
             setSelectedCandidateIds(new Set());
             setMultiSelectAction(null);
+            // F4: refresh the list so the freshly-added candidate row
+            // reflects whatever the latest scores/tags are (post-F3
+            // those are denormalized on the candidate doc by the
+            // reviewer agent). Without this, the modal closes but the
+            // page keeps showing the pre-add snapshot.
+            loadListData();
           }}
           initialMode={multiSelectAction === 'create-new' ? 'create-new' : 'select-list'}
         />
