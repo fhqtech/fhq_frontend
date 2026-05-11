@@ -242,45 +242,20 @@ export default function CandidateRegistration() {
   };
 
   const calculateProfileCompletion = () => {
-    console.log('=== PROFILE COMPLETION DEBUG ===');
-    console.log('Form Data:', JSON.stringify(formData, null, 2));
-
     let completed = 0;
     const total = 9; // 6 mandatory + 3 optional psych questions
 
-    // Mandatory fields (6 total)
-    console.log('phone:', `"${formData.phone}"`, formData.phone.trim() ? '✓' : '✗');
     if (formData.phone.trim()) completed++;
-
-    console.log('location:', `"${formData.location}"`, formData.location.trim() ? '✓' : '✗');
     if (formData.location.trim()) completed++;
-
-    console.log('jobTitle:', `"${formData.jobTitle}"`, formData.jobTitle.trim() ? '✓' : '✗');
     if (formData.jobTitle.trim()) completed++;
-
-    console.log('experienceYears:', `"${formData.experienceYears}"`, (formData.experienceYears.trim() || formData.experienceYears === "0") ? '✓' : '✗');
     if (formData.experienceYears.trim() || formData.experienceYears === "0") completed++;
-
-    console.log('availableIn:', `"${formData.availableIn}"`, formData.availableIn.trim() ? '✓' : '✗');
     if (formData.availableIn.trim()) completed++;
-
-    console.log('psychAssessment.animal:', `"${formData.psychAssessment.animal}"`, formData.psychAssessment.animal ? '✓' : '✗');
     if (formData.psychAssessment.animal) completed++;
-
-    // Optional psych questions (3 total) - LinkedIn, resume, portfolio not counted
-    console.log('psychAssessment.color:', `"${formData.psychAssessment.color}"`, formData.psychAssessment.color ? '✓' : '✗');
     if (formData.psychAssessment.color) completed++;
-
-    console.log('psychAssessment.environment:', `"${formData.psychAssessment.environment}"`, formData.psychAssessment.environment ? '✓' : '✗');
     if (formData.psychAssessment.environment) completed++;
-
-    console.log('psychAssessment.symbol:', `"${formData.psychAssessment.symbol}"`, formData.psychAssessment.symbol ? '✓' : '✗');
     if (formData.psychAssessment.symbol) completed++;
 
-    const percentage = Math.round((completed / total) * 100);
-    console.log(`\n📊 RESULT: ${completed}/${total} fields completed = ${percentage}%`);
-    console.log('=================================\n');
-    return percentage;
+    return Math.round((completed / total) * 100);
   };
 
   const validateForm = () => {

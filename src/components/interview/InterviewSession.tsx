@@ -14,6 +14,7 @@ import { VideoTiming } from '@/types/videoTiming';
 import VideoRecorder from './VideoRecorder';
 import { videoUploadManager } from '@/utils/videoUpload';
 import { Mic, MicOff, Settings, ChevronDown, Wifi, WifiOff, Clock, RefreshCw } from 'lucide-react';
+import * as Sentry from '@sentry/react';
 
 // Custom PhoneDisconnect icon
 const PhoneDisconnectIcon = ({ size = 20, className = "" }: { size?: number; className?: string }) => (
@@ -26,12 +27,16 @@ const PhoneDisconnectIcon = ({ size = 20, className = "" }: { size?: number; cla
 const BACKEND_URL = import.meta.env.VITE_LLM_BACKEND_URL;
 const WEBSOCKET_URL = import.meta.env.VITE_STT_WEBSOCKET_URL;
 
-// Validate critical environment variables
+// Validate critical environment variables. These are interview-blocking
+// in production; without them STT and the LLM agent simply can't connect.
+// Sentry capture lets operators see the misconfigured deploy immediately.
 if (!WEBSOCKET_URL) {
   console.error('[Interview] CRITICAL ERROR: WEBSOCKET_URL is undefined!');
+  Sentry.captureMessage('VITE_STT_WEBSOCKET_URL missing at runtime', { level: 'error' });
 }
 if (!BACKEND_URL) {
   console.error('[Interview] CRITICAL ERROR: BACKEND_URL is undefined!');
+  Sentry.captureMessage('VITE_LLM_BACKEND_URL missing at runtime', { level: 'error' });
 }
 
 interface InterviewSessionProps {
@@ -714,10 +719,21 @@ export const InterviewSession = ({
           } else {
             console.error('[Background] Video upload failed:', videoUploadResult.error);
             setVideoUploadStatus('error');
+            // Surface to operators — candidate has already navigated to the
+            // thank-you page by the time we reach here, so a toast won't
+            // render. Recruiter still has the transcript; this is monitoring.
+            Sentry.captureMessage('Video upload failed after retries', {
+              level: 'warning',
+              tags: { sessionId, interviewId },
+              extra: { error: videoUploadResult.error, blobSize: videoRecordingStateRef.current.blob?.size },
+            });
           }
         } catch (error) {
           console.error('[Background] Video upload error:', error);
           setVideoUploadStatus('error');
+          Sentry.captureException(error, {
+            tags: { sessionId, interviewId, stage: 'video_upload' },
+          });
         }
       } else {
         console.log('🎥 [Background] ❌ SKIPPING VIDEO UPLOAD - No video blob or zero duration');
@@ -803,9 +819,14 @@ export const InterviewSession = ({
       console.log('[Interview] Ending interview - navigating immediately');
       onInterviewComplete(sessionData);
 
-      // Continue processing in background (don't await)
+      // Continue processing in background (don't await). Candidate has
+      // already navigated to thank-you; failures here are operator
+      // visibility only.
       processVideoAndResults(historyWithTiming).catch(error => {
         console.error('[Interview] Background processing error:', error);
+        Sentry.captureException(error, {
+          tags: { sessionId, interviewId, stage: 'background_processing' },
+        });
       });
 
     } catch (error) {
