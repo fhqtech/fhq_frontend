@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Search, Filter, Loader2, Users, TrendingUp, Star, CheckCircle } from "lucide-react";
-import { WalkingLoader } from "@/components/ui/WalkingLoader";
+import { PageSkeleton } from "@/components/ui/shimmer";
 
 export default function CandidateListDetail() {
   const { listId } = useParams<{ listId: string }>();
@@ -109,14 +109,7 @@ export default function CandidateListDetail() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <WalkingLoader />
-          <p className="text-muted-foreground mt-6">Loading candidates...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton header cards={3} rows={6} cols={5} message="Loading candidates…" />;
   }
 
   return (

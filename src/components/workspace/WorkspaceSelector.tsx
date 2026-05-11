@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, ChevronDown, Loader2 } from 'lucide-react';
+import { Building2, ChevronDown } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 export const WorkspaceSelector: React.FC = () => {
   const {
@@ -33,8 +34,8 @@ export const WorkspaceSelector: React.FC = () => {
   if (isLoadingWorkspaces) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Loading workspaces...</span>
+        <Spinner size="sm" label="Loading workspaces" />
+        <span>Loading workspaces…</span>
       </div>
     );
   }

@@ -4,7 +4,7 @@ import { ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { WalkingLoader } from '@/components/ui/WalkingLoader';
+import { Spinner } from '@/components/ui/spinner';
 
 import EnhancedBlueprintDisplay from '@/components/blueprint/EnhancedBlueprintDisplay';
 import { transformInterviewData } from '@/utils/blueprintTransform';
@@ -122,11 +122,11 @@ const DynamicBlueprintPage: React.FC = () => {
 
         {/* Loading content - centered */}
         <div className="flex-1 flex flex-col items-center justify-center">
-          <WalkingLoader />
+          <Spinner size="lg" variant="brand" label="Loading interview blueprint" />
           <div className="mt-6 text-center">
-            <h3 className="text-lg font-semibold uppercase tracking-wider">Loading Interview Blueprint</h3>
+            <h3 className="text-lg font-semibold uppercase tracking-wider">Loading interview blueprint</h3>
             <p className="text-foreground-muted">
-              Fetching blueprint data for this interview...
+              Fetching blueprint data for this interview…
             </p>
           </div>
         </div>

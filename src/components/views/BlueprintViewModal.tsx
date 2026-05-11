@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, Award, Wrench } from 'lucide-react';
+import { X, Award, Wrench } from 'lucide-react';
+import { SpinnerWithCopy } from '@/components/ui/spinner';
 import { fetchFullBlueprint, FullBlueprintData, EvaluationPillar } from '@/services/templateApi';
 import SkillsGraph from '../ui/SkillsGraph';
 
@@ -98,8 +99,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
         <div className="flex-1 overflow-y-auto flex">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center py-20">
-              <Loader2 size={32} className="animate-spin text-indigo-600" />
-              <span className="ml-3 text-gray-500 font-mono">Loading blueprint...</span>
+              <SpinnerWithCopy size="lg" variant="brand" label="Loading blueprint…" />
             </div>
           ) : error ? (
             <div className="flex-1 flex items-center justify-center py-20">

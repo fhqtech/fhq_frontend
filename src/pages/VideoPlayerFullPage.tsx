@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { VideoAnalyticsDrawer } from '@/components/video/VideoAnalyticsDrawer';
-import { WalkingLoader } from '@/components/ui/WalkingLoader';
+import { SpinnerWithCopy } from '@/components/ui/spinner';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
@@ -791,10 +791,7 @@ export default function VideoPlayerFullPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <WalkingLoader />
-          <p className="text-muted-foreground mt-6">Loading video session...</p>
-        </div>
+        <SpinnerWithCopy size="lg" label="Loading video session…" />
       </div>
     );
   }

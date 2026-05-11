@@ -7,7 +7,7 @@ import { EmptyListCard } from "@/components/analytics/EmptyListCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2, Plus } from "lucide-react";
-import { WalkingLoader } from "@/components/ui/WalkingLoader";
+import { PageSkeleton } from "@/components/ui/shimmer";
 
 export default function CandidateAnalytics() {
   const navigate = useNavigate();
@@ -32,14 +32,7 @@ export default function CandidateAnalytics() {
   );
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <WalkingLoader />
-          <p className="text-muted-foreground mt-6">Loading analytics...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton header cards={4} rows={6} cols={5} message="Loading analytics…" />;
   }
 
   return (

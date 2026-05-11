@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Plus, Star, Pencil, Trash2 } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Table,
   TableBody,
@@ -304,8 +305,8 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
   if (isLoadingProjects) {
     return (
       <div className={`flex items-center gap-2 text-sm text-muted-foreground ${compact ? 'px-0 py-0' : 'px-3 py-2'}`}>
-        <Loader2 className="h-4 w-4 animate-spin" />
-        {!compact && <span>Loading projects...</span>}
+        <Spinner size="sm" label="Loading projects" />
+        {!compact && <span>Loading projects…</span>}
       </div>
     );
   }

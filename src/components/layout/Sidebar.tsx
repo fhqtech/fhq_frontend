@@ -16,7 +16,7 @@ import {
 } from "phosphor-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { WalkingLoader } from "@/components/ui/WalkingLoader";
+import { SpinnerWithCopy } from "@/components/ui/spinner";
 import { 
   Collapsible,
   CollapsibleContent,
@@ -103,10 +103,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       {/* Logout Overlay */}
       {isLoggingOut && (
         <div className="fixed inset-0 bg-background z-[9999] flex items-center justify-center">
-          <div className="flex flex-col items-center">
-            <WalkingLoader />
-            <p className="text-muted-foreground mt-6">Signing out...</p>
-          </div>
+          <SpinnerWithCopy size="lg" label="Signing out…" />
         </div>
       )}
 

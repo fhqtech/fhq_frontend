@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertTriangle, Lightbulb, TrendingDown, MessageSquareQuote, ArrowLeft, Clock, RefreshCw } from "lucide-react";
 import { RatingPanel } from "@/components/interview/RatingPanel";
-import { WalkingLoader } from "@/components/ui/WalkingLoader";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
@@ -481,7 +481,7 @@ export default function InterviewResults() {
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <div className="mb-8 flex items-center justify-center">
-            <WalkingLoader />
+            <Spinner size="lg" variant="brand" label="Processing" />
           </div>
 
           <h1 className="text-4xl font-bold text-foreground mb-4 animate-pulse">
@@ -515,7 +515,7 @@ export default function InterviewResults() {
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <div className="mb-8 flex items-center justify-center">
-            <WalkingLoader />
+            <Spinner size="lg" variant="brand" label="Processing" />
           </div>
 
           <h1 className="text-4xl font-bold text-foreground mb-4">

@@ -19,7 +19,7 @@ import {
   FolderOpen,
   X
 } from "lucide-react";
-import { WalkingLoader } from "@/components/ui/WalkingLoader";
+import { PageSkeleton } from "@/components/ui/shimmer";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -310,14 +310,7 @@ export default function ListDetail() {
   const userName = user?.name?.split(' ')[0] || 'there';
 
   if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background flex-1">
-        <div className="flex flex-col items-center">
-          <WalkingLoader />
-          <p className="text-muted-foreground mt-6">Loading list details...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton header cards={3} rows={6} cols={5} message="Loading list details…" />;
   }
 
   if (!listDetails) {

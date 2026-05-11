@@ -16,7 +16,7 @@ import { EditListDialog } from './components/EditListDialog';
 import { ShareListDialog } from './components/ShareListDialog';
 import { DeleteConfirmDialog } from './components/DeleteConfirmDialog';
 import { SourceConfigModal } from '@/components/sources/SourceConfigModal';
-import { WalkingLoader } from '@/components/ui/WalkingLoader';
+import { PageSkeleton } from '@/components/ui/shimmer';
 import doggieSvg from '@/assets/empty-state-lists-page/doggie.svg';
 
 interface YourListsTabProps {
@@ -435,14 +435,7 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 200px)' }}>
-        <div className="flex flex-col items-center">
-          <WalkingLoader />
-          <p className="text-muted-foreground mt-6">Loading candidate pools...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton header={false} cards={3} rows={5} cols={4} message="Loading candidate pools…" />;
   }
 
   // Transform qualified lists to AnalyticsList format
