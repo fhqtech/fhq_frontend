@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Bot, Users, UserCheck, TrendingUp } from "lucide-react";
 import { PageSkeleton } from "@/components/ui/shimmer";
+import { useInterviewListLiveUpdates } from "@/hooks/useInterviewListLiveUpdates";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,14 @@ export default function Dashboard() {
     }
   }, [searchParams, setSearchParams]);
 
+  // Live updates: NBA + stats + recent table all reflect live candidate
+  // progress without manual refresh. SSE bumps `liveRevision` ~5s after
+  // any tracked field changes server-side.
+  const liveRevision = useInterviewListLiveUpdates(
+    currentWorkspace?.id,
+    currentProject?.id,
+  );
+
   useEffect(() => {
     if (!currentWorkspace || !currentProject) {
       setLoading(false);
@@ -42,7 +51,9 @@ export default function Dashboard() {
     let cancelled = false;
     (async () => {
       try {
-        setLoading(true);
+        // Show shimmer only on the first load; live-revision-driven
+        // refetches keep the table populated and just diff-update it.
+        if (interviews.length === 0) setLoading(true);
         const data = await interviewApi.getInterviews(currentWorkspace.id, currentProject.id, {
           limit: 100,
         });
@@ -56,7 +67,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [currentWorkspace, currentProject]);
+  }, [currentWorkspace, currentProject, liveRevision]);
 
   const stats = useMemo(() => {
     const active = interviews.filter(

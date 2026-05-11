@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/shimmer";
+import { useInterviewListLiveUpdates } from "@/hooks/useInterviewListLiveUpdates";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import {
@@ -167,9 +168,18 @@ export default function ManageInterviewsEnhanced() {
   };
 
   // Load interviews when workspace or project changes
+  // Live updates: backend SSE bumps `liveRevision` when status,
+  // candidate counts, or participation rate change anywhere in this
+  // project's interview list. Refetch on bump so the table reflects
+  // candidate progress without a manual reload.
+  const liveRevision = useInterviewListLiveUpdates(
+    currentWorkspace?.id,
+    currentProject?.id,
+  );
+
   useEffect(() => {
     fetchInterviews();
-  }, [currentWorkspace, currentProject]);
+  }, [currentWorkspace, currentProject, liveRevision]);
 
   // Calculate stats from real data - use filteredInterviews to respect interview type filter
   const activeInterviews = filteredInterviews.filter(interview =>
