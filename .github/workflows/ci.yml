@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # The Vite production build aborts when required env vars are
+      # missing (see vite.config.ts). Provide dummies so the build
+      # succeeds in CI — they're never used at runtime.
+      - name: Production build
+        run: npx vite build --mode production
+        env:
+          VITE_API_BASE_URL: https://example.com
+          VITE_FRONTEND_BASE_URL: https://example.com
+
+      - name: Unit tests
+        run: npm test -- --run
+
+      # Lint last — failures here are noisier and we want build/test
+      # signal first.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true  # advisory until we clean the existing baseline
