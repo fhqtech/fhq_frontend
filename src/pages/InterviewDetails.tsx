@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronRight, ChevronLeft, Download, Loader2 } from "lucide-react";
+import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2 } from "lucide-react";
 import { CloudArrowDown, CaretLeft } from "phosphor-react";
 import googleLogo from "@/assets/google_logo.png";
 import aiAvatar from "@/assets/ai-avatar.png";

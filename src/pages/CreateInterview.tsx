@@ -12,6 +12,8 @@ import blueprintGuideImg2 from "@/assets/create-interview-guide/edit-interview-b
 import { DuplicateAnalysisModal } from "@/components/modals/DuplicateAnalysisModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ShimmerInterviewConfig } from "@/components/ui/shimmer";
+import { SpinnerWithCopy } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1963,16 +1965,14 @@ export default function CreateInterview() {
     }));
   };
 
-  // Loading state for edit mode
+  // Loading state for edit mode — show form skeleton matching the layout
+  // the user is about to see, with a contextual status line.
   if (isLoadingInterview) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <CircleNotch className="w-8 h-8 text-brand-primary animate-spin mx-auto" />
-          <div>
-            <h3 className="text-lg font-medium text-foreground">Loading Interview</h3>
-            <p className="text-sm text-foreground-muted">Please wait while we fetch your interview data...</p>
-          </div>
+      <div className="container mx-auto py-6 space-y-6" role="status" aria-busy="true">
+        <SpinnerWithCopy label="Loading interview…" />
+        <div className="rounded-lg border border-border p-6">
+          <ShimmerInterviewConfig />
         </div>
       </div>
     );
@@ -3271,11 +3271,9 @@ export default function CreateInterview() {
                       </button>
                     </div>
                   </div>
-                  {console.log('🔍 isLoadingLists:', isLoadingLists, 'availableLists:', availableLists.length)}
                   {isLoadingLists ? (
                     <div className="flex items-center justify-center py-8">
-                      <CircleNotch className="w-6 h-6 animate-spin text-brand-primary" />
-                      <span className="ml-2 text-sm text-muted-foreground">Loading candidate pools...</span>
+                      <SpinnerWithCopy label="Loading candidate pools…" variant="brand" />
                     </div>
                   ) : availableLists.length > 0 ? (
                     <>

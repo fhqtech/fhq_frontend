@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Bot, Users, UserCheck, TrendingUp, Loader2 } from "lucide-react";
+import { Bot, Users, UserCheck, TrendingUp } from "lucide-react";
+import { PageSkeleton } from "@/components/ui/shimmer";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -126,10 +127,7 @@ export default function Dashboard() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-muted-foreground">
-          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          Loading dashboard…
-        </div>
+        <PageSkeleton header={false} cards={4} rows={5} cols={4} message="Loading your interviews…" />
       ) : interviews.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">

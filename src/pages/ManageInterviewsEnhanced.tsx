@@ -3,7 +3,7 @@ import { MagnifyingGlass as Search, Plus, Calendar, Users, Clock, Play, Pause, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { WalkingLoader } from "@/components/ui/WalkingLoader";
+import { PageSkeleton } from "@/components/ui/shimmer";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import {
@@ -241,7 +241,11 @@ export default function ManageInterviewsEnhanced() {
   };
 
   const handleViewDetails = (interviewId: string) => {
-    navigate(`/interviews/${interviewId}`);
+    const it = interviews.find((i) => i.id === interviewId);
+    const path = it?.type === 'fitment'
+      ? `/fitment-interviews/${interviewId}`
+      : `/interviews/${interviewId}`;
+    navigate(path);
   };
 
   const handleAddCandidates = (interviewId: string) => {
@@ -442,14 +446,7 @@ export default function ManageInterviewsEnhanced() {
   }
 
   if (isLoading && interviews.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <WalkingLoader />
-          <p className="text-foreground-muted mt-6">Loading interviews...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton header cards={0} rows={6} cols={6} message="Loading your interviews…" />;
   }
 
   return (
