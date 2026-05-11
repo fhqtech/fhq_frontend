@@ -83,63 +83,123 @@ export const InterviewPreCheck = ({
   const [isSettingActive, setIsSettingActive] = useState(false);
   const [isPreparingResume, setIsPreparingResume] = useState(false);
   const [prepareCompleted, setPrepareCompleted] = useState(false);
+  const [prepareError, setPrepareError] = useState<string | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const micStatusRef = useRef<'idle' | 'testing' | 'success' | 'error'>('idle');
 
   const resumes = candidateData.resumes || [];
 
-  // Call /prepare API to process resume
+  // Call /prepare API to provision the agent session for this resume.
+  // Honest failure: if it fails, surface the error so the candidate sees
+  // a Retry button instead of a stuck-disabled Continue.
   const callPrepareAPI = async (resumeId: string) => {
     if (!candidateToken || !candidateData?.id || !interviewData?.id) {
-      console.log("⏭️ Skipping resume preparation - missing required data");
       return;
     }
 
     setIsPreparingResume(true);
     setPrepareCompleted(false);
+    setPrepareError(null);
 
     try {
-      console.log(`🔧 Preparing resume ${resumeId} for interview...`);
-      const startTime = Date.now();
-
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             candidate_token: candidateToken,
             interview_id: interviewData.id,
-            candidate_id: candidateData.id
-          })
-        }
+            candidate_id: candidateData.id,
+          }),
+        },
       );
 
-      if (response.ok) {
-        const result = await response.json();
-        const elapsed = Date.now() - startTime;
-        console.log(`✅ Resume prepared in ${elapsed}ms:`, result.session_id);
+      const result = await response.json().catch(() => ({}));
 
-        // Pass session_id to parent component
+      if (response.ok && result?.success !== false) {
         if (result.session_id && onSessionCreated) {
           onSessionCreated(result.session_id);
         }
-
         setPrepareCompleted(true);
+        setPrepareError(null);
       } else {
-        console.warn("⚠️ Failed to prepare resume (non-critical)");
-        setPrepareCompleted(true); // Allow to proceed even if prepare fails
+        const msg = result?.error || result?.detail || 'Could not prepare your resume. Please retry.';
+        setPrepareError(msg);
+        toast({
+          title: 'Resume preparation failed',
+          description: msg,
+          variant: 'destructive',
+        });
       }
-    } catch (error) {
-      console.warn("⚠️ Error preparing resume (non-critical):", error);
-      setPrepareCompleted(true); // Allow to proceed even if prepare fails
+    } catch (error: any) {
+      const msg = 'Network error while preparing your resume. Please retry.';
+      setPrepareError(msg);
+      toast({
+        title: 'Network error',
+        description: msg,
+        variant: 'destructive',
+      });
     } finally {
       setIsPreparingResume(false);
+    }
+  };
+
+  // Single source of truth for the "candidate selected a resume" action.
+  // Runs the three sequential API calls honestly:
+  //   1. /select-resume (lock to this interview) — fatal if it fails
+  //   2. /set-active     (update profile)        — warn if it fails, continue
+  //   3. /prepare        (provision agent)       — surfaced via prepareError
+  // Returns ok=true only when the lock step succeeded; caller decides
+  // whether to roll back UI state.
+  const selectAndPrepareResume = async (resumeId: string): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const selectResponse = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/interviews/${interviewData.id}/select-resume`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(candidateToken ? { 'Authorization': `Bearer ${candidateToken}` } : {}),
+          },
+          body: JSON.stringify({ resumeId }),
+        },
+      );
+
+      if (!selectResponse.ok) {
+        const body = await selectResponse.json().catch(() => ({}));
+        const msg = body?.detail || body?.error || 'Could not select this resume for the interview.';
+        return { ok: false, error: msg };
+      }
+
+      // Step 2 — best effort. A failed set-active still leaves the
+      // interview correctly locked to the chosen resume (step 1), so
+      // we proceed to /prepare regardless.
+      try {
+        const setActiveResponse = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/resumes/${resumeId}/set-active`,
+          {
+            method: 'PUT',
+            headers: candidateToken ? { 'Authorization': `Bearer ${candidateToken}` } : {},
+          },
+        );
+        if (!setActiveResponse.ok) {
+          toast({
+            title: 'Active resume not updated',
+            description: 'Your interview will still use the selected file.',
+          });
+        }
+      } catch {
+        // Same as non-OK above — non-fatal.
+      }
+
+      await callPrepareAPI(resumeId);
+      return { ok: true };
+    } catch (error: any) {
+      return { ok: false, error: error?.message || 'Network error while selecting resume.' };
     }
   };
 
@@ -187,8 +247,15 @@ export const InterviewPreCheck = ({
     }
   }, [microphoneStatus, speakerStatus]);
 
+  // Keep ref in sync with state so async callbacks (10s timer, RAF) read
+  // the latest value instead of the stale closure they captured at start.
+  const updateMicStatus = (next: 'idle' | 'testing' | 'success' | 'error') => {
+    micStatusRef.current = next;
+    setMicrophoneStatus(next);
+  };
+
   const testMicrophone = async () => {
-    setMicrophoneStatus('testing');
+    updateMicStatus('testing');
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -198,7 +265,6 @@ export const InterviewPreCheck = ({
       audioContextRef.current = audioContext;
 
       const analyser = audioContext.createAnalyser();
-      analyserRef.current = analyser;
 
       const microphone = audioContext.createMediaStreamSource(stream);
       microphone.connect(analyser);
@@ -213,29 +279,30 @@ export const InterviewPreCheck = ({
         setAudioLevel(average);
 
         if (average > 10) {
-          setMicrophoneStatus('success');
+          updateMicStatus('success');
           setTimeout(() => {
             stream.getTracks().forEach(track => track.stop());
             audioContext.close();
           }, 1000);
-        } else {
+        } else if (micStatusRef.current === 'testing') {
           requestAnimationFrame(checkAudioLevel);
         }
       };
 
       checkAudioLevel();
 
-      // Auto-fail after 10 seconds
+      // Auto-fail after 10s. Reads ref, not the stale state closure — a
+      // success that fired at t=9s won't get overwritten back to 'error'.
       setTimeout(() => {
-        if (microphoneStatus === 'testing') {
-          setMicrophoneStatus('error');
+        if (micStatusRef.current === 'testing') {
+          updateMicStatus('error');
           stream.getTracks().forEach(track => track.stop());
           audioContext.close();
         }
       }, 10000);
 
     } catch (error) {
-      setMicrophoneStatus('error');
+      updateMicStatus('error');
       const err = error as DOMException;
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setMicrophoneError('Microphone access was blocked. Click the lock icon in your browser address bar and allow microphone, then retry.');
@@ -328,43 +395,19 @@ export const InterviewPreCheck = ({
         onResumesUpdate(data.resumes);
       }
 
-      // Auto-select the newly uploaded resume
-      const newResumeId = data.resume?.id || data.resumeId;
-      setSelectedResumeId(newResumeId);
-
-      // Lock resume to interview and update profile
+      // Lock + set-active + prepare. Only flip the selection UI if the
+      // lock step succeeded; revert (don't select) if it failed.
+      const newResumeId = data.resume?.id;
       if (newResumeId) {
-        try {
-          // Step 1: Lock resume to THIS interview (creates interviewResumes mapping)
-          const selectResponse = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/interviews/${interviewData.id}/select-resume`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...(candidateToken ? { 'Authorization': `Bearer ${candidateToken}` } : {})
-              },
-              body: JSON.stringify({ resumeId: newResumeId })
-            }
-          );
-
-          if (selectResponse.ok) {
-            // Step 2: Set as active (updates general profile)
-            await fetch(
-              `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/resumes/${newResumeId}/set-active`,
-              {
-                method: 'PUT',
-                headers: candidateToken ? {
-                  'Authorization': `Bearer ${candidateToken}`
-                } : {}
-              }
-            );
-
-            // Step 3: Prepare agent session (now resume is locked to interview)
-            callPrepareAPI(newResumeId);
-          }
-        } catch (error) {
-          console.error('Error processing resume:', error);
+        const result = await selectAndPrepareResume(newResumeId);
+        if (result.ok) {
+          setSelectedResumeId(newResumeId);
+        } else {
+          toast({
+            title: 'Could not attach resume',
+            description: result.error,
+            variant: 'destructive',
+          });
         }
       }
     } catch (error: any) {
@@ -379,53 +422,25 @@ export const InterviewPreCheck = ({
   };
 
   const handleResumeSelect = async (resumeId: string) => {
-    setSelectedResumeId(resumeId);
+    const previousId = selectedResumeId;
     setIsSettingActive(true);
+    setSelectedResumeId(resumeId);
 
-    try {
-      // Step 1: Lock resume to THIS interview
-      const selectResponse = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/interviews/${interviewData.id}/select-resume`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(candidateToken ? { 'Authorization': `Bearer ${candidateToken}` } : {})
-          },
-          body: JSON.stringify({ resumeId: resumeId })
-        }
-      );
+    const result = await selectAndPrepareResume(resumeId);
+    setIsSettingActive(false);
 
-      if (selectResponse.ok) {
-        // Step 2: Set as active (updates general profile)
-        await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/resumes/${resumeId}/set-active`,
-          {
-            method: 'PUT',
-            headers: candidateToken ? {
-              'Authorization': `Bearer ${candidateToken}`
-            } : {}
-          }
-        );
-
-        toast({
-          title: "Resume Selected",
-          description: "This resume is now set as active.",
-        });
-
-        // Step 3: Prepare agent session
-        callPrepareAPI(resumeId);
-      } else {
-        throw new Error('Failed to select resume');
-      }
-    } catch (error) {
+    if (result.ok) {
       toast({
-        title: "Error",
-        description: "Failed to select resume. Please try again.",
-        variant: "destructive"
+        title: 'Resume Selected',
+        description: 'This resume is now set as active.',
       });
-    } finally {
-      setIsSettingActive(false);
+    } else {
+      setSelectedResumeId(previousId);
+      toast({
+        title: 'Could not select resume',
+        description: result.error,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -495,59 +510,19 @@ export const InterviewPreCheck = ({
     setCurrentStep(2);
   };
 
-  const handleStartInterview = async () => {
+  const handleStartInterview = () => {
     if (resumes.length > 0 && !selectedResumeId) {
       toast({
-        title: "Resume Required",
-        description: "Please select a resume before starting the interview.",
-        variant: "destructive"
+        title: 'Resume Required',
+        description: 'Please select a resume before starting the interview.',
+        variant: 'destructive',
       });
       return;
     }
-
-    if (resumes.length > 0) {
-      setIsSelectingResume(true);
-
-      try {
-        // Call API to lock resume for this interview
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/interviews/${interviewData.id}/select-resume`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              resumeId: selectedResumeId
-            })
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to select resume');
-        }
-
-        // Resume locked successfully
-        toast({
-          title: "Resume Selected",
-          description: "Your resume has been locked for this interview!",
-        });
-
-        onStartInterview();
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to select resume. Please try again.",
-          variant: "destructive"
-        });
-        setIsSelectingResume(false);
-      }
-    } else {
-      // No resumes, proceed directly
-      onStartInterview();
-    }
+    // Step 1 already locked + prepared the resume via selectAndPrepareResume.
+    // No need to re-call /select-resume here — that path was wasted RTT
+    // (and silently swallowed errors).
+    onStartInterview();
   };
 
   const dosList = [
@@ -804,6 +779,32 @@ export const InterviewPreCheck = ({
         {/* Bottom Action Buttons - Step 1 */}
         {currentStep === 1 && (
           <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-40">
+            {prepareError && (
+              <div className="max-w-6xl mx-auto px-12 pt-4">
+                <div className="flex items-center justify-between gap-4 rounded border border-red-200 bg-red-50 px-4 py-3">
+                  <div className="flex items-start gap-2 text-sm text-red-700">
+                    <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>{prepareError}</span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (selectedResumeId) callPrepareAPI(selectedResumeId);
+                    }}
+                    disabled={isPreparingResume || !selectedResumeId}
+                    className="bg-red-600 hover:bg-red-700 text-white h-8 px-4 rounded text-xs uppercase tracking-wider"
+                  >
+                    {isPreparingResume ? (
+                      <>
+                        <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                        Retrying...
+                      </>
+                    ) : (
+                      'Retry'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="max-w-6xl mx-auto px-12 py-6 flex justify-between items-center">
               <Button
                 onClick={onCancel}
@@ -823,7 +824,7 @@ export const InterviewPreCheck = ({
               </Button>
               <Button
                 onClick={handleContinueToStep2}
-                disabled={!selectedResumeId || isUploadingResume || isPreparingResume || !prepareCompleted}
+                disabled={!selectedResumeId || isUploadingResume || isPreparingResume || !prepareCompleted || !!prepareError}
                 className="bg-black hover:bg-slate-800 text-white rounded h-12 px-8 font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-50 uppercase tracking-wider text-xs"
               >
                 {isPreparingResume ? (
