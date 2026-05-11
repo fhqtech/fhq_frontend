@@ -229,6 +229,22 @@ The NBA card is the single most important UI element on the dashboard — it abs
 7. ~~**TOTAL CANDIDATES = 0 after create**~~ — ✅ **FIXED** (F2): `prepare_invitations_for_lists` runs during `create_interview` and writes invitation rows for every list member (without emailing). Stats endpoint reads from there so the page reflects the correct count from page-load #1.
 8. ~~**Evaluation results never surface on curated list**~~ — ✅ **FIXED** (F3): reviewer agent additionally patches `candidates/{candidate_id}` with score + tags right after the canonical write to `interview_results`. CandidateCard reads from there; no frontend change.
 9. ~~**"Add to List" success without UI update**~~ — ✅ **FIXED** (F4): ListDetail's onSuccess hook now calls `loadListData()` so the post-add view reflects the new state.
+10. ~~**Candidate count mismatch (Screening list shows 2, InterviewDetails shows 0)**~~ — ✅ **FIXED** (F7): canonicalized on `candidate_invitations` row count. See §10 below.
+
+---
+
+## 10) Candidate-count canonical source (F7)
+
+Every "how many candidates does this interview have" question reads from **one place**: the count of rows in `candidate_invitations` where `interview_id == this`. Previously different surfaces drifted between three sources (`interview.candidateCount` stored field, walking `interview.lists → list candidates subcollection`, summing across rows). F7 ended the drift.
+
+| Surface | Backend path | Source |
+|---|---|---|
+| InterviewDetails "TOTAL CANDIDATES" card | `GET /interviews/{id}/stats` | `_count_invitations_for_interview(id)` |
+| Screening list "Candidates" column | `GET /workspaces/.../interviews` | `_count_invitations_for_interviews_batch([ids])` — chunked `in` query, 30 IDs/round-trip |
+| Dashboard NBA + hero stats | same list endpoint | inherits the batched count |
+| Stored `interview.candidateCount` | every `prepare_invitations_for_lists` call | re-synced via `_sync_interview_candidate_count` after fan-out |
+
+Single source of truth. No more 0-vs-2 surprises.
 
 ---
 
