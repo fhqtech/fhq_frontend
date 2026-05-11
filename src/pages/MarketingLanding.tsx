@@ -1,9 +1,10 @@
-// Marketing Landing Page for recruitfast.ai
+// Marketing Landing Page for FunnelHQ
 import { useState, useEffect, useRef } from "react";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronDown, Check } from 'lucide-react';
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowRight, ChevronDown, Check, LogIn, LayoutDashboard } from 'lucide-react';
 import { AntiGravityCanvas } from "@/components/ui/particle-effect-for-hero";
 import { ParticleSphere } from "@/components/interview/ParticleSphere";
 import { ConversationState } from "@/types/interview";
@@ -15,38 +16,67 @@ const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const initials = (user?.email || '?').slice(0, 2).toUpperCase();
+
   return (
     <nav className="absolute top-0 left-0 w-full z-20 flex justify-between items-center p-6 md:p-8">
-      <div className="flex items-center">
-        <div className="flex flex-col">
-          <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter">
-            recruitfast.ai
-          </span>
-        </div>
-      </div>
+      <button
+        onClick={() => navigate('/')}
+        className="flex items-center"
+        aria-label="FunnelHQ home"
+      >
+        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter">
+          FunnelHQ
+        </span>
+      </button>
       <div className="hidden md:flex space-x-8 text-sm font-medium text-white/70">
         <a href="#features" className="hover:text-white transition-colors">Features</a>
         <button onClick={() => scrollToSection('meet-flowy')} className="hover:text-white transition-colors">See Me In Action</button>
         <button onClick={() => navigate('/how-it-works')} className="hover:text-white transition-colors">How It Works</button>
         <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+        <a href="#book-demo" className="hover:text-white transition-colors">Contact</a>
       </div>
-      <button
-        onClick={() => scrollToSection('pricing')}
-        className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
-      >
-        Contact Us
-      </button>
+      {isAuthenticated ? (
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+          aria-label={`Open dashboard for ${user?.email || 'your account'}`}
+        >
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/15 text-xs">
+            {initials}
+          </span>
+          <LayoutDashboard className="w-4 h-4" />
+          <span className="hidden sm:inline">Dashboard</span>
+        </button>
+      ) : (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/product-landing')}
+            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/80 hover:text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign in
+          </button>
+          <button
+            onClick={() => navigate('/product-landing')}
+            className="px-4 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-white/90 transition-all"
+          >
+            Get started
+          </button>
+        </div>
+      )}
     </nav>
   );
 };
 
 const RotatingWord = () => {
-  const words = ["Assess", "Discover", "Decide"];
+  const words = ["screen", "shortlist", "interview", "decide"];
   const [wordIndex, setWordIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,16 +127,20 @@ const HeroContent = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
-            Flowy does the talking, you choose
+            Hire smarter. Hire faster.
           </span>
         </div>
 
-        <h1 className="text-7xl md:text-9xl lg:text-[11rem] font-light text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter mix-blend-difference">
-          <RotatingWord /><br/><span className="tracking-wider">Talents</span>
+        <h1 className="text-6xl md:text-8xl lg:text-9xl font-light text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tight mix-blend-difference leading-[1.05]">
+          AI that helps you<br/>
+          <span className="tracking-tight"><RotatingWord /></span> talent
         </h1>
 
+        <p className="text-base md:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
+          Flowy runs your screening interviews end-to-end. Recruiters meet only the candidates worth meeting — with structured scores, transcripts, and recordings ready in minutes.
+        </p>
 
-        <div className="pt-8 pointer-events-auto flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="pt-4 pointer-events-auto flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={() => navigate('/product-landing')}
             className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black rounded-full font-bold tracking-wide overflow-hidden transition-transform hover:scale-105 active:scale-95"
@@ -523,6 +557,7 @@ const FeaturesGridSection = () => {
 
 // Pricing Section
 const PricingSection = () => {
+  const navigate = useNavigate();
   return (
     <section id="pricing" className="relative bg-black py-24">
       <div className="max-w-6xl mx-auto px-6">
@@ -565,8 +600,14 @@ const PricingSection = () => {
               </li>
             </ul>
 
-            <div className="text-3xl font-light text-white mb-2">€0</div>
-            <p className="text-white/40 text-sm">forever</p>
+            <div className="text-3xl font-light text-white mb-1">€0</div>
+            <p className="text-white/40 text-sm mb-6">forever</p>
+            <button
+              onClick={() => navigate('/product-landing')}
+              className="w-full px-4 py-3 text-sm font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+            >
+              Start free
+            </button>
           </div>
 
           {/* Pro Plan */}
@@ -602,7 +643,16 @@ const PricingSection = () => {
               </li>
             </ul>
 
-            <div className="text-xl font-light text-white/70 mb-2">Contact our sales team</div>
+            <div className="text-xl font-light text-white/70 mb-6">Contact our sales team</div>
+            <button
+              onClick={() => {
+                const el = document.getElementById('book-demo');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="w-full px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#005aef] to-[#00b1ff] rounded-full hover:opacity-90 transition-all"
+            >
+              Talk to sales
+            </button>
           </div>
 
           {/* Enterprise Plan */}
@@ -706,7 +756,7 @@ const BookDemoSection = () => {
   };
 
   return (
-    <section id="pricing" className="relative bg-black py-24">
+    <section id="book-demo" className="relative bg-black py-24">
       {/* Subtle gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900/50 to-black pointer-events-none" />
 
@@ -854,7 +904,7 @@ const Footer = () => {
             <div className="mb-4">
               <div className="flex flex-col">
                 <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter">
-                  recruitfast.ai
+                  FunnelHQ
                 </span>
               </div>
             </div>
@@ -895,7 +945,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/40 text-sm">
-            © {currentYear} recruitfast.ai. All rights reserved.
+            © {currentYear} FunnelHQ. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             {/* LinkedIn */}

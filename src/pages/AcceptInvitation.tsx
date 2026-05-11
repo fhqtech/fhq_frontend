@@ -192,9 +192,13 @@ const AcceptInvitation = () => {
               <button
                 onClick={handleDismiss}
                 className="w-full px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl transition-colors"
+                aria-label="Dismiss this invitation and continue using your current account"
               >
-                Continue with Current Account
+                Skip this invitation
               </button>
+              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                Skipping won't accept the invitation. To join this list as {invitedEmail}, log out and log back in with that email.
+              </p>
             </div>
           </div>
         )}

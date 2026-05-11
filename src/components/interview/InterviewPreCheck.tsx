@@ -73,6 +73,7 @@ export const InterviewPreCheck = ({
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [microphoneStatus, setMicrophoneStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [microphoneError, setMicrophoneError] = useState<string>('');
   const [speakerStatus, setSpeakerStatus] = useState<'idle' | 'testing' | 'success'>('idle');
   const [hasReadInstructions, setHasReadInstructions] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -235,6 +236,18 @@ export const InterviewPreCheck = ({
 
     } catch (error) {
       setMicrophoneStatus('error');
+      const err = error as DOMException;
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicrophoneError('Microphone access was blocked. Click the lock icon in your browser address bar and allow microphone, then retry.');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setMicrophoneError('No microphone detected. Plug in a microphone (or check Bluetooth) and retry.');
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setMicrophoneError('Your microphone is in use by another app (Zoom, Meet, Teams). Close it and retry.');
+      } else if (err.name === 'OverconstrainedError') {
+        setMicrophoneError('Selected microphone does not meet our audio requirements. Try a different microphone.');
+      } else {
+        setMicrophoneError('Unable to access your microphone. Try a different browser (Chrome/Edge recommended) or check your OS permissions.');
+      }
     }
   };
 
@@ -590,11 +603,11 @@ export const InterviewPreCheck = ({
             <div className="flex items-center relative h-10 -ml-4">
               <img
                 src="/logo.png"
-                alt="Flowdot AI"
+                alt="FunnelHQ"
                 className="h-16 object-cover object-top -mt-2"
               />
               <div className="absolute left-14">
-                <h1 className="text-xl font-bold text-slate-900 whitespace-nowrap">Flowdot AI</h1>
+                <h1 className="text-xl font-bold text-slate-900 whitespace-nowrap">FunnelHQ</h1>
                 <p className="text-[10px] text-slate-500 whitespace-nowrap">Interview Setup</p>
               </div>
             </div>
@@ -965,6 +978,11 @@ export const InterviewPreCheck = ({
                   )}
                 </div>
               </div>
+              {microphoneStatus === 'error' && microphoneError && (
+                <p className="mt-3 text-xs text-destructive leading-relaxed" role="alert">
+                  {microphoneError}
+                </p>
+              )}
             </Card>
 
             {/* Speaker Test */}

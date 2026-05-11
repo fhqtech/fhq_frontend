@@ -86,7 +86,7 @@ const ProductLanding = () => {
         <div className="max-w-xl">
           {/* Logo */}
           <div className="mb-12">
-            <span className="text-2xl font-bold text-white">recruitfast.ai</span>
+            <span className="text-2xl font-bold text-white">FunnelHQ</span>
           </div>
 
           {/* Main Headline */}
@@ -182,7 +182,7 @@ const ProductLanding = () => {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <span className="text-2xl font-bold text-white">recruitfast.ai</span>
+            <span className="text-2xl font-bold text-white">FunnelHQ</span>
           </div>
 
           <Card className="border-0 rounded-2xl shadow-2xl" style={{ background: 'rgba(255, 255, 255, 0.98)' }}>

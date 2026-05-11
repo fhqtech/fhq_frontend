@@ -179,8 +179,17 @@ export default function Dashboard() {
                   {recentInterviews.map((interview) => (
                     <TableRow
                       key={interview.id}
-                      className="cursor-pointer"
+                      className="cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+                      role="link"
+                      tabIndex={0}
+                      aria-label={`Open interview ${interview.title ?? interview.id}`}
                       onClick={() => navigate(`/interviews/${interview.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/interviews/${interview.id}`);
+                        }
+                      }}
                     >
                       <TableCell className="font-medium">{interview.title ?? interview.id}</TableCell>
                       <TableCell>

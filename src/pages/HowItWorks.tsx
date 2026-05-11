@@ -670,13 +670,10 @@ const BlueprintShowcase = () => {
                           </div>
                         </div>
                         <div className="pt-4 border-t border-white/10">
-                          <button
-                            disabled
-                            className="w-full py-3 bg-gradient-to-r from-purple-500/50 to-pink-500/50 text-white/50 font-bold rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
-                          >
-                            <RefreshCw className="w-4 h-4" /> Update & Regenerate <Lock className="w-4 h-4" />
-                          </button>
-                          <p className="text-center text-white/30 text-[10px] font-mono mt-2">Demo mode: Changes are local only</p>
+                          <div className="w-full py-3 px-4 bg-white/5 border border-white/10 text-white/60 font-medium rounded-lg flex items-center justify-center gap-2 text-sm">
+                            <Lock className="w-4 h-4" />
+                            Preview only — sign up to edit and regenerate
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -828,7 +825,7 @@ const Navigation = () => {
       <div className="flex items-center">
         <button onClick={() => navigate('/')} className="flex flex-col hover:opacity-80 transition-opacity">
           <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter">
-            recruitfast.ai
+            FunnelHQ
           </span>
         </button>
       </div>

@@ -69,13 +69,13 @@ export function Header({ onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-1 -ml-4">
           <img
             src="/logo.png"
-            alt="Flowdot AI"
+            alt="FunnelHQ"
             className="w-20 h-20 rounded-full object-cover"
             style={{ objectPosition: 'center' }}
           />
           <div className="hidden sm:flex flex-col -ml-4">
             <span className="font-semibold text-[#222831] text-lg leading-tight">
-              Flowdot AI
+              FunnelHQ
             </span>
             <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
               Recruiter Portal

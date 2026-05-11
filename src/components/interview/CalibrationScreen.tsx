@@ -31,6 +31,7 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
     currentRms: 0
   });
   const [micPermission, setMicPermission] = useState<'pending' | 'granted' | 'denied'>('pending');
+  const [micErrorMessage, setMicErrorMessage] = useState<string>('');
   const calibrationTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Phase descriptions for user guidance
@@ -61,23 +62,31 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
     });
   };
 
+  const requestMicrophone = async () => {
+    setMicErrorMessage('');
+    setMicPermission('pending');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicPermission('granted');
+      startCalibrationProcess(stream);
+    } catch (error) {
+      const err = error as DOMException;
+      setMicPermission('denied');
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicErrorMessage('Microphone access was blocked. Click the lock icon in your browser address bar and allow microphone access, then click "Try again".');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setMicErrorMessage('No microphone detected. Plug in a microphone (or check Bluetooth) and try again.');
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setMicErrorMessage('Your microphone is in use by another app (Zoom, Meet, Teams). Close it and try again.');
+      } else {
+        setMicErrorMessage('Unable to access your microphone. Try Chrome or Edge, or check your operating system permissions.');
+      }
+    }
+  };
+
   // Request microphone permission and start calibration when dialog opens
   useEffect(() => {
     if (!open) return;
-    
-    const requestMicrophone = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        setMicPermission('granted');
-        
-        // Start calibration phases
-        startCalibrationProcess(stream);
-      } catch (error) {
-        console.error('Microphone access denied:', error);
-        setMicPermission('denied');
-      }
-    };
-
     requestMicrophone();
 
     return () => {
@@ -160,14 +169,19 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
     <div className="text-center space-y-4">
       <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
       <div>
-        <h3 className="text-lg font-semibold text-red-600">Microphone Access Required</h3>
-        <p className="text-sm text-muted-foreground mt-2">
-          Please allow microphone access to calibrate your audio.
+        <h3 className="text-lg font-semibold text-red-600">Microphone access required</h3>
+        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+          {micErrorMessage || 'Please allow microphone access to calibrate your audio.'}
         </p>
       </div>
-      <Button onClick={() => window.location.reload()} variant="outline" size="sm">
-        Refresh Page
-      </Button>
+      <div className="flex justify-center gap-2">
+        <Button onClick={requestMicrophone} variant="default" size="sm">
+          Try again
+        </Button>
+        <Button onClick={() => window.location.reload()} variant="outline" size="sm">
+          Refresh page
+        </Button>
+      </div>
     </div>
   );
 

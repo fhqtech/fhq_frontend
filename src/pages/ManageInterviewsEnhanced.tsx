@@ -354,7 +354,7 @@ export default function ManageInterviewsEnhanced() {
           title: "Interview Paused",
           description: `"${title}" has been paused.`
         });
-        refetch();
+        fetchInterviews();
       } catch (error) {
         console.error('Failed to pause interview:', error);
         toast({
@@ -372,7 +372,7 @@ export default function ManageInterviewsEnhanced() {
           title: "Interview Resumed",
           description: `"${title}" has been resumed and is now active.`
         });
-        refetch();
+        fetchInterviews();
       } catch (error) {
         console.error('Failed to resume interview:', error);
         toast({
@@ -433,7 +433,7 @@ export default function ManageInterviewsEnhanced() {
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-destructive mb-4">{error}</p>
-              <Button onClick={refetch}>Retry</Button>
+              <Button onClick={fetchInterviews}>Retry</Button>
             </div>
           </CardContent>
         </Card>
@@ -597,8 +597,17 @@ export default function ManageInterviewsEnhanced() {
                   {paginatedInterviews.map((interview) => (
                     <TableRow
                       key={interview.id}
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="cursor-pointer hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+                      role="link"
+                      tabIndex={0}
+                      aria-label={`Open interview ${interview.title}`}
                       onClick={() => handleViewDetails(interview.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleViewDetails(interview.id);
+                        }
+                      }}
                     >
                       <TableCell className="min-w-[140px]">
                         <div>
@@ -819,14 +828,10 @@ export default function ManageInterviewsEnhanced() {
 
       {/* Start Interview Modal */}
       <Dialog open={startModalOpen} onOpenChange={(open) => {
-        // Only allow closing if not currently starting (prevents accidental closure during API call)
-        if (!isStartingInterview) {
-          setStartModalOpen(open);
-          if (!open) {
-            // Reset state when modal is manually closed
-            setStartingProgress("");
-            setCurrentStartingInterview(null);
-          }
+        setStartModalOpen(open);
+        if (!open) {
+          setStartingProgress("");
+          setCurrentStartingInterview(null);
         }
       }}>
         <DialogContent className="sm:max-w-md">

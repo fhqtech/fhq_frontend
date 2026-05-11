@@ -138,6 +138,7 @@ export default function CandidateRegistration() {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isExtractingResume, setIsExtractingResume] = useState(false);
+  const [extractionFailed, setExtractionFailed] = useState(false);
   const [bonusQuestionIndex, setBonusQuestionIndex] = useState(0);
   const [consentChecked, setConsentChecked] = useState(false);
 
@@ -513,6 +514,7 @@ export default function CandidateRegistration() {
   const autoFillFromResume = async (file: File) => {
     try {
       setIsExtractingResume(true);
+      setExtractionFailed(false);
       const data = await extractFromResume(file);
       setFormData(prev => ({
         ...prev,
@@ -529,6 +531,7 @@ export default function CandidateRegistration() {
       }));
     } catch (err) {
       console.warn('[autoFillFromResume] failed:', err);
+      setExtractionFailed(true);
     } finally {
       setIsExtractingResume(false);
     }
@@ -760,11 +763,11 @@ export default function CandidateRegistration() {
           <div className="flex items-center">
             <img
               src="/logo.png"
-              alt="Flowdot AI"
+              alt="FunnelHQ"
               className="h-20 object-contain"
             />
             <div className="-ml-2">
-              <h1 className="text-lg font-bold text-slate-900">Flowdot AI</h1>
+              <h1 className="text-lg font-bold text-slate-900">FunnelHQ</h1>
               <p className="text-xs text-slate-500">Candidate Portal</p>
             </div>
           </div>
@@ -1235,6 +1238,11 @@ export default function CandidateRegistration() {
                       </div>
 
                       {formErrors.resume && <p className="text-xs text-red-500 mt-2">{formErrors.resume}</p>}
+                      {extractionFailed && !formErrors.resume && (
+                        <p className="text-xs text-amber-600 mt-2" role="status">
+                          We couldn't auto-fill from your resume. No worries — please fill in the fields below manually.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1292,19 +1300,19 @@ export default function CandidateRegistration() {
         <div className="flex-grow"></div>
       )}
 
-      {/* About Flowdot AI Box */}
+      {/* About FunnelHQ Box */}
       {currentStep === 0 && (
         <div className="px-8 mt-6">
             <div className="bg-white border border-slate-300 rounded-lg p-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)] max-w-5xl mx-auto">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Flowdot AI" className="h-16 object-cover object-top flex-shrink-0" />
+              <img src="/logo.png" alt="FunnelHQ" className="h-16 object-cover object-top flex-shrink-0" />
               <div className="flex flex-col flex-1">
-                <h1 className="text-lg font-bold text-slate-900 whitespace-nowrap">Flowdot AI</h1>
+                <h1 className="text-lg font-bold text-slate-900 whitespace-nowrap">FunnelHQ</h1>
                 <p className="text-[10px] text-slate-500 whitespace-nowrap">Candidate Portal</p>
               </div>
               <div className="flex flex-col items-end">
                 <p className="text-xs text-slate-700 whitespace-nowrap">
-                  Flowdot is an AI-powered candidate screening platform where professionals take a single interview to unlock multiple job opportunities
+                  FunnelHQ is an AI-powered candidate screening platform where professionals take a single interview to unlock multiple job opportunities
                 </p>
                 <div className="flex items-center gap-3 mt-1 whitespace-nowrap">
                   <a href="#" className="text-blue-600 hover:text-blue-700 text-[10px]">LinkedIn</a>
@@ -1315,7 +1323,7 @@ export default function CandidateRegistration() {
                   <a href="#" className="text-slate-600 hover:text-slate-900 text-[10px]">Privacy</a>
                   <a href="#" className="text-slate-600 hover:text-slate-900 text-[10px]">Contact</a>
                   <span className="text-slate-300">•</span>
-                  <span className="text-slate-500 text-[10px]">© 2025 Flowdot AI. All rights reserved.</span>
+                  <span className="text-slate-500 text-[10px]">© 2025 FunnelHQ. All rights reserved.</span>
                 </div>
               </div>
             </div>

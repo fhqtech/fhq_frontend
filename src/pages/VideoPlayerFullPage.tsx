@@ -879,12 +879,12 @@ export default function VideoPlayerFullPage() {
             <div className="relative flex items-center justify-start -ml-2">
               <img
                 src="/logo.png"
-                alt="Flowdot AI"
+                alt="FunnelHQ"
                 className="w-14 h-9 rounded-full object-cover"
                 style={{ objectPosition: 'center center' }}
               />
               <span className="absolute left-[2.8rem] top-1/2 -translate-y-1/2 font-semibold text-foreground whitespace-nowrap text-lg">
-                Flowdot AI
+                FunnelHQ
               </span>
             </div>
 

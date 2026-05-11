@@ -59,7 +59,7 @@ export const MOCK_VIDEO_SESSION: VideoSessionData = {
     url: '/api/videos/demo/stream', // Demo endpoint for now
     duration: 10834, // 10.8 seconds from your logs
     fileSize: 62859, // 62KB from your logs
-    gcsPath: 'gs://flowdot-ai/test/videos/X173i42BORJC0uyWQZhT/X173i42BORJC0uyWQZhT_e1c0e04e-c8fd-4d84-92ac-06a286a35525_1758900621558_video.webm'
+    gcsPath: 'gs://FunnelHQ-ai/test/videos/X173i42BORJC0uyWQZhT/X173i42BORJC0uyWQZhT_e1c0e04e-c8fd-4d84-92ac-06a286a35525_1758900621558_video.webm'
   },
   conversation: [
     {

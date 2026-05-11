@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
@@ -38,6 +38,7 @@ import InterviewSwipeView from "./pages/InterviewSwipeView";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import TestAssets from "./pages/TestAssets";
 import HowItWorks from "./pages/HowItWorks";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+          <ErrorBoundary>
           <Routes>
             {/* Marketing landing page (public) */}
             <Route path="/" element={<MarketingLanding />} />
@@ -59,6 +61,8 @@ const App = () => (
 
             {/* Product landing / Login page (no sidebar) */}
             <Route path="/product-landing" element={<ProductLanding />} />
+            <Route path="/login" element={<Navigate to="/product-landing" replace />} />
+            <Route path="/signin" element={<Navigate to="/product-landing" replace />} />
 
             {/* OAuth callback handler for Google login */}
             <Route path="/auth/callback" element={<OAuth2Handler />} />
@@ -201,6 +205,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
       </WorkspaceProvider>

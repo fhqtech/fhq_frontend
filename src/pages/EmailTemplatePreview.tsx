@@ -8,7 +8,7 @@ const EmailTemplatePreview = () => {
   const [interviewTitle, setInterviewTitle] = useState('junior');
   const [interviewType, setInterviewType] = useState('screening');
   const [interviewDuration, setInterviewDuration] = useState('30');
-  const [companyName, setCompanyName] = useState('Flowdot AI');
+  const [companyName, setCompanyName] = useState('FunnelHQ');
   const [invitationUrl, setInvitationUrl] = useState('http://localhost:8080/register/nR1rMKH1AKR81XwekkNVt2BU2MBIYKLC7i960NYD3Vg');
 
   const htmlTemplate = `
@@ -162,7 +162,7 @@ const EmailTemplatePreview = () => {
                   id="companyName"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Flowdot AI"
+                  placeholder="FunnelHQ"
                 />
               </div>
 
@@ -182,7 +182,7 @@ const EmailTemplatePreview = () => {
                   setInterviewTitle('junior');
                   setInterviewType('screening');
                   setInterviewDuration('30');
-                  setCompanyName('Flowdot AI');
+                  setCompanyName('FunnelHQ');
                   setInvitationUrl('http://localhost:8080/register/nR1rMKH1AKR81XwekkNVt2BU2MBIYKLC7i960NYD3Vg');
                 }}
                 variant="outline"

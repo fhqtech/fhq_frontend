@@ -1141,8 +1141,14 @@ export default function CandidatePortal() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 text-center">
           <RippleLoader />
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">Loading your portal</h1>
+            <p className="mt-2 text-sm text-foreground-muted max-w-md">
+              We're pulling up your interview details. This usually takes a few seconds.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -1185,11 +1191,11 @@ export default function CandidatePortal() {
             <div className="flex items-center relative h-10 -ml-4">
               <img
                 src="/logo.png"
-                alt="Flowdot AI"
+                alt="FunnelHQ"
                 className="h-16 object-cover object-top -mt-2"
               />
               <div className="absolute left-14">
-                <h1 className="text-xl font-bold text-slate-900 whitespace-nowrap">Flowdot AI</h1>
+                <h1 className="text-xl font-bold text-slate-900 whitespace-nowrap">FunnelHQ</h1>
                 <p className="text-[10px] text-slate-500 whitespace-nowrap">Candidate Portal</p>
               </div>
             </div>
