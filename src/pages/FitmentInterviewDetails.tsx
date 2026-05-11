@@ -1262,7 +1262,7 @@ export default function FitmentInterviewDetails() {
                       }
                     }}
                   >
-                    Try Again
+                    Retry start
                   </Button>
                 </div>
               )}

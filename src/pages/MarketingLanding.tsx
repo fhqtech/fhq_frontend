@@ -4,7 +4,7 @@ import { ProblemSection } from "@/components/landing/ProblemSection";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowRight, ChevronDown, Check, LogIn, LayoutDashboard } from 'lucide-react';
+import { ArrowRight, ChevronDown, Check, LogIn, LayoutDashboard, Menu, X } from 'lucide-react';
 import { AntiGravityCanvas } from "@/components/ui/particle-effect-for-hero";
 import { ParticleSphere } from "@/components/interview/ParticleSphere";
 import { ConversationState } from "@/types/interview";
@@ -17,61 +17,97 @@ const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'
 const Navigation = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
+    setMobileOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const initials = (user?.email || '?').slice(0, 2).toUpperCase();
 
   return (
-    <nav className="absolute top-0 left-0 w-full z-20 flex justify-between items-center p-6 md:p-8">
-      <button
-        onClick={() => navigate('/')}
-        className="flex items-center"
-        aria-label="FunnelHQ home"
-      >
-        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter">
-          FunnelHQ
-        </span>
-      </button>
-      <div className="hidden md:flex space-x-8 text-sm font-medium text-white/70">
-        <a href="#features" className="hover:text-white transition-colors">Features</a>
-        <button onClick={() => scrollToSection('meet-flowy')} className="hover:text-white transition-colors">See Me In Action</button>
-        <button onClick={() => navigate('/how-it-works')} className="hover:text-white transition-colors">How It Works</button>
-        <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-        <a href="#book-demo" className="hover:text-white transition-colors">Contact</a>
-      </div>
-      {isAuthenticated ? (
+    <>
+      <nav className="absolute top-0 left-0 w-full z-20 flex justify-between items-center p-6 md:p-8">
         <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
-          aria-label={`Open dashboard for ${user?.email || 'your account'}`}
+          onClick={() => navigate('/')}
+          className="flex items-center"
+          aria-label="FunnelHQ home"
         >
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/15 text-xs">
-            {initials}
+          <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter">
+            FunnelHQ
           </span>
-          <LayoutDashboard className="w-4 h-4" />
-          <span className="hidden sm:inline">Dashboard</span>
         </button>
-      ) : (
+        <div className="hidden md:flex space-x-8 text-sm font-medium text-white/70">
+          <a href="#features" className="hover:text-white transition-colors">Features</a>
+          <button onClick={() => scrollToSection('meet-flowy')} className="hover:text-white transition-colors">See Me In Action</button>
+          <button onClick={() => navigate('/how-it-works')} className="hover:text-white transition-colors">How It Works</button>
+          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+          <a href="#book-demo" className="hover:text-white transition-colors">Contact</a>
+        </div>
         <div className="flex items-center gap-2">
+          {isAuthenticated ? (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+              aria-label={`Open dashboard for ${user?.email || 'your account'}`}
+            >
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/15 text-xs">
+                {initials}
+              </span>
+              <LayoutDashboard className="w-4 h-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/product-landing')}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/80 hover:text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign in
+              </button>
+              <button
+                onClick={() => navigate('/product-landing')}
+                className="px-4 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-white/90 transition-all"
+              >
+                Get started
+              </button>
+            </>
+          )}
           <button
-            onClick={() => navigate('/product-landing')}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/80 hover:text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+            onClick={() => setMobileOpen((v) => !v)}
+            className="md:hidden flex items-center justify-center w-10 h-10 text-white/80 hover:text-white border border-white/20 rounded-full hover:bg-white/10 transition-all"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
           >
-            <LogIn className="w-4 h-4" />
-            Sign in
-          </button>
-          <button
-            onClick={() => navigate('/product-landing')}
-            className="px-4 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-white/90 transition-all"
-          >
-            Get started
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
+      </nav>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-30 bg-black/95 backdrop-blur-sm pt-24 px-6">
+          <div className="flex flex-col space-y-6 text-lg font-medium text-white/80">
+            <a onClick={() => setMobileOpen(false)} href="#features" className="hover:text-white">Features</a>
+            <button onClick={() => scrollToSection('meet-flowy')} className="text-left hover:text-white">See Me In Action</button>
+            <button onClick={() => { setMobileOpen(false); navigate('/how-it-works'); }} className="text-left hover:text-white">How It Works</button>
+            <a onClick={() => setMobileOpen(false)} href="#pricing" className="hover:text-white">Pricing</a>
+            <a onClick={() => setMobileOpen(false)} href="#book-demo" className="hover:text-white">Contact</a>
+            {!isAuthenticated && (
+              <button
+                onClick={() => { setMobileOpen(false); navigate('/product-landing'); }}
+                className="text-left flex items-center gap-2 hover:text-white"
+              >
+                <LogIn className="w-5 h-5" />
+                Sign in
+              </button>
+            )}
+          </div>
+        </div>
       )}
-    </nav>
+    </>
   );
 };
 
@@ -825,7 +861,7 @@ const BookDemoSection = () => {
                     </label>
                     <input
                       type="email"
-                      placeholder="john@company.com"
+                      placeholder="you@work-email.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 focus:border-[#005aef] focus:ring-2 focus:ring-[#005aef]/20 outline-none transition-all text-white placeholder:text-white/40"

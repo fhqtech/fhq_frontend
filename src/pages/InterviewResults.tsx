@@ -570,7 +570,7 @@ export default function InterviewResults() {
               <p className="text-muted-foreground mb-4">{error}</p>
               <Button onClick={handleRetry}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
+                Retry loading results
               </Button>
             </div>
           </div>
@@ -602,7 +602,7 @@ export default function InterviewResults() {
               <p className="text-muted-foreground mb-4">Unable to load evaluation data</p>
               <Button onClick={handleRetry}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
+                Retry loading results
               </Button>
             </div>
           </div>

@@ -915,7 +915,7 @@ export default function ManageInterviewsEnhanced() {
                       }
                     }}
                   >
-                    Try Again
+                    Retry start
                   </Button>
                 </div>
               )}

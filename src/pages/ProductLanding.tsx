@@ -226,7 +226,7 @@ const ProductLanding = () => {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="you@company.com"
+                      placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10 h-11 text-sm"

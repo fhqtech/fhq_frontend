@@ -688,7 +688,7 @@ export default function CandidateRegistration() {
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Try Again
+              Reload page
             </Button>
           </CardContent>
         </Card>

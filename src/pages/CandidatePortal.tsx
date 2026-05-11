@@ -1167,7 +1167,7 @@ export default function CandidatePortal() {
               variant="outline"
               onClick={() => window.location.reload()}
             >
-              Try Again
+              Reload page
             </Button>
           </CardContent>
         </Card>
