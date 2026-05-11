@@ -395,6 +395,41 @@ class InterviewApiService {
 
     return await response.json();
   }
+
+  /**
+   * Re-send invitation emails for specific candidates on an interview.
+   * Does not mint new tokens — resends the email tied to the existing
+   * invitation. Use for expired or stuck-on-scheduling candidates.
+   */
+  async resendInvitations(
+    interviewId: string,
+    candidateIds: string[],
+    workspaceId?: string,
+    projectId?: string,
+  ): Promise<{
+    invitations_resent: number;
+    emails_sent: number;
+    emails_failed: number;
+    errors: string[];
+  }> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/interviews/${interviewId}/resend-invitations`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          candidate_ids: candidateIds,
+          workspace_id: workspaceId,
+          project_id: projectId,
+        }),
+      },
+    );
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || error.error || 'Failed to resend invitations');
+    }
+    return await response.json();
+  }
 }
 
 export const interviewApi = new InterviewApiService();

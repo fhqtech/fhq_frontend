@@ -221,6 +221,9 @@ export default function InterviewDetails() {
   const [startModalOpen, setStartModalOpen] = useState(false);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
   const [startingProgress, setStartingProgress] = useState("");
+
+  // Re-invite (resend invitation email) state
+  const [isResendingInvites, setIsResendingInvites] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -1004,6 +1007,41 @@ export default function InterviewDetails() {
     } finally {
       setIsStartingInterview(false);
       // Don't reset these on error - keep modal open
+    }
+  };
+
+  // Re-invite candidates stuck on scheduling or expired. Resends the
+  // invitation email tied to their existing token — no new tokens are
+  // minted, so the candidate experience continues from where they left off.
+  const handleResendStuck = async () => {
+    if (isResendingInvites || !id) return;
+    const stuck = candidates.filter((c) =>
+      ['scheduling', 'expired', 'invited'].includes((c.status || '').toLowerCase())
+    );
+    if (stuck.length === 0) {
+      toast({ title: 'No candidates to re-invite', description: 'Every invitation has been responded to.' });
+      return;
+    }
+    setIsResendingInvites(true);
+    try {
+      const result = await interviewApi.resendInvitations(
+        id,
+        stuck.map((c) => c.candidateId || c.id).filter(Boolean),
+        currentWorkspace?.id,
+        currentProject?.id,
+      );
+      toast({
+        title: 'Invitations resent',
+        description: `${result.emails_sent} sent, ${result.emails_failed} failed${result.errors?.length ? ` (${result.errors.length} lookup issues)` : ''}`,
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Resend failed',
+        description: err?.message || 'Could not resend invitations.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsResendingInvites(false);
     }
   };
 
@@ -1844,6 +1882,25 @@ export default function InterviewDetails() {
             <ShimmerTable />
           ) : (
             <>
+              {/* Re-invite stuck candidates */}
+              {candidates.some((c) => ['scheduling', 'expired', 'invited'].includes((c.status || '').toLowerCase())) && (
+                <div className="flex items-center justify-between p-3 mb-2 mt-4 rounded-sm bg-amber-50 border border-amber-200">
+                  <div className="text-sm text-amber-900">
+                    {candidates.filter((c) => ['scheduling', 'expired', 'invited'].includes((c.status || '').toLowerCase())).length}{' '}
+                    candidate(s) haven't started yet. Re-send their invitation email.
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleResendStuck}
+                    disabled={isResendingInvites}
+                    className="rounded-sm uppercase font-bold text-xs h-8 px-3 border-amber-400 text-amber-900 hover:bg-amber-100"
+                  >
+                    {isResendingInvites ? 'Resending…' : 'Re-invite'}
+                  </Button>
+                </div>
+              )}
+
               {/* Card Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                 {paginatedCandidates.map((candidate) => {
