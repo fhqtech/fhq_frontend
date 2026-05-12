@@ -33,8 +33,7 @@ import InterviewSessionPage from "./pages/interview/InterviewSessionPage";
 import InterviewThankYouPage from "./pages/interview/InterviewThankYouPage";
 import InterviewResults from "./pages/InterviewResults";
 import DynamicBlueprintPage from "./pages/DynamicBlueprintPage";
-import VideoTestPage from "./pages/VideoTestPage";
-import VideoPlayerFullPage from "./pages/VideoPlayerFullPage";
+// C1: VideoTestPage + VideoPlayerFullPage removed (audio-only product since S1).
 import EmailTemplatePreview from "./pages/EmailTemplatePreview";
 import InterviewSwipeView from "./pages/InterviewSwipeView";
 import AcceptInvitation from "./pages/AcceptInvitation";
@@ -154,11 +153,8 @@ const App = () => (
               </ProtectedRoute>
             } />
 
-            <Route path="/interview/:interviewId/candidate/:candidateId/video/:sessionId" element={<VideoPlayerFullPage />} />
-
-            <Route path="/fitment-interviews/:fitmentInterviewId/candidate/:candidateId/video/:sessionId" element={<VideoPlayerFullPage />} />
-
-            <Route path="/video-test" element={<VideoTestPage />} />
+            {/* C1: video review routes removed; recruiters now click into
+                /interview/:interviewId/results/:sessionId for the TAG view. */}
 
             <Route path="/email-templates/prelims" element={<EmailTemplatePreview />} />
 

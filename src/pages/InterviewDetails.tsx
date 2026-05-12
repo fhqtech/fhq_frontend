@@ -1940,10 +1940,11 @@ export default function InterviewDetails() {
                       key={candidate.id}
                       candidate={candidate}
                       onClick={() => {
-                        if (hasSingleAttempt && candidate.attempts[0].session_id && candidate.candidateId) {
-                          navigate(`/interview/${id}/candidate/${candidate.candidateId}/video/${candidate.attempts[0].session_id}`, {
-                            state: { duration: candidate.attempts[0].duration }
-                          });
+                        // C1: navigate to InterviewResults (TAG viewer + scores)
+                        // instead of the deleted VideoPlayerFullPage. New
+                        // interviews are audio-only; review = TAG, not video.
+                        if (hasSingleAttempt && candidate.attempts[0].session_id) {
+                          navigate(`/interview/${id}/results/${candidate.attempts[0].session_id}`);
                         }
                       }}
                     />

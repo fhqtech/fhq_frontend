@@ -1066,8 +1066,11 @@ export default function FitmentInterviewDetails() {
                       key={candidate.id}
                       className="cursor-pointer hover:bg-gray-50 transition-colors"
                       onClick={() => {
+                        // C1: route to InterviewResults (TAG) instead of
+                        // the deleted VideoPlayerFullPage. Same route is
+                        // used for screening + fitment results.
                         if (candidate.sessionId) {
-                          navigate(`/fitment-interviews/${id}/candidate/${candidate.candidateId}/video/${candidate.sessionId}`);
+                          navigate(`/interview/${id}/results/${candidate.sessionId}`);
                         } else {
                           toast({
                             title: "No Interview Found",
