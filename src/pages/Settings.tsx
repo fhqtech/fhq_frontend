@@ -526,14 +526,14 @@ export default function Settings() {
                   {[
                     {
                       value: "professional-male",
-                      label: "Professional Male",
-                      icon: "👨‍💼",
+                      label: "Grace · American English",
+                      icon: "🎙️",
                       disabled: true
                     },
                     {
                       value: "professional-female",
-                      label: "Professional Female",
-                      icon: "👩‍💼",
+                      label: "Smriti · Indian English",
+                      icon: "🎙️",
                       disabled: false
                     }
                   ].map((voice) => {

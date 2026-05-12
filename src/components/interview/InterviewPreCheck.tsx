@@ -588,7 +588,7 @@ export const InterviewPreCheck = ({
                 <p className="text-xs text-slate-500">{candidateData.email}</p>
               </div>
               <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(candidateData.name)}`}
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(candidateData.name)}`}
                 alt={candidateData.name}
                 className="w-10 h-10 rounded-full shadow-md"
               />

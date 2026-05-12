@@ -2758,7 +2758,7 @@ export default function CreateInterview() {
                         </Label>
                         <Input
                           id="listName"
-                          placeholder="e.g., Senior Frontend Developers"
+                          placeholder="e.g., Senior Tax Managers · GST Specialists · FP&A Leads"
                           value={createListFormData.name}
                           onChange={(e) => setCreateListFormData(prev => ({ ...prev, name: e.target.value }))}
                           className="mt-2 rounded-sm border-none transition-all duration-300 bg-white"

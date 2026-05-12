@@ -58,7 +58,7 @@ export function TranscriptBox({
             // User Message - Right aligned
             <div key={index} className="flex items-start gap-2 flex-row-reverse">
               <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=candidate"
+                src="https://api.dicebear.com/7.x/initials/svg?seed=candidate"
                 alt="You"
                 className="w-6 h-6 rounded-full flex-shrink-0"
               />
@@ -73,7 +73,7 @@ export function TranscriptBox({
         {(isUserSpeaking || currentUtterance) && (
           <div className="flex items-start gap-2 flex-row-reverse">
             <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=candidate"
+              src="https://api.dicebear.com/7.x/initials/svg?seed=candidate"
               alt="You"
               className="w-6 h-6 rounded-full flex-shrink-0"
             />

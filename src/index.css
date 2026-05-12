@@ -16,11 +16,17 @@
     --foreground-muted: 210 12% 52%;
     --foreground-subtle: 210 8% 72%;
 
-    /* Brand Colors - Professional Blue Palette */
-    --brand-primary: 203 64% 54%;
-    --brand-primary-dark: 203 64% 47%;
-    --brand-primary-light: 203 64% 94%;
-    --brand-secondary: 32 95% 55%;
+    /* Brand Colors — FunnelHQ finance palette (UB.2 2026-05-12).
+       Replaces the prior generic sky-blue (203 64% ...) with a
+       deep navy primary + warm gold accent. Reads finance, not tech.
+       - navy  #1B2540 ≈ hsl(223 41% 18%)
+       - gold  #C8A24B ≈ hsl(42 53% 54%)
+       - sage  #5E7956 ≈ hsl(102 17% 41%)
+       - rust  #A03E3E ≈ hsl(0 44% 44%) */
+    --brand-primary: 223 41% 18%;
+    --brand-primary-dark: 223 41% 12%;
+    --brand-primary-light: 223 41% 95%;
+    --brand-secondary: 42 53% 54%;
     
     /* Semantic Colors */
     --success: 142 76% 36%;
@@ -49,8 +55,8 @@
     --muted: 210 12% 96%;
     --muted-foreground: var(--foreground-muted);
 
-    --accent: 32 95% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 42 53% 54%;
+    --accent-foreground: 223 41% 18%;
 
     --destructive: var(--error);
     --destructive-foreground: 0 0% 100%;

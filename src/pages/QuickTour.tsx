@@ -192,8 +192,8 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           <div className="bg-info/10 p-4 rounded-lg border border-info/20">
             <h5 className="font-semibold text-info mb-2">The Opportunity</h5>
             <p className="text-sm text-foreground-muted">
-              You already have 50 candidates from previous general developer interviews. Instead of starting from scratch, 
-              use fitment interviews to assess their specific match for this role.
+              You already have 50 candidates from previous screening interviews — say, generic Tax Manager screens. Instead of starting from scratch,
+              use fitment interviews to assess their specific match for a more specialised role (e.g. Transfer Pricing Manager, GST Litigation Specialist).
             </p>
           </div>
         </div>

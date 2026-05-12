@@ -138,7 +138,7 @@ export function CandidateCard({ candidate, onViewDetails, onToggleStar, onAddToL
       <div className="flex items-start gap-3 mb-4">
         <Avatar className="h-12 w-12 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
           <AvatarImage 
-            src={candidate.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(candidate.name)}`} 
+            src={candidate.profilePicture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(candidate.name)}`} 
             alt={candidate.name} 
           />
           <AvatarFallback className="text-sm font-medium">{initials}</AvatarFallback>

@@ -1204,7 +1204,7 @@ export default function CandidatePortal() {
                     <p className="text-xs text-slate-500">{portalData.candidate.email}</p>
                   </div>
                   <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(portalData.candidate.name)}`}
+                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(portalData.candidate.name)}`}
                     alt={portalData.candidate.name}
                     className="w-10 h-10 rounded-full shadow-md"
                   />
@@ -1490,7 +1490,7 @@ export default function CandidatePortal() {
                         </defs>
                       </svg>
                       <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(portalData.candidate.name)}`}
+                        src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(portalData.candidate.name)}`}
                         alt={portalData.candidate.name}
                         className="w-16 h-16 rounded-full absolute inset-0 m-auto"
                       />
@@ -1667,6 +1667,24 @@ export default function CandidatePortal() {
 
             {/* Active Interviews Section */}
             <div className="space-y-6">
+              {/* U5b (2026-05-12): if all interviews are completed, show
+                  a "you're done" panel instead of an empty list. Reduces
+                  the "Portal Access Error" feel when a candidate returns
+                  to the portal after finishing. */}
+              {activeInterviews.length === 0 && (
+                <div className="mt-8 max-w-4xl rounded-lg border border-emerald-200 bg-emerald-50 p-6">
+                  <h2 className="text-lg font-semibold text-emerald-900 mb-1">
+                    You're all done — thanks!
+                  </h2>
+                  <p className="text-sm text-emerald-900/80">
+                    Your interview has been submitted. The recruiting team
+                    will review your responses and reach out within 3-5
+                    business days. You can close this window now, or come
+                    back here any time using this link to see your status.
+                  </p>
+                </div>
+              )}
+
               {activeInterviews.length > 0 && (
                 <div>
                   <h2 className="text-xl font-semibold text-black mb-4 mt-8 uppercase tracking-wider">Active Interviews</h2>
@@ -2042,7 +2060,7 @@ export default function CandidatePortal() {
                   value={editFormData.jobTitle}
                   onChange={(e) => setEditFormData({ ...editFormData, jobTitle: e.target.value })}
                   className="col-span-3"
-                  placeholder="e.g., Senior Software Engineer"
+                  placeholder="e.g., Senior Tax Manager"
                 />
               </div>
 

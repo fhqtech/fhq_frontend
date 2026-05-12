@@ -1411,23 +1411,60 @@ export default function InterviewDetails() {
 
             {/* Blueprint and Control Buttons Row */}
             <div className="flex items-center gap-4">
-              {/* Interview Blueprint - Compact Version */}
-              {!loadingInterview && interview && (
-                <div className="flex items-center">
-                  {/* Blueprint exists - show View and Regenerate buttons */}
-                  {blueprintExists === true && (
+              {/* Interview Blueprint - Compact Version
+                  U3 (2026-05-12): rewritten as a single switch on
+                  `blueprintStatus` so the four states are mutually
+                  exclusive. Previously we rendered "Blueprint Ready"
+                  from `blueprintExists` AND "Blueprint Generating..."
+                  from a separately-polled `blueprintStatus`, and both
+                  could be true at once after a stale poll. */}
+              {!loadingInterview && interview && (() => {
+                // Effective status: explicit blueprintStatus wins; if it's
+                // null but a file exists, treat as completed.
+                const effectiveStatus = (
+                  blueprintStatus === 'generating' ? 'generating' :
+                  blueprintStatus === 'failed' ? 'failed' :
+                  blueprintStatus === 'completed' ? 'completed' :
+                  blueprintExists === true ? 'completed' :
+                  blueprintExists === false ? 'missing' :
+                  'loading'
+                );
+
+                if (effectiveStatus === 'generating') {
+                  return (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-sm">
+                      <CircleNotch className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                      <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Generating...</span>
+                    </div>
+                  );
+                }
+
+                if (effectiveStatus === 'failed') {
+                  return (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-sm">
+                      <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                      <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Failed</span>
+                      <Button
+                        onClick={() => navigate(`/create-interview?edit=${id}`)}
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700 px-2 py-1 text-xs h-6 rounded-sm uppercase font-bold"
+                      >
+                        Fix Description
+                      </Button>
+                    </div>
+                  );
+                }
+
+                if (effectiveStatus === 'completed') {
+                  return (
                     <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-sm">
                       <FileCheck className="w-3.5 h-3.5 text-blue-600" />
                       <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Ready</span>
                       <Button
                         type="button"
-                        onPointerDown={(e) => {
-                          console.log('[VIEW Button] PointerDown', { tid: interview?.template_id, id: interview?.id, ws: currentWorkspace?.id });
-                        }}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log('[VIEW Button] Clicked! Template ID:', interview?.template_id, 'Interview ID:', interview?.id, 'Workspace ID:', currentWorkspace?.id);
                           setShowBlueprintModal(true);
                         }}
                         size="sm"
@@ -1435,7 +1472,6 @@ export default function InterviewDetails() {
                       >
                         View
                       </Button>
-                      {/* Hide Regenerate button only for Control Tower templates (read-only) */}
                       {interview.template_source !== 'control_tower' && (
                         <Button
                           onClick={handleRegenerateBlueprint}
@@ -1457,32 +1493,11 @@ export default function InterviewDetails() {
                         </Button>
                       )}
                     </div>
-                  )}
+                  );
+                }
 
-                  {/* Blueprint Status - New Status Tracking */}
-                  {blueprintStatus === 'generating' && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-sm">
-                      <CircleNotch className="w-3.5 h-3.5 text-blue-600 animate-spin" />
-                      <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Generating...</span>
-                    </div>
-                  )}
-
-                  {blueprintStatus === 'failed' && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-sm">
-                      <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-                      <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Failed</span>
-                      <Button
-                        onClick={() => navigate(`/create-interview?edit=${id}`)}
-                        size="sm"
-                        className="bg-red-600 hover:bg-red-700 px-2 py-1 text-xs h-6 rounded-sm uppercase font-bold"
-                      >
-                        Fix Description
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Blueprint doesn't exist - show Check and Regenerate buttons */}
-                  {blueprintExists === false && (!blueprintStatus || blueprintStatus === 'completed') && (
+                if (effectiveStatus === 'missing') {
+                  return (
                     <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-sm">
                       <Settings className="w-3.5 h-3.5 text-yellow-600" />
                       <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Blueprint Not Found</span>
@@ -1511,17 +1526,17 @@ export default function InterviewDetails() {
                         )}
                       </Button>
                     </div>
-                  )}
+                  );
+                }
 
-                  {/* Loading - initial check */}
-                  {blueprintExists === null && !blueprintStatus && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-sm">
-                      <Settings className="w-3.5 h-3.5 text-gray-500 animate-spin" />
-                      <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Checking...</span>
-                    </div>
-                  )}
-                </div>
-              )}
+                // loading
+                return (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-sm">
+                    <Settings className="w-3.5 h-3.5 text-gray-500 animate-spin" />
+                    <span className="text-xs font-medium text-gray-900 uppercase tracking-wider">Checking...</span>
+                  </div>
+                );
+              })()}
 
               {/* Interview Control Buttons */}
               {!loadingInterview && interview && (

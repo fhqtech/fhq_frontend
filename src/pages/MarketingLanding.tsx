@@ -112,7 +112,7 @@ const Navigation = () => {
 };
 
 const RotatingWord = () => {
-  const words = ["screen", "shortlist", "interview", "decide"];
+  const words = ["depth", "rigor", "rubric", "evidence"];
   const [wordIndex, setWordIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -163,17 +163,17 @@ const HeroContent = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
-            Hire smarter. Hire faster.
+            Finance hiring · India · Big-4 calibrated
           </span>
         </div>
 
         <h1 className="text-6xl md:text-8xl lg:text-9xl font-light text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tight mix-blend-difference leading-[1.05]">
-          AI that helps you<br/>
-          <span className="tracking-tight"><RotatingWord /></span> talent
+          Finance hiring,<br/>
+          decided on <span className="tracking-tight"><RotatingWord /></span>.
         </h1>
 
         <p className="text-base md:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
-          Flowy runs your screening interviews end-to-end. Recruiters meet only the candidates worth meeting — with structured scores, transcripts, and recordings ready in minutes.
+          Smriti runs 20-minute structured interviews calibrated to tax, audit, controllership, FP&amp;A, and consulting — built by Big-4 finance practitioners. You meet only the candidates worth your time.
         </p>
 
         <div className="pt-4 pointer-events-auto flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -398,10 +398,10 @@ const MeetFlowySection = () => {
 
   const getStatusText = () => {
     switch (conversationState) {
-      case 'greeting': return 'Flowy is calibrating...';
+      case 'greeting': return 'Smriti is calibrating...';
       case 'listening': return transcript ? `"${transcript}"` : 'Listening... Your turn to speak';
-      case 'ai-thinking': return 'Flowy is thinking...';
-      case 'ai-speaking': return 'Flowy is speaking...';
+      case 'ai-thinking': return 'Smriti is thinking...';
+      case 'ai-speaking': return 'Smriti is speaking...';
       default: return '';
     }
   };
@@ -420,12 +420,12 @@ const MeetFlowySection = () => {
         {/* Content */}
         <div className="w-full lg:w-1/2 text-center lg:text-left space-y-6">
           <h2 className="text-5xl md:text-6xl lg:text-7xl font-light text-white tracking-wider">
-            Meet <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005aef] to-[#00b1ff]">Flowy</span>
+            Meet <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005aef] to-[#00b1ff]">Smriti</span>
           </h2>
 
           <p className="text-lg text-white/60 font-light">
-            She handles the small talk and the hard questions.<br />
-            <span className="text-white/80">You handle the final call.</span>
+            She runs the 20-minute structured interview — calibrated to your finance role, scored on a Big-4 rubric.<br />
+            <span className="text-white/80">You make the final call.</span>
           </p>
 
           {conversationState === 'hidden' && (
@@ -433,7 +433,7 @@ const MeetFlowySection = () => {
               onClick={handleStartConversation}
               className="group inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#003887] to-[#005aef] text-white font-medium hover:opacity-90 transition-opacity"
             >
-              <span>Talk to Flowy</span>
+              <span>Talk to Smriti</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
                 <path d="M128,176a48.05,48.05,0,0,0,48-48V64a48,48,0,0,0-96,0v64A48.05,48.05,0,0,0,128,176ZM96,64a32,32,0,0,1,64,0v64a32,32,0,0,1-64,0Zm40,143.6V232a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64,64,0,0,0,128,0,8,8,0,0,1,16,0A80.11,80.11,0,0,1,136,207.6Z"></path>
               </svg>
@@ -490,13 +490,13 @@ const CandidatePortalSection = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-light text-white tracking-wide">
-            Let AI handle the basics,{' '}
+            Let AI screen for depth,{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005aef] to-[#00b1ff]">
-              Not HR
+              not buzzwords
             </span>
           </h2>
           <p className="text-white/50 text-lg max-w-2xl mx-auto mt-4">
-            Candidates move through a structured, fair, and engaging AI-led experience - without waiting for human intervention.
+            Every finance candidate runs through the same 20-minute rubric — tax, controllership, FP&amp;A, advisory. The TAG shows you where they're strong, developing, or have gaps. Then you decide.
           </p>
         </div>
 
@@ -528,33 +528,33 @@ const CandidatePortalSection = () => {
 const FeaturesGridSection = () => {
   const features = [
     {
-      title: "Automated Availability & Preferences",
-      description: "No back-and-forth emails. Candidates self-schedule based on their availability.",
+      title: "Big-4 Calibrated Rubrics",
+      description: "Every TAG is built on 10-12 skills written by Big-4 finance practitioners — tax, audit, controllership, FP&A, advisory. Not generic competencies.",
       span: 2,
     },
     {
-      title: "Resume Upload",
-      description: "Intelligent parsing extracts key skills and qualifications automatically.",
+      title: "Resume + Profile Capture",
+      description: "Candidates self-register, upload CV, and our parser maps it against the role rubric automatically.",
       span: 1,
     },
     {
-      title: "Real-time Scoring",
-      description: "Instant candidate scoring with transparent, role-based criteria.",
+      title: "Skill-Level Scoring",
+      description: "Per-skill scores 0-100, color-coded — Strong, Developing, Gap. Plus transferable skills the rubric surfaces.",
       span: 1,
     },
     {
-      title: "Conversational Q&A",
-      description: "Natural dialogue-based interviews that put candidates at ease while gathering insights.",
+      title: "20-Minute Structured Interview",
+      description: "Smriti, our AI interviewer, runs a focused conversation that probes depth (GST exceptions, Ind-AS revenue recognition, DCF assumptions) — not buzzwords.",
       span: 2,
     },
     {
-      title: "Scenario-Based Evaluation",
-      description: "Real-world problem solving, not keyword matching. See how candidates actually think.",
+      title: "Scenario-Based Probing",
+      description: "Real finance scenarios — a tax notice arrives at year-end, a Form 26AS mismatch, an unusual journal entry. See how candidates actually think.",
       span: 2,
     },
     {
-      title: "Reports",
-      description: "Skill & role-fit reports with actionable insights for every candidate.",
+      title: "Recruiter Report + TAG",
+      description: "A radial Talent Analysis Graph, hireability call, full transcript, and rubric-grounded summary. Ready in minutes.",
       span: 1,
     },
   ];
@@ -565,13 +565,13 @@ const FeaturesGridSection = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-light text-white tracking-wide mb-4">
-            Everything you need to{' '}
+            Built for finance,{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005aef] to-[#00b1ff]">
-              hire smarter
+              not generic screening
             </span>
           </h2>
           <p className="text-lg text-white/50">
-            Intelligent hiring tools that work in the background
+            Calibrated for India finance — accounting, taxation, advisory.
           </p>
         </div>
 
@@ -959,7 +959,7 @@ const Footer = () => {
               <li><a href="#features" className="text-white/50 hover:text-white text-sm transition-colors">Features</a></li>
               <li><a href="/how-it-works" className="text-white/50 hover:text-white text-sm transition-colors">How It Works</a></li>
               <li><a href="#pricing" className="text-white/50 hover:text-white text-sm transition-colors">Pricing</a></li>
-              <li><a href="#meet-flowy" className="text-white/50 hover:text-white text-sm transition-colors">Meet Flowy</a></li>
+              <li><a href="#meet-flowy" className="text-white/50 hover:text-white text-sm transition-colors">Meet Smriti</a></li>
             </ul>
           </div>
 
@@ -1004,32 +1004,32 @@ const FAQSection = () => {
 
   const faqs = [
     {
+      question: "Does FunnelHQ work for finance roles outside India?",
+      answer: "Right now we're calibrated for India finance — Ind-AS, GST, Indian direct tax, ICAI/ICSI/ICMAI certifications. Global IFRS / US-GAAP rubrics are on the roadmap."
+    },
+    {
+      question: "What finance roles do you support today?",
+      answer: "Three verticals: Accounting (controllership, close, consolidation, statutory), Taxation (direct, indirect, international, transfer pricing), and Management Consulting (risk advisory, transaction services, forensic). If your role isn't in these, FunnelHQ won't produce reliable signal — and we'll tell you up front."
+    },
+    {
+      question: "How long does a candidate interview take?",
+      answer: "20 minutes for a screening TAG. The candidate joins via a link, talks to Smriti (our AI interviewer), and finishes with a structured report in your dashboard."
+    },
+    {
       question: "Does AI make the final hiring decision?",
-      answer: "No. AI supports screening and assessment, but HR and hiring managers always make the final decision."
+      answer: "No. The TAG and Smriti's transcript are inputs. Your hiring manager makes the call. We surface depth signal — we don't replace judgement."
     },
     {
-      question: "How long does each AI interview take?",
-      answer: "Screening interview: ~10 minutes. Role-specific interview: 15–25 minutes (configurable)."
+      question: "Who calibrated the rubrics?",
+      answer: "Big-4 finance practitioners — alumni of Deloitte, PwC, EY, KPMG. Every skill has 0-100 anchors, scenario probes, and a description written by someone who's done the work."
     },
     {
-      question: "Is this suitable for senior and specialised roles?",
-      answer: "Yes. The two-level interview model works for entry-level, mid-level, and senior positions, including specialised technical roles."
+      question: "Is the platform GDPR / DPDP compliant?",
+      answer: "Yes. Explicit consent at registration, data minimisation, candidate right-to-erasure, audit trail. India's DPDP Act 2023 alignment included."
     },
     {
-      question: "How does this reduce bias?",
-      answer: "AI applies consistent, role-based criteria to every candidate, reducing subjective human bias in early screening stages."
-    },
-    {
-      question: "Is the platform GDPR compliant?",
-      answer: "Yes. The platform is designed with GDPR principles including data minimisation, consent, and secure access controls."
-    },
-    {
-      question: "Will candidates be comfortable interacting with AI?",
-      answer: "Yes. Candidates benefit from flexible scheduling, transparency, and faster feedback — leading to higher completion rates."
-    },
-    {
-      question: "Can this integrate with existing ATS or HR systems?",
-      answer: "Enterprise plans support integrations with leading ATS and HR platforms."
+      question: "Can candidates fake their way through?",
+      answer: "Smriti probes for depth with scenario-based follow-ups (a tax notice arrives, a journal entry doesn't reconcile, an Ind-AS revenue question). Generic answers score Developing, not Strong. Reading off ChatGPT in real time shows up in pacing + the depth gap."
     }
   ];
 

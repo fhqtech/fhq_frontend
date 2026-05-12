@@ -164,7 +164,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             <div className="flex flex-col items-center gap-1">
               <Avatar className="h-12 w-12 flex-shrink-0">
                 <AvatarImage
-                  src={candidate.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(candidate.name)}`}
+                  src={candidate.profilePicture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(candidate.name)}`}
                   alt={candidate.name}
                 />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">

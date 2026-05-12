@@ -444,7 +444,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
             <div className="flex items-start gap-4">
             <Avatar className="h-16 w-16">
               <AvatarImage
-                src={candidate.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(candidate.name)}`}
+                src={candidate.profilePicture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(candidate.name)}`}
                 alt={candidate.name}
               />
               <AvatarFallback>{initials}</AvatarFallback>

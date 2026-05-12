@@ -1,12 +1,12 @@
 import { X } from 'lucide-react';
 
 const problems = [
-  "Manual resume screening that takes hours per role",
-  "Multiple HR touchpoints per candidate",
-  "High recruiter cost per hire",
-  "Interview scheduling chaos across calendars",
-  "Subjective and inconsistent assessments",
-  "Candidate drop-offs due to slow processes",
+  "Tax, audit, and FP&A CVs read identically — generalist screeners can't tell depth from buzzwords",
+  "Finance hiring managers wasted 8+ hours/week on first-round screens",
+  "Candidates rejected on résumé keyword matches, not on actual rubric depth",
+  "No structured signal on GST, Ind-AS, transfer pricing, or controllership rigor",
+  "Big-4 alums and tier-2 colleges evaluated on the same generic questions",
+  "Strong candidates drop off because the first conversation feels generic",
 ];
 
 export function ProblemSection() {
@@ -16,7 +16,7 @@ export function ProblemSection() {
       <div className="max-w-4xl mx-auto px-6 py-24">
         {/* Headline */}
         <h2 className="text-4xl md:text-6xl font-light text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter mb-16 text-center">
-          Hiring today is broken - slow, expensive, and inconsistent.
+          Finance hiring breaks at the first conversation.
         </h2>
 
         {/* Problem List - Left Aligned */}
