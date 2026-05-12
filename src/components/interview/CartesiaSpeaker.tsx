@@ -76,7 +76,6 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
         // Log every ~30 frames (roughly once per second at 60fps) when there's audio
         logCounter++;
         if (logCounter % 30 === 0 && normalizedLevel > 0.05) {
-          console.log('[CartesiaSpeaker] TTS audio level:', normalizedLevel.toFixed(3));
         }
 
         animationFrameRef.current = requestAnimationFrame(updateLevel);
@@ -130,7 +129,6 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
 
       // Return the partial text that was spoken
       const partialText = spokenTextRef.current.trim();
-      console.log('[CartesiaSpeaker] Interrupted. Partial text:', partialText);
 
       // Reset for next use
       spokenTextRef.current = "";
@@ -221,7 +219,6 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
 
       // If already speaking, stop the current audio before starting new one
       if (isSpeaking) {
-        console.log('[CartesiaSpeaker] New text received while speaking - stopping current audio');
         stopPlayback();
       }
 
@@ -242,7 +239,7 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
 
       const apiKey = import.meta.env.VITE_CARTESIA_API_KEY;
       if (!apiKey) {
-        console.error("[Cartesia] Missing VITE_CARTESIA_API_KEY in your .env file!");
+        if (import.meta.env.DEV) console.error("[Cartesia] Missing VITE_CARTESIA_API_KEY in your .env file!");
         setIsSpeaking(false);
         onSpeakingStateChange?.(false);
         onError?.('missing_api_key');  // P1 R6
@@ -275,12 +272,10 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
         // Stop any existing monitoring first to prevent duplicates
         stopAudioLevelMonitoring();
         startAudioLevelMonitoring();
-        console.log('[CartesiaSpeaker] Audio level monitoring started');
       }
 
       // Close any existing WebSocket connection before opening a new one
       if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
-        console.log('[CartesiaSpeaker] Closing existing WebSocket connection before opening new one');
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -310,7 +305,6 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
               sample_rate: 44100,
             },
           };
-          console.log('[CartesiaSpeaker] Sending message with speed:', speechRate, message);
           ws.send(JSON.stringify(message));
         } else {
           // Full mode: speak all sentences
@@ -347,7 +341,7 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
       };
 
       ws.onerror = (err) => {
-        console.error("[Cartesia] WebSocket error:", err);
+        if (import.meta.env.DEV) console.error("[Cartesia] WebSocket error:", err);
         setIsSpeaking(false);
         onSpeakingStateChange?.(false);
         onError?.('websocket');  // P1 R6
@@ -365,38 +359,22 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
     };
 
     useEffect(() => {
-      console.log('[CartesiaSpeaker] Effect triggered:', {
-        trigger,
-        text: text?.substring(0, 50) + '...',
-        lastSpoken: lastSpokenTextRef.current?.substring(0, 50) + '...',
-        isNewText: text !== lastSpokenTextRef.current,
-        mode,
-        speechRate
-      });
 
       // MOCKTAGON: Trigger-based activation - only speak when trigger is true or changes
       if (trigger && text && text !== lastSpokenTextRef.current) {
-        console.log('[CartesiaSpeaker] Starting speech - trigger mode');
         lastSpokenTextRef.current = text;
         speakSentences(text);
       } else if (!trigger && text && text !== lastSpokenTextRef.current) {
         // Fallback: Auto-speak when trigger is false (backward compatibility)
-        console.log('[CartesiaSpeaker] Starting speech - fallback mode');
         lastSpokenTextRef.current = text;
         speakSentences(text);
       } else {
-        console.log('[CartesiaSpeaker] Not starting speech:', {
-          noTrigger: !trigger,
-          noText: !text,
-          sameText: text === lastSpokenTextRef.current
-        });
       }
     }, [text, trigger, mode, speechRate]);
 
     // Cleanup effect to close WebSocket when component unmounts
     useEffect(() => {
       return () => {
-        console.log('[CartesiaSpeaker] Component unmounting - cleaning up WebSocket connection');
         if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
           wsRef.current.close();
           wsRef.current = null;

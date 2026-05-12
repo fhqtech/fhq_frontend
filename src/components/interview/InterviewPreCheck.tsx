@@ -465,7 +465,6 @@ export const InterviewPreCheck = ({
 
     // Pre-generate AI greeting in background if session is ready
     if (preCreatedSessionId) {
-      console.log("🎯 Pre-generating AI greeting in background...");
       const greetingStartTime = Date.now();
 
       const greetingPromise = fetch(
@@ -490,16 +489,12 @@ export const InterviewPreCheck = ({
           // Store greeting in sessionStorage so interview page can use it
           if (greetingText) {
             sessionStorage.setItem(`greeting_${preCreatedSessionId}`, greetingText);
-            console.log(`✅ AI greeting pre-generated and cached in ${greetingElapsed}ms`);
-            console.log(`📝 Cached greeting: "${greetingText.substring(0, 50)}..."`);
           }
           return greetingText;
         } else {
-          console.warn("⚠️ Failed to pre-generate greeting (non-critical)");
           return null;
         }
       }).catch(error => {
-        console.warn("⚠️ Error pre-generating greeting (non-critical):", error);
         return null;
       });
 

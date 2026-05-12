@@ -26,11 +26,11 @@ const WEBSOCKET_URL = import.meta.env.VITE_STT_WEBSOCKET_URL;
 // in production; without them STT and the LLM agent simply can't connect.
 // Sentry capture lets operators see the misconfigured deploy immediately.
 if (!WEBSOCKET_URL) {
-  console.error('[Interview] CRITICAL ERROR: WEBSOCKET_URL is undefined!');
+  if (import.meta.env.DEV) console.error('[Interview] CRITICAL ERROR: WEBSOCKET_URL is undefined!');
   Sentry.captureMessage('VITE_STT_WEBSOCKET_URL missing at runtime', { level: 'error' });
 }
 if (!BACKEND_URL) {
-  console.error('[Interview] CRITICAL ERROR: BACKEND_URL is undefined!');
+  if (import.meta.env.DEV) console.error('[Interview] CRITICAL ERROR: BACKEND_URL is undefined!');
   Sentry.captureMessage('VITE_LLM_BACKEND_URL missing at runtime', { level: 'error' });
 }
 
@@ -93,26 +93,18 @@ export const InterviewSession = ({
     },
     {
       onStateChange: (newState) => {
-        console.log('[Interview] State changed to:', ConversationState[newState], {
-          isListening: newState === ConversationState.LISTENING,
-          isSpeaking: newState === ConversationState.SPEAKING,
-          isThinking: newState === ConversationState.THINKING
-        });
         setIsListening(newState === ConversationState.LISTENING);
         setIsSpeaking(newState === ConversationState.SPEAKING);
       },
       onMessageAdded: (message) => {
         // Update textToSpeak when AI responds
         if (message.role === 'ai') {
-          console.log('[Interview] New AI message received, stopping current TTS');
 
           // Stop any currently playing TTS immediately
           if (speakerRef.current && isSpeakingRef.current) {
-            console.log('[Interview] Interrupting current TTS to play new message');
             speakerRef.current.stop();
           }
 
-          console.log('[Interview] Setting AI message for speech:', message.content);
           setTextToSpeak(message.content);
           // F1: removed `videoTimingRef.current.aiSpeakingStarted(...)` —
           // VideoTimingManager was deleted in S1 (audio-only refactor) but
@@ -133,7 +125,7 @@ export const InterviewSession = ({
         setInteractiveTask(task);
       },
       onError: (error) => {
-        console.error('[Interview] Conversation error:', error);
+        if (import.meta.env.DEV) console.error('[Interview] Conversation error:', error);
         onInterviewError(new Error(error));
       }
     }
@@ -234,7 +226,7 @@ export const InterviewSession = ({
           setSelectedAudioDevice(micDevices[0].deviceId);
         }
       } catch (err) {
-        console.error('[Interview] Error accessing media devices:', err);
+        if (import.meta.env.DEV) console.error('[Interview] Error accessing media devices:', err);
       }
     };
     getAudioDevices();
@@ -253,7 +245,6 @@ export const InterviewSession = ({
   // Load existing conversation history when resuming
   const loadConversationHistory = () => {
     try {
-      console.log('[Interview] 🔄 Resuming interview with', conversationHistory.length, 'messages');
 
       // Load all messages into conversation orchestrator and transcript
       const loadedMessages: TranscriptMessage[] = [];
@@ -272,7 +263,6 @@ export const InterviewSession = ({
 
       if (lastAiMessage) {
         const lastAiText = lastAiMessage.text || lastAiMessage.content || '';
-        console.log('[Interview] 🔊 Speaking last AI message:', lastAiText.substring(0, 50) + '...');
         setTextToSpeak(lastAiText);
         conversationOrchestrator.transitionToState(ConversationState.SPEAKING);
       } else {
@@ -280,7 +270,7 @@ export const InterviewSession = ({
         conversationOrchestrator.transitionToState(ConversationState.LISTENING);
       }
     } catch (error) {
-      console.error('[Interview] Error loading conversation history:', error);
+      if (import.meta.env.DEV) console.error('[Interview] Error loading conversation history:', error);
       // Fallback to normal greeting
       sendInitialMessage();
     }
@@ -289,13 +279,11 @@ export const InterviewSession = ({
   // Use pre-generated greeting - either from cache or in-flight request
   const sendInitialMessage = async () => {
     try {
-      console.log('[Interview] ⚡ Retrieving pre-generated greeting...');
 
       // First check if greeting is already in sessionStorage (completed request)
       let cachedGreeting = sessionStorage.getItem(`greeting_${sessionId}`);
 
       if (cachedGreeting) {
-        console.log('[Interview] ✅ Using cached greeting (instant!)');
         conversationOrchestrator.addMessage('ai', cachedGreeting);
         setTextToSpeak(cachedGreeting);
         setTranscriptMessages([{ role: 'ai', content: cachedGreeting }]);
@@ -308,14 +296,12 @@ export const InterviewSession = ({
       const greetingPromise = (window as any)[`greetingPromise_${sessionId}`];
 
       if (greetingPromise) {
-        console.log('[Interview] ⏳ Waiting for in-flight greeting request from pre-check page...');
         const greetingText = await greetingPromise;
 
         // Clean up
         delete (window as any)[`greetingPromise_${sessionId}`];
 
         if (greetingText) {
-          console.log('[Interview] ✅ Using greeting from pre-check request (no duplicate call!)');
           conversationOrchestrator.addMessage('ai', greetingText);
           setTextToSpeak(greetingText);
           setTranscriptMessages([{ role: 'ai', content: greetingText }]);
@@ -325,14 +311,13 @@ export const InterviewSession = ({
       }
 
       // Fallback: neither cached nor in-flight - create new request
-      console.warn('[Interview] ⚠️ No cached or in-flight greeting, fetching from API...');
       const result = await conversationOrchestrator.sendMessage('hi');
 
       if (result && !result.terminated) {
         conversationOrchestrator.transitionToState(ConversationState.SPEAKING);
       }
     } catch (error) {
-      console.error('[Interview] Error loading greeting:', error);
+      if (import.meta.env.DEV) console.error('[Interview] Error loading greeting:', error);
       // Fallback to local welcome message if everything fails
       const fallbackMessage = `Hi ${candidateData.name}! I'm your AI interviewer, ready to chat with you today!`;
       conversationOrchestrator.addMessage('ai', fallbackMessage);
@@ -352,9 +337,6 @@ export const InterviewSession = ({
   // Send chat message using conversation orchestrator
   const sendChatMessage = async (payload: { message: string }) => {
     const callTime = Date.now();
-    console.log(`[AssemblyAIStreamer - LLM] [${callTime}] ========================================`);
-    console.log(`[AssemblyAIStreamer - LLM] [${callTime}] 🤖 Sending to orchestrator:`, JSON.stringify(payload.message));
-    console.log(`[AssemblyAIStreamer - LLM] [${callTime}] Message length: ${payload.message.length} chars`);
 
     // Add user message to transcript
     setTranscriptMessages(prev => [...prev, { role: 'user', content: payload.message }]);
@@ -365,16 +347,14 @@ export const InterviewSession = ({
 
     const result = await orchestratorSendMessage(payload.message, truncatedText);
     const responseTime = Date.now();
-    console.log(`[AssemblyAIStreamer - LLM] [${responseTime}] 🤖 Response received after ${responseTime - callTime}ms`);
 
     // Check if the orchestrator ignored the call
     if (!result) {
-      console.warn('[Interview] sendChatMessage call was ignored by the orchestrator (it was busy).');
       return;
     }
 
     if (result.error) {
-      console.error("Error from conversation orchestrator:", result.error);
+      if (import.meta.env.DEV) console.error("Error from conversation orchestrator:", result.error);
       return;
     }
 
@@ -423,10 +403,8 @@ export const InterviewSession = ({
       // F3: re-check at fire time. State could have flipped since the
       // 30s timer was scheduled (e.g., user spoke just before tick).
       if (isWaitingRef.current) {
-        console.log('[Interview] Inactivity timer fired but waiting for AI — re-arming');
         return;
       }
-      console.log('[Interview] 30 seconds of inactivity detected - showing warning');
       setShowInactivityWarning(true);
       setInactivityCountdown(60);
 
@@ -440,11 +418,9 @@ export const InterviewSession = ({
           if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
           // F3: don't end interview while still waiting for AI to reply.
           if (isWaitingRef.current) {
-            console.log('[Interview] Countdown hit 0 but waiting for AI — re-arming');
             resetInactivityTimer();
             return;
           }
-          console.log('[Interview] Inactivity timeout reached - ending interview');
           handleEndInterview();
         }
       }, 1000);
@@ -466,7 +442,6 @@ export const InterviewSession = ({
       isUserSpeakingRef.current = true;
       if (isSpeakingRef.current) {
         const partialText = speakerRef.current?.stop();
-        console.log('[Interview] AI interrupted. Partial text:', partialText);
         if (partialText && partialText.trim()) {
           truncatedAIMessageRef.current = partialText + "...";
         }
@@ -487,7 +462,6 @@ export const InterviewSession = ({
 
     if (isFinal && transcript.trim()) {
       const receiveTime = Date.now();
-      console.log(`[Interview] [${receiveTime}] 📝 Final transcript: "${transcript}"`);
 
       isUserSpeakingRef.current = false;
       setCurrentUtterance(transcript);
@@ -505,7 +479,6 @@ export const InterviewSession = ({
   // Store interview session completion and results
   const storeSessionCompletion = async (conversationHistory: any[]) => {
     if (!candidateToken) {
-      console.warn('[Interview] No candidate token available, skipping session completion storage');
       return null;
     }
 
@@ -516,7 +489,6 @@ export const InterviewSession = ({
       // Add to previous duration for cumulative active time
       const totalActiveDuration = previousActiveDuration + currentSessionDuration;
 
-      console.log(`[Interview] Active duration: previous=${previousActiveDuration}s + current=${currentSessionDuration}s = total=${totalActiveDuration}s (${(totalActiveDuration/60).toFixed(1)} mins)`);
 
       const requestBody: any = {
         candidate_token: candidateToken,
@@ -533,15 +505,14 @@ export const InterviewSession = ({
       });
 
       if (!response.ok) {
-        console.error('[Interview] Failed to store session completion:', response.statusText);
+        if (import.meta.env.DEV) console.error('[Interview] Failed to store session completion:', response.statusText);
         return null;
       }
 
       const result = await response.json();
-      console.log('[Interview] Session completion stored successfully:', result);
       return result;
     } catch (error) {
-      console.error('[Interview] Error storing session completion:', error);
+      if (import.meta.env.DEV) console.error('[Interview] Error storing session completion:', error);
       return null;
     }
   };
@@ -572,15 +543,13 @@ export const InterviewSession = ({
         setAudioLevel(level);
         // Log periodically for debugging (only when there's significant audio)
         if (level > 0.1) {
-          console.log('[Interview] Mic audio level:', level.toFixed(3));
         }
       },
       () => {
-        console.log('[Interview] ✅ AssemblyAI connected - ready for continuous listening');
         setConnectionStatus('connected');
       },
       (error) => {
-        console.error('[Interview] ❌ AssemblyAI error:', error);
+        if (import.meta.env.DEV) console.error('[Interview] ❌ AssemblyAI error:', error);
         setConnectionStatus('error');
       },
       import.meta.env.VITE_API_BASE_URL, // Backend URL for token generation (local Flask backend)
@@ -592,7 +561,6 @@ export const InterviewSession = ({
 
   // Reconnect function for STT failures
   const handleReconnect = () => {
-    console.log('[Interview] Attempting to reconnect STT...');
     setConnectionStatus('idle');
     setStreamWarning('Reconnecting to audio servers…');
     // Small delay to ensure cleanup, then restart
@@ -638,7 +606,7 @@ export const InterviewSession = ({
     try {
       await storeSessionCompletion(conversationHistory);
     } catch (error) {
-      console.error('[Background] Error storing session completion:', error);
+      if (import.meta.env.DEV) console.error('[Background] Error storing session completion:', error);
       Sentry.captureException(error, {
         tags: { sessionId, interviewId, stage: 'session_completion' },
       });
@@ -687,14 +655,14 @@ export const InterviewSession = ({
 
       // Persist completion in background — candidate is already on thank-you page.
       completeSessionInBackground(historyForResults).catch(error => {
-        console.error('[Interview] Background completion error:', error);
+        if (import.meta.env.DEV) console.error('[Interview] Background completion error:', error);
         Sentry.captureException(error, {
           tags: { sessionId, interviewId, stage: 'background_completion' },
         });
       });
 
     } catch (error) {
-      console.error('[Interview] Error ending interview:', error);
+      if (import.meta.env.DEV) console.error('[Interview] Error ending interview:', error);
       // Still complete the interview even if there's an error
       onInterviewComplete({ sessionId, error: 'Error saving interview data' });
     } finally {
@@ -706,7 +674,6 @@ export const InterviewSession = ({
   // Start inactivity timer when interview is ready and waiting for user
   useEffect(() => {
     if (isInitialized && conversationState === ConversationState.LISTENING && !isSpeaking) {
-      console.log('[Interview] Starting inactivity detection - interview is listening');
       resetInactivityTimer();
     }
   }, [isInitialized, conversationState, isSpeaking, resetInactivityTimer]);
@@ -962,7 +929,6 @@ export const InterviewSession = ({
         onSpeakingStateChange={setIsSpeaking}
         onAudioLevel={setTtsAudioLevel}
         onComplete={() => {
-          console.log('[Interview] Speaking completed, transitioning to listening');
           completeSpeaking();
           resetInactivityTimer();
         }}
@@ -970,7 +936,6 @@ export const InterviewSession = ({
           // P1 R6: TTS failed. Tell the candidate so they don't sit in
           // silence wondering if the interview hung. The interview keeps
           // running (transcripts are captured via AssemblyAI regardless).
-          console.warn('[Interview] TTS error:', reason);
           Sentry.captureMessage(`Cartesia TTS failure: ${reason}`, {
             level: 'warning',
             tags: { sessionId, interviewId },

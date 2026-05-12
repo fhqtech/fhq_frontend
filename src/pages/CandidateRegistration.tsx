@@ -259,7 +259,7 @@ export default function CandidateRegistration() {
         setError(data.error || "Invalid or expired invitation token");
       }
     } catch (err) {
-      console.error('Error fetching invitation details:', err);
+      if (import.meta.env.DEV) console.error('Error fetching invitation details:', err);
       setError("Failed to load invitation details. Please try again.");
     } finally {
       setLoading(false);
@@ -293,29 +293,23 @@ export default function CandidateRegistration() {
     // Contact validation
     if (!formData.phone.trim()) {
       errors.phone = "Phone number is required";
-      console.log("❌ Validation failed: Phone number is missing");
     } else if (!/^[\+]?[\d\s\-\(\)]+$/.test(formData.phone)) {
       errors.phone = "Please enter a valid phone number";
-      console.log("❌ Validation failed: Phone number format invalid");
     }
 
     if (!formData.location.trim()) {
       errors.location = "Location is required";
-      console.log("❌ Validation failed: Location is missing");
     }
 
     // Professional validation
     if (!formData.jobTitle.trim()) {
       errors.jobTitle = "Job title is required";
-      console.log("❌ Validation failed: Job title is missing");
     }
     if (!formData.experienceYears.trim() && formData.experienceYears !== "0") {
       errors.experience = "Years of experience is required";
-      console.log("❌ Validation failed: Experience years is missing");
     }
     if (!formData.availableIn.trim()) {
       errors.availableIn = "Available in is required";
-      console.log("❌ Validation failed: Available to start is missing");
     }
 
     // Profile validation
@@ -324,15 +318,12 @@ export default function CandidateRegistration() {
       const linkedinPattern = /^(https?:\/\/)?(www\.)?linkedin\.com\/(in|company)\/[\w\-]+\/?$/i;
       if (!linkedinPattern.test(formData.linkedin.trim())) {
         errors.linkedin = "Please enter a valid LinkedIn URL (e.g., https://linkedin.com/in/yourprofile)";
-        console.log("❌ Validation failed: LinkedIn URL format invalid:", formData.linkedin);
       }
     }
 
     // Log success or failure
     if (Object.keys(errors).length === 0) {
-      console.log("✅ All validations passed!");
     } else {
-      console.log("❌ Validation errors:", errors);
     }
 
     setFormErrors(errors);
@@ -405,7 +396,7 @@ export default function CandidateRegistration() {
         }
       }
     } catch (error) {
-      console.error("Error fetching location suggestions:", error);
+      if (import.meta.env.DEV) console.error("Error fetching location suggestions:", error);
     }
 
     // Fallback to comprehensive world cities database
@@ -534,7 +525,6 @@ export default function CandidateRegistration() {
         portfolioUrl: prev.portfolioUrl?.trim() ? prev.portfolioUrl : data.portfolioUrl,
       }));
     } catch (err) {
-      console.warn('[autoFillFromResume] failed:', err);
       setExtractionFailed(true);
     } finally {
       setIsExtractingResume(false);
@@ -665,7 +655,7 @@ export default function CandidateRegistration() {
         });
       }
     } catch (err) {
-      console.error('Error submitting registration:', err);
+      if (import.meta.env.DEV) console.error('Error submitting registration:', err);
       toast({
         title: "Error",
         description: "Failed to submit registration. Please try again.",

@@ -298,7 +298,6 @@ export default function CandidatePortal() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && token) {
-        console.log('[Portal] Page became visible - refreshing data');
         fetchPortalData(token);
       }
     };
@@ -360,7 +359,7 @@ export default function CandidatePortal() {
         }
       }
     } catch (error) {
-      console.error('Error fetching missing field question:', error);
+      if (import.meta.env.DEV) console.error('Error fetching missing field question:', error);
     } finally {
       setFetchingQuestion(false);
     }
@@ -408,16 +407,8 @@ export default function CandidatePortal() {
 
   // Handle quick answer submission from banner
   const handleQuickAnswer = async (field: string, value: string) => {
-    console.log('🔵 handleQuickAnswer called:', { field, value });
-    console.log('🔵 Initial checks:', {
-      hasPortalData: !!portalData,
-      hasToken: !!token,
-      submittingAnswer,
-      candidateId: portalData?.candidate?.id
-    });
 
     if (!portalData || !token || submittingAnswer) {
-      console.log('❌ Early return - missing requirements');
       return;
     }
 
@@ -451,10 +442,8 @@ export default function CandidatePortal() {
         [field]: value
       };
 
-      console.log('🔵 Payload prepared:', payload);
 
       const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidates/${portalData.candidate.id}/profile`;
-      console.log('🔵 API URL:', apiUrl);
 
       // Send update to backend
       const response = await fetch(apiUrl, {
@@ -465,12 +454,9 @@ export default function CandidatePortal() {
         body: JSON.stringify(payload)
       });
 
-      console.log('🔵 Response status:', response.status);
       const result = await response.json();
-      console.log('🔵 Response data:', result);
 
       if (response.ok && result.success) {
-        console.log('✅ Success!');
         // Success! Show a subtle animation
         setBannerAnimating(true);
 
@@ -494,7 +480,6 @@ export default function CandidatePortal() {
         }, 800);
 
       } else {
-        console.log('❌ API returned error:', result);
         // Revert optimistic update on failure
         setPortalData(portalData);
         toast({
@@ -504,10 +489,9 @@ export default function CandidatePortal() {
         });
       }
     } catch (error) {
-      console.log('❌ Exception caught:', error);
       // Revert optimistic update on error
       setPortalData(portalData);
-      console.error('Error updating profile:', error);
+      if (import.meta.env.DEV) console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -573,7 +557,7 @@ export default function CandidatePortal() {
         }
       }
     } catch (err) {
-      console.error('Error fetching portal data:', err);
+      if (import.meta.env.DEV) console.error('Error fetching portal data:', err);
       if ((err as Error)?.name === 'AbortError') {
         setError("This is taking longer than expected. Check your connection and try again.");
       } else {
@@ -587,11 +571,6 @@ export default function CandidatePortal() {
 
   const processInterviewsWithDetails = async (data: PortalData) => {
     try {
-      console.log('🔍 Processing interviews with details:', {
-        candidateInterviews: data.candidate.interviews,
-        interviewDetails: data.interview_details,
-        mainInterview: data.interview
-      });
 
       // Group interviews by unique combinations to avoid showing duplicates
       const uniqueInterviews = data.candidate.interviews.reduce((acc, interview) => {
@@ -605,13 +584,6 @@ export default function CandidatePortal() {
                           (interview.interviewId === data.interview.id ? data.interview : undefined)
         };
 
-        console.log('✅ Enhanced interview:', {
-          interviewId: interview.interviewId,
-          type: interview.type,
-          hasDetails: !!enhanced.interviewDetails,
-          detailsTitle: enhanced.interviewDetails?.title,
-          fullDetails: enhanced.interviewDetails
-        });
 
         // Only add if we don't already have this exact combination
         const existingIndex = acc.findIndex(existing =>
@@ -630,11 +602,10 @@ export default function CandidatePortal() {
       // Sort by date (newest first)
       uniqueInterviews.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
 
-      console.log('📋 Final enhanced interviews:', uniqueInterviews);
 
       setEnhancedInterviews(uniqueInterviews);
     } catch (err) {
-      console.error('Error processing interviews:', err);
+      if (import.meta.env.DEV) console.error('Error processing interviews:', err);
       // Fallback to showing all interviews
       const fallbackEnhanced = data.candidate.interviews.map((interview, index) => ({
         ...interview,
@@ -687,7 +658,6 @@ export default function CandidatePortal() {
             return interview;
           } catch (error) {
             // If status check fails, keep original status
-            console.warn(`Failed to check status for interview ${interview.interviewId}:`, error);
             return interview;
           }
         })
@@ -695,7 +665,7 @@ export default function CandidatePortal() {
 
       setEnhancedInterviews(updatedInterviews);
     } catch (error) {
-      console.error('Failed to refresh interview statuses:', error);
+      if (import.meta.env.DEV) console.error('Failed to refresh interview statuses:', error);
     }
   };
 
@@ -775,7 +745,7 @@ export default function CandidatePortal() {
       }
 
     } catch (error) {
-      console.error('Error checking interview status:', error);
+      if (import.meta.env.DEV) console.error('Error checking interview status:', error);
       setStartingInterviewId(null);
       toast({
         title: "Error",
@@ -865,7 +835,7 @@ export default function CandidatePortal() {
         }
       }
     } catch (error) {
-      console.error("Error fetching location suggestions:", error);
+      if (import.meta.env.DEV) console.error("Error fetching location suggestions:", error);
     }
   };
 
@@ -950,7 +920,7 @@ export default function CandidatePortal() {
         });
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      if (import.meta.env.DEV) console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -1037,7 +1007,7 @@ export default function CandidatePortal() {
         });
       }
     } catch (error) {
-      console.error('Error uploading resume:', error);
+      if (import.meta.env.DEV) console.error('Error uploading resume:', error);
       toast({
         title: "Error",
         description: "Failed to upload resume. Please try again.",
@@ -1093,7 +1063,7 @@ export default function CandidatePortal() {
         });
       }
     } catch (error) {
-      console.error('Error setting active resume:', error);
+      if (import.meta.env.DEV) console.error('Error setting active resume:', error);
       toast({
         title: "Error",
         description: "Failed to set active resume. Please try again.",

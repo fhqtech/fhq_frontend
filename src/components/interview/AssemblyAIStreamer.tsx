@@ -53,7 +53,6 @@ export default class AssemblyAIStreamer {
     this.onConnectionError = onConnectionError;
     this.backendUrl = backendUrl;
     this.audioDeviceId = audioDeviceId;
-    console.log('[AssemblyAIStreamer] Initialized');
   }
 
   /**
@@ -62,7 +61,6 @@ export default class AssemblyAIStreamer {
    */
   private async fetchTemporaryToken(): Promise<string> {
     try {
-      console.log('[AssemblyAIStreamer] Requesting temporary token from backend...');
 
       const response = await fetch(`${this.backendUrl}/api/assemblyai-token`, {
         method: 'POST',
@@ -77,10 +75,9 @@ export default class AssemblyAIStreamer {
       }
 
       const data = await response.json();
-      console.log('[AssemblyAIStreamer] ✅ Received temporary token (expires in 8 minutes)');
       return data.token;
     } catch (error) {
-      console.error('[AssemblyAIStreamer] ❌ Failed to fetch token:', error);
+      if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] ❌ Failed to fetch token:', error);
       throw new Error('Failed to authenticate with speech service');
     }
   }
@@ -90,19 +87,16 @@ export default class AssemblyAIStreamer {
    */
   public async startStreaming() {
     if (this.isStreaming) {
-      console.warn('[AssemblyAIStreamer] Already streaming');
       return;
     }
 
     this.isStreaming = true;
-    console.log('[AssemblyAIStreamer] Starting stream...');
 
     try {
       // 1. Get temporary token from backend
       const tempToken = await this.fetchTemporaryToken();
 
       // 2. Request microphone access
-      console.log('[AssemblyAIStreamer] 🎤 Requesting microphone access...');
       const audioConstraint = this.audioDeviceId
         ? { deviceId: { exact: this.audioDeviceId } }
         : true;
@@ -112,7 +106,6 @@ export default class AssemblyAIStreamer {
       });
 
       // 3. Initialize AssemblyAI Streaming Transcriber
-      console.log('[AssemblyAIStreamer] 🔌 Connecting to AssemblyAI...');
 
       this.transcriber = new StreamingTranscriber({
         token: tempToken, // Use temporary token (browser-safe)
@@ -141,19 +134,11 @@ export default class AssemblyAIStreamer {
 
         const now = Date.now();
         const timerAge = timerStartTime ? now - timerStartTime : null;
-        console.log(`[AssemblyAIStreamer] [${now}] Turn received:`, {
-          text,
-          end_of_turn,
-          timerActive: !!this.finalTranscriptTimer,
-          timerAgeMs: timerAge,
-          accumulated: this.accumulatedTranscripts.length
-        });
 
         // Show partial transcripts as user speaks (for UI feedback)
         if (!end_of_turn) {
           // User is still speaking - reset timer if one exists
           if (this.finalTranscriptTimer) {
-            console.log(`[AssemblyAIStreamer] [${now}] 🔄 Partial received after ${timerAge}ms - CANCELLING timer (user still speaking)`);
             clearTimeout(this.finalTranscriptTimer);
             this.finalTranscriptTimer = undefined;
             timerStartTime = null;
@@ -171,29 +156,22 @@ export default class AssemblyAIStreamer {
         this.accumulatedTranscripts.push(text);
         const accumulatedText = this.accumulatedTranscripts.join(' ');
 
-        console.log(`[AssemblyAIStreamer] [${now}] Accumulated:`, this.accumulatedTranscripts);
 
         // Show accumulated text immediately
         this.onTranscriptUpdate(accumulatedText, false);
 
         // Clear any existing finalization timer (user still speaking)
         if (this.finalTranscriptTimer) {
-          console.log(`[AssemblyAIStreamer] [${now}] Clearing existing timer (new end_of_turn received)`);
           clearTimeout(this.finalTranscriptTimer);
           this.finalTranscriptTimer = undefined;
         }
 
         // Start timer before sending to backend (allows for multi-sentence utterances)
         timerStartTime = now;
-        console.log(`[AssemblyAIStreamer] [${now}] ⏱️  Starting ${FINALIZE_DELAY_MS}ms timer...`);
 
         this.finalTranscriptTimer = setTimeout(() => {
           const fireTime = Date.now();
           const finalText = this.accumulatedTranscripts.join(' ');
-          console.log(`[AssemblyAIStreamer] [${fireTime}] ⏰ Timer fired after ${fireTime - timerStartTime!}ms`);
-          console.log(`[AssemblyAIStreamer] [${fireTime}] ✅ Finalized:`, finalText);
-          console.log(`[🎤 SENDING TO BACKEND] [${fireTime}] Full text:`, JSON.stringify(finalText));
-          console.log(`[🎤 SENDING TO BACKEND] Text length: ${finalText.length} chars, Word count: ${finalText.split(' ').length} words`);
           // Send complete accumulated transcript to backend
           this.onTranscriptUpdate(finalText, true);
           // Clear accumulator for next utterance
@@ -205,19 +183,17 @@ export default class AssemblyAIStreamer {
 
       // Handle connection open
       this.transcriber.on('open', ({ id, expires_at }) => {
-        console.log('[AssemblyAIStreamer] ✅ Connected. Session ID:', id, 'Expires:', expires_at);
         this.onConnectionOpen();
       });
 
       // Handle errors
       this.transcriber.on('error', (error) => {
-        console.error('[AssemblyAIStreamer] ❌ Error:', error);
+        if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] ❌ Error:', error);
         this.onConnectionError(error.message || 'Speech recognition error');
       });
 
       // Handle connection close
       this.transcriber.on('close', (code, reason) => {
-        console.log(`[AssemblyAIStreamer] Connection closed. Code: ${code}, Reason: ${reason}`);
         if (code !== 1000) {
           this.onConnectionError(`Connection lost: ${reason || 'Unknown error'}`);
         }
@@ -225,14 +201,11 @@ export default class AssemblyAIStreamer {
 
       // 5. Connect to AssemblyAI
       await this.transcriber.connect();
-      console.log('[AssemblyAIStreamer] ✅ Connection established');
 
       // 6. Create AudioContext and start streaming audio
-      console.log('[AssemblyAIStreamer] 🎵 Setting up audio processing...');
       this.audioContext = new AudioContext({ sampleRate: 16000 });
 
       if (this.audioContext.state === 'suspended') {
-        console.warn('[AssemblyAIStreamer] AudioContext suspended. Resuming...');
         await this.audioContext.resume();
       }
 
@@ -282,10 +255,9 @@ export default class AssemblyAIStreamer {
       source.connect(processor);
       processor.connect(this.audioContext.destination);
 
-      console.log('[AssemblyAIStreamer] 🎙️ Audio streaming started');
 
     } catch (error) {
-      console.error('[AssemblyAIStreamer] ❌ FATAL: Setup failed:', error);
+      if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] ❌ FATAL: Setup failed:', error);
       this.onConnectionError(
         error instanceof Error
           ? error.message
@@ -300,14 +272,12 @@ export default class AssemblyAIStreamer {
    */
   public setMuted(muted: boolean) {
     this.isMuted = muted;
-    console.log(`[AssemblyAIStreamer] ${muted ? '🔇 Muted' : '🔊 Unmuted'}`);
   }
 
   /**
    * Stop streaming and cleanup resources
    */
   public async stopStreaming() {
-    console.log('[AssemblyAIStreamer] Stopping stream...');
     await this.cleanup();
   }
 
@@ -315,14 +285,12 @@ export default class AssemblyAIStreamer {
    * Recalibrate audio (no-op for AssemblyAI - kept for interface compatibility)
    */
   public recalibrate() {
-    console.log('[AssemblyAIStreamer] Recalibrate called (no-op for AssemblyAI)');
   }
 
   /**
    * Cleanup all resources
    */
   private async cleanup() {
-    console.log('[AssemblyAIStreamer] Cleaning up resources...');
     this.isStreaming = false;
 
     // Clear any pending finalization timer
@@ -335,9 +303,8 @@ export default class AssemblyAIStreamer {
     if (this.transcriber) {
       try {
         await this.transcriber.close();
-        console.log('[AssemblyAIStreamer] ✅ Transcriber closed');
       } catch (error) {
-        console.error('[AssemblyAIStreamer] Error closing transcriber:', error);
+        if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] Error closing transcriber:', error);
       }
       this.transcriber = undefined;
     }
@@ -346,7 +313,6 @@ export default class AssemblyAIStreamer {
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach(track => {
         track.stop();
-        console.log('[AssemblyAIStreamer] 🎤 Microphone track stopped');
       });
       this.mediaStream = undefined;
     }
@@ -355,13 +321,11 @@ export default class AssemblyAIStreamer {
     if (this.audioContext) {
       try {
         await this.audioContext.close();
-        console.log('[AssemblyAIStreamer] 🎵 AudioContext closed');
       } catch (error) {
-        console.error('[AssemblyAIStreamer] Error closing AudioContext:', error);
+        if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] Error closing AudioContext:', error);
       }
       this.audioContext = undefined;
     }
 
-    console.log('[AssemblyAIStreamer] ✅ Cleanup complete');
   }
 }
