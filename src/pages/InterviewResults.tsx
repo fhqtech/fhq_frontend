@@ -663,6 +663,49 @@ export default function InterviewResults() {
           </div>
         </header>
 
+        {/* N8: blueprint-error banner. When the interview's blueprint is
+            missing `skills` / `skill_layout`, the reviewer agent emits
+            placeholder nodes named "Blueprint Error N" with score=0. The
+            recruiter sees a no-signal report that *looks* like a bad
+            candidate but is actually an interview-config problem. Detect
+            and surface a CTA. */}
+        {(() => {
+          const nodes = rawResults?.graph_data?.nodes || [];
+          const hasBlueprintError =
+            nodes.length > 0 &&
+            nodes.every((n: any) =>
+              (n?.skill_name || n?.name || '').toLowerCase().includes('blueprint error')
+            );
+          if (!hasBlueprintError) return null;
+          return (
+            <Card className="p-4 mb-6 border-amber-300 bg-amber-50 shadow-lg">
+              <h2 className="text-base font-semibold text-amber-900 mb-2">
+                Interview blueprint is misconfigured
+              </h2>
+              <p className="text-sm text-amber-900/90 mb-3">
+                This interview's blueprint is missing required fields
+                (skills / skill_layout). The candidate's answers can't be
+                scored against a rubric, so the results below are placeholder
+                values — not a signal about the candidate.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => navigate(`/interview-blueprint/${interviewId}`)}
+                  className="px-3 py-1.5 text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-md"
+                >
+                  Open blueprint editor
+                </button>
+                <button
+                  onClick={() => navigate(`/interviews/${interviewId}`)}
+                  className="px-3 py-1.5 text-xs font-medium border border-amber-700 text-amber-900 rounded-md"
+                >
+                  Back to interview
+                </button>
+              </div>
+            </Card>
+          );
+        })()}
+
         <Card className="p-4 mb-6 shadow-lg">
           <h2 className="text-xl font-semibold text-foreground mb-3 flex items-center">
             <MessageSquareQuote className="w-5 h-5 mr-2 text-primary" />
