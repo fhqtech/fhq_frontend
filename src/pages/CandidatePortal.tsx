@@ -439,11 +439,12 @@ export default function CandidatePortal() {
       // Prepare the payload for the API
       // Send dot-notation fields directly to backend (e.g., "psychAssessment.color": "Red")
       const payload: Record<string, any> = {
-        [field]: value
+        [field]: value,
+        candidate_token: token,
       };
 
 
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidates/${portalData.candidate.id}/profile`;
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidate-portal/${portalData.candidate.id}/profile`;
 
       // Send update to backend
       const response = await fetch(apiUrl, {
@@ -882,11 +883,12 @@ export default function CandidatePortal() {
         linkedin: editFormData.linkedin,
         portfolioUrl: editFormData.portfolioUrl,
         experience: experience,
-        availableIn: editFormData.availableIn
+        availableIn: editFormData.availableIn,
+        candidate_token: token,
       };
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidates/${portalData.candidate.id}/profile`,
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidate-portal/${portalData.candidate.id}/profile`,
         {
           method: 'PUT',
           headers: {
@@ -972,6 +974,7 @@ export default function CandidatePortal() {
 
       const formData = new FormData();
       formData.append('resume', file);
+      if (token) formData.append('candidate_token', token);
 
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidates/${portalData.candidate.id}/resumes`,
@@ -1031,7 +1034,8 @@ export default function CandidatePortal() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          body: JSON.stringify({ candidate_token: token })
         }
       );
 

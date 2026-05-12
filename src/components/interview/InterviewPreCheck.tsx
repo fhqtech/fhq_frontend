@@ -161,11 +161,8 @@ export const InterviewPreCheck = ({
         `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/interviews/${interviewData.id}/select-resume`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(candidateToken ? { 'Authorization': `Bearer ${candidateToken}` } : {}),
-          },
-          body: JSON.stringify({ resumeId }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resumeId, candidate_token: candidateToken }),
         },
       );
 
@@ -183,7 +180,8 @@ export const InterviewPreCheck = ({
           `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/resumes/${resumeId}/set-active`,
           {
             method: 'PUT',
-            headers: candidateToken ? { 'Authorization': `Bearer ${candidateToken}` } : {},
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ candidate_token: candidateToken }),
           },
         );
         if (!setActiveResponse.ok) {
@@ -370,6 +368,7 @@ export const InterviewPreCheck = ({
     try {
       const formData = new FormData();
       formData.append('resume', file);
+      if (candidateToken) formData.append('candidate_token', candidateToken);
 
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/candidates/${candidateData.id}/resumes`,
