@@ -816,12 +816,12 @@ export const InterviewSession = ({
             }
             disabled={conversationState !== ConversationState.LISTENING}
             rows={1}
-            className="flex-1 resize-none bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 disabled:opacity-50 focus:outline-none focus:border-sky-500"
+            className="flex-1 resize-none bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 disabled:opacity-50 focus:outline-none focus:border-accent"
           />
           <button
             type="submit"
             disabled={!typedInput.trim() || conversationState !== ConversationState.LISTENING}
-            className="h-10 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-colors"
+            className="h-10 px-4 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-colors"
           >
             Send
           </button>
@@ -834,10 +834,10 @@ export const InterviewSession = ({
         <button
           onClick={handleMicToggle}
           className={`relative flex items-center justify-center h-12 w-12 rounded-full border-2 transition-all ${
-            isMicOn ? 'border-sky-500 bg-sky-500/10' : 'border-gray-600 bg-gray-500/10'
+            isMicOn ? 'border-accent bg-accent/10' : 'border-gray-600 bg-gray-500/10'
           }`}
         >
-          {isMicOn ? <Mic size={20} className="text-sky-400" /> : <MicOff size={20} className="text-gray-400" />}
+          {isMicOn ? <Mic size={20} className="text-accent" /> : <MicOff size={20} className="text-gray-400" />}
         </button>
 
         {/* Device Selector */}
@@ -845,7 +845,7 @@ export const InterviewSession = ({
           <select
             value={selectedAudioDevice}
             onChange={(e) => setSelectedAudioDevice(e.target.value)}
-            className="appearance-none flex items-center gap-2 h-10 px-3 pr-8 border border-slate-600 rounded-md bg-transparent text-slate-300 text-xs cursor-pointer focus:outline-none focus:border-sky-500"
+            className="appearance-none flex items-center gap-2 h-10 px-3 pr-8 border border-slate-600 rounded-md bg-transparent text-slate-300 text-xs cursor-pointer focus:outline-none focus:border-accent"
           >
             {audioDevices.map((device) => (
               <option key={device.deviceId} value={device.deviceId} className="bg-slate-800">
@@ -869,7 +869,7 @@ export const InterviewSession = ({
           <button
             onClick={() => setSpeechRate('slow')}
             className={`px-3 py-1.5 rounded text-xs transition-colors ${
-              speechRate === 'slow' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:bg-slate-700'
+              speechRate === 'slow' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-700'
             }`}
           >
             Slow
@@ -877,7 +877,7 @@ export const InterviewSession = ({
           <button
             onClick={() => setSpeechRate('normal')}
             className={`px-3 py-1.5 rounded text-xs transition-colors ${
-              speechRate === 'normal' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:bg-slate-700'
+              speechRate === 'normal' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-700'
             }`}
           >
             Normal
@@ -885,7 +885,7 @@ export const InterviewSession = ({
           <button
             onClick={() => setSpeechRate('fast')}
             className={`px-3 py-1.5 rounded text-xs transition-colors ${
-              speechRate === 'fast' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:bg-slate-700'
+              speechRate === 'fast' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-700'
             }`}
           >
             Fast

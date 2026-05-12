@@ -239,18 +239,30 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
               <div className="w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest bg-muted/50 text-muted-foreground border border-border shadow-lg">
                 NOT INTERVIEWED
               </div>
-              {/* Copy Invitation Link */}
+            </>
+          )}
+          {/* Copy candidate link (A2 2026-05-12).
+              Pre-registration → /register/{token}
+              Post-registration → /candidate-portal/{token}
+              Visible on every card now so recruiters can re-send a
+              link at any stage (e.g. candidate lost it). */}
+          {candidate.invitation_token && (() => {
+            const isRegistered = ['registered', 'completed', 'scheduling'].includes(candidate.status);
+            const path = isRegistered ? 'candidate-portal' : 'register';
+            const label = isRegistered ? 'Copy Portal Link' : 'Copy Invitation Link';
+            return (
               <div className="mt-4 flex items-center justify-center gap-2">
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Copy Invitation</span>
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    const invitationLink = `${window.location.origin}/register/${candidate.invitation_token || 'TEST_TOKEN'}`;
-                    navigator.clipboard.writeText(invitationLink);
+                    const link = `${window.location.origin}/${path}/${candidate.invitation_token}`;
+                    navigator.clipboard.writeText(link);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
                   className="flex-shrink-0 p-1.5 rounded bg-black hover:bg-slate-800 text-white transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                  title={isRegistered ? 'Copy candidate portal URL' : 'Copy registration URL'}
                 >
                   {copied ? (
                     <Check className="h-4 w-4 text-green-400" />
@@ -259,8 +271,8 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                   )}
                 </button>
               </div>
-            </>
-          )}
+            );
+          })()}
         </div>
 
         {/* Strength & Weakness Indicators */}

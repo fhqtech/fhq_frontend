@@ -50,7 +50,7 @@ export function TranscriptBox({
                 alt="Flowy"
                 className="w-6 h-6 rounded-full flex-shrink-0"
               />
-              <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
+              <div className="max-w-[80%] bg-accent/10 rounded-lg rounded-tl-none px-3 py-2">
                 <p className="text-slate-300 text-xs leading-relaxed">{message.content}</p>
               </div>
             </div>
