@@ -183,6 +183,11 @@ export const InterviewSession = ({
   // null = healthy; set string = show banner.
   const [streamWarning, setStreamWarning] = useState<string | null>(null);
 
+  // Text-input fallback for candidates without a mic / quiet environment.
+  // Routes through the same sendChatMessage as the voice path; gated on
+  // conversationState === LISTENING.
+  const [typedInput, setTypedInput] = useState('');
+
   const streamerRef = useRef<AssemblyAIStreamer | null>(null);
   const speakerRef = useRef<CartesiaSpeakerHandle>(null);
   const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -779,6 +784,48 @@ export const InterviewSession = ({
           isUserSpeaking={isListening && !!currentUtterance}
           className="w-full h-full"
         />
+      </div>
+
+      {/* Text Input Fallback — candidate can type instead of (or in addition to) speaking */}
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-10">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const text = typedInput.trim();
+            if (!text || conversationState !== ConversationState.LISTENING) return;
+            sendChatMessage({ message: text });
+            setTypedInput('');
+          }}
+          className="flex gap-2 items-end"
+        >
+          <textarea
+            value={typedInput}
+            onChange={(e) => setTypedInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                (e.currentTarget.form as HTMLFormElement)?.requestSubmit();
+              }
+            }}
+            placeholder={
+              conversationState === ConversationState.LISTENING
+                ? 'Type your answer (or just speak) — Enter to send, Shift+Enter for newline'
+                : conversationState === ConversationState.SPEAKING
+                ? 'Smriti is speaking…'
+                : 'Thinking…'
+            }
+            disabled={conversationState !== ConversationState.LISTENING}
+            rows={1}
+            className="flex-1 resize-none bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 disabled:opacity-50 focus:outline-none focus:border-sky-500"
+          />
+          <button
+            type="submit"
+            disabled={!typedInput.trim() || conversationState !== ConversationState.LISTENING}
+            className="h-10 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-colors"
+          >
+            Send
+          </button>
+        </form>
       </div>
 
       {/* Audio Controls Bar - Bottom Center */}
