@@ -114,8 +114,12 @@ export const InterviewSession = ({
 
           console.log('[Interview] Setting AI message for speech:', message.content);
           setTextToSpeak(message.content);
-          // Track AI speech start for video timing
-          videoTimingRef.current.aiSpeakingStarted(message.content);
+          // F1: removed `videoTimingRef.current.aiSpeakingStarted(...)` —
+          // VideoTimingManager was deleted in S1 (audio-only refactor) but
+          // this closure-captured reference survived. It threw a
+          // ReferenceError on every AI message, which the orchestrator's
+          // error boundary caught → onError fired → InterviewSessionPage
+          // ran navigate(-1) → candidate was bounced back to the portal.
 
           // Add to transcript messages
           setTranscriptMessages(prev => [...prev, { role: 'ai', content: message.content }]);
@@ -402,13 +406,26 @@ export const InterviewSession = ({
     setShowInactivityWarning(false);
     setInactivityCountdown(60);
 
-    // Don't start timer if AI is speaking, interview not started, or interview is ending
-    if (isSpeaking || !isInitialized || conversationState === ConversationState.IDLE || isEndingInterview) {
+    // F3: also bail when isWaitingForResponse — a slow Gemini turn used
+    // to fire the inactivity warning + auto-end mid-conversation.
+    if (
+      isSpeaking ||
+      !isInitialized ||
+      conversationState === ConversationState.IDLE ||
+      isEndingInterview ||
+      isWaitingForResponse
+    ) {
       return;
     }
 
     // Set 30-second warning timer
     activityTimerRef.current = setTimeout(() => {
+      // F3: re-check at fire time. State could have flipped since the
+      // 30s timer was scheduled (e.g., user spoke just before tick).
+      if (isWaitingRef.current) {
+        console.log('[Interview] Inactivity timer fired but waiting for AI — re-arming');
+        return;
+      }
       console.log('[Interview] 30 seconds of inactivity detected - showing warning');
       setShowInactivityWarning(true);
       setInactivityCountdown(60);
@@ -420,13 +437,19 @@ export const InterviewSession = ({
         setInactivityCountdown(remaining);
 
         if (remaining <= 0) {
-          console.log('[Interview] Inactivity timeout reached - ending interview');
           if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+          // F3: don't end interview while still waiting for AI to reply.
+          if (isWaitingRef.current) {
+            console.log('[Interview] Countdown hit 0 but waiting for AI — re-arming');
+            resetInactivityTimer();
+            return;
+          }
+          console.log('[Interview] Inactivity timeout reached - ending interview');
           handleEndInterview();
         }
       }, 1000);
     }, 30000); // 30 seconds
-  }, [isSpeaking, isInitialized, conversationState, isEndingInterview]);
+  }, [isSpeaking, isInitialized, conversationState, isEndingInterview, isWaitingForResponse]);
 
   // Tracks whether the user is mid-utterance, so we only fire the
   // interruption / echo-cancel logic on the leading edge of speech (not

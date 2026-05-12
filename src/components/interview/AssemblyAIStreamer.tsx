@@ -128,7 +128,11 @@ export default class AssemblyAIStreamer {
 
       // Handle transcript turns (incremental and final)
       // With formatTurns: false, we need to accumulate end_of_turn transcripts
-      const FINALIZE_DELAY_MS = 2000;
+      // F2: dropped from 2000ms → 800ms. AssemblyAI v3 streaming end_of_turn
+      // events are reliable enough that 800ms still tolerates a deliberate
+      // mid-thought pause without cutting slow speakers off, and saves
+      // ~1.2s on every turn round-trip. Major UX upgrade for interviews.
+      const FINALIZE_DELAY_MS = 800;
       let timerStartTime: number | null = null;
 
       this.transcriber.on('turn', ({ transcript, end_of_turn }) => {
