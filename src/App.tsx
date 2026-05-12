@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,37 +10,43 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import TourGuard from "@/components/tour/TourGuard";
+import { PageSkeleton } from "@/components/ui/shimmer";
+// Eager: landing-path bundle (marketing → login → OAuth → 404). Keep these
+// in the entry chunk so the first-paint network round trip stays small.
 import MarketingLanding from "./pages/MarketingLanding";
-import ProductLanding from "./pages/ProductLanding";
-import Dashboard from "./pages/Dashboard";
-import PilotDashboard from "./pages/PilotDashboard";
-import PoolDashboard from "./pages/PoolDashboard";
-import CreateInterview from "./pages/CreateInterview";
-import ManageInterviews from "./pages/ManageInterviewsEnhanced";
-import InterviewDetails from "./pages/InterviewDetails";
-import FitmentInterviews from "./pages/FitmentInterviews";
-import FitmentInterviewDetails from "./pages/FitmentInterviewDetails";
-import Lists from "./pages/Lists";
-import ListDetail from "./pages/ListDetail";
-import QuickTour from "./pages/QuickTour";
-import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import OAuth2Handler from "./components/auth/OAuth2Handler";
-import CandidateRegistration from "./pages/CandidateRegistration";
-import CandidatePortal from "./pages/CandidatePortal";
-// Interview System Pages
-import InterviewPreCheckPage from "./pages/interview/InterviewPreCheckPage";
-import InterviewSessionPage from "./pages/interview/InterviewSessionPage";
-import InterviewThankYouPage from "./pages/interview/InterviewThankYouPage";
-import InterviewResults from "./pages/InterviewResults";
-import DynamicBlueprintPage from "./pages/DynamicBlueprintPage";
-// C1: VideoTestPage + VideoPlayerFullPage removed (audio-only product since S1).
-import EmailTemplatePreview from "./pages/EmailTemplatePreview";
-import InterviewSwipeView from "./pages/InterviewSwipeView";
-import AcceptInvitation from "./pages/AcceptInvitation";
-import TestAssets from "./pages/TestAssets";
-import HowItWorks from "./pages/HowItWorks";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+
+// C6: lazy-loaded routes. Each lazy() becomes a separate chunk in the
+// build. Candidates hitting /interview/:id/* no longer download the
+// recruiter dashboard JS; recruiters hitting /dashboard no longer
+// download the AssemblyAI + Three.js + framer-motion session bundle.
+const ProductLanding = lazy(() => import("./pages/ProductLanding"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const PilotDashboard = lazy(() => import("./pages/PilotDashboard"));
+const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
+const CreateInterview = lazy(() => import("./pages/CreateInterview"));
+const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
+const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
+const FitmentInterviews = lazy(() => import("./pages/FitmentInterviews"));
+const FitmentInterviewDetails = lazy(() => import("./pages/FitmentInterviewDetails"));
+const Lists = lazy(() => import("./pages/Lists"));
+const ListDetail = lazy(() => import("./pages/ListDetail"));
+const QuickTour = lazy(() => import("./pages/QuickTour"));
+const Settings = lazy(() => import("./pages/Settings"));
+const CandidateRegistration = lazy(() => import("./pages/CandidateRegistration"));
+const CandidatePortal = lazy(() => import("./pages/CandidatePortal"));
+const InterviewPreCheckPage = lazy(() => import("./pages/interview/InterviewPreCheckPage"));
+const InterviewSessionPage = lazy(() => import("./pages/interview/InterviewSessionPage"));
+const InterviewThankYouPage = lazy(() => import("./pages/interview/InterviewThankYouPage"));
+const InterviewResults = lazy(() => import("./pages/InterviewResults"));
+const DynamicBlueprintPage = lazy(() => import("./pages/DynamicBlueprintPage"));
+const EmailTemplatePreview = lazy(() => import("./pages/EmailTemplatePreview"));
+const InterviewSwipeView = lazy(() => import("./pages/InterviewSwipeView"));
+const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
+const TestAssets = lazy(() => import("./pages/TestAssets"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 
 const queryClient = new QueryClient();
 
@@ -53,6 +60,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
           <ErrorBoundary>
+          <Suspense fallback={<PageSkeleton />}>
           <Routes>
             {/* Marketing landing page (public) */}
             <Route path="/" element={<MarketingLanding />} />
@@ -221,6 +229,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
