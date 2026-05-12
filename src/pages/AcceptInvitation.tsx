@@ -46,8 +46,12 @@ const AcceptInvitation = () => {
 
   const acceptInvitation = async () => {
     try {
+      // C4: env-driven URLs. Hardcoded localhost shipped to prod meant
+      // the candidate flow broke entirely on Vercel.
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
+      const CONTROL_TOWER = import.meta.env.VITE_CONTROL_TOWER_URL || 'http://localhost:8084';
       // First, get invitation details
-      const detailsResponse = await fetch(`http://localhost:8082/api/accept-invitation/${token}`, {
+      const detailsResponse = await fetch(`${API_BASE}/api/accept-invitation/${token}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +89,7 @@ const AcceptInvitation = () => {
       // Now accept the invitation
       const authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
       const acceptResponse = await fetch(
-        `http://localhost:8082/api/workspaces/${invitation.workspaceId}/invitations/${invitation.invitationId}/accept`,
+        `${API_BASE}/api/workspaces/${invitation.workspaceId}/invitations/${invitation.invitationId}/accept`,
         {
           method: 'POST',
           headers: {
@@ -111,7 +115,7 @@ const AcceptInvitation = () => {
       // Redirect to Control Tower after 2 seconds with workspace ID and token
       setTimeout(() => {
         const authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
-        window.location.href = `http://localhost:8084/talent-pools?workspace=${invitation.workspaceId}&token=${authToken}`;
+        window.location.href = `${CONTROL_TOWER}/talent-pools?workspace=${invitation.workspaceId}&token=${authToken}`;
       }, 2000);
     } catch (error: any) {
       console.error('Error accepting invitation:', error);
