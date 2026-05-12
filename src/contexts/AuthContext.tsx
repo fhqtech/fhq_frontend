@@ -80,9 +80,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Check for existing authentication on app start
   useEffect(() => {
-    // Skip auth check for candidate portal routes
+    // Skip auth check for candidate-flow routes ONLY. The recruiter
+    // results page lives under /interview/:id/results/:sessionId and
+    // IS authenticated — don't skip auth for it (bug: previously the
+    // prefix /interview/ matched everything including results, leaving
+    // user=null and bouncing recruiters to /).
     const currentPath = window.location.pathname;
-    if (currentPath.includes('/candidate-portal/') || currentPath.includes('/interview/')) {
+    const isCandidateRoute =
+      currentPath.includes('/candidate-portal/') ||
+      /^\/interview\/[^/]+\/(session|pre-check|complete)$/.test(currentPath);
+    if (isCandidateRoute) {
       setIsLoading(false);
       return;
     }
