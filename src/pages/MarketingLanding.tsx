@@ -311,7 +311,9 @@ const MeetFlowySection = () => {
       (metrics) => setAudioLevel(metrics.currentRms),
       () => {},
       () => {},
-      BACKEND_URL
+      BACKEND_URL,
+      undefined,
+      'demo', // demo-mode: fetch from /api/demo-tokens (rate-limited)
     );
 
     await assemblyStreamerRef.current.startStreaming();
@@ -466,6 +468,7 @@ const MeetFlowySection = () => {
           trigger={conversationState === 'ai-speaking'}
           speechRate="slow"
           voiceAccent="indian"
+          candidateToken="demo"
           onAudioLevel={setAudioLevel}
           onSpeakingStateChange={(speaking) => {
             if (!speaking && conversationState === 'ai-speaking') {

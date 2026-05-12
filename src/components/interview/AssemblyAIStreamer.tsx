@@ -65,6 +65,22 @@ export default class AssemblyAIStreamer {
    */
   private async fetchTemporaryToken(): Promise<string> {
     try {
+      // Demo mode: marketing demos pass candidateToken='demo' to hit the
+      // public rate-limited /api/demo-tokens endpoint instead of the
+      // gated /api/assemblyai-token. Keeps the landing-page preview alive
+      // without leaking the perm key in the bundle.
+      if (this.candidateToken === 'demo') {
+        const demoResp = await fetch(`${this.backendUrl}/api/demo-tokens`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!demoResp.ok) {
+          throw new Error(`Demo token fetch failed: ${demoResp.status}`);
+        }
+        const demoData = await demoResp.json();
+        return demoData.assemblyai_token;
+      }
+
       if (!this.candidateToken) {
         throw new Error('Missing candidate token');
       }

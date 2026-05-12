@@ -44,6 +44,22 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
 
     const fetchCartesiaKey = async (): Promise<string | null> => {
       if (cartesiaKeyRef.current) return cartesiaKeyRef.current;
+      // Demo mode: marketing demos pass candidateToken='demo'; hit the
+      // public rate-limited /api/demo-tokens instead of the gated path.
+      if (candidateToken === 'demo') {
+        try {
+          const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/demo-tokens`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (!resp.ok) return null;
+          const data = await resp.json();
+          cartesiaKeyRef.current = data.cartesia_key || null;
+          return cartesiaKeyRef.current;
+        } catch {
+          return null;
+        }
+      }
       if (!candidateToken) return null;
       try {
         const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/cartesia-token`, {

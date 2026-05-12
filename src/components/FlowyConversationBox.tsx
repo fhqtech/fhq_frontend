@@ -136,7 +136,9 @@ export default function FlowyConversationBox() {
       () => {}, // metrics update
       () => console.log('🎤 AssemblyAI connected'),
       (error) => console.error('❌ AssemblyAI error:', error),
-      BACKEND_URL
+      BACKEND_URL,
+      undefined,
+      'demo', // demo-mode: fetch from /api/demo-tokens (rate-limited)
     );
 
     await assemblyStreamerRef.current.startStreaming();
@@ -383,6 +385,7 @@ User: ${userMessage}`;
           trigger={conversationState === 'ai-speaking'}
           speechRate="slow"
           voiceAccent="indian"
+          candidateToken="demo"
           onSpeakingStateChange={(speaking) => {
             if (!speaking && conversationState === 'ai-speaking') {
               handleAISpeakingComplete();
