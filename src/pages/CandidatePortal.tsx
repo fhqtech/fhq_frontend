@@ -504,12 +504,14 @@ export default function CandidatePortal() {
   };
 
   const fetchPortalData = async (portalToken: string) => {
-    // H9: client-side timeout. Even with the H2 backend slow-path fix
-    // (collection_group + backfill), Firestore can still degrade and
-    // leave the portal hanging on an unbounded fetch. Cap at 10s and
-    // surface a clear retry path.
+    // H9: client-side timeout. The backend portal endpoint does ~5
+    // sequential Firestore reads (invitation → candidate → interview
+    // → blueprint → per-interview details + sessions). At pilot scale
+    // with Firestore in the nam5 region this routinely takes 7-10s.
+    // 30s gives real headroom; backend parallelization is on the
+    // roadmap but until then we don't want to false-error.
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
+    const timeout = setTimeout(() => controller.abort(), 30_000);
 
     try {
       setLoading(true);
