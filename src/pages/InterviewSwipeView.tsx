@@ -36,6 +36,10 @@ export default function InterviewSwipeView() {
   const [reviewerName, setReviewerName] = useState(() => localStorage.getItem('swipe_reviewer_name') || "");
   const [otpError, setOtpError] = useState("");
   const [loading, setLoading] = useState(false);
+  // C3: previously referenced but never declared, crashing the page on the
+  // OTP-verify path. Read from query string (?otp=) where the QR code
+  // embeds it; null if absent (handler shows a friendly error in that case).
+  const expectedOtp = searchParams.get("otp");
 
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);

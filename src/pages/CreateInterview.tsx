@@ -3794,6 +3794,11 @@ function EditModeIndicator({ lastSavedAt }) {
 
 // Multi-Source Candidate Manager Component for Interview Creation
 function MultiSourceCandidateManager({ formData, setFormData, isEditMode, interviewId, initialSourceType }) {
+  // C3: previously referenced `user` at lines 3840 + 3919 without declaring
+  // it in this child component's scope — the outer-component `user` from
+  // CreateInterview isn't visible here. ReferenceError crashed the
+  // add-candidate flow on save.
+  const { user } = useAuth();
   // Validate initial source type
   const validSourceTypes = ['google_sheet', 'excel_file', 'manual_entry'];
   const validInitialSourceType = initialSourceType && validSourceTypes.includes(initialSourceType) ? initialSourceType : null;
@@ -3837,7 +3842,7 @@ function MultiSourceCandidateManager({ formData, setFormData, isEditMode, interv
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${userToken}`,
-            'user-id': (typeof user !== 'undefined' && user?.id) || '87c0388e-5f74-4a30-8e32-06869f852cc3'
+            'user-id': user?.id || '87c0388e-5f74-4a30-8e32-06869f852cc3'
           },
           body: JSON.stringify(sourceData)
         });
@@ -3916,7 +3921,7 @@ function MultiSourceCandidateManager({ formData, setFormData, isEditMode, interv
       if (isEditMode && interviewId) {
         // In edit mode, delete from database
         const userToken = localStorage.getItem('auth_token');
-        const userId = (typeof user !== 'undefined' && user?.id) || '87c0388e-5f74-4a30-8e32-06869f852cc3';
+        const userId = user?.id || '87c0388e-5f74-4a30-8e32-06869f852cc3';
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidate-sources/${sourceToDelete.id}`, {
           method: 'DELETE',
           headers: {

@@ -421,22 +421,13 @@ export default function ManageInterviewsEnhanced() {
   };
 
   const handleClearFilter = (filterType: string) => {
-    switch (filterType) {
-      case 'search':
-        setSearchFilter('');
-        break;
-      case 'status':
-        setStatusFilter([]);
-        break;
-      case 'type':
-        setTypeFilter([]);
-        break;
-      case 'dateRange':
-        updateFilter('dateRange', undefined);
-        break;
-      case 'candidateCount':
-        updateFilter('candidateCount', undefined);
-        break;
+    // C3: previously called setSearchFilter/setStatusFilter/setTypeFilter/
+    // updateFilter — none of which exist on this component. ReferenceError
+    // crashed the page on any clear-filter click. Only `searchTerm` exists
+    // today; the rest of the filters are placeholders. Drop the bad
+    // setters; clear what we actually have.
+    if (filterType === 'search') {
+      setSearchTerm('');
     }
   };
 

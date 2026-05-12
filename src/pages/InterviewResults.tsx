@@ -383,7 +383,9 @@ const SkillsRadarChart = ({ competencies }: { competencies: Competency[] }) => {
 export default function InterviewResults() {
   const { interviewId, sessionId } = useParams();
   const navigate = useNavigate();
-  const { getIdToken } = useAuth();
+  // C3: AuthContextType has no getIdToken. Rest of the codebase reads the
+  // JWT straight from localStorage. Drop the bogus destructure.
+  useAuth();
   const [evaluation, setEvaluation] = useState<EvaluationData | null>(null);
   const [rawResults, setRawResults] = useState<InterviewResultsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -405,7 +407,7 @@ export default function InterviewResults() {
     }
 
     try {
-      const token = await getIdToken();
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`${API_BASE_URL}/api/results/session/${sessionId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -452,7 +454,7 @@ export default function InterviewResults() {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, getIdToken]);
+  }, [sessionId]);
 
   useEffect(() => {
     fetchResults();
