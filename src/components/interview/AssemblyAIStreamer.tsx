@@ -28,6 +28,8 @@ export default class AssemblyAIStreamer {
   private onConnectionError: (error: string) => void;
   private backendUrl: string;
   private audioDeviceId?: string;
+  // C1: invitation token is now required by /api/assemblyai-token.
+  private candidateToken?: string;
 
   private isStreaming = false;
   private isMuted = false;
@@ -44,7 +46,8 @@ export default class AssemblyAIStreamer {
     onConnectionOpen: () => void,
     onConnectionError: (error: string) => void,
     backendUrl: string,
-    audioDeviceId?: string
+    audioDeviceId?: string,
+    candidateToken?: string,
   ) {
     this.sessionId = sessionId;
     this.onTranscriptUpdate = onTranscriptUpdate;
@@ -53,6 +56,7 @@ export default class AssemblyAIStreamer {
     this.onConnectionError = onConnectionError;
     this.backendUrl = backendUrl;
     this.audioDeviceId = audioDeviceId;
+    this.candidateToken = candidateToken;
   }
 
   /**
@@ -61,12 +65,16 @@ export default class AssemblyAIStreamer {
    */
   private async fetchTemporaryToken(): Promise<string> {
     try {
+      if (!this.candidateToken) {
+        throw new Error('Missing candidate token');
+      }
 
       const response = await fetch(`${this.backendUrl}/api/assemblyai-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ candidate_token: this.candidateToken }),
       });
 
       if (!response.ok) {

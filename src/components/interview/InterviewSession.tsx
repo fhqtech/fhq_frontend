@@ -553,7 +553,8 @@ export const InterviewSession = ({
         setConnectionStatus('error');
       },
       import.meta.env.VITE_API_BASE_URL, // Backend URL for token generation (local Flask backend)
-      selectedAudioDevice
+      selectedAudioDevice,
+      candidateToken,
     );
 
     streamerRef.current.startStreaming();
