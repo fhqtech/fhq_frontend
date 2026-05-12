@@ -927,6 +927,7 @@ export const InterviewSession = ({
         mode="full"
         speechRate={speechRate}
         voiceAccent={voiceAccent}
+        candidateToken={candidateToken}
         onSpeakingStateChange={setIsSpeaking}
         onAudioLevel={setTtsAudioLevel}
         onComplete={() => {

@@ -161,7 +161,12 @@ const ConversationPanel = ({
         // If the part is a word (i.e., contains non-whitespace characters)
         if (part.trim().length > 0) {
           const span = document.createElement('span');
-          span.innerHTML = part; // Use innerHTML to render HTML tags like <strong>
+          // C2: textContent, not innerHTML. LLM output (or anything that
+          // bubbles up from a candidate transcript) is never trusted as
+          // HTML. The <strong>-rendering rationale was wishful — Smriti's
+          // prompt doesn't produce HTML, and a prompt-injection attempt
+          // could.
+          span.textContent = part;
           span.style.display = 'inline-block';
           span.style.opacity = '0';
           span.style.transform = 'translateY(10px)';

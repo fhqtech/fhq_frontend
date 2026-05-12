@@ -15,6 +15,9 @@ interface CartesiaSpeakerProps {
   onSpeakingStateChange?: (isSpeaking: boolean) => void;
   onComplete?: () => void; // MOCKTAGON: Completion callback
   onAudioLevel?: (level: number) => void; // Audio level callback (0-1) for reactive animations
+  // C2: candidate token required to fetch the Cartesia key from backend.
+  // Without it the speaker cannot connect (no fallback to bundled env key).
+  candidateToken?: string;
   // P1 R6: surface TTS failures to the parent. Today a WebSocket error
   // calls onComplete (silently), so the interview state machine thinks
   // the agent "finished speaking" successfully. The parent now sees the
@@ -23,7 +26,7 @@ interface CartesiaSpeakerProps {
 }
 
 const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
-  ({ text, trigger = false, mode = "full", speechRate = "normal", voiceAccent = "indian", onSpeakingStateChange, onComplete, onAudioLevel, onError }, ref) => {
+  ({ text, trigger = false, mode = "full", speechRate = "normal", voiceAccent = "indian", onSpeakingStateChange, onComplete, onAudioLevel, candidateToken, onError }, ref) => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const audioCtxRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
@@ -35,6 +38,27 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
     const wsRef = useRef<WebSocket | null>(null);
     const currentTextRef = useRef<string>(""); // Track current text being spoken
     const spokenTextRef = useRef<string>(""); // Track what has been spoken so far
+    // C2: in-memory cache of the Cartesia key fetched from backend. Lives
+    // only for the lifetime of the component (no localStorage).
+    const cartesiaKeyRef = useRef<string | null>(null);
+
+    const fetchCartesiaKey = async (): Promise<string | null> => {
+      if (cartesiaKeyRef.current) return cartesiaKeyRef.current;
+      if (!candidateToken) return null;
+      try {
+        const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/cartesia-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate_token: candidateToken }),
+        });
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        cartesiaKeyRef.current = data.key || null;
+        return cartesiaKeyRef.current;
+      } catch {
+        return null;
+      }
+    };
 
     // Voice ID mapping
     const VOICE_IDS = {
@@ -237,9 +261,9 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
         return;
       }
 
-      const apiKey = import.meta.env.VITE_CARTESIA_API_KEY;
+      const apiKey = await fetchCartesiaKey();
       if (!apiKey) {
-        if (import.meta.env.DEV) console.error("[Cartesia] Missing VITE_CARTESIA_API_KEY in your .env file!");
+        if (import.meta.env.DEV) console.error("[Cartesia] Could not obtain Cartesia key (missing candidateToken or token endpoint rejected).");
         setIsSpeaking(false);
         onSpeakingStateChange?.(false);
         onError?.('missing_api_key');  // P1 R6
