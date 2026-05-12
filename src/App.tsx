@@ -7,8 +7,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CandidateAuthProvider } from "@/contexts/CandidateAuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
 import TourGuard from "@/components/tour/TourGuard";
 import { PageSkeleton } from "@/components/ui/shimmer";
 // Eager: landing-path bundle (marketing → login → OAuth → 404). Keep these
@@ -48,12 +50,24 @@ const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
 const TestAssets = lazy(() => import("./pages/TestAssets"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 
+// Phase 4-6: candidate dashboard suite
+const CandidateLogin = lazy(() => import("./pages/candidate/CandidateLogin"));
+const CandidateClaimPassword = lazy(() => import("./pages/candidate/ClaimPassword"));
+const CandidateForgotPassword = lazy(() => import("./pages/candidate/ForgotPassword"));
+const CandidateOAuthSuccess = lazy(() => import("./pages/candidate/OAuthSuccess"));
+const CandidateDashboard = lazy(() => import("./pages/candidate/CandidateDashboard"));
+const CandidateInterviewDetail = lazy(() => import("./pages/candidate/CandidateInterviewDetail"));
+const CandidateResults = lazy(() => import("./pages/candidate/CandidateResults"));
+const CandidateProfile = lazy(() => import("./pages/candidate/CandidateProfile"));
+const CandidateSettings = lazy(() => import("./pages/candidate/CandidateSettings"));
+
 const queryClient = new QueryClient();
 
 // Environment variables loaded - logging removed for security
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <CandidateAuthProvider>
       <WorkspaceProvider>
         <TooltipProvider>
           <Toaster />
@@ -226,6 +240,52 @@ const App = () => (
             } />
 
 
+            {/* Phase 4-6: Candidate dashboard suite (persistent accounts) */}
+            <Route path="/candidate/login" element={<CandidateLogin />} />
+            <Route path="/candidate/oauth-success" element={<CandidateOAuthSuccess />} />
+            <Route path="/claim-password/:token" element={<CandidateClaimPassword />} />
+            <Route path="/forgot-password" element={<CandidateForgotPassword />} />
+            <Route
+              path="/candidate/dashboard"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateDashboard />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/interviews/:id"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateInterviewDetail />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/interviews/:id/results"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateResults />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/profile"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateProfile />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/settings"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateSettings />
+                </CandidateProtectedRoute>
+              }
+            />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -234,6 +294,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
       </WorkspaceProvider>
+      </CandidateAuthProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
