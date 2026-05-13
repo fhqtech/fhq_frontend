@@ -2,8 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, User, CheckCircle2, Clock, XCircle, AlertCircle, Eye, CheckCircle, MapPin, ThumbsUp, ThumbsDown, Check, X, Copy } from "lucide-react";
+import { Calendar, User, CheckCircle2, Clock, XCircle, AlertCircle, Eye, CheckCircle, MapPin, ThumbsUp, ThumbsDown, Check, X, Copy, Mail, MailWarning, MailCheck, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { interviewApi } from "@/services/interviewApi";
 import {
   Radar,
   RadarChart,
@@ -22,8 +24,55 @@ interface CandidateCardProps {
 
 export function CandidateCard({ candidate, onClick, hideViewButton = false }: CandidateCardProps) {
   const [copied, setCopied] = useState(false);
+  const [resending, setResending] = useState(false);
+  // Local optimistic mirror of the email_* fields so the UI flips
+  // immediately after a Resend without re-fetching the whole list.
+  const [emailState, setEmailState] = useState<{
+    sent: boolean | null;
+    sentAt: string | null;
+    error: string | null;
+  }>({
+    sent: candidate.email_sent ?? null,
+    sentAt: candidate.email_sent_at ?? null,
+    error: candidate.email_error ?? null,
+  });
+  const { toast } = useToast();
   const hasSession = candidate.session_id && candidate.session_status === "completed";
   const hasScore = candidate.score !== null && candidate.score !== undefined;
+
+  const handleResend = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!candidate.invitation_id) {
+      toast({ title: "Cannot resend", description: "Missing invitation id", variant: "destructive" });
+      return;
+    }
+    setResending(true);
+    try {
+      const result = await interviewApi.resendInvitationEmail(candidate.invitation_id);
+      setEmailState({
+        sent: result.email_sent,
+        sentAt: result.email_sent_at,
+        error: result.email_error,
+      });
+      if (result.email_sent) {
+        toast({ title: "Email resent", description: `Sent to ${candidate.email}` });
+      } else {
+        toast({
+          title: "Resend failed",
+          description: result.email_error || "Email did not send",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Resend failed",
+        description: err?.message || "Network error",
+        variant: "destructive",
+      });
+    } finally {
+      setResending(false);
+    }
+  };
 
   // Get blueprint from the latest attempt (if exists)
   const blueprint = candidate.attempts && candidate.attempts.length > 0
@@ -270,6 +319,52 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                     <Copy className="h-4 w-4" />
                   )}
                 </button>
+              </div>
+            );
+          })()}
+
+          {/* Email-delivery status chip + Resend (Phase 3b) */}
+          {candidate.invitation_id && (() => {
+            const sent = emailState.sent;
+            const sentAt = emailState.sentAt;
+            const error = emailState.error;
+            let chipClass = "border-border bg-muted/40 text-muted-foreground";
+            let icon = <Mail className="h-3 w-3" />;
+            let label = "Email pending";
+            if (sent === true) {
+              chipClass = "border-emerald-200 bg-emerald-50 text-emerald-700";
+              icon = <MailCheck className="h-3 w-3" />;
+              const when = sentAt
+                ? new Date(sentAt).toLocaleDateString()
+                : "";
+              label = when ? `Email sent · ${when}` : "Email sent";
+            } else if (sent === false) {
+              chipClass = "border-red-200 bg-red-50 text-red-700";
+              icon = <MailWarning className="h-3 w-3" />;
+              label = "Email failed";
+            }
+            return (
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border ${chipClass}`}
+                  title={error || (sentAt ? `Sent ${new Date(sentAt).toLocaleString()}` : "")}
+                >
+                  {icon}
+                  {label}
+                </span>
+                {sent !== true && (
+                  <button
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-white disabled:opacity-50 transition-colors"
+                    title="Resend invitation email"
+                  >
+                    <RefreshCw
+                      className={`h-3 w-3 ${resending ? "animate-spin" : ""}`}
+                    />
+                    {resending ? "Resending…" : "Resend"}
+                  </button>
+                )}
               </div>
             );
           })()}

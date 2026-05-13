@@ -279,6 +279,33 @@ class InterviewApiService {
   }
 
   /**
+   * Resend invitation email for a single candidate.
+   * Phase 3a: backend persists email_sent / email_error / etc. and
+   * returns the fresh state.
+   */
+  async resendInvitationEmail(invitationId: string): Promise<{
+    success: boolean;
+    invitation_id: string;
+    email_sent: boolean;
+    email_sent_at: string | null;
+    email_error: string | null;
+    email_message_id: string | null;
+  }> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/invitations/${invitationId}/resend`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.detail || data?.error || 'Resend failed');
+    }
+    return data;
+  }
+
+  /**
    * Get interview stats
    */
   async getInterviewStats(
