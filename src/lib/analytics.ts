@@ -36,6 +36,15 @@ let posthogPromise: Promise<typeof import("posthog-js").default> | null = null;
 
 function getPosthog(): Promise<typeof import("posthog-js").default> | null {
   if (!ENABLED || typeof window === "undefined") return null;
+  // DPDP §6 — non-essential processing requires explicit consent.
+  // ConsentContext writes to localStorage; we read fresh on every dispatch
+  // so a revocation immediately stops further captures.
+  try {
+    const consent = window.localStorage.getItem("fh_consent_v1");
+    if (consent !== "accepted") return null;
+  } catch {
+    return null;
+  }
   if (!posthogPromise) {
     posthogPromise = import("posthog-js").then((mod) => {
       mod.default.init(POSTHOG_KEY!, {

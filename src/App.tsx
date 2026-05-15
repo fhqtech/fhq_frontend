@@ -10,6 +10,8 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CandidateAuthProvider } from "@/contexts/CandidateAuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { ConsentProvider } from "@/contexts/ConsentContext";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
 import TourGuard from "@/components/tour/TourGuard";
@@ -52,6 +54,8 @@ const TestAssets = lazy(() => import("./pages/TestAssets"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
+const DataAccount = lazy(() => import("./pages/account/DataAccount"));
+const CandidateDataAccount = lazy(() => import("./pages/candidate/account/CandidateDataAccount"));
 
 // Phase 4-6: candidate dashboard suite
 const CandidateLogin = lazy(() => import("./pages/candidate/CandidateLogin"));
@@ -71,6 +75,7 @@ const LegacyFitmentRedirect = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ConsentProvider>
     <AuthProvider>
       <CandidateAuthProvider>
       <WorkspaceProvider>
@@ -79,6 +84,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
           <ErrorBoundary>
+          <ConsentBanner />
           <Suspense fallback={<PageSkeleton />}>
           <Routes>
             {/* Marketing landing page (public) */}
@@ -243,6 +249,15 @@ const App = () => (
               </ProtectedRoute>
             } />
 
+            {/* DPDP §11–13 rights surface (workspace) */}
+            <Route path="/account/data" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <DataAccount />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
 
             {/* Phase 4-6: Candidate dashboard suite (persistent accounts) */}
             <Route path="/candidate/login" element={<CandidateLogin />} />
@@ -289,6 +304,15 @@ const App = () => (
                 </CandidateProtectedRoute>
               }
             />
+            {/* DPDP §11–13 rights surface (applicant) */}
+            <Route
+              path="/candidate/account/data"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateDataAccount />
+                </CandidateProtectedRoute>
+              }
+            />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
@@ -300,6 +324,7 @@ const App = () => (
       </WorkspaceProvider>
       </CandidateAuthProvider>
     </AuthProvider>
+    </ConsentProvider>
   </QueryClientProvider>
 );
 
