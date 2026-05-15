@@ -86,10 +86,35 @@ export default function Dashboard() {
 
  const nba = useMemo(() => computeDashboardNBA(snapshots, loading), [snapshots, loading]);
 
+ // F24.5: time-of-day greeting shown once per day per user. Mono kicker
+ // sits above the H1 — first thing the user sees post-login. Skipped on
+ // first visit ever (no prior visit recorded) to let the hero land
+ // unannounced for a brand-new account.
+ const greeting = useMemo(() => {
+ if (!user?.id) return null;
+ if (typeof window === "undefined") return null;
+ const today = new Date().toISOString().slice(0, 10);
+ const key = `fh_last_dash_${user.id}`;
+ let lastVisit: string | null = null;
+ try { lastVisit = window.localStorage.getItem(key); } catch { /* private mode */ }
+ if (lastVisit === today) return null;
+ try { window.localStorage.setItem(key, today); } catch { /* ignore */ }
+ if (!lastVisit) return null; // first ever visit — skip greeting
+ const hour = new Date().getHours();
+ const tod = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+ const first = user.name?.split(" ")[0];
+ return first ? `Good ${tod}, ${first}` : `Good ${tod}`;
+ }, [user?.id, user?.name]);
+
  return (
  <div className="space-y-8">
  <div className="flex items-center justify-between">
  <div>
+ {greeting && (
+ <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2 animate-in fade-in duration-300">
+ {greeting}
+ </p>
+ )}
  {/* T4: brand-mirroring hero. Matches funnelhq.co primary headline. */}
  <h1 className="text-3xl font-bold text-foreground">
  {FINANCE_STRINGS.dashboard.heroHeadline}
@@ -134,15 +159,17 @@ export default function Dashboard() {
  ) : (
  <>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
- <StatsCard title="Active Interviews" value={stats.active} icon={Bot} variant="primary" />
+ <StatsCard index={0} title="Active Interviews" value={stats.active} icon={Bot} variant="primary" />
  <StatsCard
+ index={1}
  title="Total Candidates"
  value={stats.totalCandidates}
  icon={Users}
  variant="success"
  />
- <StatsCard title="Completed" value={stats.completedInterviews} icon={UserCheck} />
+ <StatsCard index={2} title="Completed" value={stats.completedInterviews} icon={UserCheck} />
  <StatsCard
+ index={3}
  title="Completion Rate"
  value={stats.completionRate}
  change={{ value: "%", positive: true }}

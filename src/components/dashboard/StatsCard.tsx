@@ -1,5 +1,6 @@
 import { Icon } from "phosphor-react";
 import { cn } from "@/lib/utils";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 interface StatsCardProps {
   title: string;
@@ -11,16 +12,32 @@ interface StatsCardProps {
   icon: Icon;
   variant?: "default" | "primary" | "success" | "warning";
   className?: string;
+  /** F24.5: stagger index — adds an `animation-delay` class so
+   *  multiple cards mount in sequence rather than all at once. */
+  index?: number;
 }
 
-export function StatsCard({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
+// Per-index stagger delay (Tailwind-emitted classes). Caps at 4 cards;
+// after that the stagger looks unnatural so we just snap.
+const DELAY_CLASSES = [
+  "[animation-delay:0ms]",
+  "[animation-delay:80ms]",
+  "[animation-delay:160ms]",
+  "[animation-delay:240ms]",
+];
+
+export function StatsCard({
+  title,
+  value,
+  change,
+  icon: Icon,
   variant = "default",
-  className 
+  className,
+  index = 0,
 }: StatsCardProps) {
+  const numericValue = typeof value === "number" ? value : Number(value);
+  const isCountable = Number.isFinite(numericValue);
+  const delayClass = DELAY_CLASSES[Math.min(index, DELAY_CLASSES.length - 1)];
   const variantStyles = {
     default: "bg-surface border-border",
     primary: "bg-ink border-ink/20 text-paper",
@@ -37,8 +54,10 @@ export function StatsCard({
 
   return (
     <div className={cn(
-      // F24.1: tactile press + lift + mount fade. transform-only.
-      "p-6 rounded-lg border transition-[box-shadow,transform] duration-150 ease-out hover:shadow-2 hover:-translate-y-0.5 active:translate-y-0 active:shadow-1 animate-in fade-in duration-300",
+      // F24.1: tactile press + lift + mount fade.
+      // F24.5: stagger via per-index animation-delay class.
+      "p-6 rounded-lg border transition-[box-shadow,transform] duration-150 ease-out hover:shadow-2 hover:-translate-y-0.5 active:translate-y-0 active:shadow-1 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both",
+      delayClass,
       variantStyles[variant],
       className
     )}>
@@ -54,7 +73,7 @@ export function StatsCard({
             "text-xl font-bold mt-2",
             variant === "default" ? "text-foreground" : "text-paper"
           )}>
-            {value}
+            {isCountable ? <AnimatedCounter value={numericValue} duration={650} /> : value}
           </p>
           {change && (
             <p className={cn(
