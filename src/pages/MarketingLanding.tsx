@@ -6,10 +6,12 @@
  * gradients. Single primary CTA → /start (chooser screen).
  */
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, BarChart3, Users, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCandidateAuth } from "@/contexts/CandidateAuthContext";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 function initialsFrom(input?: string): string {
   if (!input) return "··";
@@ -94,22 +96,60 @@ function Topbar() {
 }
 
 function Hero() {
+  // F24.7: word-stagger reveal on H1, then sub + CTAs cascade. transform +
+  // opacity only — no layout shift, Lighthouse-safe.
+  const headline = "Finance hiring, decided on depth.";
+  const words = headline.split(" ");
   return (
     <section className="bg-paper border-b border-rule">
       <div className="max-w-6xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
         <div>
-          <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-5">
+          <motion.p
+            className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
             Finance hiring · India · Big-4 calibrated
-          </p>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-ink leading-[1.05] mb-5">
-            Finance hiring, decided on depth.
-          </h1>
-          <p className="text-lg text-ink-soft leading-relaxed mb-8 max-w-xl">
+          </motion.p>
+          <motion.h1
+            className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-ink leading-[1.05] mb-5"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+            }}
+          >
+            {words.map((w, i) => (
+              <motion.span
+                key={`${i}-${w}`}
+                style={{ display: "inline-block", marginRight: "0.25em" }}
+                variants={{
+                  hidden: { opacity: 0, y: 12 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                {w}
+              </motion.span>
+            ))}
+          </motion.h1>
+          <motion.p
+            className="text-lg text-ink-soft leading-relaxed mb-8 max-w-xl"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
             FunnelHQ runs structured AI assessments calibrated to tax, audit,
             controllership, FP&amp;A and consulting. You meet only the
             applicants worth your time.
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
+          </motion.p>
+          <motion.div
+            className="flex flex-wrap items-center gap-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
             <Button variant="gold" size="lg" asChild>
               <Link to="/start">
                 Get started <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -120,7 +160,7 @@ function Hero() {
                 See how it works <ChevronRight className="ml-1.5 h-4 w-4" />
               </a>
             </Button>
-          </div>
+          </motion.div>
         </div>
         <div className="hidden md:block">
           <div className="relative rounded-lg border border-rule bg-paper-2 shadow-2 p-8 aspect-4/3 flex flex-col justify-between">
@@ -246,11 +286,44 @@ function HowItWorks() {
   );
 }
 
+// F24.7: stats are mixed format ("8.4×" / "62%" / "10"). For the integer
+// one, use AnimatedCounter on whileInView so it counts when scrolled into
+// view — only fires once per session per stat.
+type Stat = { num: string; counter?: { value: number; suffix?: string }; label: string; body: string };
+
+function OutcomeCard({ stat, index }: { stat: Stat; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-lg border border-rule bg-paper p-7 shadow-1"
+    >
+      <div className="border-t-2 border-gold w-10 mb-4" />
+      <div className="text-4xl font-mono font-semibold tabular-nums text-ink tracking-tight">
+        {stat.counter ? (
+          <>
+            <AnimatedCounter value={stat.counter.value} duration={900} />
+            {stat.counter.suffix}
+          </>
+        ) : (
+          stat.num
+        )}
+      </div>
+      <div className="font-mono uppercase tracking-wider text-[11px] text-muted mt-2 mb-3">
+        {stat.label}
+      </div>
+      <p className="text-sm text-ink-soft leading-relaxed">{stat.body}</p>
+    </motion.div>
+  );
+}
+
 function Outcomes() {
-  const stats = [
+  const stats: Stat[] = [
     { num: "8.4×", label: "Faster screening", body: "From résumé inbox to shortlist in days, not weeks." },
     { num: "62%", label: "Less interviewer time", body: "AI handles the depth probe; you decide on the signal." },
-    { num: "10", label: "Skills per role", body: "Big-4 calibrated rubric with 0-100 anchors per skill." },
+    { num: "10", counter: { value: 10 }, label: "Skills per role", body: "Big-4 calibrated rubric with 0-100 anchors per skill." },
   ];
   return (
     <section id="outcomes" className="bg-paper-2 border-y border-rule">
@@ -264,20 +337,8 @@ function Outcomes() {
           </h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-lg border border-rule bg-paper p-7 shadow-1"
-            >
-              <div className="border-t-2 border-gold w-10 mb-4" />
-              <div className="text-4xl font-mono font-semibold tabular-nums text-ink tracking-tight">
-                {s.num}
-              </div>
-              <div className="font-mono uppercase tracking-wider text-[11px] text-muted mt-2 mb-3">
-                {s.label}
-              </div>
-              <p className="text-sm text-ink-soft leading-relaxed">{s.body}</p>
-            </div>
+          {stats.map((s, i) => (
+            <OutcomeCard key={s.label} stat={s} index={i} />
           ))}
         </div>
       </div>
