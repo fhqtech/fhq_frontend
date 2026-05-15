@@ -37,7 +37,8 @@ export function StatsCard({
 
   return (
     <div className={cn(
-      "p-6 rounded-lg border transition-all hover:shadow-2",
+      // F24.1: tactile press + lift + mount fade. transform-only.
+      "p-6 rounded-lg border transition-[box-shadow,transform] duration-150 ease-out hover:shadow-2 hover:-translate-y-0.5 active:translate-y-0 active:shadow-1 animate-in fade-in duration-300",
       variantStyles[variant],
       className
     )}>
