@@ -84,7 +84,9 @@ export default function ManageInterviewsEnhanced() {
  const [pageSize, setPageSize] = useState(10);
  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
  const [interviewToDelete, setInterviewToDelete] = useState<{id: string, title: string} | null>(null);
- const isDeletingInterview = deleteInterview.isPending;
+ // F25.0: isDeletingInterview moved next to its mutation declaration below
+ // (was here, threw TDZ "Cannot access 'deleteInterview' before initialization"
+ // because deleteInterview is declared 39 lines later).
  const [startModalOpen, setStartModalOpen] = useState(false);
  const [isStartingInterview, setIsStartingInterview] = useState(false);
  const [currentStartingInterview, setCurrentStartingInterview] = useState<{id: string, title: string} | null>(null);
@@ -126,6 +128,7 @@ export default function ManageInterviewsEnhanced() {
  const deleteInterview = useDeleteInterviewMutation(currentWorkspace?.id, currentProject?.id);
  const startInterview = useStartInterviewMutation(currentWorkspace?.id, currentProject?.id);
  const prefetchInterview = usePrefetchInterview(currentWorkspace?.id, currentProject?.id);
+ const isDeletingInterview = deleteInterview.isPending;
 
  // Filter interviews based on search term and interview type (route-based)
  const filteredInterviews = useMemo(() => {
