@@ -76,7 +76,7 @@ export default defineConfig(({ mode }) => {
             if (id.includes("recharts") || id.includes("d3-")) {
               return "charts-vendor";
             }
-            if (id.includes("three") || id.includes("@react-three") || id.includes("framer-motion") || id.includes("gsap")) {
+            if (id.includes("three") || id.includes("@react-three") || id.includes("framer-motion")) {
               return "anim-vendor";
             }
             if (id.includes("assemblyai")) {

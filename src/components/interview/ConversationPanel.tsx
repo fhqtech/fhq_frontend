@@ -1,7 +1,5 @@
 import { HistoryItem } from "@/types/interview";
-import { useRef, useState, useEffect } from "react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 
 // Render markdown emphasis (bold text with asterisks) as HTML
@@ -111,7 +109,6 @@ const ConversationPanel = ({
 }: ConversationPanelProps) => {
   const lastAiMessage = history.filter(item => item.role === 'model').pop();
   const bubbleRef = useRef(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showIdleNudge, setShowIdleNudge] = useState(false);
   const [isIdle, setIsIdle] = useState(false);
@@ -146,48 +143,14 @@ const ConversationPanel = ({
     };
   }, [isWaitingForResponse, messageText, onIdleNudge]);
 
-  useGSAP(() => {
-    if (messageText && textRef.current) {
-      // FIX: The original logic `messageText.split(' ')` discarded newline
-      // characters, merging all paragraphs. This new logic preserves them.
-
-      textRef.current.innerHTML = ''; // Clear previous text
-
-      // Split text by whitespace, but keep the whitespace characters (spaces, newlines)
-      // in the resulting array. e.g., "Hi\nthere" becomes ["Hi", "\n", "there"]
-      const parts = messageText.split(/(\s+)/);
-
-      parts.forEach(part => {
-        // If the part is a word (i.e., contains non-whitespace characters)
-        if (part.trim().length > 0) {
-          const span = document.createElement('span');
-          // C2: textContent, not innerHTML. LLM output (or anything that
-          // bubbles up from a candidate transcript) is never trusted as
-          // HTML. The <strong>-rendering rationale was wishful — Smriti's
-          // prompt doesn't produce HTML, and a prompt-injection attempt
-          // could.
-          span.textContent = part;
-          span.style.display = 'inline-block';
-          span.style.opacity = '0';
-          span.style.transform = 'translateY(10px)';
-          textRef.current!.appendChild(span);
-        } else {
-          // Otherwise, it's a whitespace part. Append it as a text node
-          // to preserve the original formatting (spaces, newlines, etc.).
-          textRef.current!.appendChild(document.createTextNode(part));
-        }
-      });
-
-      // Animate only the <span> elements (the words), not the whitespace text nodes.
-      gsap.to(textRef.current.querySelectorAll('span'), {
-        opacity: 1,
-        y: 0,
-        stagger: 0.08,
-        ease: 'power3.out',
-        delay: 0.2,
-      });
-    }
-  }, { scope: bubbleRef, dependencies: [messageText] });
+  // Word-stagger reveal — split the message into word + whitespace parts so
+  // newlines render correctly. Whitespace stays as inert text nodes; only
+  // word spans animate. textContent (not innerHTML) — LLM output is never
+  // trusted as HTML, and prompt-injection attempts must not become DOM.
+  const wordParts = useMemo(
+    () => (messageText ? messageText.split(/(\s+)/) : []),
+    [messageText],
+  );
 
   return (
     <div className="flex flex-col h-full items-center pt-8">
@@ -206,8 +169,34 @@ const ConversationPanel = ({
           >
             <div className={`bg-paper text-ink rounded-2xl p-6 text-left text-xl shadow-2 min-h-[120px] transition-all duration-300 ${isIdle ? 'ring-2 ring-gold ring-opacity-60' : ''
               }`}>
-              {/* This 'p' tag with 'whitespace-pre-wrap' is essential for rendering the newline characters correctly. */}
-              <p ref={textRef} className="whitespace-pre-wrap"></p>
+              {/* whitespace-pre-wrap preserves newlines from the LLM. */}
+              <motion.p
+                key={messageText}
+                className="whitespace-pre-wrap"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+                }}
+              >
+                {wordParts.map((part, i) =>
+                  part.trim().length > 0 ? (
+                    <motion.span
+                      key={`${i}-${part}`}
+                      style={{ display: "inline-block" }}
+                      variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: { opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1] } },
+                      }}
+                    >
+                      {part}
+                    </motion.span>
+                  ) : (
+                    <span key={`${i}-ws`}>{part}</span>
+                  ),
+                )}
+              </motion.p>
 
               {/* Gentle nudge indicator */}
               {showIdleNudge && (

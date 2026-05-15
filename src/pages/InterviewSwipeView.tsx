@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
-import { useSpring, animated } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,36 +188,36 @@ export default function InterviewSwipeView() {
     }
   };
 
-  // Spring animation for card
-  const [{ x, rotate }, api] = useSpring(() => ({
-    x: 0,
-    rotate: 0,
-  }));
+  // Tinder-style swipe — Framer Motion `useMotionValue` so x/rotate update
+  // outside the React render cycle (no per-pixel re-render). The card
+  // component below sets `drag="x"` + `dragSnapToOrigin` so the spring-back
+  // is built in; we only intervene on a velocity-triggered swipe to fly
+  // the card off-screen, then snap back to 0 for the next applicant.
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, (v) => v / 20);
+  const swipeShadow = useTransform(x, (v) => {
+    const absVal = Math.abs(v);
+    if (absVal < 50) return "drop-shadow(0 4px 12px rgba(0,0,0,0.15))";
+    const intensity = Math.min((absVal - 50) / 150, 1);
+    return v > 0
+      ? `drop-shadow(0 8px 24px rgba(34, 197, 94, ${intensity * 0.6}))`
+      : `drop-shadow(0 8px 24px rgba(239, 68, 68, ${intensity * 0.6}))`;
+  });
 
-  // Drag gesture
-  const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
-      const trigger = vx > 0.2; // velocity threshold
-      const dir = xDir < 0 ? -1 : 1;
-
-      if (!active && trigger) {
-        // Swiped
-        handleSwipe(dir === 1 ? 'right' : 'left');
-        api.start({ x: dir * 1000, rotate: dir * 45 });
-        setTimeout(() => {
-          api.start({ x: 0, rotate: 0, immediate: true });
-        }, 300);
-      } else {
-        // Dragging or released without trigger
-        api.start({
-          x: active ? mx : 0,
-          rotate: active ? mx / 20 : 0,
-          immediate: (key) => active && key === "x",
-        });
-      }
-    },
-    { axis: "x" }
-  );
+  const handleDragEnd = (
+    _event: unknown,
+    info: { offset: { x: number; y: number }; velocity: { x: number; y: number } },
+  ) => {
+    const trigger = Math.abs(info.velocity.x) > 200; // px/s threshold (FM units)
+    if (trigger) {
+      const dir = info.velocity.x < 0 ? -1 : 1;
+      handleSwipe(dir === 1 ? "right" : "left");
+      animate(x, dir * 1000, { duration: 0.3 }).then(() => {
+        x.set(0);
+      });
+    }
+    // Otherwise FM's dragSnapToOrigin springs us back automatically.
+  };
 
   const currentCandidate = candidates[currentIndex];
   const progress = candidates.length > 0 ? ((currentIndex + 1) / candidates.length) * 100 : 0;
@@ -396,24 +395,17 @@ export default function InterviewSwipeView() {
       {/* Card Stack */}
       <div className="max-w-md mx-auto relative min-h-[700px]">
         {currentCandidate ? (
-          <animated.div
-            {...bind()}
+          <motion.div
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragSnapToOrigin
+            dragElastic={1}
+            onDragEnd={handleDragEnd}
             style={{
               x,
               rotate,
+              filter: swipeShadow,
               touchAction: "none",
-              filter: x.to((val) => {
-                const absVal = Math.abs(val);
-                if (absVal < 50) return 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))';
-                const intensity = Math.min((absVal - 50) / 150, 1);
-                if (val > 0) {
-                  // Swiping right - green shadow
-                  return `drop-shadow(0 8px 24px rgba(34, 197, 94, ${intensity * 0.6}))`;
-                } else {
-                  // Swiping left - red shadow
-                  return `drop-shadow(0 8px 24px rgba(239, 68, 68, ${intensity * 0.6}))`;
-                }
-              }),
             }}
             className="cursor-grab active:cursor-grabbing"
           >
@@ -421,11 +413,10 @@ export default function InterviewSwipeView() {
               candidate={currentCandidate}
               hideViewButton={true}
             />
-            {/* Swipe Instructions */}
             <div className="text-center text-xs text-muted-foreground mt-4 uppercase tracking-wider">
               Swipe right to shortlist • Swipe left to reject
             </div>
-          </animated.div>
+          </motion.div>
         ) : (
           <div className="flex items-center justify-center min-h-[700px]">
             <Loader2 className="w-8 h-8 animate-spin text-ink" />
