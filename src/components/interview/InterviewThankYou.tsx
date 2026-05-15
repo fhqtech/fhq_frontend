@@ -97,7 +97,7 @@ export const InterviewThankYou = ({
   };
 
   return (
-    <div className="min-h-dvh bg-[#EEEEEE] relative overflow-hidden">
+    <div className="min-h-dvh bg-paper-2 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-success/30 rounded-full blur-3xl animate-pulse" />
@@ -184,8 +184,8 @@ export const InterviewThankYou = ({
                       <span className="text-xs font-bold text-info">2</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-ink">Review in progress</p>
-                      <p className="text-xs text-muted">Our team will evaluate your responses</p>
+                      <p className="text-sm font-medium text-ink">Talent Analysis Graph in progress</p>
+                      <p className="text-xs text-muted">Your responses are being scored against the role rubric. Usually ready in 1–2 minutes.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -193,8 +193,8 @@ export const InterviewThankYou = ({
                       <span className="text-xs font-bold text-gold-ink">3</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-ink">We'll be in touch</p>
-                      <p className="text-xs text-muted">Expect updates within 3-5 business days</p>
+                      <p className="text-sm font-medium text-ink">You'll hear back</p>
+                      <p className="text-xs text-muted">The hiring team reviews your TAG and reaches out within 3–5 business days.</p>
                     </div>
                   </div>
                 </div>

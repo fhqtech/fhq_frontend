@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Mail } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorBanner } from '@/components/ui/error-banner';
+import { StatusDot } from '@/components/ui/status-dot';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCandidateAuth } from '@/contexts/CandidateAuthContext';
 
@@ -57,12 +58,28 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
+/**
+ * F24.6: applicant-side "analyzing" pill.
+ *
+ * Heuristic — completed within the last 5 minutes = TAG still being scored.
+ * The reviewer agent typically finishes within 1–2 min; 5 min is the soft
+ * upper bound from F19's portal-load measurements.
+ */
+function isAnalyzing(inv: Invitation): boolean {
+  if (groupOf(inv.status) !== 'completed') return false;
+  if (!inv.completed_at) return true; // completed flag set but no timestamp — assume in-flight
+  const completedMs = new Date(inv.completed_at).getTime();
+  if (Number.isNaN(completedMs)) return false;
+  return Date.now() - completedMs < 5 * 60_000;
+}
+
 function InvitationCard({ inv }: { inv: Invitation }) {
   const navigate = useNavigate();
   const group = groupOf(inv.status);
+  const analyzing = isAnalyzing(inv);
   const cta =
     group === 'completed'
-      ? 'View results'
+      ? analyzing ? 'Results coming soon' : 'View results'
       : inv.status === 'started' || inv.status === 'paused'
       ? 'Resume interview'
       : 'Start interview';
@@ -99,11 +116,13 @@ function InvitationCard({ inv }: { inv: Invitation }) {
         {inv.completed_at && (
           <span>Completed {new Date(inv.completed_at).toLocaleDateString()}</span>
         )}
+        {analyzing && <StatusDot variant="pending" pulse label="Analyzing" />}
       </div>
 
       <button
         onClick={onClick}
-        className="mt-auto h-9 bg-primary hover:bg-primary/90 text-paper text-sm font-medium rounded-md"
+        disabled={analyzing}
+        className="mt-auto h-9 bg-primary hover:bg-primary/90 text-paper text-sm font-medium rounded-md transition-colors disabled:bg-paper-3 disabled:text-muted disabled:cursor-not-allowed"
       >
         {cta}
       </button>
