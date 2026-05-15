@@ -1,6 +1,14 @@
 import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import path from "path";
+
+// React Compiler 1.0 (GA Oct 2025). Compilation target: React 19.
+// Per-file opt-in via "use memo" pragma at top of file; all other
+// files run unmodified to bound regression surface during F23.5.
+const REACT_COMPILER_CONFIG = {
+  target: "19" as const,
+  compilationMode: "annotation" as const,
+};
 
 const REQUIRED_PROD_ENV = [
   "VITE_API_BASE_URL",
@@ -31,7 +39,13 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    plugins: [react()],
+    plugins: [
+      react({
+        babel: {
+          plugins: [["babel-plugin-react-compiler", REACT_COMPILER_CONFIG]],
+        },
+      }),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
