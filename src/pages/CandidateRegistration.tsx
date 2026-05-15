@@ -1237,12 +1237,12 @@ export default function CandidateRegistration() {
 
                         {formData.resumeFile ? (
                           <div className="flex flex-col items-center gap-3 w-full">
-                            <CheckCircle className="w-8 h-8 text-green-600" />
+                            <CheckCircle className="w-8 h-8 text-success" />
                             <div className="text-center">
                               <p className="text-ink font-semibold text-sm">{formData.resumeFile.name}</p>
                               <p className="text-xs text-muted mt-1">{(formData.resumeFile.size / 1024).toFixed(2)} KB</p>
                               {isExtractingResume && (
-                                <p className="text-[11px] text-blue-600 mt-1 inline-flex items-center gap-1">
+                                <p className="text-[11px] text-info mt-1 inline-flex items-center gap-1">
                                   <Loader2 className="w-3 h-3 animate-spin" />
                                   Reading your resume to pre-fill the form…
                                 </p>

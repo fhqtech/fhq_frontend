@@ -3,7 +3,12 @@
  * accepts or declines. Once a choice is recorded, the banner stays
  * hidden; users can revisit + revoke at /account/data (workspace) or
  * /candidate/account/data (applicant).
+ *
+ * F24.2: AnimatePresence wraps the conditional render so the exit
+ * transition fires on accept/decline (slide-out + fade) instead of
+ * disappearing instantly.
  */
+import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useConsent } from "@/contexts/ConsentContext";
 import { Button } from "@/components/ui/button";
@@ -11,15 +16,19 @@ import { Button } from "@/components/ui/button";
 export function ConsentBanner() {
   const { state, accept, decline } = useConsent();
 
-  if (state !== "unknown") return null;
-
   return (
-    <div
-      role="dialog"
-      aria-labelledby="consent-banner-title"
-      aria-describedby="consent-banner-description"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[min(640px,calc(100vw-2rem))] bg-paper border border-rule rounded-lg shadow-3 p-5"
-    >
+    <AnimatePresence>
+      {state === "unknown" && (
+        <motion.div
+          role="dialog"
+          aria-labelledby="consent-banner-title"
+          aria-describedby="consent-banner-description"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 24 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[min(640px,calc(100vw-2rem))] bg-paper border border-rule rounded-lg shadow-3 p-5"
+        >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
         <div className="flex-1 space-y-1.5">
           <h3
@@ -47,6 +56,8 @@ export function ConsentBanner() {
           </Button>
         </div>
       </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

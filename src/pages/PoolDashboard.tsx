@@ -13,7 +13,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertTriangle, ArrowLeft, Users, Filter, Download } from "lucide-react";
+import { PageSkeleton } from "@/components/ui/shimmer";
+import { ErrorBanner } from "@/components/ui/error-banner";
+import { ArrowLeft, Users, Filter, Download } from "lucide-react";
 import { downloadCsv } from "@/lib/csv";
 import { usePoolDashboardQuery, type PoolCandidate } from "@/queries/poolQueries";
 
@@ -97,20 +99,19 @@ export default function PoolDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    );
+    return <PageSkeleton header cards={3} rows={8} cols={3} message="Loading talent pool…" />;
   }
 
   if (error || !stats) {
     return (
       <div className="p-8">
-        <Card className="flex items-center gap-3 border-red-200 bg-red-50 p-6 text-red-700">
-          <AlertTriangle className="h-5 w-5" />
-          <span>{error || "Pool stats unavailable."}</span>
-        </Card>
+        <ErrorBanner
+          tone="danger"
+          title="Couldn't load talent pool"
+          description={error || "Pool stats unavailable."}
+          retryLabel="Try again"
+          onRetry={() => poolQuery.refetch()}
+        />
       </div>
     );
   }
