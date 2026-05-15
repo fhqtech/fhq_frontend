@@ -8,8 +8,38 @@
  * NOT a substitute for legal review. Update with counsel before launch.
  */
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
+function LanguageToggle() {
+  const { t, i18n } = useTranslation("privacy");
+  const setLng = (lng: string) => {
+    void i18n.changeLanguage(lng);
+    document.documentElement.lang = lng;
+  };
+  const current = i18n.resolvedLanguage || "en";
+  return (
+    <div className="flex items-center gap-2 text-sm" role="group" aria-label={t("languageToggle.label")}>
+      <button
+        onClick={() => setLng("en")}
+        className={current === "en" ? "font-semibold text-ink" : "text-muted hover:text-ink"}
+        aria-pressed={current === "en"}
+      >
+        {t("languageToggle.english")}
+      </button>
+      <span className="text-rule">·</span>
+      <button
+        onClick={() => setLng("hi")}
+        className={current === "hi" ? "font-semibold text-ink" : "text-muted hover:text-ink"}
+        aria-pressed={current === "hi"}
+      >
+        {t("languageToggle.hindi")}
+      </button>
+    </div>
+  );
+}
 
 export default function PrivacyPolicy() {
+  const { t } = useTranslation("privacy");
   return (
     <div className="min-h-dvh bg-paper-2 text-ink antialiased">
       <header className="bg-paper border-b border-rule">
@@ -20,25 +50,29 @@ export default function PrivacyPolicy() {
             </div>
             <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
           </Link>
-          <Link to="/terms" className="text-sm text-ink-soft hover:text-ink">
-            Terms
-          </Link>
+          <div className="flex items-center gap-4">
+            <LanguageToggle />
+            <Link to="/terms" className="text-sm text-ink-soft hover:text-ink">
+              Terms
+            </Link>
+          </div>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-14">
         <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-3">
-          Legal
+          {t("kicker")}
         </p>
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-ink mb-2">
-          Privacy policy
+          {t("title")}
         </h1>
-        <p className="text-sm text-muted mb-10">
-          Last updated 14 May 2026. This policy describes how FunnelHQ handles your
-          personal data under India's Digital Personal Data Protection Act (DPDP),
-          2023. We aim for plain English over legal jargon — talk to us if anything
-          is unclear.
+        <p className="text-sm text-muted mb-3">
+          {t("lastUpdated")} {t("intro")}
         </p>
+        <p className="text-sm text-ink-soft mb-10 p-4 bg-paper border border-rule rounded-md">
+          {t("summary")}
+        </p>
+        <p className="text-xs text-muted mb-10 italic">{t("fullPolicyNote")}</p>
 
         <Section title="Who we are">
           <p>

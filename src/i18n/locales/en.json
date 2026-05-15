@@ -1,0 +1,35 @@
+{
+  "privacy": {
+    "kicker": "Legal",
+    "title": "Privacy policy",
+    "lastUpdated": "Last updated 15 May 2026.",
+    "intro": "This policy describes how FunnelHQ handles your personal data under India's Digital Personal Data Protection Act (DPDP), 2023. We aim for plain English over legal jargon — talk to us if anything is unclear.",
+    "summary": "We are a finance-hiring platform. We process your personal data lawfully under DPDP. You can exercise your rights — access, correction, erasure, nominee — from your account settings.",
+    "sections": {
+      "whoWeAre": "Who we are",
+      "whatWeCollect": "What we collect",
+      "whyWeCollect": "Why we collect it",
+      "whereItLives": "Where it lives",
+      "retention": "Retention",
+      "yourRights": "Your rights under DPDP",
+      "subProcessors": "Sub-processors",
+      "security": "Security",
+      "changes": "Changes to this policy",
+      "contact": "Contact"
+    },
+    "languageToggle": {
+      "label": "Language",
+      "english": "English",
+      "hindi": "हिंदी"
+    },
+    "fullPolicyNote": "Full policy below in English. हिंदी संस्करण के लिए ऊपर भाषा बदलें।"
+  },
+  "consent": {
+    "kicker": "Privacy choice",
+    "body": "We use product analytics to understand how the app is used, and session replay to debug issues. Both run in the EU and never capture passwords or résumé content. You can change your mind anytime in your account settings.",
+    "readPolicy": "Read our privacy notice.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "withdraw": "Withdraw"
+  }
+}
