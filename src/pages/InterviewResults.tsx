@@ -274,9 +274,9 @@ export default function InterviewResults() {
   };
 
   return (
-    <div className="min-h-dvh bg-gradient-subtle p-4">
+    <div className="min-h-dvh bg-gradient-subtle p-4 animate-in fade-in duration-300">
       <main className="max-w-6xl mx-auto">
-        <header className="mb-6">
+        <header className="mb-6 animate-in slide-in-from-top-2 fade-in duration-400">
           <div className="flex justify-between items-start">
             <div className="flex items-center">
               <Button

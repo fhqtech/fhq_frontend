@@ -17,6 +17,7 @@ import {
 } from "./constants";
 import type { TagMode, TagNode } from "./types";
 import { nodeStatus } from "./adapters";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 interface TagSidePanelProps {
   node: TagNode | null;
@@ -110,7 +111,8 @@ export function TagSidePanel({ node, mode }: TagSidePanelProps) {
                 className="tag-score-num"
                 style={{ fontFamily: TAG_TYPE.serif, color: TAG_PALETTE.ink }}
               >
-                {node.score}
+                {/* F24.4: count-up reveal so the score lands as a moment, not just text. */}
+                <AnimatedCounter value={node.score!} duration={500} />
                 <span
                   className="tag-score-max"
                   style={{ fontFamily: TAG_TYPE.mono, color: TAG_PALETTE.muted2 }}

@@ -1,7 +1,11 @@
 /**
  * TAG stats strip — counts per status bucket above the graph card.
  * Mirrors the marketing reference's "4 STRONG MATCH · 2 DEVELOPING · 2 GAP · 3 TRANSFERABLE".
+ *
+ * F24.4: each count uses AnimatedCounter so on result-reveal the numbers
+ * roll up from 0 → N rather than landing flat.
  */
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { STATUS_LABELS, STATUS_STYLES, TAG_PALETTE, TAG_TYPE } from "./constants";
 import type { TagStats } from "./types";
 
@@ -31,7 +35,7 @@ export function TagStatsStrip({ stats }: TagStatsStripProps) {
               className="tag-stat-num"
               style={{ fontFamily: TAG_TYPE.serif, color }}
             >
-              {count}
+              <AnimatedCounter value={count} duration={700} />
             </div>
             <div
               className="tag-stat-lbl"
