@@ -12,6 +12,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { NextBestActionCard } from "@/components/dashboard/NextBestActionCard";
+import { FirstRunStepper } from "@/components/onboarding/FirstRunStepper";
+import { useOnboardingState } from "@/components/onboarding/useOnboardingState";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useInterviewsQuery, useInvalidateInterviewsOnRevision, usePrefetchInterview } from "@/queries/interviewsQueries";
@@ -45,9 +47,16 @@ export default function Dashboard() {
 
  const prefetchInterview = usePrefetchInterview(currentWorkspace?.id, currentProject?.id);
  const interviewsQuery = useInterviewsQuery(currentWorkspace?.id, currentProject?.id, { limit: 100 });
+ const { completeStep } = useOnboardingState(user?.id);
  const interviews = interviewsQuery.data?.interviews ?? [];
  const loading = interviewsQuery.isPending && Boolean(currentWorkspace && currentProject);
  const error = interviewsQuery.error instanceof Error ? interviewsQuery.error.message : null;
+
+ // F24.8: auto-complete the "first interview" onboarding step once
+ // the workspace has any interview at all.
+ useEffect(() => {
+ if (interviews.length > 0) completeStep("first_interview");
+ }, [interviews.length, completeStep]);
 
  const stats = useMemo(() => {
  const active = interviews.filter(
@@ -134,6 +143,8 @@ export default function Dashboard() {
  Create New Interview
  </Button>
  </div>
+
+ <FirstRunStepper />
 
  <NextBestActionCard nba={nba} />
 
