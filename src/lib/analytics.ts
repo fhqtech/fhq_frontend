@@ -18,7 +18,11 @@
 
 type Props = Record<string, string | number | boolean | null | undefined>;
 
-const ENABLED = Boolean(import.meta.env.VITE_POSTHOG_KEY);
+const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
+// EU host by default — DPDP-aligned default for India workloads. Override
+// with VITE_POSTHOG_HOST if you self-host or use the US cloud.
+const POSTHOG_HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) || "https://eu.i.posthog.com";
+const ENABLED = Boolean(POSTHOG_KEY);
 
 interface Identity {
   user_id: string;
@@ -28,18 +32,53 @@ interface Identity {
 }
 
 let currentIdentity: Identity | null = null;
+let posthogPromise: Promise<typeof import("posthog-js").default> | null = null;
 
-function dispatch(_event: string, _props: Props): void {
-  // Real provider goes here. Today we only enqueue when VITE_POSTHOG_KEY
-  // is set so we don't pay any network cost in dev. The console mirror
-  // below is the dev-only feedback loop.
-  if (!ENABLED) return;
-  // TODO(F23): forward to posthog-js when the key lands.
+function getPosthog(): Promise<typeof import("posthog-js").default> | null {
+  if (!ENABLED || typeof window === "undefined") return null;
+  if (!posthogPromise) {
+    posthogPromise = import("posthog-js").then((mod) => {
+      mod.default.init(POSTHOG_KEY!, {
+        api_host: POSTHOG_HOST,
+        capture_pageview: true,
+        autocapture: false,
+        // Session replay opt-in via consent boundary; off by default for DPDP.
+        disable_session_recording: true,
+        // Workspace + applicant flows both rely on first-party cookies; no
+        // cross-domain bridging.
+        persistence: "localStorage+cookie",
+      });
+      return mod.default;
+    });
+  }
+  return posthogPromise;
+}
+
+function dispatch(event: string, props: Props): void {
+  const ph = getPosthog();
+  if (!ph) return;
+  void ph.then((posthog) => {
+    posthog.capture(event, props);
+  });
 }
 
 /** Tag every subsequent track() call with who's doing it. */
 export function identify(identity: Identity): void {
   currentIdentity = identity;
+  const ph = getPosthog();
+  if (ph) {
+    void ph.then((posthog) => {
+      posthog.identify(identity.user_id, {
+        user_kind: identity.user_kind,
+        workspace_id: identity.workspace_id ?? undefined,
+        // email intentionally omitted — DPDP minimization. Backfill
+        // server-side via /api/posthog-identify if you ever need it.
+      });
+      if (identity.workspace_id) {
+        posthog.group("workspace", identity.workspace_id);
+      }
+    });
+  }
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.debug("[analytics] identify", identity);
@@ -49,6 +88,10 @@ export function identify(identity: Identity): void {
 /** Clear identity on logout — prevents next-user attribution leakage. */
 export function reset(): void {
   currentIdentity = null;
+  const ph = getPosthog();
+  if (ph) {
+    void ph.then((posthog) => posthog.reset());
+  }
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.debug("[analytics] reset");

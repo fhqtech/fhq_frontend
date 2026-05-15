@@ -64,6 +64,7 @@
     "lucide-react": "^0.542.0",
     "next-themes": "^0.3.0",
     "phosphor-react": "^1.4.1",
+    "posthog-js": "^1.373.4",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.6",
     "react-day-picker": "^8.10.1",

@@ -14,11 +14,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: npm ci --legacy-peer-deps
+
+      - name: Type check
+        run: npx tsc --noEmit
 
       # The Vite production build aborts when required env vars are
       # missing (see vite.config.ts). Provide dummies so the build
@@ -28,6 +31,19 @@ jobs:
         env:
           VITE_API_BASE_URL: https://example.com
           VITE_FRONTEND_BASE_URL: https://example.com
+
+      # Bundle budget — warn if total JS gzipped exceeds 1.2 MB. Refresh
+      # the threshold when we drop one of Framer Motion / GSAP /
+      # react-spring (currently we ship all three; anim-vendor alone is
+      # ~240 kB gzipped).
+      - name: Bundle budget
+        run: |
+          total=$(find dist/assets -name "*.js" -exec gzip -c {} \; | wc -c)
+          mb=$(awk "BEGIN{printf \"%.2f\", $total/1024/1024}")
+          echo "Total JS gzipped: ${mb} MB"
+          if [ "$total" -gt 1258291 ]; then
+            echo "::warning::Total JS gzipped (${mb} MB) exceeds 1.2 MB budget"
+          fi
 
       - name: Unit tests
         run: npm test -- --run
