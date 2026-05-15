@@ -53,3 +53,7 @@ coverage/
 # Boot artifacts
 frontend.log
 frontend-boot.log
+
+# Python bytecode (Claude hook cache)
+__pycache__/
+*.pyc

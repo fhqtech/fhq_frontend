@@ -101,7 +101,7 @@ const DynamicBlueprintPage: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background p-8">
+      <div className="min-h-[100dvh] flex flex-col bg-background p-8">
         <div className="container mx-auto">
           {/* Header with back button */}
           <div className="flex items-center gap-4 mb-8">
@@ -114,8 +114,8 @@ const DynamicBlueprintPage: React.FC = () => {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-foreground uppercase tracking-wider">Interview Blueprint</h1>
-              <p className="text-foreground-muted">Loading blueprint data...</p>
+              <h1 className="text-3xl font-bold text-foreground">Interview Blueprint</h1>
+              <p className="text-muted">Loading blueprint data...</p>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@ const DynamicBlueprintPage: React.FC = () => {
           <Spinner size="lg" variant="brand" label="Loading interview blueprint" />
           <div className="mt-6 text-center">
             <h3 className="text-lg font-semibold uppercase tracking-wider">Loading interview blueprint</h3>
-            <p className="text-foreground-muted">
+            <p className="text-muted">
               Fetching blueprint data for this interview…
             </p>
           </div>
@@ -137,7 +137,7 @@ const DynamicBlueprintPage: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-[100dvh] bg-background p-8">
         <div className="container mx-auto">
           {/* Header with back button */}
           <div className="flex items-center gap-4 mb-8">
@@ -150,8 +150,8 @@ const DynamicBlueprintPage: React.FC = () => {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-foreground uppercase tracking-wider">Interview Blueprint</h1>
-              <p className="text-foreground-muted">Error loading blueprint</p>
+              <h1 className="text-3xl font-bold text-foreground">Interview Blueprint</h1>
+              <p className="text-muted">Error loading blueprint</p>
             </div>
           </div>
 
@@ -163,8 +163,8 @@ const DynamicBlueprintPage: React.FC = () => {
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Blueprint Not Available</h3>
-                  <p className="text-foreground-muted mt-2">
+                  <h3 className="text-lg font-semibold text-ink">Blueprint Not Available</h3>
+                  <p className="text-muted mt-2">
                     {error === 'Blueprint not found'
                       ? 'The blueprint for this interview has not been generated yet. Please check back later.'
                       : `Error: ${error}`
@@ -175,7 +175,7 @@ const DynamicBlueprintPage: React.FC = () => {
                   <Button
                     onClick={handleRetry}
                     disabled={retrying}
-                    className="bg-[#222831] text-white hover:bg-[#393E46] rounded-sm uppercase font-bold text-xs"
+                    className="bg-[hsl(var(--ink))] text-paper hover:bg-[hsl(var(--ink-soft))] rounded-sm uppercase font-bold text-xs"
                   >
                     {retrying ? (
                       <>
@@ -207,7 +207,7 @@ const DynamicBlueprintPage: React.FC = () => {
   // Success state - render the blueprint
   if (blueprintData) {
     return (
-      <div className="h-screen flex flex-col bg-background">
+      <div className="h-[100dvh] flex flex-col bg-background">
         {/* Fixed Header - never moves */}
         <div className="flex-none bg-background px-6 pt-4 pb-4">
           <div className="flex items-center gap-4">
@@ -219,7 +219,7 @@ const DynamicBlueprintPage: React.FC = () => {
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <h1 className="text-3xl font-bold text-foreground uppercase tracking-wider">Interview Blueprint</h1>
+            <h1 className="text-3xl font-bold text-foreground">Interview Blueprint</h1>
           </div>
         </div>
 

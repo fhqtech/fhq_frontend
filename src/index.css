@@ -2,143 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Recruiter Dashboard Design System - Professional & Modern */
+/* FunnelHQ Design System — Indian-finance-trust palette.
+   Single source of truth for color, type, motion, and shape. Every page
+   references tokens via Tailwind classes (`bg-paper`, `text-ink`, etc.)
+   or CSS-var lookups. NO hex literals in component code. */
 
 @layer base {
   :root {
-    /* Background & Surface */
-    --background: 210 20% 98%;
-    --surface: 0 0% 100%;
-    --surface-elevated: 210 40% 99%;
-    
-    /* Text Colors */
-    --foreground: 210 24% 16%;
-    --foreground-muted: 210 12% 52%;
-    --foreground-subtle: 210 8% 72%;
+    /* Surfaces */
+    --paper:        0 0% 100%;        /* #FFFFFF */
+    --paper-2:      210 40% 98%;      /* #F8FAFC */
+    --paper-3:      210 33% 96%;      /* hover */
+    --paper-4:      210 24% 93%;      /* pressed */
 
-    /* Brand Colors — FunnelHQ finance palette (UB.2 2026-05-12).
-       Replaces the prior generic sky-blue (203 64% ...) with a
-       deep navy primary + warm gold accent. Reads finance, not tech.
-       - navy  #1B2540 ≈ hsl(223 41% 18%)
-       - gold  #C8A24B ≈ hsl(42 53% 54%)
-       - sage  #5E7956 ≈ hsl(102 17% 41%)
-       - rust  #A03E3E ≈ hsl(0 44% 44%) */
-    --brand-primary: 223 41% 18%;
-    --brand-primary-dark: 223 41% 12%;
-    --brand-primary-light: 223 41% 95%;
-    --brand-secondary: 42 53% 54%;
-    
-    /* Semantic Colors */
-    --success: 142 76% 36%;
-    --success-light: 142 76% 95%;
-    --warning: 38 92% 50%;
-    --warning-light: 38 92% 95%;
-    --error: 0 84% 60%;
-    --error-light: 0 84% 95%;
-    --info: 210 100% 56%;
-    --info-light: 210 100% 95%;
+    /* Ink (text) */
+    --ink:          221 49% 11%;      /* #0F1729 — deep navy */
+    --ink-soft:     221 30% 24%;      /* secondary text */
+    --muted:        221 14% 46%;      /* tertiary / meta */
+    --muted-2:      221 10% 64%;      /* placeholder */
 
-    /* Component Tokens */
-    --card: var(--surface);
-    --card-foreground: var(--foreground);
-    --card-elevated: var(--surface-elevated);
+    /* Rule / border */
+    --rule:         221 20% 90%;      /* hairline */
+    --rule-strong:  221 20% 80%;      /* focus edge */
 
-    --popover: var(--surface);
-    --popover-foreground: var(--foreground);
+    /* Brand */
+    --gold:         42 53% 54%;       /* #C8A24B */
+    --gold-soft:    42 45% 88%;
+    --gold-ink:     42 60% 28%;
+    --orange:       21 90% 48%;       /* #EA580C */
+    --orange-soft:  21 90% 94%;
+    --orange-ink:   21 80% 30%;
 
-    --primary: var(--brand-primary);
-    --primary-foreground: 0 0% 100%;
+    /* Status — retoned to live in the new palette */
+    --success:        152 56% 33%;   --success-soft:   150 48% 94%;
+    --warning:        38  92% 50%;   --warning-soft:   38  92% 95%;
+    --danger:         0   65% 47%;   --danger-soft:    0   72% 95%;
+    --info:           212 86% 42%;   --info-soft:      212 86% 94%;
 
-    --secondary: 210 16% 93%;
-    --secondary-foreground: var(--foreground);
+    /* Chart palette — finance-trust deterministic series. Use these in
+       order for ListCard / chart color rotation. No purple / violet /
+       cyan / indigo (banned by DESIGN.md). */
+    --chart-1:        221 49% 11%;   /* ink */
+    --chart-2:        42  53% 54%;   /* gold */
+    --chart-3:        21  90% 48%;   /* orange */
+    --chart-4:        152 56% 33%;   /* success green */
+    --chart-5:        212 86% 42%;   /* info blue */
+    --chart-6:        42  60% 28%;   /* gold-ink */
+    --chart-7:        221 30% 24%;   /* ink-soft */
 
-    --muted: 210 12% 96%;
-    --muted-foreground: var(--foreground-muted);
+    /* Shape & motion */
+    --radius:       0.625rem;        /* 10px — restrained, finance-feel */
+    --radius-sm:    0.375rem;
+    --radius-lg:    0.875rem;
+    --shadow-1:     0 1px 2px hsl(var(--ink) / 0.04);
+    --shadow-2:     0 2px 8px hsl(var(--ink) / 0.06), 0 1px 2px hsl(var(--ink) / 0.04);
+    --shadow-3:     0 12px 32px -8px hsl(var(--ink) / 0.10);
+    /* Claymorphism inset — used by FunnelHQ "soft tile" surfaces (CreateInterview wizard, FitmentInterviewDetails stat tiles, CandidateRegistration form fields). Single source of truth so tile feel stays consistent. */
+    --shadow-clay:        inset 1px 1px 2px hsl(var(--paper-3)), 2px 2px 4px hsl(var(--paper-4));
+    --shadow-clay-error:  inset 1px 1px 2px hsl(var(--danger-soft)), 2px 2px 4px hsl(var(--danger) / 0.25);
+    --shadow-clay-active: 0 4px 12px hsl(var(--ink) / 0.15);
+    --ease-spring:  cubic-bezier(.2,.72,.28,1);
 
-    --accent: 42 53% 54%;
-    --accent-foreground: 223 41% 18%;
+    /* Type — single family */
+    --font-sans:    "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono:    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --destructive: var(--error);
+    /* shadcn aliases (primitives reference these names) */
+    --background:           var(--paper-2);
+    --foreground:           var(--ink);
+    --card:                 var(--paper);
+    --card-foreground:      var(--ink);
+    --popover:              var(--paper);
+    --popover-foreground:   var(--ink);
+    --primary:              var(--ink);
+    --primary-foreground:   0 0% 100%;
+    --secondary:            var(--paper-3);
+    --secondary-foreground: var(--ink);
+    --accent:               var(--gold);
+    --accent-foreground:    var(--ink);
+    --muted-foreground:     var(--muted);
+    --destructive:          var(--danger);
     --destructive-foreground: 0 0% 100%;
+    --border:               var(--rule);
+    --input:                var(--rule);
+    --ring:                 var(--gold);
 
-    --border: 210 16% 90%;
-    --input: var(--border);
-    --ring: var(--brand-primary);
-
-    --radius: 0.75rem;
-
-    /* Status Colors */
-    --status-pending: 38 92% 50%;
-    --status-pending-light: 38 92% 95%;
-    --status-completed: var(--success);
-    --status-completed-light: var(--success-light);
-    --status-in-progress: var(--info);
-    --status-in-progress-light: var(--info-light);
-    --status-cancelled: var(--error);
-    --status-cancelled-light: var(--error-light);
-
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%);
-    --gradient-subtle: linear-gradient(135deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(142 76% 44%) 100%);
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(210 24% 16% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(210 24% 16% / 0.1), 0 2px 4px -1px hsl(210 24% 16% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(210 24% 16% / 0.1), 0 4px 6px -2px hsl(210 24% 16% / 0.05);
-    --shadow-brand: 0 10px 25px -5px hsl(var(--brand-primary) / 0.25);
-
-    /* Animation Durations */
-    --animation-fast: 0.15s;
-    --animation-normal: 0.3s;
-    --animation-slow: 0.5s;
-
-    --sidebar-background: hsl(var(--surface));
-    --sidebar-foreground: hsl(var(--foreground-muted));
-    --sidebar-primary: hsl(var(--brand-primary));
-    --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    --sidebar-accent: hsl(var(--accent));
-    --sidebar-accent-foreground: hsl(var(--accent-foreground));
-    --sidebar-border: hsl(var(--border));
-    --sidebar-ring: hsl(var(--brand-primary));
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar (legacy alias map — kept so shadcn sidebar primitive still wires up) */
+    --sidebar-background:            hsl(var(--paper));
+    --sidebar-foreground:            hsl(var(--ink-soft));
+    --sidebar-primary:               hsl(var(--ink));
+    --sidebar-primary-foreground:    hsl(var(--paper));
+    --sidebar-accent:                hsl(var(--gold));
+    --sidebar-accent-foreground:     hsl(var(--ink));
+    --sidebar-border:                hsl(var(--rule));
+    --sidebar-ring:                  hsl(var(--gold));
   }
 }
 
@@ -147,18 +104,30 @@
     @apply border-border;
   }
 
+  html {
+    font-family: var(--font-sans);
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.005em;
+  }
+
+  /* Tabular numerals for any number-heavy display */
+  .tabular-nums {
+    font-feature-settings: "tnum";
   }
 }
 
-/* Radix UI Dialog/Modal Overlay Styles */
+/* Radix UI Dialog overlay — uses the new ink token. */
 @layer components {
-  /* Dialog Overlay - the dark backdrop */
   [data-radix-dialog-overlay],
   [data-overlay],
   .radix-dialog-overlay {
-    @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
+    @apply fixed inset-0 bg-ink/40 backdrop-blur-sm;
     z-index: 9999 !important;
     top: 0 !important;
     left: 0 !important;
@@ -171,49 +140,27 @@
     padding: 0 !important;
   }
 
-  /* Dialog Content positioning */
   [data-radix-dialog-content] {
     @apply fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
-    @apply w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg;
+    @apply w-full max-w-lg rounded-lg border bg-background p-6 shadow-2;
     @apply duration-200;
     z-index: 10000 !important;
   }
 
-  /* Animation states for Dialog */
   [data-radix-dialog-overlay][data-state="open"] {
     @apply animate-in fade-in-0;
   }
-
   [data-radix-dialog-overlay][data-state="closed"] {
     @apply animate-out fade-out-0;
   }
-
   [data-radix-dialog-content][data-state="open"] {
     @apply animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%];
   }
-
   [data-radix-dialog-content][data-state="closed"] {
     @apply animate-out fade-out-0 zoom-out-95 slide-out-to-left-1/2 slide-out-to-top-[48%];
   }
 
-  /* Ensure dialogs are above other content */
   [data-radix-popper-content-wrapper] {
     @apply z-50;
-  }
-
-  /* Flip animation for stats numbers */
-  @keyframes flipIn {
-    0% {
-      transform: rotateX(-90deg);
-      opacity: 0;
-    }
-    50% {
-      transform: rotateX(-45deg);
-      opacity: 0.5;
-    }
-    100% {
-      transform: rotateX(0deg);
-      opacity: 1;
-    }
   }
 }

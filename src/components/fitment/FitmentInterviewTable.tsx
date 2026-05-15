@@ -39,8 +39,8 @@ export function FitmentInterviewTable({
       <Card>
         <CardContent className="p-0">
           <div className="flex items-center justify-center py-12">
-            <CircleNotch className="w-8 h-8 animate-spin text-gray-400" />
-            <span className="ml-2 text-gray-500 uppercase tracking-wider">Loading fitment interviews...</span>
+            <CircleNotch className="w-8 h-8 animate-spin text-muted-2" />
+            <span className="ml-2 text-muted uppercase tracking-wider">Loading fitment interviews...</span>
           </div>
         </CardContent>
       </Card>
@@ -52,21 +52,21 @@ export function FitmentInterviewTable({
       <Card>
         <CardContent className="p-0">
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Target className="w-12 h-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2 uppercase tracking-wider">No Fitment Interviews</h3>
-            <p className="text-gray-500 mb-4 uppercase text-xs tracking-wider">Create your first fitment interview to get started.</p>
+            <Target className="w-12 h-12 text-muted-2 mb-4" />
+            <h3 className="text-lg font-medium text-ink mb-2 uppercase tracking-wider">No Fitment Interviews</h3>
+            <p className="text-muted mb-4 uppercase text-xs tracking-wider">Create your first fitment interview to get started.</p>
             <Button
               onClick={onCreateNew}
-              className="text-white font-medium rounded-sm uppercase transition-all duration-200"
+              className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
               style={{
                 position: 'relative',
                 overflow: 'hidden',
-                backgroundColor: '#222831',
-                boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
+                backgroundColor: 'hsl(var(--ink))',
+                boxShadow: 'var(--shadow-clay)',
                 textTransform: 'uppercase'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
             >
               Create Fitment Interview
             </Button>
@@ -94,13 +94,13 @@ export function FitmentInterviewTable({
             {fitmentInterviews.map((interview) => (
               <TableRow
                 key={interview.id}
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => navigate(`/fitment-interviews/${interview.id}`)}
+                className="hover:bg-paper-2 cursor-pointer"
+                onClick={() => navigate(`/interviews/${interview.id}`)}
               >
                 <TableCell>
                   <div>
                     <div className="font-medium uppercase tracking-wider">{interview.title}</div>
-                    <div className="text-sm text-gray-500">ID: {interview.id.slice(0, 8)}...</div>
+                    <div className="text-sm text-muted">ID: {interview.id.slice(0, 8)}...</div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -113,9 +113,9 @@ export function FitmentInterviewTable({
                   {interview.parentInterviews && interview.parentInterviews.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {interview.parentInterviews.slice(0, 3).map((parent, index) => (
-                        <div key={index} className="bg-gray-100 border px-2 py-1 rounded text-left min-w-0 max-w-32">
+                        <div key={index} className="bg-paper-3 border px-2 py-1 rounded text-left min-w-0 max-w-32">
                           <div className="font-medium text-xs truncate">{parent.interviewTitle}</div>
-                          <div className="text-xs text-gray-500">{parent.interviewId.slice(0, 6)}...</div>
+                          <div className="text-xs text-muted">{parent.interviewId.slice(0, 6)}...</div>
                         </div>
                       ))}
                       {interview.parentInterviews.length > 3 && (
@@ -125,17 +125,17 @@ export function FitmentInterviewTable({
                       )}
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-500">No linked interviews</span>
+                    <span className="text-sm text-muted">No linked interviews</span>
                   )}
                 </TableCell>
                 <TableCell>
                   <div className="font-medium">0%</div>
-                  <div className="text-sm text-gray-500">0 of {interview.candidateCount} completed</div>
+                  <div className="text-sm text-muted">0 of {interview.candidateCount} completed</div>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0" aria-label="Row actions">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

@@ -87,7 +87,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           variant={hasValue ? "default" : "outline"}
           className={cn(
             "h-7 px-3 text-xs font-medium justify-start text-left",
-            hasValue && "bg-brand-primary text-white",
+            hasValue && "bg-ink text-white",
             className
           )}
         >
@@ -116,7 +116,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={selectAll}
-                className="h-6 px-2 text-xs text-foreground-muted hover:text-foreground"
+                className="h-6 px-2 text-xs text-muted hover:text-foreground"
               >
                 Select All
               </Button>
@@ -124,7 +124,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={clearAll}
-                className="h-6 px-2 text-xs text-foreground-muted hover:text-foreground"
+                className="h-6 px-2 text-xs text-muted hover:text-foreground"
               >
                 Clear
               </Button>
@@ -134,7 +134,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           {/* Search */}
           {searchable && (
             <div className="relative">
-              <Search className="w-3 h-3 absolute left-2 top-2.5 text-foreground-muted" />
+              <Search className="w-3 h-3 absolute left-2 top-2.5 text-muted" />
               <Input
                 placeholder="Search options..."
                 value={searchTerm}
@@ -146,7 +146,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
           {/* Selected Count */}
           {value.length > 0 && (
-            <div className="text-xs text-foreground-muted">
+            <div className="text-xs text-muted">
               {value.length} of {options.length} selected
             </div>
           )}
@@ -154,7 +154,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           {/* Options List */}
           <div className="max-h-48 overflow-y-auto space-y-1">
             {filteredOptions.length === 0 ? (
-              <div className="text-xs text-foreground-muted text-center py-4">
+              <div className="text-xs text-muted text-center py-4">
                 No options found
               </div>
             ) : (
@@ -165,13 +165,13 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
                   className={cn(
                     "flex items-center gap-2 p-2 rounded cursor-pointer text-xs",
                     "hover:bg-muted transition-colors",
-                    value.includes(option.value) && "bg-brand-primary/10"
+                    value.includes(option.value) && "bg-ink/10"
                   )}
                 >
                   <div className={cn(
                     "w-4 h-4 border rounded flex items-center justify-center",
                     value.includes(option.value) 
-                      ? "bg-brand-primary border-brand-primary" 
+                      ? "bg-ink border-ink" 
                       : "border-border"
                   )}>
                     {value.includes(option.value) && (

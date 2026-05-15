@@ -95,7 +95,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
           variant={hasValue ? "default" : "outline"}
           className={cn(
             "h-7 px-3 text-xs font-medium justify-start text-left",
-            hasValue && "bg-brand-primary text-white",
+            hasValue && "bg-ink text-white",
             className
           )}
         >
@@ -122,7 +122,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
               variant="ghost"
               size="sm"
               onClick={clearCandidateRange}
-              className="h-6 px-2 text-xs text-foreground-muted hover:text-foreground"
+              className="h-6 px-2 text-xs text-muted hover:text-foreground"
             >
               Clear
             </Button>
@@ -130,7 +130,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
           
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-foreground-muted">
+              <label className="text-xs font-medium text-muted">
                 Minimum
               </label>
               <Input
@@ -145,7 +145,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
             </div>
             
             <div className="space-y-2">
-              <label className="text-xs font-medium text-foreground-muted">
+              <label className="text-xs font-medium text-muted">
                 Maximum
               </label>
               <Input
@@ -162,7 +162,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
           
           {/* Quick Select Buttons */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-foreground-muted">
+            <label className="text-xs font-medium text-muted">
               Quick Select
             </label>
             <div className="flex flex-wrap gap-1">
@@ -204,10 +204,10 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
           {/* Range Visualization */}
           {(minValue || maxValue) && (
             <div className="space-y-2">
-              <label className="text-xs font-medium text-foreground-muted">
+              <label className="text-xs font-medium text-muted">
                 Preview
               </label>
-              <div className="p-2 bg-muted rounded text-xs text-foreground-muted">
+              <div className="p-2 bg-muted rounded text-xs text-muted">
                 {getDisplayText()}
               </div>
             </div>
@@ -225,7 +225,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
             <Button
               size="sm"
               onClick={applyCandidateRange}
-              className="flex-1 h-8 text-xs bg-brand-primary hover:bg-brand-primary/90"
+              className="flex-1 h-8 text-xs bg-ink hover:bg-ink/90"
             >
               Apply
             </Button>

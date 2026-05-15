@@ -39,11 +39,21 @@ export default function InterviewPreCheckPage() {
     };
   } | null;
 
-  // Local state for candidate data to allow updates
+  useEffect(() => {
+    if (!stateData?.candidateToken || !stateData?.candidateData?.id) {
+      const fallbackToken = sessionStorage.getItem('candidateToken');
+      if (fallbackToken) {
+        navigate(`/candidate-portal/${fallbackToken}`, { replace: true });
+      } else {
+        navigate('/candidate/login', { replace: true });
+      }
+    }
+  }, [stateData, navigate]);
+
   const [localCandidateData, setLocalCandidateData] = useState(stateData?.candidateData || {
-    id: "candidate-123",
-    name: "Candidate Name",
-    email: "candidate@example.com"
+    id: "",
+    name: "",
+    email: ""
   });
 
   const handleStartInterview = async () => {
@@ -138,20 +148,20 @@ export default function InterviewPreCheckPage() {
 
   if (contextNotReady) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+      <div className="min-h-[100dvh] bg-paper flex items-center justify-center p-8">
         <div className="max-w-md text-center space-y-6">
-          <div className="mx-auto w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-amber-600" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-gold-soft flex items-center justify-center">
+            <AlertTriangle className="w-8 h-8 text-gold-ink" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold text-slate-900">Hold on — almost ready</h1>
-            <p className="text-sm text-slate-600">{contextNotReady}</p>
+            <h1 className="text-2xl font-semibold text-ink">Hold on — almost ready</h1>
+            <p className="text-sm text-muted">{contextNotReady}</p>
           </div>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={handleCancel} disabled={isStarting}>
               Back
             </Button>
-            <Button onClick={handleStartInterview} disabled={isStarting} className="bg-black hover:bg-slate-800 text-white">
+            <Button onClick={handleStartInterview} disabled={isStarting} variant="gold">
               {isStarting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -81,25 +81,25 @@ export const InterviewStatusModal: React.FC<InterviewStatusModalProps> = ({
           <div className="flex justify-center">{content.icon}</div>
 
           <div className="space-y-2">
-            <DialogTitle className="text-lg font-semibold text-gray-900">
+            <DialogTitle className="text-lg font-semibold text-ink">
               {content.title}
             </DialogTitle>
             {interviewTitle && (
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium text-ink-soft">
                 "{interviewTitle}"
               </p>
             )}
           </div>
 
-          <DialogDescription className="text-sm text-gray-600">
+          <DialogDescription className="text-sm text-muted">
             {content.message}
           </DialogDescription>
 
           <div className={`p-3 rounded-lg ${content.bgColor} border ${content.borderColor}`}>
-            <p className="text-sm text-gray-700 mb-2">
+            <p className="text-sm text-ink-soft mb-2">
               <strong>What you can do:</strong>
             </p>
-            <ul className="text-sm text-gray-600 space-y-2">
+            <ul className="text-sm text-muted space-y-2">
               {content.actions.map((action, index) => (
                 <li key={index} className="flex items-start gap-2">
                   <span className="flex-shrink-0 mt-0.5">{action.icon}</span>
@@ -110,11 +110,11 @@ export const InterviewStatusModal: React.FC<InterviewStatusModalProps> = ({
           </div>
 
           {recruiterContact && (
-            <div className="bg-white p-3 rounded-lg border border-gray-200">
+            <div className="bg-paper p-3 rounded-lg border border-rule">
               <p className="text-sm">
                 <strong>Recruiter Contact:</strong>
               </p>
-              <p className="text-sm text-gray-600 mt-1">{recruiterContact}</p>
+              <p className="text-sm text-muted mt-1">{recruiterContact}</p>
             </div>
           )}
 

@@ -82,7 +82,7 @@ export default function PilotDashboard() {
     <div className="p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Pilot dashboard</h1>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted">
           Auto-refreshes every 30s · last updated {new Date(stats!.now).toLocaleTimeString()}
         </p>
       </div>
@@ -139,12 +139,12 @@ function StatCard({
 }) {
   return (
     <Card className={`p-4 ${warn ? "border-amber-300 bg-amber-50" : ""}`}>
-      <div className="flex items-center justify-between text-xs uppercase tracking-wider text-slate-500">
+      <div className="flex items-center justify-between text-xs uppercase tracking-wider text-muted">
         <span>{label}</span>
         {icon}
       </div>
       <div className="mt-2 text-3xl font-bold">{value}</div>
-      {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
+      {hint && <div className="mt-1 text-xs text-muted">{hint}</div>}
     </Card>
   );
 }

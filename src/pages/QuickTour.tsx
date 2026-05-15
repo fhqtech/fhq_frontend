@@ -36,7 +36,7 @@ function LottieAnimation() {
 const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
   {
     id: 1,
-    title: "Welcome to FlowDotAI",
+    title: "Welcome to FunnelHQ",
     subtitle: "Your Complete AI-Powered Interview Solution",
     content: (
       <div className="space-y-4">
@@ -55,34 +55,34 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
               50% { transform: translateY(-10px); }
             }
           `}</style>
-          <p className="text-base text-foreground-muted">
+          <p className="text-base text-muted">
             Transform your hiring process with AI-powered interviews that scale with your needs.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center gap-2 p-4 bg-green-50 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center gap-2 p-4 bg-green-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CheckCircle className="w-5 h-5 text-green-600" weight="fill" />
             <div>
               <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Automated Screening</h4>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AI conducts interviews automatically</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <BarChart3 className="w-5 h-5 text-blue-600" weight="fill" />
             <div>
               <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Smart Analytics</h4>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Detailed insights and scoring</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-4 bg-orange-50 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center gap-2 p-4 bg-orange-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <Target className="w-5 h-5 text-orange-600" weight="fill" />
             <div>
               <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Role-Specific Fitment</h4>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Assess for specific positions</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-4 bg-purple-50 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center gap-2 p-4 bg-purple-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <Clock className="w-5 h-5 text-purple-600" weight="fill" />
             <div>
               <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Save Time</h4>
@@ -101,14 +101,14 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
       <div className="space-y-6">
         <div className="bg-gradient-subtle p-6 rounded-lg">
           <h4 className="font-bold text-lg mb-2">The Challenge</h4>
-          <p className="text-foreground-muted mb-4">
+          <p className="text-muted mb-4">
             TechCorp needs to hire 50 junior accountants from 500+ applications. Traditional interviews would take months.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-error/10 p-4 rounded-lg border border-error/20">
-              <h5 className="font-semibold text-error mb-2">Traditional Approach</h5>
-              <ul className="text-sm space-y-1 text-foreground-muted">
+            <div className="bg-danger/10 p-4 rounded-lg border border-danger/20">
+              <h5 className="font-semibold text-danger mb-2">Traditional Approach</h5>
+              <ul className="text-sm space-y-1 text-muted">
                 <li>• 500 applications to review manually</li>
                 <li>• 200+ phone screenings (40 hours)</li>
                 <li>• 100+ in-person interviews (80 hours)</li>
@@ -118,7 +118,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </div>
             <div className="bg-success/10 p-4 rounded-lg border border-success/20">
               <h5 className="font-semibold text-success mb-2">AI Recruiter Solution</h5>
-              <ul className="text-sm space-y-1 text-foreground-muted">
+              <ul className="text-sm space-y-1 text-muted">
                 <li>• AI screens all 500 candidates</li>
                 <li>• Automated scoring and ranking</li>
                 <li>• Focus on top 50 candidates only</li>
@@ -133,43 +133,43 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           <h4 className="font-semibold uppercase tracking-wider">How It Works:</h4>
           <div className="space-y-2">
             <div
-              className="flex items-center gap-3 p-4 bg-white rounded-sm"
-              style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}
+              className="flex items-center gap-3 p-4 bg-paper rounded-sm"
+              style={{ boxShadow: 'var(--shadow-clay)' }}
             >
-              <div className="w-8 h-8 bg-[#222831] rounded-full flex items-center justify-center text-white text-sm font-bold">1</div>
+              <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">1</div>
               <div>
                 <p className="font-semibold uppercase tracking-wider text-sm">Create Accounting Interview</p>
-                <p className="text-xs text-foreground-muted uppercase tracking-wider">Set up questions covering tax, financial reporting, and analytical skills</p>
+                <p className="text-xs text-muted uppercase tracking-wider">Set up questions covering tax, financial reporting, and analytical skills</p>
               </div>
             </div>
             <div
-              className="flex items-center gap-3 p-4 bg-white rounded-sm"
-              style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}
+              className="flex items-center gap-3 p-4 bg-paper rounded-sm"
+              style={{ boxShadow: 'var(--shadow-clay)' }}
             >
-              <div className="w-8 h-8 bg-[#222831] rounded-full flex items-center justify-center text-white text-sm font-bold">2</div>
+              <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">2</div>
               <div>
                 <p className="font-semibold uppercase tracking-wider text-sm">Bulk Import Candidates</p>
-                <p className="text-xs text-foreground-muted uppercase tracking-wider">Upload CSV/Excel with 500 candidate details</p>
+                <p className="text-xs text-muted uppercase tracking-wider">Upload CSV/Excel with 500 candidate details</p>
               </div>
             </div>
             <div
-              className="flex items-center gap-3 p-4 bg-white rounded-sm"
-              style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}
+              className="flex items-center gap-3 p-4 bg-paper rounded-sm"
+              style={{ boxShadow: 'var(--shadow-clay)' }}
             >
-              <div className="w-8 h-8 bg-[#222831] rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
+              <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">3</div>
               <div>
                 <p className="font-semibold uppercase tracking-wider text-sm">AI Conducts Interviews</p>
-                <p className="text-xs text-foreground-muted uppercase tracking-wider">Each candidate gets personalized phone/video interview</p>
+                <p className="text-xs text-muted uppercase tracking-wider">Each candidate gets personalized phone/video interview</p>
               </div>
             </div>
             <div
-              className="flex items-center gap-3 p-4 bg-white rounded-sm"
-              style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}
+              className="flex items-center gap-3 p-4 bg-paper rounded-sm"
+              style={{ boxShadow: 'var(--shadow-clay)' }}
             >
-              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold">4</div>
+              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-paper text-sm font-bold">4</div>
               <div>
                 <p className="font-semibold uppercase tracking-wider text-sm">Review Results</p>
-                <p className="text-xs text-foreground-muted uppercase tracking-wider">Get scored candidates ranked by performance</p>
+                <p className="text-xs text-muted uppercase tracking-wider">Get scored candidates ranked by performance</p>
               </div>
             </div>
           </div>
@@ -185,13 +185,13 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
       <div className="space-y-6">
         <div className="bg-gradient-subtle p-6 rounded-lg">
           <h4 className="font-bold text-lg mb-2">The Challenge</h4>
-          <p className="text-foreground-muted mb-4">
+          <p className="text-muted mb-4">
             StartupXYZ needs a Senior React Developer with specific skills in TypeScript, Node.js, and cloud architecture.
           </p>
           
           <div className="bg-info/10 p-4 rounded-lg border border-info/20">
             <h5 className="font-semibold text-info mb-2">The Opportunity</h5>
-            <p className="text-sm text-foreground-muted">
+            <p className="text-sm text-muted">
               You already have 50 candidates from previous screening interviews — say, generic Tax Manager screens. Instead of starting from scratch,
               use fitment interviews to assess their specific match for a more specialised role (e.g. Transfer Pricing Manager, GST Litigation Specialist).
             </p>
@@ -202,31 +202,31 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           <h4 className="font-semibold">Fitment Interview Process:</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-3 p-3 bg-surface rounded-lg">
-              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-white text-sm font-bold">1</div>
+              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-paper text-sm font-bold">1</div>
               <div>
                 <p className="font-medium">Upload Job Description</p>
-                <p className="text-sm text-foreground-muted">Paste the specific Senior React Developer requirements</p>
+                <p className="text-sm text-muted">Paste the specific Senior React Developer requirements</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-surface rounded-lg">
-              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-white text-sm font-bold">2</div>
+              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-paper text-sm font-bold">2</div>
               <div>
                 <p className="font-medium">Auto-Shortlist or Manual Select</p>
-                <p className="text-sm text-foreground-muted">Choose high-scoring candidates or manually select specific ones</p>
+                <p className="text-sm text-muted">Choose high-scoring candidates or manually select specific ones</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-surface rounded-lg">
-              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
+              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-paper text-sm font-bold">3</div>
               <div>
                 <p className="font-medium">AI Generates Role-Specific Questions</p>
-                <p className="text-sm text-foreground-muted">Creates questions about React hooks, TypeScript patterns, cloud deployment</p>
+                <p className="text-sm text-muted">Creates questions about React hooks, TypeScript patterns, cloud deployment</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-surface rounded-lg">
-              <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center text-white text-sm font-bold">4</div>
+              <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center text-paper text-sm font-bold">4</div>
               <div>
                 <p className="font-medium">Get Fitment Scores</p>
-                <p className="text-sm text-foreground-muted">Each candidate gets a role-specific fitment score (0-100%)</p>
+                <p className="text-sm text-muted">Each candidate gets a role-specific fitment score (0-100%)</p>
               </div>
             </div>
           </div>
@@ -234,7 +234,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
 
         <div className="bg-success/10 p-4 rounded-lg border border-success/20">
           <h5 className="font-semibold text-success mb-2">Multiple Fitment Interviews</h5>
-          <p className="text-sm text-foreground-muted">
+          <p className="text-sm text-muted">
             The same candidate pool can be assessed for different roles - Frontend Developer, Full-Stack Developer, 
             Tech Lead - each with its own fitment interview and scoring.
           </p>
@@ -249,15 +249,15 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
     content: (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+          <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
-                <Bot className="w-5 h-5 text-brand-primary" />
+                <Bot className="w-5 h-5 text-ink" />
                 Interview Creation
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm space-y-2 text-foreground-muted">
+              <ul className="text-sm space-y-2 text-muted">
                 <li>• Choose from Accounting, Taxation, or Consulting</li>
                 <li>• Set interview duration (15-60 minutes)</li>
                 <li>• Select AI voice type (Male/Female, Professional/Friendly)</li>
@@ -266,7 +266,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+          <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
                 <Users className="w-5 h-5 text-info" />
@@ -274,7 +274,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm space-y-2 text-foreground-muted">
+              <ul className="text-sm space-y-2 text-muted">
                 <li>• Bulk import via CSV/Excel</li>
                 <li>• Google Sheets integration</li>
                 <li>• Manual candidate addition</li>
@@ -283,7 +283,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+          <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
                 <Target className="w-5 h-5 text-warning" />
@@ -291,7 +291,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm space-y-2 text-foreground-muted">
+              <ul className="text-sm space-y-2 text-muted">
                 <li>• Upload job descriptions</li>
                 <li>• Auto-generate role-specific questions</li>
                 <li>• Multiple fitment interviews per candidate</li>
@@ -300,7 +300,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+          <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
                 <BarChart3 className="w-5 h-5 text-success" />
@@ -308,7 +308,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm space-y-2 text-foreground-muted">
+              <ul className="text-sm space-y-2 text-muted">
                 <li>• Interview completion rates</li>
                 <li>• Candidate performance scoring</li>
                 <li>• Time-to-hire metrics</li>
@@ -318,28 +318,28 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           </Card>
         </div>
 
-        <div className="bg-gradient-primary/10 p-6 rounded-lg border border-brand-primary/20">
-          <h4 className="font-bold text-lg mb-2 text-brand-primary uppercase tracking-wider">Communication Channels</h4>
+        <div className="bg-ink/10 p-6 rounded-lg border border-ink/20">
+          <h4 className="font-bold text-lg mb-2 text-ink uppercase tracking-wider">Communication Channels</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="flex items-center gap-3">
-              <Mail className="w-6 h-6 text-brand-primary" />
+              <Mail className="w-6 h-6 text-ink" />
               <div>
                 <p className="font-medium">Email Invitations</p>
-                <p className="text-sm text-foreground-muted">Automated personalized emails</p>
+                <p className="text-sm text-muted">Automated personalized emails</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Phone className="w-6 h-6 text-brand-primary" />
+              <Phone className="w-6 h-6 text-ink" />
               <div>
                 <p className="font-medium">Phone Interviews</p>
-                <p className="text-sm text-foreground-muted">AI-powered voice calls</p>
+                <p className="text-sm text-muted">AI-powered voice calls</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <MessageSquare className="w-6 h-6 text-brand-primary" />
+              <MessageSquare className="w-6 h-6 text-ink" />
               <div>
                 <p className="font-medium">SMS Reminders</p>
-                <p className="text-sm text-foreground-muted">Automated follow-ups</p>
+                <p className="text-sm text-muted">Automated follow-ups</p>
               </div>
             </div>
           </div>
@@ -359,13 +359,13 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           </div>
           <div className="text-left flex-1 pt-8 space-y-4">
             <div>
-              <h3 className="text-2xl font-bold mb-1 uppercase tracking-wider">YOU'RE ALL SET!</h3>
+              <h3 className="text-2xl font-bold mb-1">YOU'RE ALL SET!</h3>
               <p className="text-sm text-muted-foreground uppercase tracking-wider">
-                NOW YOU UNDERSTAND HOW TO LEVERAGE FLOWDOTAI FOR EFFICIENT, SCALABLE HIRING.
+                NOW YOU UNDERSTAND HOW TO LEVERAGE FUNNELHQ FOR EFFICIENT, SCALABLE HIRING.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-sm shadow-sm" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+            <div className="bg-paper p-6 rounded-sm shadow-1" style={{ boxShadow: 'var(--shadow-clay)' }}>
               <h4 className="font-bold mb-2 uppercase tracking-wider">Pro Tips for Success</h4>
               <ul className="text-[10px] text-left space-y-2 text-muted-foreground uppercase tracking-wider">
                 <li>• Start with a small batch (10-20 candidates) to test your interview setup</li>
@@ -380,12 +380,12 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
 
         <div className="flex items-start gap-8">
           <div style={{ width: '280px', flexShrink: 0 }}></div>
-          <div className="flex-1 p-6 bg-white rounded-sm text-left">
+          <div className="flex-1 p-6 bg-paper rounded-sm text-left">
             <h4 className="font-bold mb-4 uppercase tracking-wider text-base">
               Create your first interview in under 5 minutes
             </h4>
             <Button
-              className="bg-[#222831] hover:bg-[#393E46] text-white uppercase tracking-wider text-xs font-bold px-8"
+              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper uppercase tracking-wider text-xs font-bold px-8"
               onClick={() => navigate("/interviews/create")}
             >
               Create Interview
@@ -483,8 +483,8 @@ export default function QuickTour() {
         {/* Header */}
         <div className="flex items-center justify-between pt-4 pb-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground uppercase tracking-wider">Product Quick Tour</h1>
-            <p className="text-foreground-muted mt-2 text-xs uppercase tracking-wider">
+            <h1 className="text-3xl font-bold text-foreground">Product Quick Tour</h1>
+            <p className="text-muted mt-2 text-xs uppercase tracking-wider">
               Learn how to maximize your hiring efficiency with AI Recruiter
             </p>
           </div>
@@ -507,9 +507,9 @@ export default function QuickTour() {
             <span>Step {currentStep + 1} of {tourSteps.length}</span>
             <span>{Math.round(((currentStep + 1) / tourSteps.length) * 100)}% Complete</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-paper-3 rounded-full h-2">
             <div
-              className="bg-[#222831] h-2 rounded-full transition-all duration-300 ease-out"
+              className="bg-[hsl(var(--ink))] h-2 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${((currentStep + 1) / tourSteps.length) * 100}%` }}
             />
           </div>
@@ -523,7 +523,7 @@ export default function QuickTour() {
               variant={index === currentStep ? "default" : "outline"}
               size="sm"
               onClick={() => handleStepClick(index)}
-              className={`${index === currentStep ? "bg-[#222831] hover:bg-[#393E46] text-white border-0" : ""} text-[10px] px-3 py-1 h-8 whitespace-nowrap flex-shrink-0 uppercase tracking-wider font-bold`}
+              className={`${index === currentStep ? "bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0" : ""} text-[10px] px-3 py-1 h-8 whitespace-nowrap flex-shrink-0 uppercase tracking-wider font-bold`}
             >
               <span className="hidden md:inline">{step.title}</span>
               <span className="md:hidden">{index + 1}</span>
@@ -537,8 +537,8 @@ export default function QuickTour() {
 
       {/* Main Content */}
       <div
-        className="min-h-96 rounded-sm bg-white transition-shadow duration-200"
-        style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}
+        className="min-h-96 rounded-sm bg-paper transition-shadow duration-200"
+        style={{ boxShadow: 'var(--shadow-clay)' }}
       >
         <div className="text-center pb-6 p-6">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -546,7 +546,7 @@ export default function QuickTour() {
           </div>
           {currentStep !== 4 && (
             <>
-              <h2 className="text-2xl font-bold uppercase tracking-wider">{currentStepData.title}</h2>
+              <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
               {currentStepData.subtitle && (
                 <p className="text-sm text-muted-foreground uppercase tracking-wider mt-2">{currentStepData.subtitle}</p>
               )}
@@ -575,7 +575,7 @@ export default function QuickTour() {
             <Button
               onClick={handleCompleteTour}
               disabled={isCompleting || isSkipping}
-              className="bg-[#222831] hover:bg-[#393E46] text-white border-0 flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
+              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0 flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
             >
               <CheckCircle className="w-4 h-4" />
               {isCompleting ? "Completing..." : "Finish Tour"}
@@ -583,7 +583,7 @@ export default function QuickTour() {
           ) : (
             <Button
               onClick={handleNext}
-              className="bg-[#222831] hover:bg-[#393E46] text-white flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
+              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
             >
               Next
               <ArrowRight className="w-4 h-4" />

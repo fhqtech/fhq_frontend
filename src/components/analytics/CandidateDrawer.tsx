@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,6 @@ import {
   AlertCircle,
   ThumbsUp,
   Brain,
-  Loader2,
   Code,
   Award,
   GraduationCap,
@@ -507,7 +507,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           <TabsContent value="overview" className="space-y-6 mt-6">
             {loadingOverview ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="lg" variant="gold" />
               </div>
             ) : errorOverview ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">
@@ -617,23 +617,23 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
 
                 {/* Assessment Scores */}
                 <Card className="p-4">
-                  <h3 className="font-semibold text-lg mb-3">Assessment Scores</h3>
+                  <h3 className="font-semibold text-lg mb-3">Assessment scores</h3>
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-center">
-                      <div className="text-sm text-muted-foreground mb-1">Screening</div>
-                      <div className="text-2xl font-bold text-blue-600">
+                    <div className="p-4 rounded-md bg-paper-2 border border-rule text-center">
+                      <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-1">Screening</div>
+                      <div className="text-2xl font-bold text-ink font-mono tabular-nums">
                         {overviewData?.scores?.screening || 0}
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-purple-50 border border-purple-200 text-center">
-                      <div className="text-sm text-muted-foreground mb-1">Preliminary</div>
-                      <div className="text-2xl font-bold text-purple-600">
+                    <div className="p-4 rounded-md bg-paper-2 border border-rule text-center">
+                      <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-1">Preliminary</div>
+                      <div className="text-2xl font-bold text-ink font-mono tabular-nums">
                         {overviewData?.scores?.preliminary || 0}
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-center">
-                      <div className="text-sm text-muted-foreground mb-1">Fitment</div>
-                      <div className="text-2xl font-bold text-green-600">
+                    <div className="p-4 rounded-md bg-paper-2 border border-rule text-center">
+                      <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-1">Fitment</div>
+                      <div className="text-2xl font-bold text-ink font-mono tabular-nums">
                         {overviewData?.scores?.fitment || 0}
                       </div>
                     </div>
@@ -680,7 +680,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           <TabsContent value="insights" className="space-y-6 mt-6">
             {loadingInsights ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="lg" variant="gold" />
               </div>
             ) : errorInsights ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">
@@ -785,7 +785,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           <TabsContent value="psych" className="space-y-6 mt-6">
             {loadingPsych ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="lg" variant="gold" />
               </div>
             ) : errorPsych ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">
@@ -814,7 +814,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
                         <h4 className="font-semibold mb-3">Color Preference</h4>
                         <div className="flex items-center gap-3 mb-3">
                           <div
-                            className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center"
+                            className="w-12 h-12 rounded-full border-2 border-rule flex items-center justify-center"
                             style={{
                               backgroundColor: psychData.assessment.colorChoice === 'Blue' ? '#3B82F6' :
                                              psychData.assessment.colorChoice === 'Red' ? '#EF4444' :
@@ -975,7 +975,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           <TabsContent value="interviews" className="space-y-6 mt-6">
             {loadingInterviews ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="lg" variant="gold" />
               </div>
             ) : errorInterviews ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">
@@ -1022,7 +1022,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           <TabsContent value="skills" className="space-y-6 mt-6">
             {loadingSkills ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="lg" variant="gold" />
               </div>
             ) : errorSkills ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">

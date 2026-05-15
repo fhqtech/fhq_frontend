@@ -43,10 +43,10 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
   };
 
   const phaseIcons = {
-    detecting: <Mic className="w-8 h-8 text-blue-500" />,
-    measuring: <MicOff className="w-8 h-8 text-orange-500" />,
-    calibrating: <Mic className="w-8 h-8 text-green-500 animate-pulse" />,
-    ready: <CheckCircle className="w-8 h-8 text-green-600" />
+    detecting: <Mic className="w-8 h-8 text-info" />,
+    measuring: <MicOff className="w-8 h-8 text-orange-ink" />,
+    calibrating: <Mic className="w-8 h-8 text-success animate-pulse" />,
+    ready: <CheckCircle className="w-8 h-8 text-success" />
   };
 
   // Reset calibration when dialog opens
@@ -167,9 +167,9 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
 
   const micPermissionContent = (
     <div className="text-center space-y-4">
-      <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+      <AlertCircle className="w-12 h-12 text-danger mx-auto" />
       <div>
-        <h3 className="text-lg font-semibold text-red-600">Microphone access required</h3>
+        <h3 className="text-lg font-semibold text-danger">Microphone access required</h3>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
           {micErrorMessage || 'Please allow microphone access to calibrate your audio.'}
         </p>
@@ -206,7 +206,7 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
           key={phase}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-base font-medium text-gray-700 dark:text-gray-300"
+          className="text-base font-medium text-ink-soft "
         >
           {phaseDescriptions[phase]}
         </motion.p>
@@ -225,7 +225,7 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-xs space-y-1"
+          className="bg-paper-2 p-3 rounded-lg text-xs space-y-1"
         >
           <div className="flex justify-between">
             <span>Current Level:</span>

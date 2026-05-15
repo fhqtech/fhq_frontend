@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { PageSpinner } from '@/components/ui/spinner';
 
 const OAuth2Handler = () => {
   const navigate = useNavigate();
@@ -53,14 +54,7 @@ const OAuth2Handler = () => {
     handleOAuthCallback();
   }, [searchParams, navigate, checkAuthStatus]);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Completing authentication...</p>
-      </div>
-    </div>
-  );
+  return <PageSpinner label="Completing authentication…" variant="brand" />;
 };
 
 export default OAuth2Handler;

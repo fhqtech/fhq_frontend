@@ -64,7 +64,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
           onClick={onClearAll}
           className={cn(
             "h-7 px-3 text-xs font-medium",
-            !hasActiveFilters && "bg-brand-primary text-white"
+            !hasActiveFilters && "bg-ink text-white"
           )}
         >
           All
@@ -96,7 +96,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
               }}
               className={cn(
                 "h-7 px-3 text-xs font-medium",
-                isActive && "bg-brand-primary text-white"
+                isActive && "bg-ink text-white"
               )}
             >
               {status.label}
@@ -114,7 +114,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
           onClick={onThisWeekFilter}
           className={cn(
             "h-7 px-3 text-xs font-medium",
-            activeFilters.dateRange?.start && "bg-brand-primary text-white"
+            activeFilters.dateRange?.start && "bg-ink text-white"
           )}
         >
           <Calendar className="w-3 h-3 mr-1" />
@@ -142,7 +142,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
           }}
           className={cn(
             "h-7 px-3 text-xs font-medium",
-            activeFilters.candidateCount?.min && "bg-brand-primary text-white"
+            activeFilters.candidateCount?.min && "bg-ink text-white"
           )}
         >
           <Users className="w-3 h-3 mr-1" />
@@ -160,7 +160,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-1.5 sm:gap-2 pb-2 border-b border-border">
-          <div className="flex items-center text-xs text-foreground-muted">
+          <div className="flex items-center text-xs text-muted">
             <Filter className="w-3 h-3 mr-1" />
             Active filters:
           </div>
@@ -244,7 +244,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
               variant="ghost"
               size="sm"
               onClick={onClearAll}
-              className="h-6 px-2 text-xs text-foreground-muted hover:text-foreground"
+              className="h-6 px-2 text-xs text-muted hover:text-foreground"
             >
               Clear all
             </Button>

@@ -35,8 +35,8 @@ export default function ListsPage() {
   }, []);
 
   return (
-    <div className="h-full bg-gray-50 flex flex-col overflow-hidden pt-6">
-      <div className="flex-shrink-0 bg-gray-50 pr-8 pb-4">
+    <div className="h-full bg-paper-2 flex flex-col overflow-hidden pt-6">
+      <div className="flex-shrink-0 bg-paper-2 pr-8 pb-4">
         <style>{`
           .wrap {
             --round: 10px;
@@ -190,7 +190,7 @@ export default function ListsPage() {
           {activeTab === 'yours' && (
             <Button
               onClick={handleCreateList}
-              className="bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+              className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Candidate Pool
@@ -212,7 +212,7 @@ export default function ListsPage() {
       </div>
 
       {/* Right Side Analytics Panel */}
-      <div className={`fixed top-0 right-0 h-screen bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-2xl ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
+      <div className={`fixed top-0 right-0 h-[100dvh] bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-2xl ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
         {/* Toggle Button */}
         <button
           onClick={() => setIsAnalyticsPanelOpen(!isAnalyticsPanelOpen)}

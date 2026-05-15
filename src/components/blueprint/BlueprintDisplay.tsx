@@ -11,7 +11,7 @@ interface BlueprintDisplayProps {
 const BlueprintDisplay = ({ data }: BlueprintDisplayProps) => {
   console.log('🎯 BlueprintDisplay rendering with data:', data);
   return (
-    <div className="blueprint-display space-y-6 relative bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+    <div className="blueprint-display space-y-6 relative bg-paper p-6 rounded-lg border border-rule shadow-1">
 
       <BlueprintHeader />
       <MissionSection mission={data.mission} />
@@ -23,26 +23,26 @@ const BlueprintDisplay = ({ data }: BlueprintDisplayProps) => {
 };
 
 const BlueprintHeader = () => (
-  <div className="text-center py-4 bg-gray-50 rounded-lg border border-gray-100">
-    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+  <div className="text-center py-4 bg-paper-2 rounded-lg border border-rule">
+    <h1 className="text-2xl font-bold text-ink mb-2">
       Interview Blueprint
     </h1>
-    <p className="text-sm text-gray-600">
+    <p className="text-sm text-muted">
       AI-Powered Evaluation Framework
     </p>
   </div>
 );
 
 const MissionSection = ({ mission }: { mission: string }) => (
-  <Card className="border border-gray-200">
+  <Card className="border border-rule">
     <CardHeader className="pb-3">
-      <CardTitle className="text-lg font-semibold text-gray-900">
+      <CardTitle className="text-lg font-semibold text-ink">
         Mission Statement
       </CardTitle>
     </CardHeader>
     <CardContent className="pt-0">
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-        <p className="text-base text-gray-700 leading-relaxed">
+      <div className="bg-paper-2 rounded-lg p-4 border border-rule">
+        <p className="text-base text-ink-soft leading-relaxed">
           "{mission}"
         </p>
       </div>
@@ -52,14 +52,14 @@ const MissionSection = ({ mission }: { mission: string }) => (
 
 const EvaluationPillarsSection = ({ pillars }: { pillars: string[] }) => (
   <div>
-    <h2 className="text-base font-semibold mb-2 text-gray-900">
+    <h2 className="text-base font-semibold mb-2 text-ink">
       Evaluation Pillars
     </h2>
     <div className="flex flex-wrap gap-2">
       {pillars.map((pillar, index) => (
-        <Card key={index} className="border border-gray-200 hover:shadow-sm transition-shadow">
+        <Card key={index} className="border border-rule hover:shadow-1 transition-shadow">
           <CardContent className="p-2">
-            <h3 className="text-sm font-medium text-gray-800 whitespace-nowrap">
+            <h3 className="text-sm font-medium text-ink whitespace-nowrap">
               {pillar}
             </h3>
           </CardContent>
@@ -75,19 +75,19 @@ const ResponsibilitiesSection = ({ responsibilities, questions }: { responsibili
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <h2 className="text-lg font-semibold mb-3 text-gray-900">
+        <h2 className="text-lg font-semibold mb-3 text-ink">
           Key Responsibilities
         </h2>
-        <Card className="bg-blue-100/40 backdrop-blur-sm border border-blue-300/90 shadow-sm">
+        <Card className="bg-blue-100/40 backdrop-blur-sm border border-blue-300/90 shadow-1">
           <CardContent className="p-4">
-            <div className="bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/60">
+            <div className="bg-paper/40 backdrop-blur-sm rounded-lg p-3 border border-white/60">
               <ul className="space-y-2">
                 {parsedResponsibilities.slice(0, Math.ceil(parsedResponsibilities.length / 2)).map((responsibility: string, index: number) => (
                   <li key={index} className="flex items-start gap-2">
                     <div className="w-6 h-6 bg-blue-200/95 backdrop-blur-sm text-blue-800 font-medium rounded-full flex items-center justify-center flex-shrink-0 text-xs border border-blue-400/90">
                       {index + 1}
                     </div>
-                    <span className="text-sm text-gray-700 leading-relaxed">
+                    <span className="text-sm text-ink-soft leading-relaxed">
                       {responsibility}
                     </span>
                   </li>
@@ -99,18 +99,18 @@ const ResponsibilitiesSection = ({ responsibilities, questions }: { responsibili
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-3 text-gray-900">
+        <h2 className="text-lg font-semibold mb-3 text-ink">
           Qualifying Questions
         </h2>
         <div className="space-y-2">
           {questions.slice(0, 3).map((question: string, index: number) => (
-            <Card key={index} className="bg-blue-100/40 backdrop-blur-sm border border-blue-300/90 shadow-sm">
+            <Card key={index} className="bg-blue-100/40 backdrop-blur-sm border border-blue-300/90 shadow-1">
               <CardContent className="p-3">
                 <div className="flex gap-2">
                   <div className="w-6 h-6 bg-blue-200/95 backdrop-blur-sm text-blue-800 font-medium rounded-full flex items-center justify-center flex-shrink-0 text-xs border border-blue-400/90">
                     Q{index + 1}
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                  <p className="text-sm text-ink-soft leading-relaxed">
                     {question}
                   </p>
                 </div>
@@ -126,15 +126,18 @@ const ResponsibilitiesSection = ({ responsibilities, questions }: { responsibili
 const QualifyingQuestionsSection = ({ questions }: { questions: string[] }) => null;
 
 const CandidateProfileSection = ({ profile }: { profile: string }) => (
-  <Card className="bg-green-100/40 backdrop-blur-sm border border-green-300/90 shadow-sm border-l-4 border-l-green-500">
+  <Card className="bg-paper border border-rule shadow-1">
     <CardHeader className="pb-3">
-      <CardTitle className="text-lg font-semibold text-gray-900">
-        Ideal Candidate Profile
+      <span className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+        Ideal applicant
+      </span>
+      <CardTitle className="text-lg font-semibold text-ink mt-1">
+        Profile
       </CardTitle>
     </CardHeader>
     <CardContent className="pt-0">
-      <div className="bg-white/40 backdrop-blur-sm rounded-lg p-4 border border-white/60">
-        <p className="text-base text-gray-700 leading-relaxed">
+      <div className="bg-paper-2 rounded-md p-4 border border-rule">
+        <p className="text-base text-ink-soft leading-relaxed">
           "{profile}"
         </p>
       </div>

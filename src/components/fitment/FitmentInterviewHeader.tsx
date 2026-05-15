@@ -9,22 +9,22 @@ export function FitmentInterviewHeader({ onCreateNew }: FitmentInterviewHeaderPr
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-3xl font-bold text-foreground uppercase tracking-wider">Role Fitment</h1>
-        <p className="text-foreground-muted mt-2 uppercase text-xs tracking-wider">
+        <h1 className="text-3xl font-bold text-foreground">Role Fitment</h1>
+        <p className="text-muted mt-2 uppercase text-xs tracking-wider">
           Specialized interviews tailored to specific job roles and requirements.
         </p>
       </div>
       <Button
-        className="text-white font-medium rounded-sm uppercase transition-all duration-200"
+        className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
         style={{
           position: 'relative',
           overflow: 'hidden',
-          backgroundColor: '#222831',
-          boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
+          backgroundColor: 'hsl(var(--ink))',
+          boxShadow: 'var(--shadow-clay)',
           textTransform: 'uppercase'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
         onClick={onCreateNew}
       >
         <Upload className="w-4 h-4 mr-2" />

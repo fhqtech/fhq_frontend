@@ -29,7 +29,7 @@ const ExpandablePillarCard: React.FC<ExpandablePillarCardProps> = ({
   const expanded = onToggle ? isExpanded : localExpanded;
 
   return (
-    <Card className="border border-gray-200 hover:shadow-lg transition-all duration-300">
+    <Card className="border border-rule hover:shadow-2 transition-all duration-300">
       <CardHeader
         className="cursor-pointer pb-3"
         onClick={handleToggle}
@@ -38,11 +38,11 @@ const ExpandablePillarCard: React.FC<ExpandablePillarCardProps> = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               {expanded ? (
-                <ChevronDown className="w-5 h-5 text-gray-500" />
+                <ChevronDown className="w-5 h-5 text-muted" />
               ) : (
-                <ChevronRight className="w-5 h-5 text-gray-500" />
+                <ChevronRight className="w-5 h-5 text-muted" />
               )}
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-semibold text-ink">
                 {pillar.pillar_name}
               </CardTitle>
             </div>
@@ -51,7 +51,7 @@ const ExpandablePillarCard: React.FC<ExpandablePillarCardProps> = ({
             {pillar.evaluation_criteria.length} skills
           </Badge>
         </div>
-        <p className="text-sm text-gray-600 mt-2 ml-7">
+        <p className="text-sm text-muted mt-2 ml-7">
           {pillar.description}
         </p>
       </CardHeader>
@@ -78,22 +78,22 @@ const SkillCard: React.FC<SkillCardProps> = ({ criteria }) => {
   const config = PROFICIENCY_CONFIG[criteria.required_proficiency];
 
   return (
-    <div className={`bg-gray-50 rounded-lg p-4 border-2 border-${config.borderColor}`}>
+    <div className={`bg-paper-2 rounded-lg p-4 border-2 border-${config.borderColor}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="font-medium text-gray-900">
+            <h4 className="font-medium text-ink">
               {criteria.skill_name}
             </h4>
             <ProficiencyBadge level={criteria.required_proficiency} size="sm" />
           </div>
-          <p className="text-sm text-gray-600 leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed">
             {criteria.context}
           </p>
         </div>
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="ml-3 p-1 text-gray-400 hover:text-gray-600 rounded"
+          className="ml-3 p-1 text-muted-2 hover:text-muted rounded"
           title={showDetails ? 'Hide details' : 'Show details'}
         >
           <Eye className="w-4 h-4" />
@@ -104,8 +104,8 @@ const SkillCard: React.FC<SkillCardProps> = ({ criteria }) => {
       {criteria.integrates_with.length > 0 && (
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-gray-500" />
-            <span className="text-xs font-medium text-gray-700">Integrates with:</span>
+            <Users className="w-4 h-4 text-muted" />
+            <span className="text-xs font-medium text-ink-soft">Integrates with:</span>
           </div>
           <div className="flex flex-wrap gap-1">
             {criteria.integrates_with.map((integration, idx) => (
@@ -123,13 +123,13 @@ const SkillCard: React.FC<SkillCardProps> = ({ criteria }) => {
 
       {/* Expandable focus areas */}
       {showDetails && (
-        <div className="mt-4 pt-3 border-t border-gray-200">
-          <h5 className="text-xs font-medium text-gray-700 mb-2 uppercase tracking-wide">
+        <div className="mt-4 pt-3 border-t border-rule">
+          <h5 className="text-xs font-medium text-ink-soft mb-2 uppercase tracking-wide">
             Interview Focus Areas
           </h5>
           <ul className="space-y-2">
             {criteria.interview_focus_areas.map((area, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+              <li key={idx} className="flex items-start gap-2 text-sm text-muted">
                 <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
                 <span className="leading-relaxed">{area}</span>
               </li>

@@ -43,5 +43,44 @@ export default defineConfig(({ mode }) => {
       pure: ["console.log", "console.debug", "console.info"],
       drop: ["debugger"],
     } : undefined,
+    build: {
+      // S3.3: split heavy deps into separate chunks so the marketing
+      // landing + auth bundle stays light. Without this, lazy() splits
+      // are defeated because every chunk eager-imports the same
+      // heavyweight libs (recharts, three, framer-motion, lucide).
+      // Numbers are guidance, not contracts — Vite picks the actual graph.
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (!id.includes("node_modules")) return undefined;
+            if (id.includes("react-router") || id.includes("react-dom") || /[/\\]react[/\\]/.test(id)) {
+              return "react-vendor";
+            }
+            if (id.includes("@radix-ui") || id.includes("vaul") || id.includes("cmdk") || id.includes("sonner")) {
+              return "ui-vendor";
+            }
+            if (id.includes("recharts") || id.includes("d3-")) {
+              return "charts-vendor";
+            }
+            if (id.includes("three") || id.includes("@react-three") || id.includes("framer-motion") || id.includes("gsap")) {
+              return "anim-vendor";
+            }
+            if (id.includes("assemblyai")) {
+              return "stt-vendor";
+            }
+            if (id.includes("@tanstack")) {
+              return "query-vendor";
+            }
+            if (id.includes("lucide-react") || id.includes("phosphor-react")) {
+              return "icons-vendor";
+            }
+            return "vendor";
+          },
+        },
+      },
+      // Larger chunk-size warning threshold — we deliberately keep some
+      // vendor chunks above 500kb. Anything above 1.5mb still warns.
+      chunkSizeWarningLimit: 1500,
+    },
   };
 });

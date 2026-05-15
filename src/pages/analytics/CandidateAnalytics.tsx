@@ -6,6 +6,7 @@ import { ListCard } from "@/components/analytics/ListCard";
 import { EmptyListCard } from "@/components/analytics/EmptyListCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Search, Loader2, Plus } from "lucide-react";
 import { PageSkeleton } from "@/components/ui/shimmer";
 
@@ -36,7 +37,7 @@ export default function CandidateAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-[100dvh] bg-background p-6">
       <div className="container mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Candidate Analytics</h1>
@@ -58,13 +59,12 @@ export default function CandidateAnalytics() {
 
         {/* Lists Grid */}
         {lists.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No lists found. Create your first list to get started.</p>
-            <Button onClick={() => navigate("/lists")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Go to Lists Management
-            </Button>
-          </div>
+          <EmptyState
+            icon={Plus}
+            title="No lists yet"
+            description="Create your first applicant list to get started."
+            primaryAction={{ label: "Go to lists", onClick: () => navigate("/lists") }}
+          />
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

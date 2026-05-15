@@ -144,7 +144,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsCreating(true)}
-                className="h-6 px-2 text-xs text-foreground-muted hover:text-foreground"
+                className="h-6 px-2 text-xs text-muted hover:text-foreground"
               >
                 <Plus className="w-3 h-3 mr-1" />
                 Save Current
@@ -155,7 +155,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
           {/* Save Current Filters Section */}
           {isCreating && (
             <div className="space-y-2 p-3 bg-muted rounded">
-              <label className="text-xs font-medium text-foreground-muted">
+              <label className="text-xs font-medium text-muted">
                 Preset Name
               </label>
               <div className="flex gap-2">
@@ -176,6 +176,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
                   size="sm"
                   onClick={saveCurrentAsPreset}
                   disabled={!newPresetName.trim()}
+                  aria-label="Save preset"
                   className="h-8 px-2"
                 >
                   <Save className="w-3 h-3" />
@@ -192,7 +193,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
                   <X className="w-3 h-3" />
                 </Button>
               </div>
-              <div className="text-xs text-foreground-muted">
+              <div className="text-xs text-muted">
                 Current filters: {getPresetSummary(currentFilters)}
               </div>
             </div>
@@ -200,7 +201,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
 
           {/* No Active Filters Message */}
           {!hasActiveFilters() && !isCreating && (
-            <div className="text-xs text-foreground-muted text-center py-4">
+            <div className="text-xs text-muted text-center py-4">
               Apply some filters first to save as a preset
             </div>
           )}
@@ -208,7 +209,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
           {/* Presets List */}
           {presets.length > 0 && (
             <div className="space-y-2">
-              <label className="text-xs font-medium text-foreground-muted">
+              <label className="text-xs font-medium text-muted">
                 Saved Presets ({presets.length})
               </label>
               <div className="max-h-48 overflow-y-auto space-y-2">
@@ -219,10 +220,10 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm truncate">{preset.name}</div>
-                      <div className="text-xs text-foreground-muted truncate">
+                      <div className="text-xs text-muted truncate">
                         {getPresetSummary(preset.filters)}
                       </div>
-                      <div className="text-xs text-foreground-muted">
+                      <div className="text-xs text-muted">
                         {new Date(preset.createdAt).toLocaleDateString()}
                       </div>
                     </div>
@@ -252,7 +253,7 @@ export const FilterPresets: React.FC<FilterPresetsProps> = ({
 
           {/* No Presets Message */}
           {presets.length === 0 && !isCreating && hasActiveFilters() && (
-            <div className="text-xs text-foreground-muted text-center py-4">
+            <div className="text-xs text-muted text-center py-4">
               No saved presets yet. Save your current filters to get started!
             </div>
           )}

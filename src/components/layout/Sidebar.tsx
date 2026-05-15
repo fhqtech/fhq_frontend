@@ -35,18 +35,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
-// T4: rebrand "Interviews" → "TAGs" to mirror funnelhq.co's product language.
-// Submenu items keep their action-oriented labels (Create / Screening / Fitment)
-// so recruiter mental models around the workflow stay intact.
+// TAG is reserved for the Talent Analysis Graph (the output artifact).
+// Sidebar uses domain language (Interviews / Setup / Screening / Fitment)
+// to match how recruiters actually think about the work.
 const menuItems = [
   { title: "Quick Tour", url: "/quick-tour", icon: Play },
   {
-    title: "TAGs",
+    title: "Interviews",
     icon: Briefcase,
     subItems: [
-      { title: "Create TAG", url: "/interviews/create" },
-      { title: "Screening TAGs", url: "/interviews/manage" },
-      { title: "Fitment TAGs", url: "/interviews/fitment" }
+      { title: "Setup", url: "/interviews/create" },
+      { title: "Screening", url: "/interviews/manage" },
+      { title: "Fitment", url: "/interviews/fitment" }
     ]
   },
   { title: "Talent Pools", url: "/lists", icon: Users },
@@ -110,7 +110,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       )}
 
       <div className={cn(
-        "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-full shadow-sm pt-4",
+        "bg-paper border-r border-rule transition-all duration-300 flex flex-col h-full shadow-1 pt-4",
         collapsed ? "w-16" : "w-64"
       )}>
         {/* Navigation */}
@@ -131,8 +131,9 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                     variant="ghost"
                     className={cn(
                       "w-full justify-between text-left px-3 py-2 rounded-sm transition-all !font-semibold text-xs uppercase tracking-widest",
-                      isSubItemActive(item) && "bg-[#222831] text-white shadow-md",
-                      !isSubItemActive(item) && "text-gray-700 hover:bg-[#393E46] hover:text-white",
+                      isSubItemActive(item)
+                        ? "bg-paper-3 text-ink border-l-2 border-gold"
+                        : "text-ink-soft hover:text-ink hover:bg-paper-3",
                       collapsed && "justify-center"
                     )}
                   >
@@ -152,8 +153,8 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                         className={({ isActive }) => cn(
                           "block py-2 px-3 ml-7 text-xs rounded-sm transition-all font-semibold uppercase tracking-wider",
                           isActive
-                            ? "bg-[#222831] text-white shadow-md"
-                            : "text-gray-600 hover:bg-[#393E46] hover:text-white"
+                            ? "bg-paper-3 text-ink border-l-2 border-gold"
+                            : "text-muted hover:text-ink hover:bg-paper-3"
                         )}
                       >
                         {subItem.title}
@@ -173,8 +174,8 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                 "flex items-center rounded-sm transition-all font-semibold text-xs uppercase tracking-widest",
                 collapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
                 isActive(item.url)
-                  ? "bg-[#222831] text-white shadow-md"
-                  : "text-gray-700 hover:bg-[#393E46] hover:text-white"
+                  ? "bg-paper-3 text-ink border-l-2 border-gold"
+                  : "text-ink-soft hover:text-ink hover:bg-paper-3"
               )}
             >
               <item.icon className={cn("transition-all", collapsed ? "w-6 h-6" : "w-4 h-4")} />
@@ -191,7 +192,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             <Button
               variant="ghost"
               className={cn(
-                "w-full text-red-600 hover:text-red-700 hover:bg-red-50 font-semibold text-xs uppercase tracking-wider",
+                "w-full text-danger hover:text-danger hover:bg-danger-soft font-semibold text-xs uppercase tracking-wider",
                 collapsed ? "justify-center p-2" : "justify-start"
               )}
               disabled={isLoggingOut}
@@ -215,7 +216,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-danger hover:bg-danger/90 text-paper"
                 disabled={isLoggingOut}
               >
                 {isLoggingOut ? "Signing out..." : "Sign out"}

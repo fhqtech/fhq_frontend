@@ -30,10 +30,10 @@ export function TranscriptBox({
   }, [messages, currentUtterance]);
 
   return (
-    <div className={`bg-slate-900/95 rounded-lg border border-slate-700 flex flex-col ${className}`}>
+    <div className={`bg-ink/95 rounded-lg border border-ink flex flex-col ${className}`}>
       {/* Header */}
-      <div className="px-3 py-2 border-b border-slate-700">
-        <span className="text-slate-400 text-xs uppercase tracking-wider font-normal">TRANSCRIPT</span>
+      <div className="px-3 py-2 border-b border-ink">
+        <span className="text-muted-2 text-xs uppercase tracking-wider font-normal">TRANSCRIPT</span>
       </div>
 
       {/* Messages Container */}
@@ -51,7 +51,7 @@ export function TranscriptBox({
                 className="w-6 h-6 rounded-full flex-shrink-0"
               />
               <div className="max-w-[80%] bg-accent/10 rounded-lg rounded-tl-none px-3 py-2">
-                <p className="text-slate-300 text-xs leading-relaxed">{message.content}</p>
+                <p className="text-muted-2 text-xs leading-relaxed">{message.content}</p>
               </div>
             </div>
           ) : (
@@ -62,8 +62,8 @@ export function TranscriptBox({
                 alt="You"
                 className="w-6 h-6 rounded-full flex-shrink-0"
               />
-              <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
-                <p className="text-slate-300 text-xs leading-relaxed">{message.content}</p>
+              <div className="max-w-[80%] bg-success/10 rounded-lg rounded-tr-none px-3 py-2">
+                <p className="text-muted-2 text-xs leading-relaxed">{message.content}</p>
               </div>
             </div>
           )
@@ -77,14 +77,14 @@ export function TranscriptBox({
               alt="You"
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
-            <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
+            <div className="max-w-[80%] bg-success/10 rounded-lg rounded-tr-none px-3 py-2">
               {currentUtterance ? (
-                <p className="text-slate-300 text-xs leading-relaxed italic">{currentUtterance}</p>
+                <p className="text-muted-2 text-xs leading-relaxed italic">{currentUtterance}</p>
               ) : (
                 <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-1.5 h-1.5 bg-success rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-success rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-success rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               )}
             </div>

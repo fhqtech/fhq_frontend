@@ -8,8 +8,8 @@ interface ConnectionStatusProps {
 
 const statusInfo = {
   idle: { text: 'Not Connected', Icon: WifiOff, color: 'text-destructive' },
-  connecting: { text: 'Connecting...', Icon: Wifi, color: 'text-amber-500 animate-pulse' },
-  connected: { text: 'Connected', Icon: Wifi, color: 'text-green-500' },
+  connecting: { text: 'Connecting...', Icon: Wifi, color: 'text-gold-ink animate-pulse' },
+  connected: { text: 'Connected', Icon: Wifi, color: 'text-success' },
   error: { text: 'Connection Error', Icon: WifiOff, color: 'text-destructive' },
 };
 

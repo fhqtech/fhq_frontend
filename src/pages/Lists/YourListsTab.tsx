@@ -498,7 +498,7 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
     <div className="space-y-6">
       {/* AI Generate List Card - Hidden for now, to be worked on later */}
       {/* {allLists.length > 0 && (
-        <Card className="relative overflow-hidden border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent hover:border-primary/30 transition-all duration-300">
+        <Card className="relative overflow-hidden border border-primary/20 bg-paper-2 from-primary/5 to-transparent hover:border-primary/30 transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 flex-1">
@@ -533,35 +533,35 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
 
       {/* Search and Filters - Sticky - Only show when there are lists */}
       {allLists.length > 0 && (
-        <div className="sticky top-0 z-10 bg-gray-50 pb-4 flex items-center gap-3">
+        <div className="sticky top-0 z-10 bg-paper-2 pb-4 flex items-center gap-3">
           <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search candidate pools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-paper"
             />
           </div>
           <div className="flex gap-2">
             <Button
               variant={listFilter === 'all' ? 'default' : 'outline'}
               onClick={() => setListFilter('all')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'all' ? 'bg-black hover:bg-slate-800 text-white' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'all' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               All
             </Button>
             <Button
               variant={listFilter === 'normal' ? 'default' : 'outline'}
               onClick={() => setListFilter('normal')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'normal' ? 'bg-black hover:bg-slate-800 text-white' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'normal' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Normal
             </Button>
             <Button
               variant={listFilter === 'curated' ? 'default' : 'outline'}
               onClick={() => setListFilter('curated')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'curated' ? 'bg-black hover:bg-slate-800 text-white' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'curated' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Curated
             </Button>
@@ -573,11 +573,11 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
       {allLists.length === 0 ? (
         <div className="text-center py-8">
           <img src={doggieSvg} alt="No pools" className="w-96 h-96 mx-auto mb-6 object-contain" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-3 uppercase tracking-wider">No candidate pools yet</h3>
-          <p className="text-sm text-gray-500 mb-6 uppercase tracking-wider">
+          <h3 className="text-xl font-semibold text-ink mb-3 uppercase tracking-wider">No candidate pools yet</h3>
+          <p className="text-sm text-muted mb-6 uppercase tracking-wider">
             Create your first candidate pool to start organizing candidates
           </p>
-          <Button onClick={() => setShowCreateDialog(true)} className="bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold">
+          <Button onClick={() => setShowCreateDialog(true)} className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold">
             <Plus className="h-4 w-4 mr-2" />
             Create Candidate Pool
           </Button>

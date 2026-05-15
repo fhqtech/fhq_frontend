@@ -11,7 +11,9 @@ import { FitmentInterviewTable } from "@/components/fitment/FitmentInterviewTabl
 
 export default function FitmentInterviews() {
   const [fitmentInterviewsData, setFitmentInterviewsData] = useState<any[]>([]);
-  const [isLoadingFitmentInterviews, setIsLoadingFitmentInterviews] = useState(false);
+  // Default to true so the empty-state JSX doesn't flash before the
+  // workspace context resolves + the fetch fires.
+  const [isLoadingFitmentInterviews, setIsLoadingFitmentInterviews] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentWorkspace, currentProject } = useWorkspace();
@@ -57,27 +59,27 @@ export default function FitmentInterviews() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-sm p-6 bg-white" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+        <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
           <div className="flex items-center gap-4">
             <p className="text-5xl font-bold text-foreground">{fitmentInterviewsData.length}</p>
-            <div className="text-sm text-foreground-muted uppercase text-xs tracking-wider leading-tight">
+            <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
               <div>Total</div>
               <div>Fitments</div>
             </div>
           </div>
         </div>
-        <div className="rounded-sm p-6 bg-white" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+        <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
           <div className="flex items-center gap-4">
             <p className="text-5xl font-bold text-foreground">{fitmentInterviewsData.filter(interview => interview.status === 'completed').length}</p>
-            <div className="text-sm text-foreground-muted uppercase text-xs tracking-wider leading-tight">
+            <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
               <div>Completed</div>
             </div>
           </div>
         </div>
-        <div className="rounded-sm p-6 bg-white" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+        <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
           <div className="flex items-center gap-4">
             <p className="text-5xl font-bold text-foreground">{fitmentInterviewsData.filter(interview => interview.status === 'active').length}</p>
-            <div className="text-sm text-foreground-muted uppercase text-xs tracking-wider leading-tight">
+            <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
               <div>In Progress</div>
             </div>
           </div>

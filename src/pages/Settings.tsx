@@ -240,15 +240,14 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-foreground-muted mt-2">
+          <p className="text-muted mt-2">
             Configure your AI interviewer preferences and account settings.
           </p>
         </div>
-        <Button disabled className="bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed">
-          <Save className="w-4 h-4 mr-2" />
-          Save Changes
-          <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 text-gray-500 rounded-full">Coming Soon</span>
-        </Button>
+        {/* S1.8: top-level Save was disabled with "Coming Soon" for the
+            entire page lifetime. Each tab that has real save behavior
+            should ship its own scoped Save button. Removed here to
+            stop signaling "this product is half-built" on every page load. */}
       </div>
 
       {/* Control Center Button */}
@@ -261,7 +260,7 @@ export default function Settings() {
               // Pass token in URL - Control Tower will immediately store it and remove from URL
               window.open(`${controlTowerUrl}?workspace=${currentWorkspace.id}&token=${encodeURIComponent(token || '')}`, '_blank', 'noopener,noreferrer');
             }}
-            className="px-6 py-3 bg-[#222831] text-white rounded-lg font-semibold hover:bg-[#1a1f26] transition-all duration-200 shadow-md hover:shadow-lg uppercase tracking-wide"
+            className="px-6 py-3 bg-[hsl(var(--ink))] text-paper rounded-lg font-semibold hover:bg-[#1a1f26] transition-all duration-200 shadow-2 hover:shadow-2 uppercase tracking-wide"
           >
             <span className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
@@ -288,7 +287,7 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5 text-brand-primary" />
+                <User className="w-5 h-5 text-ink" />
                 Profile Information
               </CardTitle>
               <CardDescription>
@@ -339,7 +338,7 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Folder className="w-5 h-5 text-brand-primary" />
+                <Folder className="w-5 h-5 text-ink" />
                 Your Projects
               </CardTitle>
               <CardDescription>
@@ -386,22 +385,22 @@ export default function Settings() {
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 font-medium text-sm text-foreground-muted">Name</th>
-                      <th className="text-left p-4 font-medium text-sm text-foreground-muted">Type</th>
-                      <th className="text-left p-4 font-medium text-sm text-foreground-muted">ID</th>
-                      <th className="text-right p-4 font-medium text-sm text-foreground-muted">Star</th>
+                      <th className="text-left p-4 font-medium text-sm text-muted">Name</th>
+                      <th className="text-left p-4 font-medium text-sm text-muted">Type</th>
+                      <th className="text-left p-4 font-medium text-sm text-muted">ID</th>
+                      <th className="text-right p-4 font-medium text-sm text-muted">Star</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {isLoadingProjects ? (
                       <tr>
-                        <td colSpan={4} className="p-8 text-center text-foreground-muted">
+                        <td colSpan={4} className="p-8 text-center text-muted">
                           Loading projects...
                         </td>
                       </tr>
                     ) : projects.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="p-8 text-center text-foreground-muted">
+                        <td colSpan={4} className="p-8 text-center text-muted">
                           No projects found
                         </td>
                       </tr>
@@ -425,10 +424,13 @@ export default function Settings() {
                                 )}
                               </div>
                             </td>
-                            <td className="p-4 text-foreground-muted">Project</td>
-                            <td className="p-4 text-foreground-muted font-mono text-sm">{project.id}</td>
+                            <td className="p-4 text-muted">Project</td>
+                            <td className="p-4 text-muted font-mono text-sm">{project.id}</td>
                             <td className="p-4 text-right">
-                              <button className="text-muted-foreground hover:text-yellow-500 transition-colors">
+                              <button
+                                aria-label="Favorite project"
+                                className="text-muted hover:text-warning transition-colors"
+                              >
                                 <Star size={20} />
                               </button>
                             </td>
@@ -446,7 +448,7 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Mail className="w-5 h-5 text-brand-primary" />
+                <Mail className="w-5 h-5 text-ink" />
                 Communication Channels
               </CardTitle>
               <CardDescription>
@@ -456,10 +458,10 @@ export default function Settings() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-brand-primary" />
+                  <Mail className="w-5 h-5 text-ink" />
                   <div>
                     <p className="font-medium text-foreground">Email Notifications</p>
-                    <p className="text-sm text-foreground-muted">Send interview invites via email</p>
+                    <p className="text-sm text-muted">Send interview invites via email</p>
                   </div>
                 </div>
                 <Switch
@@ -470,13 +472,13 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-60">
                 <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-gray-400" />
+                  <Phone className="w-5 h-5 text-muted-2" />
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="font-medium text-gray-500">Phone Calls</p>
-                      <p className="text-sm text-gray-400">Enable phone-based interviews</p>
+                      <p className="font-medium text-muted">Phone Calls</p>
+                      <p className="text-sm text-muted-2">Enable phone-based interviews</p>
                     </div>
-                    <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Coming Soon</span>
+                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
                   </div>
                 </div>
                 <Switch
@@ -488,13 +490,13 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-60">
                 <div className="flex items-center gap-3">
-                  <MessageSquare className="w-5 h-5 text-gray-400" />
+                  <MessageSquare className="w-5 h-5 text-muted-2" />
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="font-medium text-gray-500">SMS Messages</p>
-                      <p className="text-sm text-gray-400">Send reminders and updates via SMS</p>
+                      <p className="font-medium text-muted">SMS Messages</p>
+                      <p className="text-sm text-muted-2">Send reminders and updates via SMS</p>
                     </div>
-                    <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Coming Soon</span>
+                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
                   </div>
                 </div>
                 <Switch
@@ -511,7 +513,7 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Volume2 className="w-5 h-5 text-brand-primary" />
+                <Volume2 className="w-5 h-5 text-ink" />
                 Voice Calibration
               </CardTitle>
               <CardDescription>
@@ -544,27 +546,27 @@ export default function Settings() {
                         key={voice.value}
                         className={`relative flex-1 p-3 rounded-lg border transition-all duration-200 ${
                           isDisabled
-                            ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
+                            ? 'border-rule bg-paper-3 cursor-not-allowed opacity-60'
                             : isSelected
-                              ? 'border-brand-primary bg-brand-primary/15 shadow-md cursor-pointer'
-                              : 'border-gray-200 bg-white hover:border-brand-primary/40 hover:shadow-sm hover:bg-gray-50/50 cursor-pointer'
+                              ? 'border-ink bg-ink/15 shadow-2 cursor-pointer'
+                              : 'border-rule bg-paper hover:border-ink/40 hover:shadow-1 hover:bg-paper-2/50 cursor-pointer'
                         }`}
                         onClick={() => !isDisabled && updateSetting('voice', 'type', voice.value)}
                       >
                         {isSelected && !isDisabled && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-brand-primary rounded-full flex items-center justify-center">
-                            <CheckCircle className="w-3 h-3 text-white" weight="fill" />
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-ink rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-3 h-3 text-paper" weight="fill" />
                           </div>
                         )}
 
                         <div className="flex items-center space-x-3">
                           <div className={`text-lg ${isDisabled ? 'opacity-30' : 'opacity-60'}`}>{voice.icon}</div>
-                          <div className={`font-medium text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>{voice.label}</div>
+                          <div className={`font-medium text-sm ${isDisabled ? 'text-muted-2' : 'text-ink'}`}>{voice.label}</div>
                         </div>
 
                         {isDisabled && (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded">Coming Soon</span>
+                            <span className="text-xs text-muted bg-paper px-2 py-1 rounded">Coming Soon</span>
                           </div>
                         )}
                       </div>
@@ -581,7 +583,7 @@ export default function Settings() {
                   <div className="mt-4 max-w-sm">
                     <div className="relative flex items-start justify-between">
                       {/* Connecting Line - positioned at radio button level */}
-                      <div className="absolute top-2 left-2 right-2 h-0.5 bg-gray-300 z-0"></div>
+                      <div className="absolute top-2 left-2 right-2 h-0.5 bg-paper-4 z-0"></div>
 
                       {[
                         { value: "slow", label: "0.75x", display: "Slow" },
@@ -598,10 +600,10 @@ export default function Settings() {
                                 value={speed.value}
                                 checked={isSelected}
                                 onChange={(e) => updateSetting('voice', 'speed', e.target.value)}
-                                className="w-4 h-4 rounded-full bg-white border-2 border-gray-300 checked:border-brand-primary checked:bg-brand-primary focus:outline-none focus:ring-0 focus:ring-offset-0 appearance-none relative checked:after:content-[''] checked:after:w-2 checked:after:h-2 checked:after:rounded-full checked:after:bg-white checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:transform checked:after:-translate-x-1/2 checked:after:-translate-y-1/2"
+                                className="w-4 h-4 rounded-full bg-paper border-2 border-rule-strong checked:border-ink checked:bg-ink focus:outline-none focus:ring-0 focus:ring-offset-0 appearance-none relative checked:after:content-[''] checked:after:w-2 checked:after:h-2 checked:after:rounded-full checked:after:bg-paper checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:transform checked:after:-translate-x-1/2 checked:after:-translate-y-1/2"
                               />
-                              <span className="text-xs font-semibold text-gray-900 mt-2">{speed.label}</span>
-                              <span className="text-xs text-gray-500 mt-1">{speed.display}</span>
+                              <span className="text-xs font-semibold text-ink mt-2">{speed.label}</span>
+                              <span className="text-xs text-muted mt-1">{speed.display}</span>
                             </label>
                           </div>
                         );
@@ -628,8 +630,8 @@ export default function Settings() {
                             size="sm"
                             className={`${
                               isSelected
-                                ? 'bg-brand-primary hover:bg-brand-primary/90 text-white border-brand-primary'
-                                : 'hover:bg-gray-50 border-gray-200'
+                                ? 'bg-ink hover:bg-ink/90 text-paper border-ink'
+                                : 'hover:bg-paper-2 border-rule'
                             }`}
                             onClick={() => updateSetting('voice', 'accent', accent.value)}
                           >
@@ -648,7 +650,7 @@ export default function Settings() {
                             {[...Array(12)].map((_, i) => (
                               <div
                                 key={i}
-                                className="w-1 bg-brand-primary rounded-full animate-pulse"
+                                className="w-1 bg-ink rounded-full animate-pulse"
                                 style={{
                                   height: `${Math.random() * 20 + 6}px`,
                                   animationDelay: `${i * 0.1}s`,
@@ -666,7 +668,7 @@ export default function Settings() {
                             variant="outline"
                             size="sm"
                             onClick={playAudioPreview}
-                            className="flex items-center gap-1 px-3 py-1 text-xs border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
+                            className="flex items-center gap-1 px-3 py-1 text-xs border-ink text-ink hover:bg-ink hover:text-paper"
                           >
                             <Play className="w-3 h-3" weight="fill" />
                             Preview
@@ -677,7 +679,7 @@ export default function Settings() {
                             variant="outline"
                             size="sm"
                             onClick={stopAudioPreview}
-                            className="flex items-center gap-1 px-3 py-1 text-xs border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            className="flex items-center gap-1 px-3 py-1 text-xs border-red-500 text-red-500 hover:bg-red-500 hover:text-paper"
                           >
                             <Stop className="w-3 h-3" weight="fill" />
                             Stop
@@ -696,19 +698,19 @@ export default function Settings() {
           <Card className="opacity-60">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-500">Notification Preferences</span>
-                <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Coming Soon</span>
+                <Bell className="w-5 h-5 text-muted-2" />
+                <span className="text-muted">Notification Preferences</span>
+                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-muted-2">
                 Choose when and how you want to be notified
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-gray-400">Interview Completed</p>
-                  <p className="text-sm text-gray-400">Get notified when interviews are finished</p>
+                  <p className="font-medium text-muted-2">Interview Completed</p>
+                  <p className="text-sm text-muted-2">Get notified when interviews are finished</p>
                 </div>
                 <Switch
                   checked={false}
@@ -718,8 +720,8 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-gray-400">Candidate Shortlisted</p>
-                  <p className="text-sm text-gray-400">Get notified when candidates are shortlisted</p>
+                  <p className="font-medium text-muted-2">Candidate Shortlisted</p>
+                  <p className="text-sm text-muted-2">Get notified when candidates are shortlisted</p>
                 </div>
                 <Switch
                   checked={false}
@@ -729,8 +731,8 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-gray-400">Low Score Alerts</p>
-                  <p className="text-sm text-gray-400">Get alerted for interviews with low scores</p>
+                  <p className="font-medium text-muted-2">Low Score Alerts</p>
+                  <p className="text-sm text-muted-2">Get alerted for interviews with low scores</p>
                 </div>
                 <Switch
                   checked={false}
@@ -740,8 +742,8 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-gray-400">Daily Digest</p>
-                  <p className="text-sm text-gray-400">Receive daily summary of activities</p>
+                  <p className="font-medium text-muted-2">Daily Digest</p>
+                  <p className="text-sm text-muted-2">Receive daily summary of activities</p>
                 </div>
                 <Switch
                   checked={false}
@@ -756,19 +758,19 @@ export default function Settings() {
           <Card className="opacity-60">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-500">Appearance Settings</span>
-                <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Coming Soon</span>
+                <Palette className="w-5 h-5 text-muted-2" />
+                <span className="text-muted">Appearance Settings</span>
+                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-muted-2">
                 Customize the look and feel of your dashboard
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="opacity-50 pointer-events-none">
-                <Label className="text-gray-400">Theme</Label>
+                <Label className="text-muted-2">Theme</Label>
                 <Select disabled value="light">
-                  <SelectTrigger className="mt-2 bg-gray-50 border-gray-200">
+                  <SelectTrigger className="mt-2 bg-paper-2 border-rule">
                     <SelectValue />
                   </SelectTrigger>
                 </Select>
@@ -776,8 +778,8 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-gray-400">Compact Mode</p>
-                  <p className="text-sm text-gray-400">Use a more compact layout to fit more content</p>
+                  <p className="font-medium text-muted-2">Compact Mode</p>
+                  <p className="text-sm text-muted-2">Use a more compact layout to fit more content</p>
                 </div>
                 <Switch checked={false} disabled />
               </div>

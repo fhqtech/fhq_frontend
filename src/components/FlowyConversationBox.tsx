@@ -335,7 +335,7 @@ User: ${userMessage}`;
       {conversationState === 'hidden' && (
         <button
           onClick={handlePourNowClick}
-          className="mt-8 flex items-center gap-3 border-2 border-white/30 hover:border-white/50 bg-transparent text-white px-6 py-3 rounded hover:bg-white/10 transition-all"
+          className="mt-8 flex items-center gap-3 border-2 border-white/30 hover:border-white/50 bg-transparent text-paper px-6 py-3 rounded hover:bg-paper/10 transition-all"
         >
           <span className="font-normal tracking-wider">Pour Now</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FDE68A" viewBox="0 0 256 256">

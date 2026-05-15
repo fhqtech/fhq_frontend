@@ -5,6 +5,7 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import { suggestFromTitle, type InterviewSuggestion } from "@/services/suggestionsApi";
 import { BlueprintPreviewRail } from "@/components/create-interview/BlueprintPreviewRail";
+import { EditModeIndicator } from "@/components/create-interview/EditModeIndicator";
 import { ArrowLeft, FloppyDisk as Save, Users, Robot as Bot, SpeakerHigh as Volume2, Envelope as Mail, Phone, ChatCircle as MessageSquare, Upload, Download, FileXls as FileSpreadsheet, Gear as Settings, Calculator, Receipt, Briefcase, ArrowsOut, CheckCircle, Info, Play, Stop, CircleNotch, Trash, X, Plus, ArrowsClockwise, CloudArrowUp, ClockCounterClockwise, AddressBook, CaretLeft, CaretRight } from "phosphor-react";
 import aiAvatar from "@/assets/ai-avatar.png";
 import blueprintGuideImg1 from "@/assets/create-interview-guide/interview-blueprint.png";
@@ -54,6 +55,7 @@ import { FilePreview } from "@/components/ui/file-preview";
 import { SourceDeleteConfirmationModal } from "@/components/ui/source-delete-confirmation-modal";
 import { templateApi, InterviewTemplate } from "@/services/templateApi";
 import { creditApi, CreditInfo } from "@/services/creditApi";
+import { track, Events } from "@/lib/analytics";
 
 export default function CreateInterview() {
   const [searchParams] = useSearchParams();
@@ -1645,6 +1647,14 @@ export default function CreateInterview() {
 
       const interviewId = (result as any).interviewId || result.id || editId;
 
+      if (!isEditMode && interviewId) {
+        track(Events.interview.created, {
+          interview_id: interviewId,
+          type: formData.type || "screening",
+          duration_min: Number(formData.duration) || 0,
+        });
+      }
+
       await new Promise(resolve => setTimeout(resolve, 600)); // Brief delay for UX
 
       console.log(`Interview ${isEditMode ? 'updated' : 'created'} successfully:`, result);
@@ -2003,10 +2013,10 @@ export default function CreateInterview() {
     return (
       <div className="h-full flex flex-col items-center justify-center bg-background px-4">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-foreground uppercase tracking-wider mb-3">
+          <h1 className="text-3xl font-bold text-foreground mb-3">
             Create Interview
           </h1>
-          <p className="text-foreground-muted uppercase text-xs tracking-wider">
+          <p className="text-muted uppercase text-xs tracking-wider">
             Choose the type of interview you want to create
           </p>
         </div>
@@ -2028,18 +2038,18 @@ export default function CreateInterview() {
               <div
                 className="w-24 h-24 rounded-full flex items-center justify-center mb-8 transition-all duration-300 group-hover:scale-110"
                 style={{
-                  backgroundColor: '#222831',
+                  backgroundColor: 'hsl(var(--ink))',
                   boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.1)'
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-paper" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-foreground uppercase tracking-wider mb-3">
+              <h2 className="text-2xl font-bold text-foreground mb-3">
                 Screening
               </h2>
-              <p className="text-foreground-muted text-sm uppercase tracking-wider leading-relaxed">
+              <p className="text-muted text-sm uppercase tracking-wider leading-relaxed">
                 Quick initial assessment to filter candidates at scale
               </p>
             </div>
@@ -2061,18 +2071,18 @@ export default function CreateInterview() {
               <div
                 className="w-24 h-24 rounded-full flex items-center justify-center mb-8 transition-all duration-300 group-hover:scale-110"
                 style={{
-                  backgroundColor: '#222831',
+                  backgroundColor: 'hsl(var(--ink))',
                   boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.1)'
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-paper" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-foreground uppercase tracking-wider mb-3">
+              <h2 className="text-2xl font-bold text-foreground mb-3">
                 Fitment
               </h2>
-              <p className="text-foreground-muted text-sm uppercase tracking-wider leading-relaxed">
+              <p className="text-muted text-sm uppercase tracking-wider leading-relaxed">
                 In-depth role-specific evaluation with detailed analysis
               </p>
             </div>
@@ -2145,15 +2155,15 @@ export default function CreateInterview() {
                         type="button"
                         variant={blueprintMode === 'new' ? 'default' : 'outline'}
                         className={`h-9 text-xs font-medium px-4 rounded uppercase transition-all duration-200 ${
-                          blueprintMode === 'new' ? 'text-white' : 'hover:text-white'
+                          blueprintMode === 'new' ? 'text-paper' : 'hover:text-paper'
                         }`}
                         style={{
                           border: 'none',
-                          backgroundColor: blueprintMode === 'new' ? '#222831' : 'transparent',
-                          boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                          backgroundColor: blueprintMode === 'new' ? 'hsl(var(--ink))' : 'transparent',
+                          boxShadow: 'var(--shadow-clay)'
                         }}
                         onMouseEnter={(e) => {
-                          if (blueprintMode !== 'new') e.currentTarget.style.backgroundColor = '#393E46';
+                          if (blueprintMode !== 'new') e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
                         }}
                         onMouseLeave={(e) => {
                           if (blueprintMode !== 'new') e.currentTarget.style.backgroundColor = 'transparent';
@@ -2170,15 +2180,15 @@ export default function CreateInterview() {
                         type="button"
                         variant={blueprintMode === 'template' ? 'default' : 'outline'}
                         className={`h-9 text-xs font-medium px-4 rounded uppercase transition-all duration-200 ${
-                          blueprintMode === 'template' ? 'text-white' : 'hover:text-white'
+                          blueprintMode === 'template' ? 'text-paper' : 'hover:text-paper'
                         }`}
                         style={{
                           border: 'none',
-                          backgroundColor: blueprintMode === 'template' ? '#222831' : 'transparent',
-                          boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                          backgroundColor: blueprintMode === 'template' ? 'hsl(var(--ink))' : 'transparent',
+                          boxShadow: 'var(--shadow-clay)'
                         }}
                         onMouseEnter={(e) => {
-                          if (blueprintMode !== 'template') e.currentTarget.style.backgroundColor = '#393E46';
+                          if (blueprintMode !== 'template') e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
                         }}
                         onMouseLeave={(e) => {
                           if (blueprintMode !== 'template') e.currentTarget.style.backgroundColor = 'transparent';
@@ -2195,7 +2205,7 @@ export default function CreateInterview() {
                           type="button"
                           className="faq-button-start w-8 h-8 rounded-full border-none flex items-center justify-center cursor-pointer relative"
                           style={{
-                            background: 'linear-gradient(147deg, #00ADB5 0%, #222831 74%)',
+                            background: 'linear-gradient(147deg, #00ADB5 0%, hsl(var(--ink)) 74%)',
                             boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.15)'
                           }}
                         >
@@ -2203,10 +2213,10 @@ export default function CreateInterview() {
                             <path d="M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74V320c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7V160c0-70.7-57.3-128-128-128H144C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"></path>
                           </svg>
                           <span
-                            className="faq-tooltip-start absolute opacity-0 text-white py-1 px-2 rounded text-xs flex items-center justify-center pointer-events-none transition-all duration-200 whitespace-nowrap"
+                            className="faq-tooltip-start absolute opacity-0 text-paper py-1 px-2 rounded text-xs flex items-center justify-center pointer-events-none transition-all duration-200 whitespace-nowrap"
                             style={{
                               top: '-40px',
-                              background: 'linear-gradient(147deg, #00ADB5 0%, #222831 74%)',
+                              background: 'linear-gradient(147deg, #00ADB5 0%, hsl(var(--ink)) 74%)',
                               letterSpacing: '0.5px'
                             }}
                           >
@@ -2215,7 +2225,7 @@ export default function CreateInterview() {
                               className="absolute w-2 h-2 rotate-45"
                               style={{
                                 bottom: '-4px',
-                                backgroundColor: '#222831'
+                                backgroundColor: 'hsl(var(--ink))'
                               }}
                             ></span>
                           </span>
@@ -2241,7 +2251,7 @@ export default function CreateInterview() {
                       </div>
                     </div>
                     {availableTemplates.length === 0 && !isLoadingTemplates && (
-                      <span className="text-xs text-gray-400">No blueprints available</span>
+                      <span className="text-xs text-muted-2">No blueprints available</span>
                     )}
                     </div>
 
@@ -2251,28 +2261,28 @@ export default function CreateInterview() {
                         className="flex items-center gap-4 px-4 py-2 rounded-lg"
                         style={{
                           backgroundColor: '#f8f9fa',
-                          boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                          boxShadow: 'var(--shadow-clay)'
                         }}
                       >
                         <div className="text-center">
-                          <div className="text-xl font-bold text-[#222831]">
+                          <div className="text-xl font-bold text-[hsl(var(--ink))]">
                             {creditInfo.creditCosts[parseInt(formData.duration)] || 0}
                           </div>
-                          <div className="text-[10px] text-gray-500 uppercase tracking-wider">Credits Per Interview</div>
+                          <div className="text-[10px] text-muted uppercase tracking-wider">Credits Per Interview</div>
                         </div>
-                        <div className="h-6 w-px bg-gray-300"></div>
+                        <div className="h-6 w-px bg-paper-4"></div>
                         <div className="text-center">
                           <div className="text-xl font-bold text-[#00ADB5]">
                             {creditInfo.available}
                           </div>
-                          <div className="text-[10px] text-gray-500 uppercase tracking-wider">Available Credits</div>
+                          <div className="text-[10px] text-muted uppercase tracking-wider">Available Credits</div>
                         </div>
-                        <div className="h-6 w-px bg-gray-300"></div>
+                        <div className="h-6 w-px bg-paper-4"></div>
                         <div className="text-center">
-                          <div className="text-xl font-bold text-[#393E46]">
+                          <div className="text-xl font-bold text-[hsl(var(--ink-soft))]">
                             {maxCandidates ?? 0}
                           </div>
-                          <div className="text-[10px] text-gray-500 uppercase tracking-wider">Max Candidates</div>
+                          <div className="text-[10px] text-muted uppercase tracking-wider">Max Candidates</div>
                         </div>
                       </div>
                     )}
@@ -2281,12 +2291,12 @@ export default function CreateInterview() {
                         className="flex items-center gap-2 px-4 py-2 rounded-lg"
                         style={{
                           backgroundColor: '#f8f9fa',
-                          boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                          boxShadow: 'var(--shadow-clay)'
                         }}
                       >
-                        <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>
-                        <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>
-                        <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
+                        <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
+                        <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
                       </div>
                     )}
                   </div>
@@ -2295,7 +2305,7 @@ export default function CreateInterview() {
                   {blueprintMode === 'template' && (
                     <div className="space-y-3">
                       {isLoadingTemplates ? (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-muted">
                           <CircleNotch size={16} className="animate-spin" />
                           Loading blueprints...
                         </div>
@@ -2307,21 +2317,21 @@ export default function CreateInterview() {
                               onClick={() => handleTemplateSelect(template)}
                               className={`p-4 rounded-lg cursor-pointer transition-all duration-200 ${
                                 selectedTemplate?.id === template.id
-                                  ? 'ring-2 ring-[#222831] bg-gray-50'
-                                  : 'hover:bg-gray-50'
+                                  ? 'ring-2 ring-[hsl(var(--ink))] bg-paper-2'
+                                  : 'hover:bg-paper-2'
                               }`}
                               style={{
                                 boxShadow: selectedTemplate?.id === template.id
                                   ? '2px 2px 6px #c0c0c0, -2px -2px 6px #ffffff'
-                                  : 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                                  : 'var(--shadow-clay)'
                               }}
                             >
                               <div className="flex items-start justify-between mb-2">
-                                <h4 className="font-medium text-sm text-gray-900 line-clamp-1">
+                                <h4 className="font-medium text-sm text-ink line-clamp-1">
                                   {template.title}
                                 </h4>
                                 {selectedTemplate?.id === template.id && (
-                                  <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
+                                  <CheckCircle size={16} className="text-success flex-shrink-0" />
                                 )}
                               </div>
                               <div className="flex flex-wrap gap-1.5 mb-2">
@@ -2332,22 +2342,22 @@ export default function CreateInterview() {
                                   {template.duration} min
                                 </Badge>
                                 {template.scope === 'global' ? (
-                                  <Badge className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
+                                  <Badge className="text-[10px] bg-info-soft text-info border-rule">
                                     Global
                                   </Badge>
                                 ) : (
-                                  <Badge className="text-[10px] bg-green-100 text-green-700 border-green-200">
+                                  <Badge className="text-[10px] bg-success-soft text-success border-rule">
                                     Project
                                   </Badge>
                                 )}
                               </div>
                               {template.topics && (
-                                <p className="text-xs text-gray-500 line-clamp-2">
+                                <p className="text-xs text-muted line-clamp-2">
                                   {template.topics}
                                 </p>
                               )}
                               {template.usageCount > 0 && (
-                                <p className="text-[10px] text-gray-400 mt-2">
+                                <p className="text-[10px] text-muted-2 mt-2">
                                   Used {template.usageCount} time{template.usageCount !== 1 ? 's' : ''}
                                 </p>
                               )}
@@ -2355,7 +2365,7 @@ export default function CreateInterview() {
                           ))}
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-500 py-4 text-center">
+                        <div className="text-sm text-muted py-4 text-center">
                           No blueprints available for this project.
                         </div>
                       )}
@@ -2372,9 +2382,9 @@ export default function CreateInterview() {
                 {/* Title */}
                 <div className="lg:col-span-2">
                   <Label htmlFor="title" className="uppercase text-xs tracking-wider flex items-center gap-2">
-                    Interview Title <span className="text-red-600">*</span>
+                    Interview Title <span className="text-danger">*</span>
                     {isSuggesting && (
-                      <span className="text-[10px] font-mono normal-case text-blue-600 inline-flex items-center gap-1">
+                      <span className="text-[10px] font-mono normal-case text-info inline-flex items-center gap-1">
                         <CircleNotch className="w-3 h-3 animate-spin" /> AI is filling defaults…
                       </span>
                     )}
@@ -2387,16 +2397,16 @@ export default function CreateInterview() {
                       clearBlueprintOnEdit();
                       setFormData(prev => ({ ...prev, title: e.target.value }));
                     }}
-                    className="mt-2 rounded border-none transition-all duration-300 bg-white"
+                    className="mt-2 rounded border-none transition-all duration-300 bg-paper"
                     style={{
-                      boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                      boxShadow: 'var(--shadow-clay)'
                     }}
                   />
                 </div>
 
                 {/* Interview Type */}
                 <div className="lg:col-span-2">
-                  <Label className="uppercase text-xs tracking-wider">Interview Type <span className="text-red-600">*</span></Label>
+                  <Label className="uppercase text-xs tracking-wider">Interview Type <span className="text-danger">*</span></Label>
                   <div className="flex gap-3 mt-2">
                     {[
                       { value: "screening", label: "Screening" },
@@ -2410,18 +2420,18 @@ export default function CreateInterview() {
                           variant={isSelected ? "default" : "outline"}
                           className={`h-10 text-xs font-medium px-6 rounded uppercase transition-all duration-200 ${
                             isSelected
-                              ? 'text-white'
-                              : 'hover:text-white'
+                              ? 'text-paper'
+                              : 'hover:text-paper'
                           }`}
                           style={{
                             border: 'none',
                             position: 'relative',
                             overflow: 'hidden',
-                            backgroundColor: isSelected ? '#222831' : 'transparent',
-                            boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                            backgroundColor: isSelected ? 'hsl(var(--ink))' : 'transparent',
+                            boxShadow: 'var(--shadow-clay)'
                           }}
                           onMouseEnter={(e) => {
-                            if (!isSelected) e.currentTarget.style.backgroundColor = '#393E46';
+                            if (!isSelected) e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
                           }}
                           onMouseLeave={(e) => {
                             if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
@@ -2445,7 +2455,7 @@ export default function CreateInterview() {
 
                 {/* Duration */}
                 <div className="lg:col-span-1">
-                  <Label className="uppercase text-xs tracking-wider">Duration <span className="text-red-600">*</span></Label>
+                  <Label className="uppercase text-xs tracking-wider">Duration <span className="text-danger">*</span></Label>
                   <div className="flex gap-4 mt-2 justify-start">
                     {[
                       { value: "10", label: "10", recommendedFor: "screening" },
@@ -2460,18 +2470,18 @@ export default function CreateInterview() {
                             variant={isSelected ? "default" : "outline"}
                             className={`w-10 h-10 rounded-full p-0 flex flex-col items-center justify-center gap-0 transition-all duration-200 ${
                               isSelected
-                                ? 'text-white'
-                                : 'hover:text-white'
+                                ? 'text-paper'
+                                : 'hover:text-paper'
                             }`}
                             style={{
                               border: 'none',
                               position: 'relative',
                               overflow: 'hidden',
-                              backgroundColor: isSelected ? '#222831' : 'transparent',
-                              boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                              backgroundColor: isSelected ? 'hsl(var(--ink))' : 'transparent',
+                              boxShadow: 'var(--shadow-clay)'
                             }}
                             onMouseEnter={(e) => {
-                              if (!isSelected) e.currentTarget.style.backgroundColor = '#393E46';
+                              if (!isSelected) e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
                             }}
                             onMouseLeave={(e) => {
                               if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
@@ -2496,7 +2506,7 @@ export default function CreateInterview() {
 
               {/* Description */}
               <div>
-                <Label htmlFor="description" className="uppercase text-xs tracking-wider">Description <span className="text-red-600">*</span></Label>
+                <Label htmlFor="description" className="uppercase text-xs tracking-wider">Description <span className="text-danger">*</span></Label>
                 <div className="relative">
                   <Textarea
                     id="description"
@@ -2506,9 +2516,9 @@ export default function CreateInterview() {
                       clearBlueprintOnEdit();
                       setFormData(prev => ({ ...prev, description: e.target.value }));
                     }}
-                    className="mt-2 min-h-[190px] pr-10 resize-none rounded border-none transition-all duration-300 bg-white"
+                    className="mt-2 min-h-[190px] pr-10 resize-none rounded border-none transition-all duration-300 bg-paper"
                     style={{
-                      boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                      boxShadow: 'var(--shadow-clay)'
                     }}
                     required
                   />
@@ -2518,7 +2528,7 @@ export default function CreateInterview() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute bottom-2 left-2 h-8 w-8 p-0 hover:bg-gray-100"
+                        className="absolute bottom-2 left-2 h-8 w-8 p-0 hover:bg-paper-3"
                       >
                         <ArrowsOut className="h-4 w-4" />
                       </Button>
@@ -2551,11 +2561,11 @@ export default function CreateInterview() {
 
               {/* Preview the AI interviewer's greeting — uses formData.title for personalization. */}
               {formData.title?.trim().length >= 4 && (
-                <div className="mt-4 flex items-center gap-3 p-3 bg-blue-50/40 border border-blue-100 rounded-sm">
-                  <Volume2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <div className="mt-4 flex items-center gap-3 p-3 bg-info-soft/40 border border-rule rounded-sm">
+                  <Volume2 className="w-4 h-4 text-info flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-gray-600 mb-0.5">Voice preview</p>
-                    <p className="text-xs text-gray-700 truncate italic">"{personalizedGreeting()}"</p>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Voice preview</p>
+                    <p className="text-xs text-ink-soft truncate italic">"{personalizedGreeting()}"</p>
                   </div>
                   <Button
                     type="button"
@@ -2574,13 +2584,13 @@ export default function CreateInterview() {
               )}
 
               {/* Navigation */}
-              <div className="flex items-start justify-between pt-8 border-t border-gray-100 mt-6">
+              <div className="flex items-start justify-between pt-8 border-t border-rule mt-6">
                 <div className="pt-6">
                   {!isEditMode && (
                     <Button
                       variant="outline"
                       onClick={() => navigate('/interviews/manage')}
-                      className="uppercase rounded-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="uppercase rounded-sm text-danger hover:text-danger hover:bg-danger-soft"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Cancel
@@ -2601,7 +2611,7 @@ export default function CreateInterview() {
                   <Button
                     onClick={stepper.currentStep === steps.length - 1 ? handleSubmit : handleNext}
                     disabled={!isCurrentStepValid || (stepper.currentStep === steps.length - 1 && isSubmitting)}
-                    className="text-white font-medium rounded-sm uppercase transition-all duration-200"
+                    className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
                     style={{
                       width: '9em',
                       height: '3em',
@@ -2609,12 +2619,12 @@ export default function CreateInterview() {
                       border: 'none',
                       position: 'relative',
                       overflow: 'hidden',
-                      backgroundColor: '#222831',
-                      boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
+                      backgroundColor: 'hsl(var(--ink))',
+                      boxShadow: 'var(--shadow-clay)',
                       textTransform: 'uppercase'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
                   >
                     {(() => {
                       const isOnLastStep = stepper.currentStep === steps.length - 1;
@@ -2641,7 +2651,7 @@ export default function CreateInterview() {
                   </Button>
                   {/* Warning for new blueprint flow */}
                   {stepper.currentStep === steps.length - 1 && !isEditMode && !selectedTemplate && (
-                    <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-warning mt-2 flex items-center gap-1">
                       <span>⚠️</span>
                       <span>Starts in draft. Review blueprint before starting.</span>
                     </p>
@@ -2690,20 +2700,20 @@ export default function CreateInterview() {
               {/* Credit Budget Warning Banner */}
               {isOverCreditBudget() && creditInfo && (
                 <div
-                  className="p-4 rounded-lg border-2 border-amber-400 bg-amber-50"
+                  className="p-4 rounded-lg border-2 border-rule bg-warning-soft"
                   style={{
                     boxShadow: '0 2px 8px rgba(245, 158, 11, 0.15)'
                   }}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                      <span className="text-amber-600 text-xl font-bold">!</span>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-warning-soft flex items-center justify-center">
+                      <span className="text-warning text-xl font-bold">!</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-amber-800 uppercase tracking-wide">
+                      <h4 className="text-sm font-semibold text-warning uppercase tracking-wide">
                         Over Credit Budget
                       </h4>
-                      <p className="text-sm text-amber-700 mt-1">
+                      <p className="text-sm text-warning mt-1">
                         You have selected <span className="font-bold">{getEffectiveCandidateCount()}</span> candidates
                         but only have credits for <span className="font-bold">{maxCandidates}</span> interviews.
                         {getCreditShortfall() > 0 && (
@@ -2713,12 +2723,12 @@ export default function CreateInterview() {
                           </span>
                         )}
                       </p>
-                      <div className="flex items-center gap-4 mt-3 text-xs text-amber-600">
+                      <div className="flex items-center gap-4 mt-3 text-xs text-warning">
                         <span>Credits needed: <strong>{getTotalCreditsNeeded()}</strong></span>
-                        <span className="text-amber-400">|</span>
+                        <span className="text-warning">|</span>
                         <span>Available: <strong>{creditInfo.available}</strong></span>
-                        <span className="text-amber-400">|</span>
-                        <span>Shortfall: <strong className="text-red-600">{getTotalCreditsNeeded() - creditInfo.available}</strong></span>
+                        <span className="text-warning">|</span>
+                        <span>Shortfall: <strong className="text-danger">{getTotalCreditsNeeded() - creditInfo.available}</strong></span>
                       </div>
                     </div>
                   </div>
@@ -2742,7 +2752,7 @@ export default function CreateInterview() {
                 }}>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm">
                     <DialogHeader>
-                      <DialogTitle className="uppercase tracking-wider text-black">
+                      <DialogTitle className="uppercase tracking-wider text-ink">
                         Create New Candidate Pool
                       </DialogTitle>
                       <DialogDescription className="uppercase text-xs tracking-wider">
@@ -2754,16 +2764,16 @@ export default function CreateInterview() {
                       {/* Pool Name */}
                       <div>
                         <Label htmlFor="listName" className="uppercase text-xs tracking-wider">
-                          Candidate Pool Name <span className="text-red-600">*</span>
+                          Candidate Pool Name <span className="text-danger">*</span>
                         </Label>
                         <Input
                           id="listName"
                           placeholder="e.g., Senior Tax Managers · GST Specialists · FP&A Leads"
                           value={createListFormData.name}
                           onChange={(e) => setCreateListFormData(prev => ({ ...prev, name: e.target.value }))}
-                          className="mt-2 rounded-sm border-none transition-all duration-300 bg-white"
+                          className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
                           style={{
-                            boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                            boxShadow: 'var(--shadow-clay)'
                           }}
                         />
                       </div>
@@ -2777,8 +2787,8 @@ export default function CreateInterview() {
                             onClick={() => setSourceEntryType('google_sheet')}
                             className={`flex-1 px-4 py-2 text-xs font-medium uppercase rounded transition-colors ${
                               sourceEntryType === 'google_sheet'
-                                ? 'bg-[#222831] text-white'
-                                : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
+                                ? 'bg-[hsl(var(--ink))] text-paper'
+                                : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
                             }`}
                           >
                             Google Sheets
@@ -2788,8 +2798,8 @@ export default function CreateInterview() {
                             onClick={() => setSourceEntryType('manual_entry')}
                             className={`flex-1 px-4 py-2 text-xs font-medium uppercase rounded transition-colors ${
                               sourceEntryType === 'manual_entry'
-                                ? 'bg-[#222831] text-white'
-                                : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
+                                ? 'bg-[hsl(var(--ink))] text-paper'
+                                : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
                             }`}
                           >
                             Manual Entry
@@ -2803,7 +2813,7 @@ export default function CreateInterview() {
                         <div className="flex items-center justify-between">
                           <Label className="uppercase text-xs tracking-wider">Google Sheets Sources</Label>
                           {sheetUrlRows.some(r => r.status === 'valid') && (
-                            <span className="text-xs font-medium text-green-600">
+                            <span className="text-xs font-medium text-success">
                               {sheetUrlRows.filter(r => r.status === 'valid').reduce((sum, r) => sum + r.candidateCount, 0)} candidate{sheetUrlRows.filter(r => r.status === 'valid').reduce((sum, r) => sum + r.candidateCount, 0) !== 1 ? 's' : ''} ready
                             </span>
                           )}
@@ -2876,27 +2886,27 @@ export default function CreateInterview() {
                                       }
                                     }
                                   }}
-                                  className={`rounded-sm border-none transition-all duration-300 bg-white pr-24 ${
-                                    row.status === 'valid' ? 'ring-2 ring-green-500' :
-                                    row.status === 'error' ? 'ring-2 ring-red-500' : ''
+                                  className={`rounded-sm border-none transition-all duration-300 bg-paper pr-24 ${
+                                    row.status === 'valid' ? 'ring-2 ring-success' :
+                                    row.status === 'error' ? 'ring-2 ring-danger' : ''
                                   }`}
                                   style={{
-                                    boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                                    boxShadow: 'var(--shadow-clay)'
                                   }}
                                 />
                                 {/* Status indicator */}
                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                   {row.status === 'validating' && (
-                                    <CircleNotch className="w-4 h-4 animate-spin text-[#222831]" />
+                                    <CircleNotch className="w-4 h-4 animate-spin text-[hsl(var(--ink))]" />
                                   )}
                                   {row.status === 'valid' && (
-                                    <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                                    <span className="text-xs text-success font-medium flex items-center gap-1">
                                       <CheckCircle className="w-4 h-4" />
                                       {row.candidateCount}
                                     </span>
                                   )}
                                   {row.status === 'error' && (
-                                    <span className="text-xs text-red-600">
+                                    <span className="text-xs text-danger">
                                       <X className="w-4 h-4" />
                                     </span>
                                   )}
@@ -2910,7 +2920,7 @@ export default function CreateInterview() {
                                   onClick={() => {
                                     setSheetUrlRows(prev => prev.filter(r => r.id !== row.id));
                                   }}
-                                  className="h-10 w-10 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  className="h-10 w-10 p-0 text-danger hover:text-danger hover:bg-danger-soft"
                                 >
                                   <Trash className="w-4 h-4" />
                                 </Button>
@@ -2932,7 +2942,7 @@ export default function CreateInterview() {
                               sheetName: ''
                             }]);
                           }}
-                          className="text-[#222831] hover:text-[#393E46] uppercase text-xs mt-2"
+                          className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] uppercase text-xs mt-2"
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Add Another Sheet
@@ -2947,7 +2957,7 @@ export default function CreateInterview() {
                         <div className="flex items-center justify-between">
                           <Label className="uppercase text-xs tracking-wider">Enter Candidates</Label>
                           {manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length > 0 && (
-                            <span className="text-xs font-medium text-green-600">
+                            <span className="text-xs font-medium text-success">
                               {manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length} candidate{manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length !== 1 ? 's' : ''} ready
                             </span>
                           )}
@@ -2955,8 +2965,8 @@ export default function CreateInterview() {
                         <div className="mt-2">
                           {/* Table Header */}
                           <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wider text-muted-foreground font-medium px-1 mb-2">
-                            <div className="col-span-5">Name <span className="text-red-600">*</span></div>
-                            <div className="col-span-6">Email <span className="text-red-600">*</span></div>
+                            <div className="col-span-5">Name <span className="text-danger">*</span></div>
+                            <div className="col-span-6">Email <span className="text-danger">*</span></div>
                             <div className="col-span-1"></div>
                           </div>
 
@@ -2973,20 +2983,20 @@ export default function CreateInterview() {
                                 <div key={candidate.id} className="grid grid-cols-12 gap-2 items-start">
                                   <div className="col-span-5">
                                     <Input
-                                      placeholder="John Doe"
+                                      placeholder="Rohan Iyer"
                                       value={candidate.name}
                                       onChange={(e) => {
                                         setManualCandidates(prev => prev.map(c =>
                                           c.id === candidate.id ? { ...c, name: e.target.value } : c
                                         ));
                                       }}
-                                      className={`rounded-sm border-none transition-all duration-300 bg-white text-sm ${showNameError ? 'ring-1 ring-red-500' : ''}`}
+                                      className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showNameError ? 'ring-1 ring-red-500' : ''}`}
                                       style={{
-                                        boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                                        boxShadow: 'var(--shadow-clay)'
                                       }}
                                     />
                                     {showNameError && (
-                                      <p className="text-xs text-red-500 mt-1">Name is required</p>
+                                      <p className="text-xs text-danger mt-1">Name is required</p>
                                     )}
                                   </div>
                                   <div className="col-span-6">
@@ -2999,13 +3009,13 @@ export default function CreateInterview() {
                                           c.id === candidate.id ? { ...c, email: e.target.value } : c
                                         ));
                                       }}
-                                      className={`rounded-sm border-none transition-all duration-300 bg-white text-sm ${showEmailError ? 'ring-1 ring-red-500' : ''}`}
+                                      className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showEmailError ? 'ring-1 ring-red-500' : ''}`}
                                       style={{
-                                        boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                                        boxShadow: 'var(--shadow-clay)'
                                       }}
                                     />
                                     {showEmailError && (
-                                      <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+                                      <p className="text-xs text-danger mt-1">Invalid email format</p>
                                     )}
                                   </div>
                                   <div className="col-span-1 flex justify-center pt-1">
@@ -3016,7 +3026,7 @@ export default function CreateInterview() {
                                         onClick={() => {
                                           setManualCandidates(prev => prev.filter(c => c.id !== candidate.id));
                                         }}
-                                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        className="h-8 w-8 p-0 text-danger hover:text-danger hover:bg-danger-soft"
                                       >
                                         <Trash className="w-4 h-4" />
                                       </Button>
@@ -3038,7 +3048,7 @@ export default function CreateInterview() {
                                 email: ''
                               }]);
                             }}
-                            className="text-[#222831] hover:text-[#393E46] uppercase text-xs mt-2"
+                            className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] uppercase text-xs mt-2"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Add Another Candidate
@@ -3060,7 +3070,7 @@ export default function CreateInterview() {
                           setSourceEntryType('google_sheet');
                           setManualCandidates([{ id: 'candidate_1', name: '', email: '' }]);
                         }}
-                        className="border-slate-300 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                        className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
                       >
                         Cancel
                       </Button>
@@ -3200,7 +3210,7 @@ export default function CreateInterview() {
                           }
                         }}
                         disabled={!createListFormData.name.trim() || isCreatingList}
-                        className="bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                        className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
                       >
                         {isCreatingList ? (
                           <>
@@ -3226,8 +3236,8 @@ export default function CreateInterview() {
                         }}
                         className={`px-4 py-2 text-sm font-medium uppercase rounded transition-colors ${
                           listViewType === 'existing'
-                            ? 'bg-brand-primary text-white'
-                            : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
+                            ? 'bg-ink text-paper'
+                            : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
                         }`}
                       >
                         Candidate Pools
@@ -3239,8 +3249,8 @@ export default function CreateInterview() {
                         }}
                         className={`px-4 py-2 text-sm font-medium uppercase rounded transition-colors ${
                           listViewType === 'shared'
-                            ? 'bg-brand-primary text-white'
-                            : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
+                            ? 'bg-ink text-paper'
+                            : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
                         }`}
                       >
                         Shared Candidate Pools
@@ -3249,27 +3259,27 @@ export default function CreateInterview() {
                     <div className="flex items-center gap-3">
                       {/* Compact selection summary with info tooltip */}
                       {formData.selectedListIds.length > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-xs font-medium text-green-800">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-success-soft border border-rule rounded">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span className="text-xs font-medium text-success">
                             {formData.selectedListIds.length} pool{formData.selectedListIds.length !== 1 ? 's' : ''} · {getEffectiveCandidateCount()} candidate{getEffectiveCandidateCount() !== 1 ? 's' : ''}
                           </span>
                           <div className="relative group">
-                            <Info className="w-3.5 h-3.5 text-green-600 cursor-help" />
-                            <div className="absolute right-0 top-6 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <Info className="w-3.5 h-3.5 text-success cursor-help" />
+                            <div className="absolute right-0 top-6 w-64 p-3 bg-paper border border-rule rounded-lg shadow-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                               <div className="text-xs space-y-1.5">
-                                <div className="font-medium text-gray-900">Selection Summary</div>
-                                <div className="text-gray-600">
+                                <div className="font-medium text-ink">Selection Summary</div>
+                                <div className="text-muted">
                                   {formData.selectedListIds.length} list{formData.selectedListIds.length !== 1 ? 's' : ''} selected
                                 </div>
-                                <div className="text-gray-600">
+                                <div className="text-muted">
                                   {getEffectiveCandidateCount()} total candidates
                                   {isUsingDuplicateExcludedCount() && (
-                                    <span className="text-green-600 ml-1">(duplicates excluded)</span>
+                                    <span className="text-success ml-1">(duplicates excluded)</span>
                                   )}
                                 </div>
                                 {duplicateAnalysis && duplicateAnalysis.totalDuplicates > 0 && (
-                                  <div className="text-amber-600">
+                                  <div className="text-warning">
                                     {duplicateAnalysis.totalDuplicates} duplicate{duplicateAnalysis.totalDuplicates !== 1 ? 's' : ''} detected
                                   </div>
                                 )}
@@ -3304,21 +3314,21 @@ export default function CreateInterview() {
                               key={`${list.id}-${index}-${isSelected}`}
                               onClick={() => handleListSelection(list.id)}
                               className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 flex-shrink-0 relative overflow-hidden ${
-                                !isSelected ? 'group hover:text-white' : ''
+                                !isSelected ? 'group hover:text-paper' : ''
                               }`}
                               style={{
                                 border: isSelected ? '2px solid #22c55e' : 'none',
                                 position: 'relative',
                                 overflow: 'hidden',
                                 backgroundColor: 'transparent',
-                                boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
+                                boxShadow: 'var(--shadow-clay)',
                                 backgroundImage: isCurated
                                   ? 'linear-gradient(to bottom right, rgba(254, 243, 199, 0.4), rgba(254, 252, 232, 0.2), rgba(255, 247, 237, 0.3))'
                                   : 'none'
                               }}
                               onMouseEnter={(e) => {
                                 if (!isSelected) {
-                                  e.currentTarget.style.backgroundColor = '#222831';
+                                  e.currentTarget.style.backgroundColor = 'hsl(var(--ink))';
                                   e.currentTarget.style.backgroundImage = 'none';
                                 }
                               }}
@@ -3336,24 +3346,24 @@ export default function CreateInterview() {
                               {/* Curated Corner Ribbon */}
                               {isCurated && (
                                 <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
-                                  <div className="absolute top-0 right-0 w-28 h-6 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 text-[10px] font-bold flex items-center justify-center shadow-lg transform rotate-45 translate-x-6 translate-y-2">
+                                  <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-warning to-warning text-warning text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
                                     Curated
                                   </div>
                                 </div>
                               )}
                               <div className="flex flex-col h-full">
                                 <div className="mb-3">
-                                  <h4 className={`font-medium text-sm transition-colors ${!isSelected ? 'group-hover:text-white' : ''}`}>{list.name}</h4>
-                                  <p className={`text-[10px] text-gray-500 uppercase tracking-wider mt-1 transition-colors ${!isSelected ? 'group-hover:text-white/60' : ''}`}>
+                                  <h4 className={`font-medium text-sm transition-colors ${!isSelected ? 'group-hover:text-paper' : ''}`}>{list.name}</h4>
+                                  <p className={`text-[10px] text-muted uppercase tracking-wider mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
                                     #{list.id}
                                   </p>
                                 </div>
                                 {list.description && (
-                                  <p className={`text-xs text-muted-foreground mb-3 line-clamp-2 transition-colors ${!isSelected ? 'group-hover:text-white/80' : ''}`}>{list.description}</p>
+                                  <p className={`text-xs text-muted-foreground mb-3 line-clamp-2 transition-colors ${!isSelected ? 'group-hover:text-paper/80' : ''}`}>{list.description}</p>
                                 )}
                                 <div className="mt-auto flex flex-col gap-2">
                                   <div className="flex items-center gap-2">
-                                    <span className={`text-xs text-muted-foreground transition-colors uppercase ${!isSelected ? 'group-hover:text-white/70' : ''}`}>
+                                    <span className={`text-xs text-muted-foreground transition-colors uppercase ${!isSelected ? 'group-hover:text-paper/70' : ''}`}>
                                       {(() => {
                                         const listDuplicateInsights = availableLists.find(l => l.id === list.listId)?.duplicateInsights;
                                         const effectiveCount = listDuplicateInsights && listDuplicateInsights.totalDuplicates > 0
@@ -3377,7 +3387,7 @@ export default function CreateInterview() {
                                   <div className="flex items-center justify-between">
                                     {/* Hide sources count for shared lists and curated lists */}
                                     {!isCurated && listViewType !== 'shared' && (
-                                      <span className={`text-xs text-muted-foreground transition-colors uppercase ${!isSelected ? 'group-hover:text-white/70' : ''}`}>
+                                      <span className={`text-xs text-muted-foreground transition-colors uppercase ${!isSelected ? 'group-hover:text-paper/70' : ''}`}>
                                         {list.sourcesCount} {list.sourcesCount === 1 ? 'Source' : 'Sources'}
                                       </span>
                                     )}
@@ -3385,9 +3395,9 @@ export default function CreateInterview() {
                                       <div className={`flex items-center gap-1 ${isCurated || listViewType === 'shared' ? 'ml-0' : 'ml-auto'}`}>
                                         <ClockCounterClockwise
                                           size={10}
-                                          className={`transition-colors ${!isSelected ? 'text-gray-500 group-hover:text-white/60' : 'text-gray-500'}`}
+                                          className={`transition-colors ${!isSelected ? 'text-muted group-hover:text-paper/60' : 'text-muted'}`}
                                         />
-                                        <span className={`text-[8px] text-gray-500 transition-colors ${!isSelected ? 'group-hover:text-white/60' : ''}`}>
+                                        <span className={`text-[8px] text-muted transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
                                           {new Date(list.updatedAt).toLocaleDateString()}
                                         </span>
                                       </div>
@@ -3401,7 +3411,7 @@ export default function CreateInterview() {
                       </div>
                       {/* Don't see the Candidate Pool you need? - shown when pools exist, only for existing view */}
                       {listViewType === 'existing' && (
-                        <div className="p-4 border-2 border-dashed border-gray-200 rounded-lg text-center mt-4">
+                        <div className="p-4 border-2 border-dashed border-rule rounded-lg text-center mt-4">
                           <div className="text-xs text-muted-foreground mb-2 uppercase">
                             Don't see the Candidate Pool you need?
                           </div>
@@ -3411,7 +3421,7 @@ export default function CreateInterview() {
                               setShowCreateListForm(true);
                             }}
                             variant="outline"
-                            className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white uppercase text-xs h-8 px-3 rounded-sm"
+                            className="border-ink text-ink hover:bg-ink hover:text-paper uppercase text-xs h-8 px-3 rounded-sm"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Create New Candidate Pool
@@ -3421,7 +3431,7 @@ export default function CreateInterview() {
                     </>
                   ) : (
                     <div className="flex justify-center pt-16">
-                      <div className="py-12 px-10 border-2 border-dashed border-gray-200 rounded-lg text-center max-w-md">
+                      <div className="py-12 px-10 border-2 border-dashed border-rule rounded-lg text-center max-w-md">
                         <div className="text-xs text-muted-foreground mb-4 uppercase">
                           {listViewType === 'existing'
                             ? 'No existing Candidate Pools'
@@ -3435,16 +3445,16 @@ export default function CreateInterview() {
                                 setShowCreateListForm(true);
                               }}
                               variant="outline"
-                              className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white uppercase text-xs h-8 px-3 rounded-sm"
+                              className="border-ink text-ink hover:bg-ink hover:text-paper uppercase text-xs h-8 px-3 rounded-sm"
                             >
                               <Plus className="w-3 h-3 mr-1" />
                               Create New Candidate Pool
                             </Button>
                             {/* Download Sample - priming UX */}
-                            <div className="mt-6 pt-4 border-t border-gray-100">
+                            <div className="mt-6 pt-4 border-t border-rule">
                               <button
                                 onClick={downloadSampleFormat}
-                                className="text-muted-foreground hover:text-brand-primary uppercase text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
+                                className="text-muted-foreground hover:text-ink uppercase text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"></path></svg>
                                 Download Sample Format
@@ -3481,7 +3491,7 @@ export default function CreateInterview() {
                     <Button
                       variant="outline"
                       onClick={handlePrevious}
-                      className="text-white font-medium rounded-sm uppercase transition-all duration-200"
+                      className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
                       style={{
                         width: '9em',
                         height: '3em',
@@ -3489,12 +3499,12 @@ export default function CreateInterview() {
                         border: 'none',
                         position: 'relative',
                         overflow: 'hidden',
-                        backgroundColor: '#222831',
-                        boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
+                        backgroundColor: 'hsl(var(--ink))',
+                        boxShadow: 'var(--shadow-clay)',
                         textTransform: 'uppercase'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
                     >
                       Previous
                     </Button>
@@ -3510,7 +3520,7 @@ export default function CreateInterview() {
                       ? getCandidatesStepButtonConfig().disabled
                       : (!isCurrentStepValid || (stepper.currentStep === steps.length - 1 && isSubmitting))
                     }
-                    className="text-white font-medium rounded-sm uppercase transition-all duration-200"
+                    className={`font-medium rounded-sm uppercase transition-all duration-200 ${stepper.currentStep === steps.length - 1 ? 'text-ink' : 'text-paper'}`}
                     style={{
                       minWidth: '9em',
                       height: '3em',
@@ -3518,14 +3528,14 @@ export default function CreateInterview() {
                       border: 'none',
                       position: 'relative',
                       overflow: 'visible',
-                      backgroundColor: '#222831',
-                      boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5',
+                      backgroundColor: stepper.currentStep === steps.length - 1 ? 'hsl(var(--gold))' : 'hsl(var(--ink))',
+                      boxShadow: 'var(--shadow-clay)',
                       whiteSpace: 'nowrap',
                       padding: '0 1.5em',
                       textTransform: 'uppercase'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = stepper.currentStep === steps.length - 1 ? 'hsl(var(--gold) / 0.9)' : 'hsl(var(--ink-soft))'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = stepper.currentStep === steps.length - 1 ? 'hsl(var(--gold))' : 'hsl(var(--ink))'}
                   >
                     {(() => {
                       // Special handling for candidates step (step 1)
@@ -3560,7 +3570,7 @@ export default function CreateInterview() {
                   </Button>
                   {/* Warning for new blueprint flow */}
                   {stepper.currentStep === steps.length - 1 && !isEditMode && !selectedTemplate && (
-                    <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-warning mt-2 flex items-center gap-1">
                       <span>⚠️</span>
                       <span>Starts in draft. Review blueprint before starting.</span>
                     </p>
@@ -3580,7 +3590,7 @@ export default function CreateInterview() {
       <Dialog open={progressModalOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md rounded-sm" onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle className="uppercase tracking-wider text-black">
+            <DialogTitle className="uppercase tracking-wider text-ink">
               {overallProgress === 100
                 ? (wasInterviewStarted ? 'INTERVIEW IS LIVE!' : 'INTERVIEW READY!')
                 : `${isEditMode ? 'UPDATING' : 'CREATING'} INTERVIEW`}
@@ -3600,11 +3610,11 @@ export default function CreateInterview() {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-foreground uppercase tracking-wider">OVERALL PROGRESS</span>
-                <span className="text-sm text-foreground-muted font-medium">{overallProgress}%</span>
+                <span className="text-sm text-muted font-medium">{overallProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-sm h-2 overflow-hidden">
+              <div className="w-full bg-paper-3 rounded-sm h-2 overflow-hidden">
                 <div
-                  className="bg-[#222831] h-full transition-all duration-500 ease-out"
+                  className="bg-[hsl(var(--ink))] h-full transition-all duration-500 ease-out"
                   style={{ width: `${overallProgress}%` }}
                 ></div>
               </div>
@@ -3616,34 +3626,34 @@ export default function CreateInterview() {
                 <div key={step.id} className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-0.5">
                     {step.status === 'completed' ? (
-                      <div className="w-5 h-5 bg-green-500 rounded-sm flex items-center justify-center">
-                        <CheckCircle className="w-3 h-3 text-white" />
+                      <div className="w-5 h-5 bg-success rounded-sm flex items-center justify-center">
+                        <CheckCircle className="w-3 h-3 text-paper" />
                       </div>
                     ) : step.status === 'active' ? (
-                      <div className="w-5 h-5 bg-[#393E46] rounded-sm flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      <div className="w-5 h-5 bg-[hsl(var(--ink-soft))] rounded-sm flex items-center justify-center">
+                        <div className="w-2 h-2 bg-paper rounded-full animate-pulse"></div>
                       </div>
                     ) : step.status === 'error' ? (
-                      <div className="w-5 h-5 bg-red-500 rounded-sm flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="w-5 h-5 bg-danger rounded-sm flex items-center justify-center">
+                        <div className="w-2 h-2 bg-paper rounded-full"></div>
                       </div>
                     ) : (
-                      <div className="w-5 h-5 bg-gray-200 rounded-sm flex items-center justify-center">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <div className="w-5 h-5 bg-paper-3 rounded-sm flex items-center justify-center">
+                        <div className="w-2 h-2 bg-muted rounded-full"></div>
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium uppercase tracking-wider ${
-                      step.status === 'completed' ? 'text-green-600' :
-                      step.status === 'active' ? 'text-[#393E46]' :
-                      step.status === 'error' ? 'text-red-700' :
-                      'text-gray-400'
+                      step.status === 'completed' ? 'text-success' :
+                      step.status === 'active' ? 'text-[hsl(var(--ink-soft))]' :
+                      step.status === 'error' ? 'text-danger' :
+                      'text-muted-2'
                     }`}>
                       {step.title}
                     </p>
                     {step.description && (
-                      <p className="text-xs text-gray-500 mt-1">{step.description}</p>
+                      <p className="text-xs text-muted mt-1">{step.description}</p>
                     )}
                   </div>
                 </div>
@@ -3669,10 +3679,10 @@ export default function CreateInterview() {
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
           <div className="p-6">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-[#222831] uppercase">
+              <DialogTitle className="text-xl font-bold text-[hsl(var(--ink))] uppercase">
                 Introducing Interview Blueprints
               </DialogTitle>
-              <DialogDescription className="text-gray-600 mt-2">
+              <DialogDescription className="text-muted mt-2">
                 Save time by using reusable Interview Blueprints from the Control Tower. Create once, use everywhere.
               </DialogDescription>
             </DialogHeader>
@@ -3688,22 +3698,22 @@ export default function CreateInterview() {
                   >
                     {/* Slide 1 Image */}
                     <div className="w-full flex-shrink-0">
-                      <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="bg-paper-2 rounded-lg p-4">
                         <img
                           src={blueprintGuideImg1}
                           alt="Create Interview Blueprint"
-                          className="w-full h-[420px] object-contain rounded-lg shadow-md"
+                          className="w-full h-[420px] object-contain rounded-lg shadow-2"
                         />
                       </div>
                     </div>
 
                     {/* Slide 2 Image */}
                     <div className="w-full flex-shrink-0">
-                      <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="bg-paper-2 rounded-lg p-4">
                         <img
                           src={blueprintGuideImg2}
                           alt="Edit Interview Blueprint"
-                          className="w-full h-[420px] object-contain rounded-lg shadow-md"
+                          className="w-full h-[420px] object-contain rounded-lg shadow-2"
                         />
                       </div>
                     </div>
@@ -3714,17 +3724,17 @@ export default function CreateInterview() {
                 {blueprintGuideSlide > 0 && (
                   <button
                     onClick={() => setBlueprintGuideSlide(prev => prev - 1)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-paper/90 shadow-2 flex items-center justify-center hover:bg-paper transition-colors"
                   >
-                    <CaretLeft size={20} className="text-gray-700" />
+                    <CaretLeft size={20} className="text-ink-soft" />
                   </button>
                 )}
                 {blueprintGuideSlide < 1 && (
                   <button
                     onClick={() => setBlueprintGuideSlide(prev => prev + 1)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-paper/90 shadow-2 flex items-center justify-center hover:bg-paper transition-colors"
                   >
-                    <CaretRight size={20} className="text-gray-700" />
+                    <CaretRight size={20} className="text-ink-soft" />
                   </button>
                 )}
               </div>
@@ -3735,10 +3745,10 @@ export default function CreateInterview() {
                   className="flex transition-transform duration-300 ease-in-out"
                   style={{ transform: `translateX(-${blueprintGuideSlide * 100}%)` }}
                 >
-                  <p className="w-full flex-shrink-0 mt-3 text-center text-sm text-gray-700">
+                  <p className="w-full flex-shrink-0 mt-3 text-center text-sm text-ink-soft">
                     <strong>Create reusable Interview Blueprints</strong> from the Control Tower to standardize your interview process across teams.
                   </p>
-                  <p className="w-full flex-shrink-0 mt-3 text-center text-sm text-gray-700">
+                  <p className="w-full flex-shrink-0 mt-3 text-center text-sm text-ink-soft">
                     <strong>Customize blueprints</strong> to match your specific hiring needs. Edit topics, duration, and interview structure anytime.
                   </p>
                 </div>
@@ -3751,7 +3761,7 @@ export default function CreateInterview() {
                     key={index}
                     onClick={() => setBlueprintGuideSlide(index)}
                     className={`w-2 h-2 rounded-full transition-colors ${
-                      blueprintGuideSlide === index ? 'bg-[#00ADB5]' : 'bg-gray-300'
+                      blueprintGuideSlide === index ? 'bg-[#00ADB5]' : 'bg-paper-4'
                     }`}
                   />
                 ))}
@@ -3759,11 +3769,11 @@ export default function CreateInterview() {
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-4 bg-gray-50 border-t">
+          <DialogFooter className="px-6 py-4 bg-paper-2 border-t">
             <Button
               onClick={handleCloseBlueprintGuide}
               className="w-full"
-              style={{ backgroundColor: '#222831' }}
+              style={{ backgroundColor: 'hsl(var(--ink))' }}
             >
               Got it, let's create an interview!
             </Button>
@@ -3775,584 +3785,3 @@ export default function CreateInterview() {
   );
 }
 
-// Edit Mode Indicator Component
-function EditModeIndicator({ lastSavedAt }) {
-  return (
-    <div className="flex items-center space-x-2 text-xs">
-      {lastSavedAt && (
-        <span className="text-success">
-          ✓ Last saved: {lastSavedAt.toLocaleTimeString()}
-        </span>
-      )}
-      <div className="flex items-center space-x-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
-        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-        <span className="text-xs font-medium">Edit Mode</span>
-      </div>
-    </div>
-  );
-}
-
-// Multi-Source Candidate Manager Component for Interview Creation
-function MultiSourceCandidateManager({ formData, setFormData, isEditMode, interviewId, initialSourceType }) {
-  // C3: previously referenced `user` at lines 3840 + 3919 without declaring
-  // it in this child component's scope — the outer-component `user` from
-  // CreateInterview isn't visible here. ReferenceError crashed the
-  // add-candidate flow on save.
-  const { user } = useAuth();
-  // Validate initial source type
-  const validSourceTypes = ['google_sheet', 'excel_file', 'manual_entry'];
-  const validInitialSourceType = initialSourceType && validSourceTypes.includes(initialSourceType) ? initialSourceType : null;
-  
-  const [showSourceSelector, setShowSourceSelector] = useState(!!validInitialSourceType);
-  const [selectedSourceType, setSelectedSourceType] = useState(validInitialSourceType);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [sourceToDelete, setSourceToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { toast } = useToast();
-
-  const sourceTypeOptions = [
-    {
-      type: 'google_sheet',
-      title: 'Google Sheets',
-      description: 'Import candidates from Google Sheets',
-      icon: '📊',
-      color: 'bg-green-50 border-green-200 hover:bg-green-100'
-    },
-    {
-      type: 'excel_file',
-      title: 'Excel/CSV File',
-      description: 'Upload Excel or CSV file with candidates',
-      icon: '📄',
-      color: 'bg-blue-50 border-blue-200 hover:bg-blue-100'
-    }
-  ];
-
-  const handleAddSource = (sourceType) => {
-    setSelectedSourceType(sourceType);
-    setShowSourceSelector(true);
-  };
-
-  const handleSourceAdded = async (sourceData) => {
-    if (isEditMode && interviewId) {
-      // In edit mode, save directly to database
-      try {
-        const userToken = localStorage.getItem('auth_token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/interviews/${interviewId}/candidate-sources`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userToken}`,
-            'user-id': user?.id || '87c0388e-5f74-4a30-8e32-06869f852cc3'
-          },
-          body: JSON.stringify(sourceData)
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          // Add the new source with real ID to local state
-          setFormData(prev => ({
-            ...prev,
-            candidateSources: [...prev.candidateSources, {
-              id: result.sourceId, // Real ID from database
-              ...sourceData,
-              createdAt: new Date().toISOString()
-            }]
-          }));
-
-          // Check for duplicate warnings
-          if (result.duplicates_detected && result.duplicate_warning) {
-            toast({
-              title: "Source Added with Duplicates Detected",
-              description: result.duplicate_warning,
-              variant: "destructive"
-            });
-          } else {
-            toast({
-              title: "Source Added",
-              description: `${sourceData.name} has been added and saved.`
-            });
-          }
-        } else {
-          throw new Error('Failed to add source');
-        }
-      } catch (error) {
-        toast({
-          title: "Failed to Add Source",
-          description: error.message || "Please try again.",
-          variant: "destructive"
-        });
-        return; // Don't close modal on error
-      }
-    } else {
-      // In create mode, just add to local state
-      setFormData(prev => ({
-        ...prev,
-        candidateSources: [...prev.candidateSources, {
-          id: `temp_${Date.now()}`, // Temporary ID for UI
-          ...sourceData,
-          createdAt: new Date().toISOString()
-        }]
-      }));
-
-      toast({
-        title: "Source Added",
-        description: `${sourceData.name} has been added successfully.`
-      });
-    }
-    
-    setShowSourceSelector(false);
-    setSelectedSourceType(null);
-  };
-
-  const handleDeleteSource = (sourceId, sourceName) => {
-    const source = formData.candidateSources.find(s => s.id === sourceId);
-    if (source) {
-      setSourceToDelete(source);
-      setShowDeleteModal(true);
-    }
-  };
-
-  const confirmDeleteSource = async () => {
-    if (!sourceToDelete) return;
-
-    setIsDeleting(true);
-    
-    try {
-      if (isEditMode && interviewId) {
-        // In edit mode, delete from database
-        const userToken = localStorage.getItem('auth_token');
-        const userId = user?.id || '87c0388e-5f74-4a30-8e32-06869f852cc3';
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/candidate-sources/${sourceToDelete.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${userToken}`,
-            'user-id': userId
-          }
-        });
-
-        if (response.ok) {
-          toast({
-            title: "Source Removed",
-            description: `${sourceToDelete.name} has been removed from the database.`
-          });
-          
-          // Also remove from local state
-          setFormData(prev => ({
-            ...prev,
-            candidateSources: prev.candidateSources.filter(source => source.id !== sourceToDelete.id)
-          }));
-        } else {
-          throw new Error('Failed to remove source from database');
-        }
-      } else {
-        // For creation mode, just remove from local state
-        setFormData(prev => ({
-          ...prev,
-          candidateSources: prev.candidateSources.filter(source => source.id !== sourceToDelete.id)
-        }));
-
-        toast({
-          title: "Source Removed",
-          description: `${sourceToDelete.name} has been removed.`
-        });
-      }
-      
-      setShowDeleteModal(false);
-      setSourceToDelete(null);
-    } catch (error) {
-      toast({
-        title: "Failed to Remove Source",
-        description: error.message || "Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const getTotalCandidates = () => {
-    return formData.candidateSources.reduce((total, source) => total + (source.candidateCount || 0), 0);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Current Sources */}
-      {formData.candidateSources.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-foreground">Current Sources</h3>
-            <span className="text-xs text-muted-foreground">
-              {getTotalCandidates()} candidates from {formData.candidateSources.length} sources
-            </span>
-          </div>
-          <div className="grid gap-3">
-            {formData.candidateSources.map((source) => (
-              <div key={source.id} className="bg-white rounded-lg border border-border p-3 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-xl">
-                      {source.type === 'google_sheet' && '📊'}
-                      {source.type === 'excel_file' && '📄'}
-                      {source.type === 'manual_entry' && '✏️'}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-medium text-sm text-foreground">{source.name}</h4>
-                        <Badge 
-                          variant={source.status === 'validated' ? 'default' : 'secondary'}
-                          className={`text-xs ${
-                            source.status === 'validated' 
-                              ? 'bg-green-100 text-green-800 border-green-200' 
-                              : 'bg-blue-100 text-blue-800 border-blue-200'
-                          }`}
-                        >
-                          {source.status === 'validated' ? 'Validated' : 'Ready'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center space-x-4 mt-1">
-                        <p className="text-xs text-foreground-muted">
-                          {source.candidateCount} candidates • {source.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </p>
-                        {source.metadata?.sheetUrl && (
-                          <a 
-                            href={source.metadata.sheetUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-600 hover:text-blue-800 underline"
-                          >
-                            View Sheet
-                          </a>
-                        )}
-                        {source.metadata?.fileName && (
-                          <span className="text-xs text-gray-600">
-                            {source.metadata.fileName}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-red-600 hover:text-red-800 border-red-200 hover:border-red-300"
-                    onClick={() => handleDeleteSource(source.id, source.name)}
-                  >
-                    <Trash className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Add New Source */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-foreground">
-          {formData.candidateSources.length > 0 ? 'Add Another Source' : 'Add Candidate Sources'}
-        </h3>
-        <div className="grid md:grid-cols-3 gap-3">
-          {sourceTypeOptions.map((option) => (
-            <button
-              key={option.type}
-              onClick={() => handleAddSource(option.type)}
-              className={`p-4 rounded-lg border-2 text-left transition-all duration-200 ${option.color}`}
-            >
-              <div className="text-2xl mb-2">{option.icon}</div>
-              <h4 className="font-semibold text-sm text-foreground mb-1">{option.title}</h4>
-              <p className="text-xs text-foreground-muted">{option.description}</p>
-            </button>
-          ))}
-        </div>
-        
-        {formData.candidateSources.length === 0 && (
-          <div className="text-center p-4 text-xs text-muted-foreground">
-            Choose one or more methods to add candidates to your interview
-          </div>
-        )}
-      </div>
-
-      {/* Source Selector Modal */}
-      {showSourceSelector && (
-        <SourceConfigModal
-          sourceType={selectedSourceType}
-          onClose={() => {
-            setShowSourceSelector(false);
-            setSelectedSourceType(null);
-          }}
-          onSave={handleSourceAdded}
-          existingCandidateSources={formData.candidateSources}
-          mainFormData={formData}
-          uploadedFilePath={formData.candidateUpload?.gcpFilePath}
-        />
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <SourceDeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setSourceToDelete(null);
-        }}
-        onConfirm={confirmDeleteSource}
-        sourceName={sourceToDelete?.name || ''}
-        candidateCount={sourceToDelete?.candidateCount || 0}
-        isDeleting={isDeleting}
-      />
-    </div>
-  );
-}
-
-
-// Source Configuration Modal Component
-function SourceConfigModal({ sourceType, onClose, onSave, existingCandidateSources = [], mainFormData, uploadedFilePath }) {
-  const [formData, setFormData] = useState({
-    name: '',
-    googleSheetUrl: '',
-    file: null,
-    candidateCount: 0
-  });
-
-  const [isValid, setIsValid] = useState(false);
-  const [validationData, setValidationData] = useState(null);
-  const [columnMapping, setColumnMapping] = useState([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleValidation = (valid, data, mapping) => {
-    setIsValid(valid);
-    setValidationData(data);
-    setColumnMapping(mapping || []);
-    
-    if (valid && data) {
-      setFormData(prev => ({ 
-        ...prev, 
-        candidateCount: data.totalRows || 0 
-      }));
-    }
-  };
-
-  const handleFileSelect = (event) => {
-    const selectedFile = event.target.files[0];
-    setFormData(prev => ({ ...prev, file: selectedFile }));
-  };
-
-  const handleSave = async () => {
-    // For manual entry, we don't need validation data
-    if (sourceType !== 'manual_entry' && (!isValid || !validationData)) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // Auto-generate names for all source types
-      let sourceName;
-      if (sourceType === 'google_sheet') {
-        // Use sheet name from validation data if available, otherwise fallback to sheet ID
-        if (validationData?.sheet_info?.sheet_name) {
-          sourceName = validationData.sheet_info.sheet_name;
-        } else {
-          // Fallback: Extract sheet ID from URL
-          const urlMatch = formData.googleSheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-          const sheetId = urlMatch ? urlMatch[1].substring(0, 8) : 'sheet';
-          sourceName = `Google Sheet (${sheetId}...)`;
-        }
-      } else if (sourceType === 'excel_file' && formData.file) {
-        // Use filename without extension
-        const fileName = formData.file.name.replace(/\.[^/.]+$/, "");
-        sourceName = fileName;
-      } else {
-        // Manual entry - generate unique name based on existing sources
-        const existingManualSources = existingCandidateSources.filter(s => s.type === 'manual_entry');
-        sourceName = `Manual Entry ${existingManualSources.length + 1}`;
-      }
-
-      const sourceData = {
-        type: sourceType,
-        name: sourceName,
-        candidateCount: sourceType === 'manual_entry' ? 0 : validationData.totalRows,
-        status: sourceType === 'manual_entry' ? 'ready' : 'validated',
-        metadata: sourceType === 'manual_entry' ? {} : {
-          columnMapping: columnMapping,
-          totalCandidates: validationData.totalRows
-        }
-      };
-
-      if (sourceType === 'google_sheet') {
-        sourceData.metadata.sheetUrl = formData.googleSheetUrl;
-      } else if (sourceType === 'excel_file') {
-        if (formData.file) {
-          sourceData.metadata.fileName = formData.file.name;
-          sourceData.metadata.fileSize = formData.file.size;
-        }
-        // FIXED: Use GCS URL from validation data (FilePreview upload) or main form data
-        const gcpFilePath = validationData?.gcsUrl || 
-                           mainFormData?.candidateUpload?.gcpFilePath || 
-                           uploadedFilePath;
-        if (gcpFilePath) {
-          sourceData.metadata.file_path = gcpFilePath;
-          sourceData.metadata.gcs_url = gcpFilePath;  // Also set gcs_url
-          console.log(`🔗 Setting file paths for CSV source: ${gcpFilePath}`);
-        } else {
-          console.warn('⚠️ No GCP file path available for CSV source');
-        }
-      }
-
-      await onSave(sourceData);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <div
-      className="fixed bg-black/70 flex items-center justify-center p-4"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 9999,
-        margin: 0,
-        padding: '16px'
-      }}
-    >
-      <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200">
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-          <h3 className="text-xl font-semibold text-[#222831]">
-            Configure {sourceType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-          </h3>
-          <Button variant="ghost" size="sm" onClick={onClose} className="text-gray-600 hover:text-[#222831] hover:bg-gray-100">
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-
-        <div className="space-y-6">
-
-          {sourceType === 'google_sheet' && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="sheetUrl" className="text-[#222831] mb-2 block">Google Sheets URL</Label>
-                <Input
-                  id="sheetUrl"
-                  placeholder="https://docs.google.com/spreadsheets/..."
-                  value={formData.googleSheetUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, googleSheetUrl: e.target.value }))}
-                  className="bg-white border-gray-300 text-[#222831] placeholder:text-gray-400 focus:border-[#948979] focus:ring-[#948979]"
-                />
-              </div>
-
-              <GoogleSheetsPreview
-                url={formData.googleSheetUrl}
-                onValidation={handleValidation}
-                className="mt-4"
-              />
-            </div>
-          )}
-
-          {sourceType === 'excel_file' && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="fileUpload" className="text-[#222831] mb-2 block">Upload Excel/CSV File</Label>
-                <div className="mt-2">
-                  <input
-                    id="fileUpload"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={handleFileSelect}
-                    className="block w-full text-sm text-gray-600
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-full file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-[#948979] file:text-white
-                      hover:file:bg-[#948979]/90"
-                  />
-                </div>
-              </div>
-
-              <FilePreview
-                file={formData.file}
-                onValidation={handleValidation}
-                className="mt-4"
-              />
-            </div>
-          )}
-
-          {sourceType === 'manual_entry' && (
-            <div className="p-5 bg-[#DFD0B8]/30 rounded-lg border border-[#948979]/30">
-              <p className="text-sm text-gray-600 mb-2">
-                Manual entry mode allows you to add candidates one by one during the interview process.
-              </p>
-              <p className="text-sm font-medium text-[#222831]">
-                This source will be created and ready for manual candidate addition.
-              </p>
-            </div>
-          )}
-
-          {isValid && validationData && (
-            <div className="p-5 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="font-medium text-green-800">
-                  Validation Successful
-                </span>
-              </div>
-              <p className="text-sm text-green-600 mt-1">
-                Found {validationData.totalRows} candidates ready to import
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-          <Button variant="outline" onClick={onClose} disabled={isProcessing} className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-[#222831]">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="bg-[#948979] hover:bg-[#948979]/90 text-white font-semibold border-0 shadow-md"
-            disabled={isProcessing || (sourceType !== 'manual_entry' && (!isValid || !validationData))}
-          >
-            {isProcessing ? (
-              <>
-                <CircleNotch className="w-4 h-4 mr-2 animate-spin" />
-                Adding Source...
-              </>
-            ) : (
-              'Add Source'
-            )}
-          </Button>
-        </div>
-      </div>
-
-    </div>
-  );
-}
-
-// Utility functions for generating step navigation URLs
-export const generateStepURL = (interviewId, step, sourceType = null) => {
-  const baseUrl = `/interviews/create`;
-  const params = new URLSearchParams();
-  
-  if (interviewId) {
-    params.append('edit', interviewId);
-  }
-  
-  if (step > 0) {
-    params.append('step', step.toString());
-  }
-  
-  if (sourceType && ['google_sheet', 'excel_file', 'manual_entry'].includes(sourceType)) {
-    params.append('source', sourceType);
-  }
-  
-  return `${baseUrl}${params.toString() ? '?' + params.toString() : ''}`;
-};
-
-// Helper function specifically for adding candidates to step 2 (Lists)
-export const generateAddCandidatesURL = (interviewId, sourceType = null) => {
-  return generateStepURL(interviewId, 2, sourceType);
-};

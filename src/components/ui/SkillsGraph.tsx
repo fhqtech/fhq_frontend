@@ -76,13 +76,15 @@ const generateLayoutFromData = (skills: BlueprintSkill[], skillLayout?: SkillLay
   });
 };
 
-// Proficiency level labels and colors - Cool to Warm gradient
+// Proficiency level labels and colors. Sentence-case finance-trust copy.
+// Slang ("NOOB / GOAT / no cap skilled") was off-brand for the Big-4
+// finance audience — replaced 2026-05-14 per Designer review S2.7.
 const proficiencyLabels: Record<number, { short: string; full: string; tag: string; color: string; bgColor: string }> = {
-  1: { short: 'NOOB', full: 'Beginner', tag: 'just started', color: '#14b8a6', bgColor: '#ccfbf1' },   // Teal / Teal-100
-  2: { short: 'BASIC', full: 'Basic', tag: 'getting there', color: '#3b82f6', bgColor: '#dbeafe' },    // Blue / Blue-100
-  3: { short: 'MID', full: 'Intermediate', tag: 'lowkey valid', color: '#8b5cf6', bgColor: '#ede9fe' }, // Purple / Violet-100
-  4: { short: 'PRO', full: 'Advanced', tag: 'no cap skilled', color: '#ec4899', bgColor: '#fce7f3' },  // Pink / Pink-100
-  5: { short: 'GOAT', full: 'Expert', tag: 'absolute unit', color: '#ef4444', bgColor: '#fee2e2' }     // Red / Red-100
+  1: { short: 'L1', full: 'Beginner', tag: 'familiar with basics', color: '#14b8a6', bgColor: '#ccfbf1' },
+  2: { short: 'L2', full: 'Basic', tag: 'comfortable with fundamentals', color: '#3b82f6', bgColor: '#dbeafe' },
+  3: { short: 'L3', full: 'Intermediate', tag: 'independent execution', color: '#8b5cf6', bgColor: '#ede9fe' },
+  4: { short: 'L4', full: 'Advanced', tag: 'leads workstreams', color: '#ec4899', bgColor: '#fce7f3' },
+  5: { short: 'L5', full: 'Expert', tag: 'sets the bar', color: '#ef4444', bgColor: '#fee2e2' },
 };
 
 // Get proficiency color for a skill based on expected_proficiency

@@ -49,7 +49,7 @@ export function FunnelChart({ candidates }: FunnelChartProps) {
                   style={{ width: `${widthPercent}%` }}
                 >
                   {stage.count > 0 && (
-                    <span className="text-xs font-medium text-white/90">
+                    <span className="text-xs font-medium text-paper/90">
                       {stage.count} candidate{stage.count !== 1 ? 's' : ''}
                     </span>
                   )}

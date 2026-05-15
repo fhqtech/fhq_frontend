@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import { identify, reset as analyticsReset, track, Events } from '@/lib/analytics';
 
 interface User {
   id: string;
@@ -125,6 +126,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         tourStatus: data.user.tour_status || data.user.tourStatus || 'not_started'
       };
       setUser(user);
+      identify({ user_id: user.id, user_kind: "workspace", email: user.email });
+      track(Events.workspace.signedIn, { method: "password" });
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -176,6 +179,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         tourStatus: data.user.tour_status || data.user.tourStatus || 'not_started'
       };
       setUser(user);
+      identify({ user_id: user.id, user_kind: "workspace", email: user.email });
+      track(Events.workspace.signedUp, { method: "password" });
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -202,9 +207,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Clear local storage
       localStorage.removeItem('auth_token');
-      
+
       // Clear user state
       setUser(null);
+      analyticsReset();
     } catch (error) {
       console.error('Logout error:', error);
       // Still clear local state even if server call fails

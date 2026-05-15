@@ -8,7 +8,7 @@ interface EmptyListCardProps {
 export function EmptyListCard({ onClick }: EmptyListCardProps) {
   return (
     <Card
-      className="p-4 transition-all duration-200 hover:shadow-lg cursor-pointer border-dashed border-2 hover:border-primary group"
+      className="p-4 transition-all duration-200 hover:shadow-2 cursor-pointer border-dashed border-2 hover:border-primary group"
       onClick={onClick}
     >
       <div className="flex flex-col items-center justify-center h-full min-h-[150px] text-center">

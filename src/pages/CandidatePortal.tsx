@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { EmptyState } from "@/components/ui/empty-state";
+import { track, Events } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -136,12 +138,12 @@ interface EnhancedInterview extends Interview {
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
-    case 'completed': return 'bg-green-500 hover:bg-green-600';
-    case 'in-progress': return 'bg-blue-500 hover:bg-blue-600';
-    case 'scheduling': return 'bg-purple-500 hover:bg-purple-600';
-    case 'applied': return 'bg-purple-500 hover:bg-purple-600';
-    case 'failed': return 'bg-red-500 hover:bg-red-600';
-    default: return 'bg-gray-500 hover:bg-gray-600';
+    case 'completed': return 'bg-success hover:bg-success';
+    case 'in-progress': return 'bg-info hover:bg-info';
+    case 'scheduling': return 'bg-gold hover:bg-gold';
+    case 'applied': return 'bg-gold hover:bg-gold';
+    case 'failed': return 'bg-danger hover:bg-danger';
+    default: return 'bg-muted hover:bg-muted';
   }
 };
 
@@ -291,6 +293,7 @@ export default function CandidatePortal() {
   useEffect(() => {
     if (token) {
       fetchPortalData(token);
+      track(Events.applicant.portalOpened, { token_prefix: token.slice(0, 6) });
     }
   }, [token]);
 
@@ -648,10 +651,12 @@ export default function CandidatePortal() {
           try {
             // Only check status for interviews that could have been paused/stopped/resumed
             if (['scheduling', 'active', 'paused', 'stopped'].includes(interview.status.toLowerCase())) {
-              // Call appropriate status endpoint based on interview type
+              // Call appropriate status endpoint based on interview type.
+              // S1.2: pass the per-invitation candidate_token to the screening
+              // status endpoint (now token-gated, no longer anonymous).
               const statusResponse = interview.interviewDetails?.type === 'fitment'
                 ? await getFitmentInterviewStatus(interview.interviewId)
-                : await getInterviewStatus(interview.interviewId);
+                : await getInterviewStatus(interview.interviewId, interview.invitationToken);
 
               return {
                 ...interview,
@@ -699,7 +704,7 @@ export default function CandidatePortal() {
     // Check current interview status before proceeding
     setStartingInterviewId(interview.interviewId);
     try {
-      const statusResponse = await getInterviewStatus(interview.interviewId);
+      const statusResponse = await getInterviewStatus(interview.interviewId, interview.invitationToken);
       const currentStatus = statusResponse.status.toLowerCase();
 
       // Show appropriate popup based on status
@@ -1084,49 +1089,49 @@ export default function CandidatePortal() {
     switch (status.toLowerCase()) {
       case 'paused':
         return (
-          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+          <Badge variant="secondary" className="bg-warning-soft text-warning border-rule">
             <Pause className="w-3 h-3 mr-1" />
             Interview Paused
           </Badge>
         );
       case 'stopped':
         return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+          <Badge variant="destructive" className="bg-danger-soft text-danger border-rule">
             <Square className="w-3 h-3 mr-1" />
             Interview Closed
           </Badge>
         );
       case 'active':
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+          <Badge variant="default" className="bg-success-soft text-success border-rule">
             <Play className="w-3 h-3 mr-1" />
             Available
           </Badge>
         );
       case 'completed':
         return (
-          <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+          <Badge variant="outline" className="bg-info-soft text-info border-rule">
             <CheckCircle className="w-3 h-3 mr-1" />
             Completed
           </Badge>
         );
       case 'scheduling':
         return (
-          <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300">
+          <Badge variant="outline" className="bg-paper-3 text-ink-soft border-rule-strong">
             <Calendar className="w-3 h-3 mr-1" />
             Scheduling
           </Badge>
         );
       case 'draft':
         return (
-          <Badge variant="secondary" className="bg-slate-100 text-slate-700 border-slate-300">
+          <Badge variant="secondary" className="bg-paper-3 text-ink-soft border-rule-strong">
             <FileText className="w-3 h-3 mr-1" />
             Draft
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+          <Badge variant="outline" className="bg-paper-2 text-muted border-rule">
             <Clock className="w-3 h-3 mr-1" />
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
@@ -1137,12 +1142,12 @@ export default function CandidatePortal() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-[100dvh] flex flex-col bg-background">
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 text-center">
           <RippleLoader />
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Loading your portal</h1>
-            <p className="mt-2 text-sm text-foreground-muted max-w-md">
+            <p className="mt-2 text-sm text-muted max-w-md">
               We're pulling up your interview details. This usually takes a few seconds.
             </p>
           </div>
@@ -1154,12 +1159,12 @@ export default function CandidatePortal() {
   // Error state
   if (error || !portalData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <Card className="w-full max-w-md border-destructive">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-foreground mb-2">Portal Access Error</h2>
-            <p className="text-foreground-muted mb-4">{error}</p>
+            <p className="text-muted mb-4">{error}</p>
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
@@ -1179,9 +1184,9 @@ export default function CandidatePortal() {
   const profileCompletion = calculateProfileCompletion(portalData.candidate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-[100dvh] bg-paper-2 from-slate-50 to-slate-100">
       {/* Header with Logo and Profile - Full Width */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+      <header className="bg-paper border-b border-rule sticky top-0 z-50 shadow-1">
         <div className="w-full px-8 py-2.5 overflow-hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -1192,25 +1197,25 @@ export default function CandidatePortal() {
                 className="h-16 object-cover object-top -mt-2"
               />
               <div className="absolute left-14">
-                <h1 className="text-xl font-bold text-slate-900 whitespace-nowrap">FunnelHQ</h1>
-                <p className="text-[10px] text-slate-500 whitespace-nowrap">Candidate Portal</p>
+                <h1 className="text-xl font-bold text-ink whitespace-nowrap">FunnelHQ</h1>
+                <p className="text-[10px] text-muted whitespace-nowrap">Applicant Portal</p>
               </div>
             </div>
 
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 hover:bg-slate-50">
+                <Button variant="ghost" className="flex items-center gap-3 hover:bg-paper-2">
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-medium text-slate-900">{portalData.candidate.name}</p>
-                    <p className="text-xs text-slate-500">{portalData.candidate.email}</p>
+                    <p className="text-sm font-medium text-ink">{portalData.candidate.name}</p>
+                    <p className="text-xs text-muted">{portalData.candidate.email}</p>
                   </div>
                   <img
                     src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(portalData.candidate.name)}`}
                     alt={portalData.candidate.name}
-                    className="w-10 h-10 rounded-full shadow-md"
+                    className="w-10 h-10 rounded-full shadow-2"
                   />
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className="w-4 h-4 text-muted-2" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -1233,7 +1238,7 @@ export default function CandidatePortal() {
       {/* Profile Completion Banner - Dynamic from API */}
       {showProfileBanner && missingField && (
         <div
-          className={`bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200 transition-all duration-500 ${
+          className={`bg-paper-2 from-gold-soft to-gold-soft border-b border-rule transition-all duration-500 ${
             bannerAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
           }`}
         >
@@ -1241,10 +1246,10 @@ export default function CandidatePortal() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
-                  <p className="text-sm font-semibold text-amber-900">
+                  <p className="text-sm font-semibold text-gold-ink">
                     {missingField.question}
                   </p>
-                  <Badge className="bg-amber-600 hover:bg-amber-700 text-white border-0">
+                  <Badge className="bg-gold hover:bg-gold text-paper border-0">
                     {profileCompletion}% Complete
                   </Badge>
                 </div>
@@ -1268,22 +1273,22 @@ export default function CandidatePortal() {
                             className={`w-6 h-6 rounded-full transition-all duration-300 cursor-pointer ${
                               isSubmitting
                                 ? 'scale-95 opacity-50'
-                                : 'hover:scale-125 hover:shadow-lg'
+                                : 'hover:scale-125 hover:shadow-2'
                             } ${
                               isSelected && !isSubmitting
-                                ? 'ring-2 ring-offset-2 ring-amber-400'
+                                ? 'ring-2 ring-offset-2 ring-gold'
                                 : ''
                             } disabled:cursor-not-allowed relative`}
                             style={{ backgroundColor: colorHex }}
                           >
                             {isSubmitting && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <Loader2 className="w-3 h-3 text-white animate-spin" />
+                                <Loader2 className="w-3 h-3 text-paper animate-spin" />
                               </div>
                             )}
                             {isSelected && !isSubmitting && (
                               <div className="absolute inset-0 flex items-center justify-center animate-in fade-in zoom-in duration-200">
-                                <CheckCircle className="w-3 h-3 text-white" />
+                                <CheckCircle className="w-3 h-3 text-paper" />
                               </div>
                             )}
                           </div>
@@ -1311,19 +1316,19 @@ export default function CandidatePortal() {
                               : 'hover:scale-125'
                           } ${
                             isSelected && !isSubmitting
-                              ? 'ring-2 ring-offset-2 ring-amber-400 rounded-lg p-1'
+                              ? 'ring-2 ring-offset-2 ring-gold rounded-lg p-1'
                               : ''
                           } disabled:cursor-not-allowed relative`}
                         >
                           {isSubmitting && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                              <Loader2 className="w-4 h-4 text-gold-ink animate-spin" />
                             </div>
                           )}
                           {!isSubmitting && emoji}
                           {isSelected && !isSubmitting && (
                             <div className="absolute -top-1 -right-1">
-                              <CheckCircle className="w-4 h-4 text-green-600 bg-white rounded-full" />
+                              <CheckCircle className="w-4 h-4 text-success bg-paper rounded-full" />
                             </div>
                           )}
                         </button>
@@ -1350,19 +1355,19 @@ export default function CandidatePortal() {
                               : 'hover:scale-125'
                           } ${
                             isSelected && !isSubmitting
-                              ? 'ring-2 ring-offset-2 ring-amber-400 rounded-lg p-1'
+                              ? 'ring-2 ring-offset-2 ring-gold rounded-lg p-1'
                               : ''
                           } disabled:cursor-not-allowed relative`}
                         >
                           {isSubmitting && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                              <Loader2 className="w-4 h-4 text-gold-ink animate-spin" />
                             </div>
                           )}
                           {!isSubmitting && emoji}
                           {isSelected && !isSubmitting && (
                             <div className="absolute -top-1 -right-1">
-                              <CheckCircle className="w-4 h-4 text-green-600 bg-white rounded-full" />
+                              <CheckCircle className="w-4 h-4 text-success bg-paper rounded-full" />
                             </div>
                           )}
                         </button>
@@ -1389,19 +1394,19 @@ export default function CandidatePortal() {
                               : 'hover:scale-125'
                           } ${
                             isSelected && !isSubmitting
-                              ? 'ring-2 ring-offset-2 ring-amber-400 rounded-lg p-1'
+                              ? 'ring-2 ring-offset-2 ring-gold rounded-lg p-1'
                               : ''
                           } disabled:cursor-not-allowed relative`}
                         >
                           {isSubmitting && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                              <Loader2 className="w-4 h-4 text-gold-ink animate-spin" />
                             </div>
                           )}
                           {!isSubmitting && emoji}
                           {isSelected && !isSubmitting && (
                             <div className="absolute -top-1 -right-1">
-                              <CheckCircle className="w-4 h-4 text-green-600 bg-white rounded-full" />
+                              <CheckCircle className="w-4 h-4 text-success bg-paper rounded-full" />
                             </div>
                           )}
                         </button>
@@ -1423,12 +1428,12 @@ export default function CandidatePortal() {
                             variant="outline"
                             disabled={submittingAnswer}
                             onClick={() => handleQuickAnswer(missingField.field, option)}
-                            className={`bg-white border-amber-300 hover:bg-amber-100 hover:border-amber-400 text-amber-900 transition-all duration-300 ${
-                              isSelected ? 'ring-2 ring-amber-500 bg-amber-100' : ''
+                            className={`bg-paper border-rule hover:bg-gold-soft hover:border-rule text-gold-ink transition-all duration-300 ${
+                              isSelected ? 'ring-2 ring-gold bg-gold-soft' : ''
                             }`}
                           >
                             {isSubmitting && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
-                            {isSelected && !isSubmitting && <CheckCircle className="w-3 h-3 mr-1 text-green-600" />}
+                            {isSelected && !isSubmitting && <CheckCircle className="w-3 h-3 mr-1 text-success" />}
                             {option}
                           </Button>
                         );
@@ -1441,7 +1446,7 @@ export default function CandidatePortal() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowProfileBanner(false)}
-                className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 flex-shrink-0"
+                className="text-gold-ink hover:text-gold-ink hover:bg-gold-soft flex-shrink-0"
                 disabled={submittingAnswer}
               >
                 <X className="w-4 h-4" />
@@ -1457,7 +1462,7 @@ export default function CandidatePortal() {
           {/* Profile Sidebar - Left */}
           <div className="space-y-4">
             {/* Hero Profile Card */}
-            <Card className="overflow-hidden shadow-md border border-slate-200 bg-white rounded">
+            <Card className="overflow-hidden shadow-2 border border-rule bg-paper rounded">
               <CardContent className="p-6">
                 {/* Profile Header with Completion Ring Around Avatar */}
                 <div className="flex items-start justify-between mb-6">
@@ -1498,9 +1503,9 @@ export default function CandidatePortal() {
                       />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-slate-900 capitalize">{portalData.candidate.name}</h2>
-                      <p className="text-sm text-amber-800">{portalData.candidate.jobTitle || 'Professional'}</p>
-                      <p className="text-xs text-slate-600 mt-1">
+                      <h2 className="text-xl font-bold text-ink capitalize">{portalData.candidate.name}</h2>
+                      <p className="text-sm text-gold-ink">{portalData.candidate.jobTitle || 'Professional'}</p>
+                      <p className="text-xs text-muted mt-1">
                         {calculateProfileCompletion(portalData.candidate)}% Complete
                       </p>
                     </div>
@@ -1508,7 +1513,8 @@ export default function CandidatePortal() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-amber-700 hover:bg-amber-100"
+                    aria-label="Edit profile"
+                    className="text-gold-ink hover:bg-gold-soft"
                     onClick={handleOpenEditModal}
                   >
                     <Edit className="w-4 h-4" />
@@ -1523,7 +1529,7 @@ export default function CandidatePortal() {
                   portalData.candidate.psychAssessment.symbol
                 ) && (
                   <div className="flex items-center gap-3 mb-3 transition-all duration-500">
-                    <span className="text-xs text-slate-400 whitespace-nowrap">Vibes:</span>
+                    <span className="text-xs text-muted-2 whitespace-nowrap">Vibes:</span>
                     <div className="flex gap-4 items-center">
                       {portalData.candidate.psychAssessment.animal && (
                         <span className="text-2xl" title={portalData.candidate.psychAssessment.animal}>
@@ -1532,7 +1538,7 @@ export default function CandidatePortal() {
                       )}
                       {portalData.candidate.psychAssessment.color && (
                         <div
-                          className="w-8 h-8 rounded-full shadow-md border-2 border-white transition-all duration-500 animate-in fade-in zoom-in"
+                          className="w-8 h-8 rounded-full shadow-2 border-2 border-white transition-all duration-500 animate-in fade-in zoom-in"
                           style={{ backgroundColor: colorMap[portalData.candidate.psychAssessment.color] || '#94a3b8' }}
                           title={portalData.candidate.psychAssessment.color}
                         />
@@ -1558,7 +1564,7 @@ export default function CandidatePortal() {
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" viewBox="0 0 256 256">
                         <path d="M237.33,106.21,61.41,41l-.16-.05A16,16,0,0,0,40.9,61.25a1,1,0,0,0,.05.16l65.26,175.92A15.77,15.77,0,0,0,121.28,248h.3a15.77,15.77,0,0,0,15-11.29l.06-.2,21.84-78,78-21.84.2-.06a16,16,0,0,0,.62-30.38ZM149.84,144.3a8,8,0,0,0-5.54,5.54L121.3,232l-.06-.17L56,56l175.82,65.22.16.06Z"></path>
                       </svg>
-                      <p className="text-sm font-medium text-black uppercase">
+                      <p className="text-sm font-medium text-ink uppercase">
                         {(() => {
                           const parts = portalData.candidate.location.split(',').map(p => p.trim());
                           if (parts.length >= 3) {
@@ -1575,7 +1581,7 @@ export default function CandidatePortal() {
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" viewBox="0 0 256 256">
                         <path d="M196.12,128c24.65-34.61,37.22-70.38,19.74-87.86S162.61,35.23,128,59.88C93.39,35.23,57.62,22.66,40.14,40.14S35.23,93.39,59.88,128c-24.65,34.61-37.22,70.38-19.74,87.86h0c5.63,5.63,13.15,8.14,21.91,8.14,18.48,0,42.48-11.17,66-27.88C151.47,212.83,175.47,224,194,224c8.76,0,16.29-2.52,21.91-8.14h0C233.34,198.38,220.77,162.61,196.12,128Zm8.43-76.55c7.64,7.64,2.48,32.4-18.52,63.28a300.33,300.33,0,0,0-21.19-23.57A300.33,300.33,0,0,0,141.27,70C172.15,49,196.91,43.8,204.55,51.45ZM176.29,128a289.14,289.14,0,0,1-22.76,25.53A289.14,289.14,0,0,1,128,176.29a289.14,289.14,0,0,1-25.53-22.76A289.14,289.14,0,0,1,79.71,128A298.62,298.62,0,0,1,128,79.71a289.14,289.14,0,0,1,25.53,22.76A289.14,289.14,0,0,1,176.29,128ZM51.45,51.45c2.2-2.21,5.83-3.35,10.62-3.35C73.89,48.1,92.76,55,114.72,70A304,304,0,0,0,91.16,91.16,300.33,300.33,0,0,0,70,114.73C49,83.85,43.81,59.09,51.45,51.45Zm0,153.1C43.81,196.91,49,172.15,70,141.27a300.33,300.33,0,0,0,21.19,23.57A304.18,304.18,0,0,0,114.73,186C83.85,207,59.09,212.2,51.45,204.55Zm153.1,0c-7.64,7.65-32.4,2.48-63.28-18.52a304.18,304.18,0,0,0,23.57-21.19A300.33,300.33,0,0,0,186,141.27C207,172.15,212.19,196.91,204.55,204.55ZM140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Z"></path>
                       </svg>
-                      <p className="text-sm font-medium text-black uppercase">
+                      <p className="text-sm font-medium text-ink uppercase">
                         {portalData.candidate.experience === '0' ||
                          portalData.candidate.experience === '0 years' ||
                          portalData.candidate.experience.toLowerCase().includes('0 months') ||
@@ -1588,7 +1594,7 @@ export default function CandidatePortal() {
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" viewBox="0 0 256 256">
                         <path d="M200,75.64V40a16,16,0,0,0-16-16H72A16,16,0,0,0,56,40V76a16.07,16.07,0,0,0,6.4,12.8L114.67,128,62.4,167.2A16.07,16.07,0,0,0,56,180v36a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V180.36a16.09,16.09,0,0,0-6.35-12.77L141.27,128l52.38-39.6A16.05,16.05,0,0,0,200,75.64ZM72,40H184V75.64L178.23,80H77.33L72,76Zm56,78L98.67,96h58.4Zm56,98H72V180l48-36v24a8,8,0,0,0,16,0V144.08l48,36.28Z"></path>
                       </svg>
-                      <p className="text-sm font-medium text-black uppercase">{portalData.candidate.availableIn}</p>
+                      <p className="text-sm font-medium text-ink uppercase">{portalData.candidate.availableIn}</p>
                     </div>
                   )}
                 </div>
@@ -1600,13 +1606,13 @@ export default function CandidatePortal() {
                       href={portalData.candidate.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded-full text-xs font-medium text-blue-700 transition-all hover:scale-105 shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-info-soft hover:bg-info-soft border border-rule rounded-full text-xs font-medium text-info transition-all hover:scale-105 shadow-1"
                     >
                       <Linkedin className="w-3.5 h-3.5" />
                       LinkedIn
                     </a>
                   ) : (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-full text-xs font-medium text-slate-400 cursor-not-allowed opacity-60">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-paper-3 border border-rule-strong rounded-full text-xs font-medium text-muted-2 cursor-not-allowed opacity-60">
                       <Linkedin className="w-3.5 h-3.5" />
                       LinkedIn
                     </div>
@@ -1616,13 +1622,13 @@ export default function CandidatePortal() {
                       href={portalData.candidate.portfolioUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-300 rounded-full text-xs font-medium text-purple-700 transition-all hover:scale-105 shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gold-soft hover:bg-gold border border-rule rounded-full text-xs font-medium text-gold-ink transition-all hover:scale-105 shadow-1"
                     >
                       <Globe className="w-3.5 h-3.5" />
                       Portfolio
                     </a>
                   ) : (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-full text-xs font-medium text-slate-400 cursor-not-allowed opacity-60">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-paper-3 border border-rule-strong rounded-full text-xs font-medium text-muted-2 cursor-not-allowed opacity-60">
                       <Globe className="w-3.5 h-3.5" />
                       Portfolio
                     </div>
@@ -1638,29 +1644,29 @@ export default function CandidatePortal() {
             {/* Stats Dashboard - Compact Grid */}
             <div className="mb-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl">
-                <Card className="shadow-md border border-slate-200 rounded">
+                <Card className="shadow-2 border border-rule rounded">
                   <CardContent className="py-6 px-4">
                     <div className="flex items-center gap-4">
                       <p className="text-3xl font-bold text-foreground">{enhancedInterviews.length}</p>
-                      <p className="text-sm text-foreground-muted uppercase">TOTAL</p>
+                      <p className="text-sm text-muted uppercase">TOTAL</p>
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="shadow-md border border-slate-200 rounded">
+                <Card className="shadow-2 border border-rule rounded">
                   <CardContent className="py-6 px-4">
                     <div className="flex items-center gap-4">
                       <p className="text-3xl font-bold text-foreground">{activeInterviews.length}</p>
-                      <p className="text-sm text-foreground-muted uppercase">ACTIVE</p>
+                      <p className="text-sm text-muted uppercase">ACTIVE</p>
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="shadow-md border border-slate-200 rounded">
+                <Card className="shadow-2 border border-rule rounded">
                   <CardContent className="py-6 px-4">
                     <div className="flex items-center gap-4">
                       <p className="text-3xl font-bold text-foreground">
                         {completedInterviews.length}
                       </p>
-                      <p className="text-sm text-foreground-muted uppercase">DONE</p>
+                      <p className="text-sm text-muted uppercase">DONE</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -1674,11 +1680,11 @@ export default function CandidatePortal() {
                   the "Portal Access Error" feel when a candidate returns
                   to the portal after finishing. */}
               {activeInterviews.length === 0 && (
-                <div className="mt-8 max-w-4xl rounded-lg border border-emerald-200 bg-emerald-50 p-6">
-                  <h2 className="text-lg font-semibold text-emerald-900 mb-1">
+                <div className="mt-8 max-w-4xl rounded-lg border border-rule bg-success-soft p-6">
+                  <h2 className="text-lg font-semibold text-success mb-1">
                     You're all done — thanks!
                   </h2>
-                  <p className="text-sm text-emerald-900/80">
+                  <p className="text-sm text-success/80">
                     Your interview has been submitted. The recruiting team
                     will review your responses and reach out within 3-5
                     business days. You can close this window now, or come
@@ -1689,19 +1695,22 @@ export default function CandidatePortal() {
 
               {activeInterviews.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-black mb-4 mt-8 uppercase tracking-wider">Active Interviews</h2>
+                  <h2 className="text-xl font-semibold text-ink mb-4 mt-8 uppercase tracking-wider">Active Interviews</h2>
                   <div className="space-y-4 max-w-4xl">
                     {activeInterviews.map((interview, index) => {
                         const isPreliminary = interview.type === 'regular';
                         const interviewTypeLabel = isPreliminary ? 'Preliminary Interview' : 'Fitment Interview';
 
                         return (
-                          <div key={interview.uniqueId} className="relative rounded-none p-8 pb-16 bg-black border border-amber-600/20 shadow-2xl h-60 overflow-hidden">
+                          <div key={interview.uniqueId} className="relative rounded-md p-8 pb-16 bg-paper border border-rule shadow-2 h-60 overflow-hidden">
+                            {/* Gold accent bar */}
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-gold"></div>
+
                             {/* Live Indicator */}
                             {interview.status.toLowerCase() === 'active' && (
                               <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
-                                <span className="text-green-500 text-xs font-semibold uppercase" style={{ letterSpacing: '0.3em' }}>LIVE</span>
+                                <div className="w-2.5 h-2.5 bg-success rounded-full animate-pulse"></div>
+                                <span className="text-success text-xs font-semibold uppercase font-mono" style={{ letterSpacing: '0.3em' }}>LIVE</span>
                               </div>
                             )}
 
@@ -1709,43 +1718,43 @@ export default function CandidatePortal() {
                               <div className="flex items-start gap-4">
                                 <div>
                                   <div className="flex items-center gap-3 mb-4">
-                                    <div className="flex-shrink-0 p-1.5 rounded-full border-2 border-slate-300/40 bg-slate-200/10">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffffff" viewBox="0 0 256 256">
+                                    <div className="flex-shrink-0 p-1.5 rounded-md bg-gold-soft">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="hsl(var(--gold-ink))" viewBox="0 0 256 256">
                                         <path d="M101.66,122.34a8,8,0,0,1,0,11.32l-32,32A8,8,0,0,1,56,160V136H16a8,8,0,0,1,0-16H56V96a8,8,0,0,1,13.66-5.66ZM240,120H200V96a8,8,0,0,0-13.66-5.66l-32,32a8,8,0,0,0,0,11.32l32,32A8,8,0,0,0,200,160V136h40a8,8,0,0,0,0-16ZM128,32a8,8,0,0,0-8,8V216a8,8,0,0,0,16,0V40A8,8,0,0,0,128,32Z"></path>
                                       </svg>
                                     </div>
-                                    <p className="text-slate-200 text-base font-medium uppercase tracking-widest">
+                                    <p className="text-gold-ink text-[11px] font-mono font-medium uppercase tracking-[0.18em]">
                                       {interviewTypeLabel}
                                     </p>
                                   </div>
                                   {interview.interviewDetails?.title && (
-                                    <p className="text-white text-4xl font-light uppercase tracking-widest mb-3">
+                                    <p className="text-ink text-3xl font-semibold tracking-tight mb-3">
                                       {interview.interviewDetails.title}
                                     </p>
                                   )}
-                                  <div className="flex items-center gap-4 text-sm text-slate-300">
+                                  <div className="flex items-center gap-4 text-sm text-muted">
                                     {interview.interviewDetails?.duration && (
                                       <div className="flex items-center gap-1.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffffff" viewBox="0 0 256 256" className="opacity-90">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
                                           <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"></path>
                                         </svg>
-                                        <span>{interview.interviewDetails.duration}min</span>
+                                        <span className="font-mono tabular-nums">{interview.interviewDetails.duration}min</span>
                                       </div>
                                     )}
                                   </div>
                                   {interview.interviewDetails?.applicant_count !== undefined && (
-                                    <div className="flex items-center gap-2 text-sm mt-2">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffffff" viewBox="0 0 256 256" className="opacity-90">
+                                    <div className="flex items-center gap-2 text-sm mt-2 text-muted">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
                                         <path d="M120,56a32,32,0,1,1,32,32A32,32,0,0,1,120,56Zm103.28,74.08a8,8,0,0,0-10.6-4c-.25.12-26.71,10.72-72.18-20.19-52.29-35.54-88-7.77-89.51-6.57a8,8,0,1,0,10,12.48c.26-.21,25.12-19.5,64.07,3.27-4.25,13.35-12.76,31.82-25.25,47-18.56,22.48-41.11,32.56-67,30A8,8,0,0,0,31.2,208a92.29,92.29,0,0,0,9.34.47c27.38,0,52-12.38,71.63-36.18.57-.69,1.14-1.4,1.69-2.1C133.31,175.29,168,190.3,168,232a8,8,0,0,0,16,0c0-24.65-10.08-45.35-29.15-59.86a104.29,104.29,0,0,0-31.31-15.81A169.31,169.31,0,0,0,139,124c26.14,16.09,46.84,20,60.69,20,12.18,0,19.06-3,19.67-3.28A8,8,0,0,0,223.28,130.08Z"></path>
                                       </svg>
-                                      <span className="text-white font-semibold">{interview.interviewDetails.applicant_count}</span>
-                                      <span className="text-slate-300 font-light">Applicants</span>
+                                      <span className="text-ink font-mono tabular-nums font-semibold">{interview.interviewDetails.applicant_count}</span>
+                                      <span className="text-muted">Applicants</span>
                                     </div>
                                   )}
 
                                   {/* Warning Message */}
-                                  <div className="flex items-center gap-2 mt-4 text-xs text-amber-400/90">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" className="flex-shrink-0">
+                                  <div className="flex items-center gap-2 mt-4 text-xs text-warning">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256" className="flex-shrink-0">
                                       <path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-11.55,39.29c-4.79,5-9.75,10.17-12.38,16.52-2.52,6.1-2.63,13.07-2.73,19.82-.1,7-.21,14.33-3.32,17.43s-10.39,3.22-17.43,3.32c-6.75.1-13.72.21-19.82,2.73-6.35,2.63-11.52,7.59-16.52,12.38S132,224,128,224s-9.15-4.92-14.11-9.69-10.17-9.75-16.52-12.38c-6.1-2.52-13.07-2.63-19.82-2.73-7-.1-14.33-.21-17.43-3.32s-3.22-10.39-3.32-17.43c-.1-6.75-.21-13.72-2.73-19.82-2.63-6.35-7.59-11.52-12.38-16.52S32,132,32,128s4.92-9.15,9.69-14.11,9.75-10.17,12.38-16.52c2.52-6.1,2.63-13.07,2.73-19.82.1-7,.21-14.33,3.32-17.43S70.51,56.9,77.55,56.8c6.75-.1,13.72-.21,19.82-2.73,6.35-2.63,11.52-7.59,16.52-12.38S124,32,128,32s9.15,4.92,14.11,9.69,10.17,9.75,16.52,12.38c6.1,2.52,13.07,2.63,19.82,2.73,7,.1,14.33.21,17.43,3.32s3.22,10.39,3.32,17.43c.1,6.75.21,13.72,2.73,19.82,2.63,6.35,7.59,11.52,12.38,16.52S224,124,224,128,219.08,137.15,214.31,142.11ZM120,136V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"></path>
                                     </svg>
                                     <span className="whitespace-nowrap">Interview cannot be retaken, once you have started the interview</span>
@@ -1758,11 +1767,10 @@ export default function CandidatePortal() {
                             <div className="absolute bottom-4 right-4 z-20">
                               {canStartInterview(interview.status, !!interview.interviewDetails?.completed_session) ? (
                                 <Button
-                                  variant="default"
+                                  variant="gold"
                                   size="sm"
                                   onClick={() => handleStartInterview(interview)}
                                   disabled={startingInterviewId === interview.interviewId}
-                                  className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-md hover:shadow-lg transition-all"
                                 >
                                   {startingInterviewId === interview.interviewId ? (
                                     <>
@@ -1777,7 +1785,7 @@ export default function CandidatePortal() {
                                   )}
                                 </Button>
                               ) : (
-                                <Button variant="ghost" size="sm" disabled className="text-slate-400">
+                                <Button variant="ghost" size="sm" disabled className="text-muted-2">
                                   {getInterviewButtonText(interview.status, !!interview.interviewDetails?.active_session?.session_id, !!interview.interviewDetails?.completed_session)}
                                   <ArrowRight className="w-4 h-4 ml-1" />
                                 </Button>
@@ -1793,49 +1801,49 @@ export default function CandidatePortal() {
               {/* Completed Interviews Section */}
               {completedInterviews.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-black mb-4 mt-8 uppercase tracking-wider">Completed Interviews</h2>
+                  <h2 className="text-xl font-semibold text-ink mb-4 mt-8 uppercase tracking-wider">Completed Interviews</h2>
                   <div className="space-y-4 max-w-4xl">
                     {completedInterviews.map((interview, index) => {
                         const isPreliminary = interview.type === 'regular';
                         const interviewTypeLabel = isPreliminary ? 'Preliminary Interview' : 'Fitment Interview';
 
                         return (
-                          <div key={interview.uniqueId} className="relative rounded-none p-8 pb-16 bg-black border border-slate-600/20 shadow-2xl h-60 overflow-hidden opacity-60">
+                          <div key={interview.uniqueId} className="relative rounded-md p-8 pb-16 bg-paper-2 border border-rule shadow-1 h-60 overflow-hidden">
                             <div className="relative z-10 flex items-start justify-between">
                               <div className="flex items-start gap-4">
                                 <div>
                                   <div className="flex items-center gap-3 mb-4">
-                                    <div className="flex-shrink-0 p-1.5 rounded-full border-2 border-slate-300/40 bg-slate-200/10">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffffff" viewBox="0 0 256 256">
+                                    <div className="flex-shrink-0 p-1.5 rounded-md bg-paper-3">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="hsl(var(--muted))" viewBox="0 0 256 256">
                                         <path d="M101.66,122.34a8,8,0,0,1,0,11.32l-32,32A8,8,0,0,1,56,160V136H16a8,8,0,0,1,0-16H56V96a8,8,0,0,1,13.66-5.66ZM240,120H200V96a8,8,0,0,0-13.66-5.66l-32,32a8,8,0,0,0,0,11.32l32,32A8,8,0,0,0,200,160V136h40a8,8,0,0,0,0-16ZM128,32a8,8,0,0,0-8,8V216a8,8,0,0,0,16,0V40A8,8,0,0,0,128,32Z"></path>
                                       </svg>
                                     </div>
-                                    <p className="text-slate-200 text-base font-medium uppercase tracking-widest">
+                                    <p className="text-muted text-[11px] font-mono font-medium uppercase tracking-[0.18em]">
                                       {interviewTypeLabel}
                                     </p>
                                   </div>
                                   {interview.interviewDetails?.title && (
-                                    <p className="text-white text-4xl font-light uppercase tracking-widest mb-3">
+                                    <p className="text-ink-soft text-3xl font-semibold tracking-tight mb-3">
                                       {interview.interviewDetails.title}
                                     </p>
                                   )}
-                                  <div className="flex items-center gap-4 text-sm text-slate-300">
+                                  <div className="flex items-center gap-4 text-sm text-muted">
                                     {interview.interviewDetails?.duration && (
                                       <div className="flex items-center gap-1.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffffff" viewBox="0 0 256 256" className="opacity-90">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
                                           <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"></path>
                                         </svg>
-                                        <span>{interview.interviewDetails.duration}min</span>
+                                        <span className="font-mono tabular-nums">{interview.interviewDetails.duration}min</span>
                                       </div>
                                     )}
                                   </div>
                                   {interview.interviewDetails?.applicant_count !== undefined && (
-                                    <div className="flex items-center gap-2 text-sm mt-2">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffffff" viewBox="0 0 256 256" className="opacity-90">
+                                    <div className="flex items-center gap-2 text-sm mt-2 text-muted">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
                                         <path d="M120,56a32,32,0,1,1,32,32A32,32,0,0,1,120,56Zm103.28,74.08a8,8,0,0,0-10.6-4c-.25.12-26.71,10.72-72.18-20.19-52.29-35.54-88-7.77-89.51-6.57a8,8,0,1,0,10,12.48c.26-.21,25.12-19.5,64.07,3.27-4.25,13.35-12.76,31.82-25.25,47-18.56,22.48-41.11,32.56-67,30A8,8,0,0,0,31.2,208a92.29,92.29,0,0,0,9.34.47c27.38,0,52-12.38,71.63-36.18.57-.69,1.14-1.4,1.69-2.1C133.31,175.29,168,190.3,168,232a8,8,0,0,0,16,0c0-24.65-10.08-45.35-29.15-59.86a104.29,104.29,0,0,0-31.31-15.81A169.31,169.31,0,0,0,139,124c26.14,16.09,46.84,20,60.69,20,12.18,0,19.06-3,19.67-3.28A8,8,0,0,0,223.28,130.08Z"></path>
                                       </svg>
-                                      <span className="text-white font-semibold">{interview.interviewDetails.applicant_count}</span>
-                                      <span className="text-slate-300 font-light">Applicants</span>
+                                      <span className="text-ink font-mono tabular-nums font-semibold">{interview.interviewDetails.applicant_count}</span>
+                                      <span>Applicants</span>
                                     </div>
                                   )}
                                 </div>
@@ -1844,7 +1852,7 @@ export default function CandidatePortal() {
 
                             {/* Completed Button - Bottom Right */}
                             <div className="absolute bottom-4 right-4 z-20">
-                              <Button variant="ghost" size="sm" disabled className="text-slate-400">
+                              <Button variant="ghost" size="sm" disabled className="text-muted">
                                 Completed
                                 <ArrowRight className="w-4 h-4 ml-1" />
                               </Button>
@@ -1881,7 +1889,7 @@ export default function CandidatePortal() {
 
           <div className="py-4">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted">
                 {portalData.candidate.resumes?.length || 0} resume{(portalData.candidate.resumes?.length || 0) !== 1 ? 's' : ''} uploaded
               </p>
               <Button
@@ -1889,7 +1897,7 @@ export default function CandidatePortal() {
                 variant="outline"
                 onClick={handleUploadClick}
                 disabled={uploadingResume}
-                className="h-8 text-xs bg-white hover:bg-amber-50 border-amber-300 text-amber-700 hover:text-amber-800"
+                className="h-8 text-xs bg-paper hover:bg-gold-soft border-rule text-gold-ink hover:text-gold-ink"
               >
                 {uploadingResume ? (
                   <>
@@ -1912,28 +1920,28 @@ export default function CandidatePortal() {
                 ).map((resume) => (
                   <div
                     key={resume.id}
-                    className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4 shadow-sm border border-amber-200 hover:shadow-md hover:border-amber-300 transition-all"
+                    className="bg-paper-2 from-gold-soft to-orange-soft rounded-lg p-4 shadow-1 border border-rule hover:shadow-2 hover:border-rule transition-all"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3 flex-1 min-w-0">
                         <div className="flex-shrink-0 mt-1">
-                          <FileText className="w-5 h-5 text-amber-600" />
+                          <FileText className="w-5 h-5 text-gold-ink" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <p
-                              className="text-sm font-medium text-slate-900 truncate"
+                              className="text-sm font-medium text-ink truncate"
                               title={resume.filename}
                             >
                               {resume.filename}
                             </p>
                             {resume.isActive && (
-                              <Badge className="px-2 py-0.5 text-[10px] bg-green-100 text-green-700 border-green-300 hover:bg-green-100">
+                              <Badge className="px-2 py-0.5 text-[10px] bg-success-soft text-success border-rule hover:bg-success-soft">
                                 Active
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">
+                          <div className="flex items-center gap-3 text-xs text-muted mb-3">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {formatUploadDate(resume.uploadedAt)}
@@ -1946,7 +1954,7 @@ export default function CandidatePortal() {
                               href={resume.gcsPath}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 bg-white hover:bg-amber-50 border border-amber-300 rounded-md transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gold-ink bg-paper hover:bg-gold-soft border border-rule rounded-md transition-colors"
                             >
                               <Download className="w-3 h-3" />
                               Download
@@ -1957,7 +1965,7 @@ export default function CandidatePortal() {
                                 variant="outline"
                                 onClick={() => handleSetActiveResume(resume.id)}
                                 disabled={settingActiveId === resume.id}
-                                className="h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-50"
+                                className="h-7 text-xs border-rule text-gold-ink hover:bg-gold-soft"
                               >
                                 {settingActiveId === resume.id ? (
                                   <>
@@ -1977,11 +1985,11 @@ export default function CandidatePortal() {
                 ))}
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-8 border border-slate-200 text-center">
-                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm text-slate-500">No resumes uploaded yet</p>
-                <p className="text-xs text-slate-400 mt-1">Upload your first resume to get started</p>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="No resumes uploaded yet"
+                description="Upload your first resume to get started."
+              />
             )}
           </div>
 
@@ -2009,26 +2017,26 @@ export default function CandidatePortal() {
           <div className="grid gap-4 py-4">
             {/* Read-only fields */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right text-slate-500">
+              <Label htmlFor="name" className="text-right text-muted">
                 Name
               </Label>
               <Input
                 id="name"
                 value={portalData.candidate.name}
-                className="col-span-3 bg-slate-50"
+                className="col-span-3 bg-paper-2"
                 disabled
                 readOnly
               />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right text-slate-500">
+              <Label htmlFor="email" className="text-right text-muted">
                 Email
               </Label>
               <Input
                 id="email"
                 value={portalData.candidate.email}
-                className="col-span-3 bg-slate-50"
+                className="col-span-3 bg-paper-2"
                 disabled
                 readOnly
               />
@@ -2036,13 +2044,13 @@ export default function CandidatePortal() {
 
             {portalData.candidate.phone && (
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="phone" className="text-right text-slate-500">
+                <Label htmlFor="phone" className="text-right text-muted">
                   Phone
                 </Label>
                 <Input
                   id="phone"
                   value={portalData.candidate.phone}
-                  className="col-span-3 bg-slate-50"
+                  className="col-span-3 bg-paper-2"
                   disabled
                   readOnly
                 />
@@ -2051,7 +2059,7 @@ export default function CandidatePortal() {
 
             {/* Editable fields */}
             <div className="border-t pt-4 mt-2">
-              <p className="text-sm font-medium text-slate-700 mb-4">Editable Information</p>
+              <p className="text-sm font-medium text-ink-soft mb-4">Editable Information</p>
 
               <div className="grid grid-cols-4 items-center gap-4 mb-4">
                 <Label htmlFor="jobTitle" className="text-right">
@@ -2079,11 +2087,11 @@ export default function CandidatePortal() {
                     placeholder="City, State"
                   />
                   {showLocationDropdown && locationSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-paper border border-rule rounded-md shadow-2 z-50 max-h-60 overflow-y-auto">
                       {locationSuggestions.map((location, index) => (
                         <div
                           key={index}
-                          className="px-4 py-2 hover:bg-amber-50 cursor-pointer text-sm"
+                          className="px-4 py-2 hover:bg-gold-soft cursor-pointer text-sm"
                           onClick={() => selectLocation(location)}
                         >
                           {location}
@@ -2100,7 +2108,7 @@ export default function CandidatePortal() {
                 </Label>
                 <div className="col-span-3 flex gap-3 items-start">
                   <div className="w-24">
-                    <Label htmlFor="experienceYears" className="text-xs text-slate-500 mb-1.5 block">
+                    <Label htmlFor="experienceYears" className="text-xs text-muted mb-1.5 block">
                       Years
                     </Label>
                     <Input
@@ -2114,7 +2122,7 @@ export default function CandidatePortal() {
                     />
                   </div>
                   <div className="w-24">
-                    <Label htmlFor="experienceMonths" className="text-xs text-slate-500 mb-1.5 block">
+                    <Label htmlFor="experienceMonths" className="text-xs text-muted mb-1.5 block">
                       Months
                     </Label>
                     <Input
@@ -2190,7 +2198,7 @@ export default function CandidatePortal() {
             <Button
               onClick={updateProfile}
               disabled={isUpdating}
-              className="bg-amber-600 hover:bg-amber-700"
+              className="bg-gold hover:bg-gold"
             >
               {isUpdating ? (
                 <>

@@ -188,20 +188,20 @@ export function NotificationBell() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full hover:bg-gray-100 transition-all"
+          className="relative h-10 w-10 rounded-full hover:bg-paper-3 transition-all"
         >
-          <Bell className="w-5 h-5 text-gray-600" />
+          <Bell className="w-5 h-5 text-muted" />
           {pendingCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 text-paper text-xs font-bold flex items-center justify-center animate-pulse">
               {pendingCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-96 p-0">
-        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
-          <h3 className="font-bold text-gray-900">Project Invitations</h3>
-          <p className="text-xs text-gray-500 mt-1">
+        <div className="p-4 border-b border-rule bg-paper-2  ">
+          <h3 className="font-bold text-ink">Project Invitations</h3>
+          <p className="text-xs text-muted mt-1">
             {pendingCount === 0 ? 'No pending invitations' : `You have ${pendingCount} pending ${pendingCount === 1 ? 'invitation' : 'invitations'}`}
           </p>
         </div>
@@ -209,8 +209,8 @@ export function NotificationBell() {
         <div className="max-h-96 overflow-y-auto">
           {invitations.length === 0 ? (
             <div className="p-8 text-center">
-              <Bell className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">No pending invitations</p>
+              <Bell className="w-12 h-12 text-muted-2 mx-auto mb-2" />
+              <p className="text-sm text-muted">No pending invitations</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -218,35 +218,35 @@ export function NotificationBell() {
                 const isWrongAccount = user?.email && user.email.toLowerCase() !== invitation.email.toLowerCase();
 
                 return (
-                  <div key={invitation.id} className={`p-4 ${isWrongAccount ? 'bg-orange-50 border-l-4 border-orange-500' : 'hover:bg-gray-50'} transition-colors`}>
+                  <div key={invitation.id} className={`p-4 ${isWrongAccount ? 'bg-orange-soft' : 'hover:bg-paper-2'} transition-colors`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-sm text-gray-900">
+                          <span className="font-semibold text-sm text-ink">
                             {invitation.projectName || 'Project'}
                           </span>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-paper-3 text-ink-soft font-medium">
                             {invitation.role}
                           </span>
                         </div>
 
                         {invitation.workspaceName && (
-                          <p className="text-xs text-gray-500 mb-1">
+                          <p className="text-xs text-muted mb-1">
                             Workspace: <span className="font-medium">{invitation.workspaceName}</span>
                           </p>
                         )}
 
-                        <p className="text-xs text-gray-600 mb-2">
+                        <p className="text-xs text-muted mb-2">
                           Invited by <span className="font-medium">{invitation.inviterName || 'Administrator'}</span>
                         </p>
 
                         {isWrongAccount && (
-                          <div className="mb-2 p-2 bg-orange-100 border border-orange-200 rounded-md">
-                            <p className="text-xs text-orange-800 font-medium">⚠️ Wrong Account</p>
-                            <p className="text-xs text-orange-700 mt-1">
+                          <div className="mb-2 p-2 bg-orange-soft border border-rule rounded-md">
+                            <p className="text-xs text-orange-ink font-medium">Wrong account</p>
+                            <p className="text-xs text-orange-ink/80 mt-1">
                               This invitation is for <span className="font-semibold">{invitation.email}</span>
                             </p>
-                            <p className="text-xs text-orange-700">
+                            <p className="text-xs text-orange-ink/80">
                               You're logged in as <span className="font-semibold">{user?.email}</span>
                             </p>
                           </div>
@@ -258,7 +258,7 @@ export function NotificationBell() {
                               <button
                                 onClick={() => handleLogoutAndRetry(invitation)}
                                 disabled={isLoading}
-                                className="flex-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                className="flex-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-paper text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                               >
                                 <LogOut className="w-3 h-3" />
                                 Switch Account
@@ -266,7 +266,7 @@ export function NotificationBell() {
                               <button
                                 onClick={() => handleDismiss(invitation)}
                                 disabled={isLoading}
-                                className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-md transition-colors disabled:opacity-50"
+                                className="px-3 py-1.5 bg-paper-3 hover:bg-paper-4 text-ink-soft text-xs font-semibold rounded-md transition-colors disabled:opacity-50"
                               >
                                 Dismiss
                               </button>
@@ -276,7 +276,7 @@ export function NotificationBell() {
                               <button
                                 onClick={() => handleAccept(invitation)}
                                 disabled={isLoading}
-                                className="flex-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                className="flex-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-paper text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                               >
                                 <Check className="w-3 h-3" />
                                 Accept
@@ -284,7 +284,7 @@ export function NotificationBell() {
                               <button
                                 onClick={() => handleDismiss(invitation)}
                                 disabled={isLoading}
-                                className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                className="px-3 py-1.5 bg-paper-3 hover:bg-paper-4 text-ink-soft text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                               >
                                 <X className="w-3 h-3" />
                                 Dismiss

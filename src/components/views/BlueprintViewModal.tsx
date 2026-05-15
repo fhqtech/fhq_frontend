@@ -54,18 +54,18 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-[1400px] max-h-[92vh] overflow-hidden flex flex-col border-2 border-gray-200"
+        className="bg-paper rounded-xl shadow-3 w-full max-w-[1400px] max-h-[92vh] overflow-hidden flex flex-col border-2 border-rule"
         onClick={e => e.stopPropagation()}
       >
         {/* Header - Gen Z style */}
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-rule bg-paper-2">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="font-mono font-black text-xl text-gray-900 uppercase tracking-wide">
+              <h2 className="font-mono font-black text-xl text-ink uppercase tracking-wide">
                 {blueprint?.role || templateTitle}
               </h2>
               {blueprint?.type && (
@@ -77,21 +77,22 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                   {blueprint.type}
                 </span>
               )}
-              <span className="bg-gray-900 text-white text-[10px] font-mono font-bold px-2 py-1 rounded uppercase">
+              <span className="bg-ink text-paper text-[10px] font-mono font-bold px-2 py-1 rounded uppercase">
                 skill tree
               </span>
             </div>
             {(blueprint?.description || blueprint?.overview) && (
-              <p className="text-sm text-gray-500 font-mono mt-1 max-w-2xl">
+              <p className="text-sm text-muted font-mono mt-1 max-w-2xl">
                 {blueprint.description || blueprint.overview}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+            aria-label="Close blueprint"
+            className="p-2 bg-paper-3 hover:bg-paper-4 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-muted" />
           </button>
         </div>
 
@@ -107,7 +108,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 <p className="text-red-600 font-medium font-mono">{error}</p>
                 <button
                   onClick={loadBlueprint}
-                  className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg font-mono font-bold uppercase text-sm hover:bg-gray-800 transition-colors"
+                  className="mt-4 px-4 py-2 bg-ink text-paper rounded-lg font-mono font-bold uppercase text-sm hover:bg-ink transition-colors"
                 >
                   Retry
                 </button>
@@ -116,19 +117,19 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
           ) : blueprint ? (
             <>
               {/* Left Sidebar - Certifications & Tools */}
-              <div className="w-56 flex-shrink-0 border-r-2 border-gray-200 bg-gray-50 p-4 flex flex-col gap-4">
+              <div className="w-56 flex-shrink-0 border-r-2 border-rule bg-paper-2 p-4 flex flex-col gap-4">
                 {/* Certifications */}
                 {blueprint.certifications_recommended && blueprint.certifications_recommended.length > 0 && (
-                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                  <div className="bg-paper border-2 border-rule rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
                       <Award className="w-4 h-4 text-amber-500" />
-                      <p className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-wider">certs</p>
+                      <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">certs</p>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       {blueprint.certifications_recommended.map((cert, i) => (
                         <div key={i} className="flex items-start gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
-                          <span className="text-[10px] font-mono text-gray-600 leading-tight">{cert}</span>
+                          <span className="text-[10px] font-mono text-muted leading-tight">{cert}</span>
                         </div>
                       ))}
                     </div>
@@ -137,17 +138,17 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
 
                 {/* Tools */}
                 {blueprint.tools && blueprint.tools.length > 0 && (
-                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                  <div className="bg-paper border-2 border-rule rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
                       <Wrench className="w-4 h-4 text-blue-500" />
-                      <p className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-wider">tools</p>
+                      <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">tools</p>
                     </div>
                     <div className="flex flex-col gap-2">
                       {blueprint.tools.map((tool, i) => (
                         <div key={i} className="flex flex-col">
-                          <span className="text-[10px] font-mono font-bold text-gray-700">{tool.name}</span>
+                          <span className="text-[10px] font-mono font-bold text-ink-soft">{tool.name}</span>
                           {tool.category && (
-                            <span className="text-[9px] font-mono text-gray-400">{tool.category}</span>
+                            <span className="text-[9px] font-mono text-muted-2">{tool.category}</span>
                           )}
                         </div>
                       ))}
@@ -157,9 +158,9 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
 
                 {/* Ideal Candidate Profile */}
                 {blueprint.ideal_candidate_profile && (
-                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
-                    <p className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-wider mb-2">Ideal Candidate</p>
-                    <p className="text-[10px] font-mono text-gray-600 leading-relaxed">
+                  <div className="bg-paper border-2 border-rule rounded-lg p-3">
+                    <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider mb-2">Ideal Candidate</p>
+                    <p className="text-[10px] font-mono text-muted leading-relaxed">
                       {blueprint.ideal_candidate_profile}
                     </p>
                   </div>
@@ -168,14 +169,14 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 {/* No certs or tools message */}
                 {(!blueprint.certifications_recommended || blueprint.certifications_recommended.length === 0) &&
                  (!blueprint.tools || blueprint.tools.length === 0) && (
-                  <div className="bg-white border-2 border-dashed border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-[10px] font-mono text-gray-400">No tools or certs specified</p>
+                  <div className="bg-paper border-2 border-dashed border-rule rounded-lg p-4 text-center">
+                    <p className="text-[10px] font-mono text-muted-2">No tools or certs specified</p>
                   </div>
                 )}
               </div>
 
               {/* Center - Skill Map */}
-              <div className="flex-1 px-6 py-4 bg-white">
+              <div className="flex-1 px-6 py-4 bg-paper">
                 {hasNewStructure && blueprint.skills ? (
                   <SkillsGraph
                     roleTitle={blueprint.role || templateTitle}
@@ -186,7 +187,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 ) : blueprint.evaluation_pillars && blueprint.evaluation_pillars.length > 0 ? (
                   // Legacy pillars view
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500">
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-muted">
                       Evaluation Pillars
                     </h3>
                     {blueprint.evaluation_pillars.map((pillar, pillarIndex) => (
@@ -195,23 +196,23 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-500 font-mono">No skills data available</p>
+                    <p className="text-muted font-mono">No skills data available</p>
                   </div>
                 )}
               </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center py-20">
-              <p className="text-gray-500 font-mono">No blueprint data available</p>
+              <p className="text-muted font-mono">No blueprint data available</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t-2 border-gray-200 px-6 py-4 bg-gray-50 flex justify-end">
+        <div className="border-t-2 border-rule px-6 py-4 bg-paper-2 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-gray-900 text-white rounded-lg font-mono font-bold uppercase text-sm hover:bg-gray-800 transition-colors"
+            className="px-6 py-2.5 bg-ink text-paper rounded-lg font-mono font-bold uppercase text-sm hover:bg-ink transition-colors"
           >
             Close
           </button>
@@ -239,22 +240,22 @@ const LegacyPillarCard: React.FC<{ pillar: EvaluationPillar; index: number }> = 
     <div className={`rounded-xl border ${colors.border} ${colors.bg} overflow-hidden`}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between text-left hover:bg-white/50 transition-colors"
+        className="w-full p-4 flex items-center justify-between text-left hover:bg-paper/50 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className={`w-8 h-8 rounded-lg ${colors.badge} ${colors.text} flex items-center justify-center font-bold text-sm`}>
             {index + 1}
           </span>
           <div>
-            <h4 className="font-bold text-slate-900">{pillar.pillar_name}</h4>
-            <p className="text-xs text-slate-500">
+            <h4 className="font-bold text-ink">{pillar.pillar_name}</h4>
+            <p className="text-xs text-muted">
               {pillar.evaluation_criteria?.length || 0} skills to assess
               {pillar.weight_percentage && ` - ${pillar.weight_percentage}% weight`}
             </p>
           </div>
         </div>
         <svg
-          className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-muted-2 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -266,7 +267,7 @@ const LegacyPillarCard: React.FC<{ pillar: EvaluationPillar; index: number }> = 
       {isExpanded && (
         <div className="px-4 pb-4 space-y-3">
           {(pillar.pillar_description || pillar.description) && (
-            <p className="text-sm text-slate-600 bg-white/60 p-3 rounded-lg">
+            <p className="text-sm text-muted bg-paper/60 p-3 rounded-lg">
               {pillar.pillar_description || pillar.description}
             </p>
           )}
@@ -276,17 +277,17 @@ const LegacyPillarCard: React.FC<{ pillar: EvaluationPillar; index: number }> = 
               {pillar.evaluation_criteria.map((criteria, criteriaIndex) => (
                 <div
                   key={criteriaIndex}
-                  className="bg-white rounded-lg p-3 border border-slate-100"
+                  className="bg-paper rounded-lg p-3 border border-rule"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <h5 className="font-medium text-slate-900 text-sm">{criteria.skill_name}</h5>
+                      <h5 className="font-medium text-ink text-sm">{criteria.skill_name}</h5>
                       {criteria.context && (
-                        <p className="text-xs text-slate-500 mt-1">{criteria.context}</p>
+                        <p className="text-xs text-muted mt-1">{criteria.context}</p>
                       )}
                     </div>
                     {criteria.required_proficiency && (
-                      <span className="text-[10px] font-bold uppercase px-2 py-1 bg-slate-100 text-slate-600 rounded">
+                      <span className="text-[10px] font-bold uppercase px-2 py-1 bg-paper-3 text-muted rounded">
                         {criteria.required_proficiency}
                       </span>
                     )}
@@ -297,7 +298,7 @@ const LegacyPillarCard: React.FC<{ pillar: EvaluationPillar; index: number }> = 
                       {criteria.interview_focus_areas.map((area, areaIndex) => (
                         <span
                           key={areaIndex}
-                          className="text-[10px] px-2 py-0.5 bg-slate-50 text-slate-600 rounded border border-slate-200"
+                          className="text-[10px] px-2 py-0.5 bg-paper-2 text-muted rounded border border-rule"
                         >
                           {area}
                         </span>

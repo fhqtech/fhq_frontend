@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Warning, X, Eye, MagnifyingGlass as Search, CaretDown, CaretUp } from 'phosphor-react';
 import { Button } from './button';
+import { Spinner } from './spinner';
 import { Label } from './label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 import { Badge } from './badge';
@@ -207,8 +208,8 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
         <Card>
           <CardContent className="p-6 text-center">
             <div className="flex items-center justify-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-primary"></div>
-              <span className="text-sm text-foreground-muted">Uploading and processing file...</span>
+              <Spinner size="sm" variant="brand" />
+              <span className="text-sm text-muted">Uploading and processing file...</span>
             </div>
           </CardContent>
         </Card>
@@ -216,10 +217,10 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
 
       {/* Error State */}
       {error && !isLoading && (
-        <Card className="border-error">
+        <Card className="border-danger">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <X className="w-5 h-5 text-error" weight="fill" />
+              <X className="w-5 h-5 text-danger" weight="fill" />
               <span>Unable to Process File</span>
             </CardTitle>
             <CardDescription>
@@ -227,13 +228,13 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-4 bg-error-light/10 border border-error/20 rounded-lg">
-              <p className="text-sm text-error font-medium mb-2">Error Details:</p>
+            <div className="p-4 bg-danger-light/10 border border-danger/20 rounded-lg">
+              <p className="text-sm text-danger font-medium mb-2">Error Details:</p>
               <p className="text-sm text-foreground">{error}</p>
             </div>
             
             <div className="p-3 bg-muted rounded-lg">
-              <p className="text-xs text-foreground-muted">
+              <p className="text-xs text-muted">
                 💡 <strong>Tip:</strong> Make sure your file follows the sample template format with Name and Email columns.
               </p>
             </div>
@@ -243,10 +244,10 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
 
       {/* Invalid Template State */}
       {sheetData && !isLoading && !error && !sheetData.isValid && (
-        <Card className="border-error">
+        <Card className="border-danger">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <X className="w-5 h-5 text-error" weight="fill" />
+              <X className="w-5 h-5 text-danger" weight="fill" />
               <span>Template Format Error</span>
             </CardTitle>
             <CardDescription>
@@ -257,8 +258,8 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
             <div className="space-y-2">
               <p className="font-medium text-sm">Issues found:</p>
               {sheetData.validationErrors.map((error, index) => (
-                <div key={index} className="flex items-center space-x-2 text-sm text-error">
-                  <div className="w-1 h-1 rounded-full bg-error"></div>
+                <div key={index} className="flex items-center space-x-2 text-sm text-danger">
+                  <div className="w-1 h-1 rounded-full bg-danger"></div>
                   <span>{error}</span>
                 </div>
               ))}
@@ -269,14 +270,14 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="font-medium text-success">✓ Column 1: Name</p>
-                  <p className="text-foreground-muted">Full candidate names</p>
+                  <p className="text-muted">Full candidate names</p>
                 </div>
                 <div>
                   <p className="font-medium text-success">✓ Column 2: Email</p>
-                  <p className="text-foreground-muted">Valid email addresses</p>
+                  <p className="text-muted">Valid email addresses</p>
                 </div>
               </div>
-              <p className="text-xs text-foreground-muted mt-3">
+              <p className="text-xs text-muted mt-3">
                 Use exactly these column names and no additional columns. Download the sample template for reference.
               </p>
             </div>
@@ -313,9 +314,9 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
             <span className="text-lg font-medium">Column Mapping</span>
             <div>
               {showColumnMapping ? (
-                <CaretUp className="w-4 h-4 text-foreground-muted" />
+                <CaretUp className="w-4 h-4 text-muted" />
               ) : (
-                <CaretDown className="w-4 h-4 text-foreground-muted" />
+                <CaretDown className="w-4 h-4 text-muted" />
               )}
             </div>
           </div>
@@ -326,7 +327,7 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
                   <div key={index} className="flex items-center justify-between p-2 border rounded text-xs">
                     <div className="flex items-center space-x-2 min-w-0 flex-1">
                       <Badge variant="outline" className="text-xs px-2 py-0.5 whitespace-nowrap">{mapping.sheetColumn}</Badge>
-                      <span className="text-xs text-foreground-muted whitespace-nowrap">→</span>
+                      <span className="text-xs text-muted whitespace-nowrap">→</span>
                     </div>
                     <Select
                       value={mapping.mappedTo}
@@ -376,9 +377,9 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
               )}
               <div>
                 {showDataPreview ? (
-                  <CaretUp className="w-4 h-4 text-foreground-muted" />
+                  <CaretUp className="w-4 h-4 text-muted" />
                 ) : (
-                  <CaretDown className="w-4 h-4 text-foreground-muted" />
+                  <CaretDown className="w-4 h-4 text-muted" />
                 )}
               </div>
             </div>
@@ -402,7 +403,7 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
                         <TableRow key={rowIndex}>
                           {row.map((cell, cellIndex) => (
                             <TableCell key={cellIndex} className="max-w-32 truncate p-2 text-xs">
-                              {cell || <span className="text-foreground-muted italic text-xs">Empty</span>}
+                              {cell || <span className="text-muted italic text-xs">Empty</span>}
                             </TableCell>
                           ))}
                         </TableRow>
@@ -411,7 +412,7 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
                   </Table>
                 </div>
                 {sheetData.totalRows > previewRows && (
-                  <p className="text-xs text-foreground-muted mt-2 text-center">
+                  <p className="text-xs text-muted mt-2 text-center">
                     Showing {previewRows} of {sheetData.totalRows} total candidates
                   </p>
                 )}

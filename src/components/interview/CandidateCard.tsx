@@ -129,22 +129,22 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
     // Priority 1: Swipe decision colors override everything
     if (candidate.swipe_decision) {
       return candidate.swipe_decision.decision === 'shortlist'
-        ? 'border-2 border-green-500 bg-green-50/50 shadow-[0_4px_12px_rgba(34,197,94,0.15)]'
-        : 'border-2 border-red-500 bg-red-50/50 shadow-[0_4px_12px_rgba(239,68,68,0.15)]';
+        ? 'border-2 border-rule bg-success-soft/50 shadow-[0_4px_12px_rgba(34,197,94,0.15)]'
+        : 'border-2 border-rule bg-danger-soft/50 shadow-[0_4px_12px_rgba(239,68,68,0.15)]';
     }
 
     // Priority 2: Availability color coding
     const availability = candidate.availableIn?.toLowerCase() || '';
     if (availability.includes('immediate')) {
-      return 'border-[1.5px] border-blue-500/30 bg-blue-500/[0.05]';
+      return 'border-[1.5px] border-rule/30 bg-info/[0.05]';
     } else if (availability.includes('2 week') || availability.includes('< 2')) {
-      return 'border-[1.5px] border-purple-500/30 bg-purple-500/[0.05]';
+      return 'border-[1.5px] border-rule/30 bg-gold/[0.05]';
     } else if (availability.includes('month') || availability.includes('> 1')) {
-      return 'border-[1.5px] border-orange-500/30 bg-orange-500/[0.05]';
+      return 'border-[1.5px] border-rule/30 bg-orange/[0.05]';
     }
 
     // Default: Gray with hover effect
-    return 'border-[1.5px] border-gray-400/30 bg-gray-400/[0.05] hover:border-primary/30';
+    return 'border-[1.5px] border-rule-strong/30 bg-muted/[0.05] hover:border-primary/30';
   };
 
   const getExperienceBadge = () => {
@@ -191,10 +191,10 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
     }
 
     // Color coding based on years
-    if (expYears >= 10) return { number, suffix, color: 'bg-purple-500' };
-    if (expYears >= 5) return { number, suffix, color: 'bg-green-500' };
-    if (expYears >= 2) return { number, suffix, color: 'bg-yellow-500' };
-    return { number, suffix, color: 'bg-blue-500' };
+    if (expYears >= 10) return { number, suffix, color: 'bg-gold' };
+    if (expYears >= 5) return { number, suffix, color: 'bg-success' };
+    if (expYears >= 2) return { number, suffix, color: 'bg-warning' };
+    return { number, suffix, color: 'bg-info' };
   };
 
   const experienceBadge = getExperienceBadge();
@@ -204,7 +204,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
       className={`group shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 cursor-pointer relative overflow-hidden rounded-sm ${getCardStyle()}`}
       onClick={onClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-paper-2 from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <CardContent className="p-5 relative">
         {/* Header with Score Badge */}
@@ -222,7 +222,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
               </Avatar>
               {/* Experience Chip below Avatar */}
               {candidate.experience !== null && candidate.experience !== undefined && (
-                <div className={`${experienceBadge.color} text-white px-2 py-0.5 rounded inline-flex items-center gap-0.5 text-[10px] font-bold shadow-sm w-12 justify-center`}>
+                <div className={`${experienceBadge.color} text-paper px-2 py-0.5 rounded inline-flex items-center gap-0.5 text-[10px] font-bold shadow-1 w-12 justify-center`}>
                   <span className="text-sm leading-none">{experienceBadge.number}</span>
                   <span className="text-[7px] leading-none">{experienceBadge.suffix}</span>
                 </div>
@@ -255,7 +255,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
               </div>
               <div className="text-xs text-muted-foreground">Score</div>
               {blueprint?.role_fit_score !== null && blueprint?.role_fit_score !== undefined && (
-                <div className="text-xs font-semibold text-black mt-1">
+                <div className="text-xs font-semibold text-ink mt-1">
                   {Math.round(blueprint.role_fit_score)}% Match
                 </div>
               )}
@@ -268,15 +268,15 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
           {blueprint?.hireability_recommendation ? (
             <div
               className={`
-                w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest shadow-lg
+                w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest shadow-2
                 ${blueprint.hireability_recommendation === 'Strongly Recommend' || blueprint.hireability_recommendation === 'Strong Recommend'
-                  ? 'bg-green-600/10 text-green-700 border border-green-600/30'
+                  ? 'bg-success/10 text-success border border-rule/30'
                   : blueprint.hireability_recommendation === 'Recommend'
-                    ? 'bg-green-500/10 text-green-600 border border-green-500/30'
+                    ? 'bg-success/10 text-success border border-rule/30'
                     : blueprint.hireability_recommendation === 'Recommend with Reservations'
-                      ? 'bg-yellow-500/10 text-yellow-700 border border-yellow-500/30'
+                      ? 'bg-warning/10 text-warning border border-rule/30'
                       : blueprint.hireability_recommendation === 'Do Not Recommend'
-                        ? 'bg-red-500/10 text-red-600 border border-red-500/30'
+                        ? 'bg-danger/10 text-danger border border-rule/30'
                         : 'bg-muted/50 text-muted-foreground border border-border'
                 }
               `}
@@ -285,7 +285,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             </div>
           ) : (
             <>
-              <div className="w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest bg-muted/50 text-muted-foreground border border-border shadow-lg">
+              <div className="w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest bg-muted/50 text-muted-foreground border border-border shadow-2">
                 NOT INTERVIEWED
               </div>
             </>
@@ -310,11 +310,11 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className="flex-shrink-0 p-1.5 rounded bg-black hover:bg-slate-800 text-white transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                  className="flex-shrink-0 p-1.5 rounded bg-ink hover:bg-ink text-paper transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                   title={isRegistered ? 'Copy candidate portal URL' : 'Copy registration URL'}
                 >
                   {copied ? (
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-success" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
@@ -332,14 +332,14 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             let icon = <Mail className="h-3 w-3" />;
             let label = "Email pending";
             if (sent === true) {
-              chipClass = "border-emerald-200 bg-emerald-50 text-emerald-700";
+              chipClass = "border-rule bg-success-soft text-success";
               icon = <MailCheck className="h-3 w-3" />;
               const when = sentAt
                 ? new Date(sentAt).toLocaleDateString()
                 : "";
               label = when ? `Email sent · ${when}` : "Email sent";
             } else if (sent === false) {
-              chipClass = "border-red-200 bg-red-50 text-red-700";
+              chipClass = "border-rule bg-danger-soft text-danger";
               icon = <MailWarning className="h-3 w-3" />;
               label = "Email failed";
             }
@@ -356,7 +356,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                   <button
                     onClick={handleResend}
                     disabled={resending}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-white disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
                     title="Resend invitation email"
                   >
                     <RefreshCw
@@ -378,7 +378,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
               {/* Strengths Count */}
               {blueprint.key_strengths && blueprint.key_strengths.length > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-2xl font-bold text-black">
+                  <span className="text-2xl font-bold text-ink">
                     {blueprint.key_strengths.length}
                   </span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#16a34a" viewBox="0 0 256 256">
@@ -390,7 +390,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
               {/* Weaknesses Count */}
               {blueprint.key_weaknesses && blueprint.key_weaknesses.length > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-2xl font-bold text-black">
+                  <span className="text-2xl font-bold text-ink">
                     {blueprint.key_weaknesses.length}
                   </span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#dc2626" viewBox="0 0 256 256">
@@ -403,7 +403,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             {/* Right side: Standout Moments */}
             {blueprint.standout_moments && blueprint.standout_moments.length > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-bold text-black">
+                <span className="text-2xl font-bold text-ink">
                   {blueprint.standout_moments.length}
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#eab308" viewBox="0 0 256 256">
@@ -416,7 +416,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
 
         {/* Skill Graph (Preferred) or Radar Chart (Fallback) */}
         {blueprint?.graph_data ? (
-          <div className="mb-4 -mx-2 bg-white rounded-sm p-0 overflow-hidden flex justify-center">
+          <div className="mb-4 -mx-2 bg-paper rounded-sm p-0 overflow-hidden flex justify-center">
             {(() => {
               // Transform graph_data nodes to BlueprintSkill format
               const graphSkills = blueprint.graph_data.nodes
@@ -469,7 +469,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             })()}
           </div>
         ) : hasBlueprint ? (
-          <div className="mb-4 -mx-2 bg-white rounded-sm p-2">
+          <div className="mb-4 -mx-2 bg-paper rounded-sm p-2">
             <ResponsiveContainer width="100%" height={240}>
               <RadarChart data={radarData} margin={{ top: 25, right: 35, bottom: 25, left: 35 }}>
                 <PolarGrid stroke="hsl(var(--border))" />
@@ -549,8 +549,8 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             {/* Shortlist Icon */}
             <button
               className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${candidate.swipe_decision?.decision === 'shortlist'
-                ? 'text-green-500'
-                : 'text-slate-400 hover:text-green-500'
+                ? 'text-success'
+                : 'text-muted-2 hover:text-success'
                 }`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -565,7 +565,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
 
             {/* Details Button */}
             <Button
-              className="flex-1 bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold text-xs border-none"
+              className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold text-xs border-none"
               onClick={(e) => {
                 e.stopPropagation();
                 onClick?.();
@@ -577,8 +577,8 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             {/* Reject Icon */}
             <button
               className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${candidate.swipe_decision?.decision === 'reject'
-                ? 'text-red-500'
-                : 'text-slate-400 hover:text-red-500'
+                ? 'text-danger'
+                : 'text-muted-2 hover:text-danger'
                 }`}
               onClick={(e) => {
                 e.stopPropagation();

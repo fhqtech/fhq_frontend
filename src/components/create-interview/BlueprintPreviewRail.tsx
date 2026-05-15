@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { previewBlueprint, type BlueprintPreview, type PreviewSkill } from "@/services/blueprintPreviewApi";
+import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
+import { tagFromPreview } from "@/components/tag/adapters";
 
 interface BlueprintPreviewRailProps {
   title: string;
@@ -69,13 +71,13 @@ export function BlueprintPreviewRail({ title, type, description }: BlueprintPrev
 
   return (
     <div
-      className="rounded-sm bg-white p-5 sticky top-6"
-      style={{ boxShadow: "inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5" }}
+      className="rounded-sm bg-paper p-5 sticky top-6"
+      style={{ boxShadow: 'var(--shadow-clay)' }}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-blue-600" />
-          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-700">
+          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-soft">
             Blueprint Preview
           </h4>
         </div>
@@ -113,27 +115,17 @@ export function BlueprintPreviewRail({ title, type, description }: BlueprintPrev
           <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider">
             {preview.skills.length} skills the interview will assess
           </p>
-          <div className="flex flex-wrap gap-2">
-            {preview.skills.map((s, i) => {
-              const style = TYPE_STYLES[s.skill_type] ?? TYPE_STYLES.technical;
-              return (
-                <span
-                  key={`${s.shortName}-${i}`}
-                  className={`inline-flex items-center gap-1.5 text-[11px] font-mono font-bold px-2 py-1 rounded border ${style.bg} ${style.border} ${style.text}`}
-                  title={s.name}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                  {s.shortName}
-                </span>
-              );
-            })}
+
+          {/* Radial TAG preview — same component used on the result page,
+              fed by tagFromPreview() with no scores / no annotations. */}
+          <div className="-mx-2 mb-3">
+            <TalentAnalysisGraph
+              data={tagFromPreview(title, preview.skills)}
+              mode="blueprint"
+            />
           </div>
-          <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-100 text-[10px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Technical</span>
-            <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Behavioral</span>
-            <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Cultural</span>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-3 italic">
+
+          <p className="text-[10px] text-muted-foreground italic">
             Preview only. Full blueprint is generated when you launch the interview.
           </p>
         </>

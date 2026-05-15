@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Mail } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorBanner } from '@/components/ui/error-banner';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCandidateAuth } from '@/contexts/CandidateAuthContext';
 
@@ -41,9 +44,9 @@ function StatusBadge({ status }: { status?: string }) {
   const group = groupOf(status);
   const cls =
     group === 'completed'
-      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      ? 'bg-success-soft text-success border-rule'
       : group === 'closed'
-      ? 'bg-gray-100 text-gray-600 border-gray-200'
+      ? 'bg-paper-3 text-muted border-rule'
       : 'bg-accent/10 text-primary border-accent/30';
   return (
     <span
@@ -74,10 +77,10 @@ function InvitationCard({ inv }: { inv: Invitation }) {
   const duration = inv.interview_duration != null ? `${inv.interview_duration} min` : null;
 
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm p-5 flex flex-col gap-3 hover:border-accent transition-colors">
+    <div className="bg-paper rounded-xl border border-border shadow-1 p-5 flex flex-col gap-3 hover:border-accent transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-foreground-muted font-semibold">
+          <p className="text-[10px] uppercase tracking-widest text-muted font-semibold">
             {inv.interview_type === 'fitment' ? 'Fitment interview' : 'Screening interview'}
           </p>
           <h3 className="text-lg font-semibold text-foreground leading-tight mt-1">
@@ -88,10 +91,10 @@ function InvitationCard({ inv }: { inv: Invitation }) {
       </div>
 
       {inv.interview_description && (
-        <p className="text-sm text-foreground-muted line-clamp-3">{inv.interview_description}</p>
+        <p className="text-sm text-muted line-clamp-3">{inv.interview_description}</p>
       )}
 
-      <div className="flex items-center gap-3 text-xs text-foreground-muted">
+      <div className="flex items-center gap-3 text-xs text-muted">
         {duration && <span>{duration}</span>}
         {inv.completed_at && (
           <span>Completed {new Date(inv.completed_at).toLocaleDateString()}</span>
@@ -100,7 +103,7 @@ function InvitationCard({ inv }: { inv: Invitation }) {
 
       <button
         onClick={onClick}
-        className="mt-auto h-9 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-md"
+        className="mt-auto h-9 bg-primary hover:bg-primary/90 text-paper text-sm font-medium rounded-md"
       >
         {cta}
       </button>
@@ -141,26 +144,26 @@ export default function CandidateDashboard() {
   const closed = (invitations || []).filter((i) => groupOf(i.status) === 'closed');
 
   return (
-    <div className="min-h-screen bg-funnel-cream">
+    <div className="min-h-[100dvh] bg-paper-2">
       {/* Header */}
-      <header className="bg-white border-b border-border">
+      <header className="bg-paper border-b border-border">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-primary tracking-tight">FunnelHQ</h1>
-            <span className="text-xs uppercase tracking-wider text-foreground-muted">
-              Candidate Portal
+            <span className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+              Applicant Portal
             </span>
           </div>
           <div className="flex items-center gap-4">
             <Link
               to="/candidate/profile"
-              className="text-sm text-foreground-muted hover:text-primary"
+              className="text-sm text-muted hover:text-primary"
             >
               Profile
             </Link>
             <Link
               to="/candidate/settings"
-              className="text-sm text-foreground-muted hover:text-primary"
+              className="text-sm text-muted hover:text-primary"
             >
               Settings
             </Link>
@@ -174,7 +177,7 @@ export default function CandidateDashboard() {
               />
               <button
                 onClick={logout}
-                className="text-xs text-foreground-muted hover:text-red-600 underline"
+                className="text-xs text-muted hover:text-danger underline"
               >
                 Sign out
               </button>
@@ -189,28 +192,30 @@ export default function CandidateDashboard() {
           <h2 className="text-2xl font-semibold text-foreground">
             Welcome back, {account?.name || account?.email}
           </h2>
-          <p className="text-sm text-foreground-muted mt-1">
-            Your interviews and results across every FunnelHQ recruiter.
+          <p className="text-sm text-muted mt-1">
+            Your assessments and TAG reports across every FunnelHQ workspace.
           </p>
         </div>
 
         {loading && (
-          <div className="text-foreground-muted text-sm">Loading your invitations…</div>
+          <div className="text-muted text-sm">Loading your invitations…</div>
         )}
 
         {error && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 mb-6">
-            {error}
-          </div>
+          <ErrorBanner
+            tone="danger"
+            title="Couldn't load your invitations"
+            description={error}
+            className="mb-6"
+          />
         )}
 
         {!loading && !error && invitations && invitations.length === 0 && (
-          <div className="bg-white border border-border rounded-xl p-8 text-center">
-            <h3 className="text-lg font-semibold text-foreground">No invitations yet</h3>
-            <p className="text-sm text-foreground-muted mt-2">
-              When a recruiter invites you to an interview, it will show up here.
-            </p>
-          </div>
+          <EmptyState
+            icon={Mail}
+            title="No invitations yet"
+            description="When a workspace invites you to an assessment, it'll show up here."
+          />
         )}
 
         {!loading && !error && invitations && invitations.length > 0 && (
@@ -256,7 +261,7 @@ function Section({
     <section>
       <div className="flex items-baseline gap-3 mb-4">
         <h3 className="text-sm uppercase tracking-widest font-semibold text-foreground">{title}</h3>
-        <span className="text-xs text-foreground-muted">{count}</span>
+        <span className="text-xs text-muted">{count}</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{children}</div>
     </section>

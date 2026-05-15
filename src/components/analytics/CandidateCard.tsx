@@ -118,7 +118,7 @@ export function CandidateCard({ candidate, onViewDetails, onToggleStar, onAddToL
 
   return (
     <Card
-      className={`p-4 hover:shadow-xl transition-all duration-300 cursor-pointer group border-border/50 bg-card/50 backdrop-blur-sm relative ${
+      className={`p-4 hover:shadow-2 transition-all duration-300 cursor-pointer group border-border/50 bg-card/50 backdrop-blur-sm relative ${
         isMultiSelectMode && isSelected ? 'border-primary border-2 bg-primary/5' : ''
       }`}
       onClick={handleCardClick}
@@ -183,7 +183,7 @@ export function CandidateCard({ candidate, onViewDetails, onToggleStar, onAddToL
       </div>
 
       {/* Performance Score - Hero Element */}
-      <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10">
+      <div className="mb-4 p-3 rounded-xl bg-paper-2 from-primary/5 to-accent/5 border border-primary/10">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground mb-1">Overall Score</p>

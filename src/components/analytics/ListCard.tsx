@@ -41,17 +41,13 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
   const [selectedProjects, setSelectedProjects] = useState<string[]>(sharedProjects.map(p => p.id));
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Generate different colors for each list
-  const colors = [
-    '#10b981', // emerald
-    '#f59e0b', // amber
-    '#8b5cf6', // violet
-    '#ec4899', // pink
-    '#06b6d4', // cyan
-    '#f97316', // orange
-    '#6366f1'  // indigo
-  ];
-  const listColor = list.color || colors[Math.abs(list.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % colors.length];
+  // Deterministic color rotation for ListCard accent. Pulls from the
+  // shared --chart-{1..7} tokens defined in index.css so the chart
+  // palette stays inside the FunnelHQ finance-trust scheme (no purple /
+  // violet / cyan / indigo). Default falls back to gold (--chart-2).
+  const chartTokens = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5', '--chart-6', '--chart-7'];
+  const tokenIndex = Math.abs(list.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % chartTokens.length;
+  const listColor = list.color || `hsl(var(${chartTokens[tokenIndex]}))`;
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -164,9 +160,9 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
         <div className="flip-card-front">
           <Card
             ref={cardRef}
-            className={`p-5 h-full transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group relative overflow-hidden border ${
+            className={`p-5 h-full transition-all duration-300 shadow-1 hover:shadow-2 cursor-pointer group relative overflow-hidden border ${
               list.isQualified
-                ? 'border-amber-200/60 bg-gradient-to-br from-amber-50/40 via-yellow-50/20 to-orange-50/30'
+                ? 'border-amber-200/60 bg-paper-2 from-amber-50/40 via-yellow-50/20 to-orange-50/30'
                 : 'border-border hover:border-primary/20'
             }`}
             onClick={!isFlipped ? onClick : undefined}
@@ -175,7 +171,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
             {/* Curated Corner Ribbon */}
             {list.isQualified && (
               <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
-                <div className="absolute top-0 right-0 w-28 h-6 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 text-[10px] font-bold flex items-center justify-center shadow-lg transform rotate-45 translate-x-6 translate-y-2">
+                <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-amber-900 text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
                   Curated
                 </div>
               </div>
@@ -184,8 +180,8 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
             {/* Gradient overlay */}
             <div className={`absolute inset-0 transition-opacity duration-300 ${
               list.isQualified
-                ? 'bg-gradient-to-br from-amber-100/30 via-yellow-100/20 to-orange-100/30 opacity-0 group-hover:opacity-100'
-                : 'bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100'
+                ? 'bg-paper-2 from-amber-100/30 via-yellow-100/20 to-orange-100/30 opacity-0 group-hover:opacity-100'
+                : 'bg-paper-2 from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100'
             }`} />
 
             <div className="relative z-10 h-full flex flex-col">
@@ -194,7 +190,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center gap-2 mb-1 min-w-0">
                     <div
-                      className="w-4 h-4 rounded-full shadow-lg flex-shrink-0"
+                      className="w-4 h-4 rounded-full shadow-2 flex-shrink-0"
                       style={{ backgroundColor: listColor }}
                     />
                     <h3
@@ -273,7 +269,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                     {showSharePopover && (
                       <div
                         ref={sharePopoverRef}
-                        className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg p-3 z-50 min-w-[250px]"
+                        className="absolute top-full left-0 mt-1 bg-paper rounded-lg shadow-2 p-3 z-50 min-w-[250px]"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="mb-3">
@@ -326,7 +322,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                           <Button
                             size="sm"
                             onClick={handleShareSave}
-                            className="bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold text-[10px] h-7"
+                            className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold text-[10px] h-7"
                           >
                             <Check className="h-3 w-3 mr-1" />
                             Save
@@ -343,14 +339,14 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
 
               {/* AI Insights Badge */}
               {list.isEnhancementLoading ? (
-                <div className="mb-4 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20 animate-pulse">
+                <div className="mb-4 p-3 bg-paper-2 from-primary/10 to-accent/10 rounded-lg border border-primary/20 animate-pulse">
                   <div className="flex items-start gap-2">
                     <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5 animate-spin" />
                     <div className="h-4 bg-primary/20 rounded w-3/4"></div>
                   </div>
                 </div>
               ) : list.aiInsights?.summary ? (
-                <div className="mb-4 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
+                <div className="mb-4 p-3 bg-paper-2 from-primary/10 to-accent/10 rounded-lg border border-primary/20">
                   <div className="flex items-start gap-2">
                     <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-foreground/80 italic line-clamp-2">
@@ -411,7 +407,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                     {list.candidates && list.candidates.slice(0, 5).map((candidate, idx) => (
                       <Avatar key={candidate.id} className="h-10 w-10 border-2 border-background ring-1 ring-border relative z-10">
                         <AvatarImage src={candidate.profilePicture} />
-                        <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-accent/20">
+                        <AvatarFallback className="text-xs bg-paper-2 from-primary/20 to-accent/20">
                           {candidate.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
@@ -437,7 +433,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
               </div>
 
               {/* Date Footer */}
-              <div className="mt-auto pt-3 flex items-center justify-end text-[7px] text-black uppercase tracking-wider">
+              <div className="mt-auto pt-3 flex items-center justify-end text-[7px] text-ink uppercase tracking-wider">
                 <span>
                   Last Updated: {new Date(list.updatedAt).toLocaleDateString('en-GB')} {new Date(list.updatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                 </span>
@@ -448,7 +444,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
 
         {/* BACK SIDE - Sources */}
         <div className="flip-card-back">
-          <Card className="p-5 shadow-sm border relative h-full" onClick={(e) => e.stopPropagation()}>
+          <Card className="p-5 shadow-1 border relative h-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-col" style={{ height: '100%', maxHeight: '400px' }}>
               {/* Header */}
               <div className="flex items-center justify-between mb-4 flex-shrink-0">
@@ -478,7 +474,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                       <div className="flex items-center gap-2">
                         {/* Google Sheets Logo - show for both google_sheets and google_sheet */}
                         {(source.type === 'google_sheets' || source.type === 'google_sheet') && (
-                          <div className="flex-shrink-0 w-6 h-6 bg-white border border-gray-200 rounded-sm flex items-center justify-center p-1">
+                          <div className="flex-shrink-0 w-6 h-6 bg-paper border border-rule rounded-sm flex items-center justify-center p-1">
                             <img src={googleLogo} alt="Google Sheets" className="w-full h-full object-contain" />
                           </div>
                         )}

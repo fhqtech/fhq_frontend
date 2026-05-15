@@ -698,18 +698,18 @@ export const InterviewSession = ({
   // previously logged to the console only — invisible to the candidate.
   if (!WEBSOCKET_URL || !BACKEND_URL) {
     return (
-      <div className="min-h-screen w-screen bg-slate-900 text-slate-100 flex items-center justify-center p-8">
+      <div className="min-h-[100dvh] w-screen bg-ink text-paper flex items-center justify-center p-8">
         <div className="max-w-md text-center space-y-6">
-          <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-            <WifiOff className="w-8 h-8 text-amber-400" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center">
+            <WifiOff className="w-8 h-8 text-gold-ink" />
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Interview setup error</h1>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-muted-2">
               We can't reach the interview servers right now. This is on us, not you.
               Please contact your recruiter or try again in a few minutes.
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted">
               Reference: {sessionId.slice(-8)}
             </p>
           </div>
@@ -719,7 +719,7 @@ export const InterviewSession = ({
   }
 
   return (
-    <div className="relative w-screen h-screen bg-black overflow-hidden">
+    <div className="relative w-screen h-[100dvh] bg-ink overflow-hidden">
       {/* 3D Particle Sphere - Full Screen Canvas */}
       <ParticleSphere
         conversationState={conversationState}
@@ -729,19 +729,19 @@ export const InterviewSession = ({
 
       {/* Logo - Top Left */}
       <div className="absolute top-6 left-6 z-10">
-        <h1 className="text-xl font-bold text-white whitespace-nowrap">FLOWDOT AI</h1>
-        <p className="text-xs text-slate-400 whitespace-nowrap">Candidate Portal</p>
+        <h1 className="text-xl font-bold text-paper whitespace-nowrap">FunnelHQ</h1>
+        <p className="text-xs text-muted-2 whitespace-nowrap">Applicant Portal</p>
       </div>
 
       {/* Interview Title & Connection Status - Center Top */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10">
-        <h2 className="text-slate-300 text-sm font-normal uppercase tracking-wider mb-2">{interviewConfig.title}</h2>
+        <h2 className="text-muted-2 text-sm font-normal uppercase tracking-wider mb-2">{interviewConfig.title}</h2>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-red-500">
+          <div className="flex items-center gap-1.5 text-danger">
             <Clock className="w-4 h-4" />
             <span className="text-sm font-medium">{formatTime(elapsedTime)}</span>
           </div>
-          <div className={`flex items-center gap-1.5 ${connectionStatus === 'connected' ? 'text-green-500' : connectionStatus === 'error' ? 'text-red-500' : 'text-amber-500'}`}>
+          <div className={`flex items-center gap-1.5 ${connectionStatus === 'connected' ? 'text-success' : connectionStatus === 'error' ? 'text-danger' : 'text-gold-ink'}`}>
             {connectionStatus === 'connected' ? (
               <Wifi className="w-4 h-4" />
             ) : connectionStatus === 'error' ? (
@@ -757,8 +757,9 @@ export const InterviewSession = ({
           {connectionStatus === 'error' && (
             <button
               onClick={handleReconnect}
-              className="flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors"
+              aria-label="Reconnect"
               title="Reconnect"
+              className="flex items-center gap-1 text-danger hover:text-danger transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -769,7 +770,7 @@ export const InterviewSession = ({
       {/* P1 R6/R7: stream warning banner (TTS down / STT reconnecting) */}
       {streamWarning && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-20 max-w-md">
-          <div className="bg-amber-500/20 border border-amber-500/50 text-amber-200 px-4 py-2 rounded text-xs flex items-center gap-2 shadow-lg">
+          <div className="bg-gold/20 border border-rule/50 text-gold px-4 py-2 rounded text-xs flex items-center gap-2 shadow-2">
             <RefreshCw className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
             <span>{streamWarning}</span>
           </div>
@@ -816,12 +817,12 @@ export const InterviewSession = ({
             }
             disabled={conversationState !== ConversationState.LISTENING}
             rows={1}
-            className="flex-1 resize-none bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 disabled:opacity-50 focus:outline-none focus:border-accent"
+            className="flex-1 resize-none bg-ink/80 border border-ink rounded-lg px-3 py-2 text-sm text-paper placeholder-muted-2 disabled:opacity-50 focus:outline-none focus:border-accent"
           />
           <button
             type="submit"
             disabled={!typedInput.trim() || conversationState !== ConversationState.LISTENING}
-            className="h-10 px-4 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-colors"
+            className="h-10 px-4 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-paper text-sm font-medium transition-colors"
           >
             Send
           </button>
@@ -834,10 +835,10 @@ export const InterviewSession = ({
         <button
           onClick={handleMicToggle}
           className={`relative flex items-center justify-center h-12 w-12 rounded-full border-2 transition-all ${
-            isMicOn ? 'border-accent bg-accent/10' : 'border-gray-600 bg-gray-500/10'
+            isMicOn ? 'border-accent bg-accent/10' : 'border-rule-strong bg-muted/10'
           }`}
         >
-          {isMicOn ? <Mic size={20} className="text-accent" /> : <MicOff size={20} className="text-gray-400" />}
+          {isMicOn ? <Mic size={20} className="text-accent" /> : <MicOff size={20} className="text-muted-2" />}
         </button>
 
         {/* Device Selector */}
@@ -845,31 +846,33 @@ export const InterviewSession = ({
           <select
             value={selectedAudioDevice}
             onChange={(e) => setSelectedAudioDevice(e.target.value)}
-            className="appearance-none flex items-center gap-2 h-10 px-3 pr-8 border border-slate-600 rounded-md bg-transparent text-slate-300 text-xs cursor-pointer focus:outline-none focus:border-accent"
+            className="appearance-none flex items-center gap-2 h-10 px-3 pr-8 border border-rule-strong rounded-md bg-transparent text-muted-2 text-xs cursor-pointer focus:outline-none focus:border-accent"
           >
             {audioDevices.map((device) => (
-              <option key={device.deviceId} value={device.deviceId} className="bg-slate-800">
+              <option key={device.deviceId} value={device.deviceId} className="bg-ink">
                 {device.label || `Microphone ${audioDevices.indexOf(device) + 1}`}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-2 pointer-events-none" />
         </div>
 
         {/* Calibration Button */}
         <button
           onClick={handleManualCalibration}
-          className="h-10 w-10 flex items-center justify-center border border-slate-600 rounded-md hover:bg-slate-800 transition-colors"
+          aria-label="Calibrate microphone"
+          title="Calibrate microphone"
+          className="h-10 w-10 flex items-center justify-center border border-rule-strong rounded-md hover:bg-ink transition-colors"
         >
-          <Settings className="w-4 h-4 text-slate-400" />
+          <Settings className="w-4 h-4 text-muted-2" />
         </button>
 
         {/* Speech Rate Control - 3 Radio Buttons */}
-        <div className="flex items-center gap-0.5 bg-slate-800 rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 bg-ink rounded-md p-0.5">
           <button
             onClick={() => setSpeechRate('slow')}
             className={`px-3 py-1.5 rounded text-xs transition-colors ${
-              speechRate === 'slow' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-700'
+              speechRate === 'slow' ? 'bg-primary text-paper' : 'text-muted-2 hover:bg-ink'
             }`}
           >
             Slow
@@ -877,7 +880,7 @@ export const InterviewSession = ({
           <button
             onClick={() => setSpeechRate('normal')}
             className={`px-3 py-1.5 rounded text-xs transition-colors ${
-              speechRate === 'normal' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-700'
+              speechRate === 'normal' ? 'bg-primary text-paper' : 'text-muted-2 hover:bg-ink'
             }`}
           >
             Normal
@@ -885,7 +888,7 @@ export const InterviewSession = ({
           <button
             onClick={() => setSpeechRate('fast')}
             className={`px-3 py-1.5 rounded text-xs transition-colors ${
-              speechRate === 'fast' ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-700'
+              speechRate === 'fast' ? 'bg-primary text-paper' : 'text-muted-2 hover:bg-ink'
             }`}
           >
             Fast
@@ -896,12 +899,12 @@ export const InterviewSession = ({
         <button
           onClick={handleEndInterview}
           disabled={isEndingInterview}
-          className="h-12 w-12 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="h-12 w-12 flex items-center justify-center bg-danger hover:bg-danger rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isEndingInterview ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <PhoneDisconnectIcon size={20} className="text-white" />
+            <PhoneDisconnectIcon size={20} className="text-paper" />
           )}
         </button>
       </div>
@@ -959,8 +962,8 @@ export const InterviewSession = ({
               </svg>
 
               {/* Center button */}
-              <div className="relative z-10 w-24 h-24 rounded-full bg-slate-800 border border-slate-600 shadow-xl flex items-center justify-center group-hover:bg-slate-700 transition-colors">
-                <span className="text-xs font-normal text-slate-300 uppercase tracking-wider">I'm here</span>
+              <div className="relative z-10 w-24 h-24 rounded-full bg-ink border border-rule-strong shadow-2 flex items-center justify-center group-hover:bg-ink transition-colors">
+                <span className="text-xs font-normal text-muted-2 uppercase tracking-wider">I'm here</span>
               </div>
             </button>
           </motion.div>

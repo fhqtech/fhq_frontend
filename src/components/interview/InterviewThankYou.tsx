@@ -97,12 +97,12 @@ export const InterviewThankYou = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#EEEEEE] relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-[#EEEEEE] relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-200/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/20 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-success/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-info/30 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-success-soft/20 rounded-full blur-3xl" />
       </div>
 
       {/* Confetti animation */}
@@ -120,7 +120,7 @@ export const InterviewThankYou = ({
             >
               <div
                 className={`w-3 h-3 ${
-                  ['bg-green-400', 'bg-blue-400', 'bg-yellow-400', 'bg-pink-400', 'bg-purple-400'][
+                  ['bg-success', 'bg-info', 'bg-warning', 'bg-gold', 'bg-gold'][
                     Math.floor(Math.random() * 5)
                   ]
                 } ${Math.random() > 0.5 ? 'rounded-full' : 'rounded-sm rotate-45'}`}
@@ -130,18 +130,18 @@ export const InterviewThankYou = ({
         </div>
       )}
 
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
+      <div className="relative z-10 flex items-center justify-center min-h-[100dvh] p-6">
         <div className={`w-full max-w-lg transition-all duration-700 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0 overflow-hidden">
+          <Card className="bg-paper/80 backdrop-blur-sm shadow-2 border-0 overflow-hidden">
             <CardContent className="p-0">
               {/* Header with role title + badge on same line, Lottie on left */}
               <div className="px-6 py-6">
                 {/* Role title and type badge on same line */}
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
+                  <h2 className="text-sm font-bold text-ink-soft uppercase tracking-wider">
                     {interviewData.title}
                   </h2>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-soft text-info">
                     {getInterviewTypeLabel(interviewData.type)}
                   </span>
                 </div>
@@ -151,15 +151,15 @@ export const InterviewThankYou = ({
                     <LottieSuccessAnimation />
                   </div>
                   <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-[#222831] mb-1">
+                    <h1 className="text-2xl font-bold text-[hsl(var(--ink))] mb-1">
                       Great job, {firstName}!
                     </h1>
-                    <p className="text-gray-500 text-sm mb-3">
+                    <p className="text-muted text-sm mb-3">
                       Your interview has been successfully completed
                     </p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-muted">
                       <span><span className="font-semibold">{formatTime(sessionData.duration)}</span> duration</span>
-                      <span className="text-gray-300">•</span>
+                      <span className="text-muted-2">•</span>
                       <span>{getCompletedDate()}</span>
                     </div>
                   </div>
@@ -167,48 +167,48 @@ export const InterviewThankYou = ({
               </div>
 
               {/* What's Next Section */}
-              <div className="px-8 py-6 bg-gradient-to-b from-gray-50 to-white">
-                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">What happens next?</h3>
+              <div className="px-8 py-6 bg-paper-2 from-gray-50 ">
+                <h3 className="text-sm font-bold text-ink-soft uppercase tracking-wide mb-4">What happens next?</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-green-700">1</span>
+                    <div className="w-6 h-6 bg-success-soft rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-success">1</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-800">Confirmation sent</p>
-                      <p className="text-xs text-gray-500">Check your email at {candidateData.email}</p>
+                      <p className="text-sm font-medium text-ink">Confirmation sent</p>
+                      <p className="text-xs text-muted">Check your email at {candidateData.email}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-blue-700">2</span>
+                    <div className="w-6 h-6 bg-info-soft rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-info">2</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-800">Review in progress</p>
-                      <p className="text-xs text-gray-500">Our team will evaluate your responses</p>
+                      <p className="text-sm font-medium text-ink">Review in progress</p>
+                      <p className="text-xs text-muted">Our team will evaluate your responses</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-purple-700">3</span>
+                    <div className="w-6 h-6 bg-gold-soft rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-gold-ink">3</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-800">We'll be in touch</p>
-                      <p className="text-xs text-gray-500">Expect updates within 3-5 business days</p>
+                      <p className="text-sm font-medium text-ink">We'll be in touch</p>
+                      <p className="text-xs text-muted">Expect updates within 3-5 business days</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="px-8 py-5 bg-gray-50 border-t border-gray-100">
+              <div className="px-8 py-5 bg-paper-2 border-t border-rule">
                 <Button
                   onClick={onReturnToPortal}
-                  className="w-full bg-[#222831] hover:bg-[#393E46] text-white py-6 rounded-xl font-medium transition-all hover:shadow-lg"
+                  className="w-full bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper py-6 rounded-xl font-medium transition-all hover:shadow-2"
                 >
                   Close Window
                 </Button>
-                <p className="text-center text-xs text-gray-400 mt-3">
+                <p className="text-center text-xs text-muted-2 mt-3">
                   Reference: {sessionData.sessionId.slice(0, 12).toUpperCase()}
                 </p>
               </div>
@@ -216,7 +216,7 @@ export const InterviewThankYou = ({
           </Card>
 
           {/* Powered by */}
-          <p className="text-center text-xs text-gray-400 mt-6">
+          <p className="text-center text-xs text-muted-2 mt-6">
             Powered by <span className="font-semibold">FunnelHQ</span>
           </p>
         </div>

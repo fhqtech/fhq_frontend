@@ -33,10 +33,10 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="min-h-[100dvh] flex items-center justify-center bg-background px-6">
           <div className="max-w-md w-full text-center space-y-4">
             <h1 className="text-2xl font-semibold text-foreground">Something went wrong</h1>
-            <p className="text-sm text-foreground-muted">
+            <p className="text-sm text-muted">
               We hit an unexpected error. Reload the page, and if the problem keeps happening please contact support.
             </p>
             {import.meta.env.DEV && (

@@ -31,7 +31,7 @@ export const AiInterviewer = ({ isListening, isSpeaking }: AiInterviewerProps) =
       <AnimatePresence>
         {isListening && !isSpeaking && ( // Only show if not also speaking
           <motion.div
-            className="absolute inset-0 rounded-full border-2 border-blue-400"
+            className="absolute inset-0 rounded-full border-2 border-rule"
             initial={{ scale: 1, opacity: 0.5 }}
             animate={{ scale: 1.15, opacity: 1 }}
             exit={{ scale: 1, opacity: 0.5 }}
@@ -47,7 +47,7 @@ export const AiInterviewer = ({ isListening, isSpeaking }: AiInterviewerProps) =
       </AnimatePresence>
 
       {/* The central avatar image */}
-      <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-lg border-4 border-white dark:border-slate-800">
+      <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-2 border-4 border-white ">
         <img src={aiAvatar} alt="AI Interviewer" className="w-full h-full object-cover" />
       </div>
     </div>

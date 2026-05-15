@@ -192,28 +192,29 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
       >
         {/* Backdrop */}
         <motion.div
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          className="absolute inset-0 bg-ink/50 backdrop-blur-sm"
           onClick={step === 'results' ? onCancel : undefined}
         />
 
         {/* Modal */}
         <motion.div
-          className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
+          className="relative bg-paper rounded-xl shadow-3 max-w-lg w-full mx-4 overflow-hidden"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
           {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-rule">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 uppercase tracking-wider">
+              <h2 className="text-lg font-semibold text-ink uppercase tracking-wider">
                 {step === 'analyzing' ? 'Analyzing Candidate Lists' : 'Duplicate Analysis Results'}
               </h2>
               {step === 'results' && (
                 <button
                   onClick={onCancel}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close dialog"
+                  className="text-muted-2 hover:text-muted transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -228,14 +229,14 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                 {/* Progress Bar */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600 uppercase tracking-wider">
+                    <span className="text-muted uppercase tracking-wider">
                       Step {currentStage + 1} of {analysisStages.length}
                     </span>
-                    <span className="text-gray-600 font-medium">{Math.round(progress)}%</span>
+                    <span className="text-muted font-medium">{Math.round(progress)}%</span>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-paper-3 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+                      className="h-full bg-paper-2  "
                       style={{ width: `${progress}%` }}
                       transition={{ duration: 0.1 }}
                     />
@@ -258,17 +259,17 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                         <ArrowsClockwise className="w-8 h-8 text-blue-500" />
                       </motion.div>
                     </div>
-                    <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wider">
+                    <h3 className="text-base font-semibold text-ink uppercase tracking-wider">
                       {analysisStages[currentStage]?.title}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted">
                       {analysisStages[currentStage]?.description}
                     </p>
                   </motion.div>
 
                   {/* Lists being analyzed */}
                   <div className="space-y-2">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Analyzing {selectedListIds.length} lists:</p>
+                    <p className="text-xs text-muted uppercase tracking-wider">Analyzing {selectedListIds.length} lists:</p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       {selectedListIds.map((listId) => {
                         const list = availableLists.find(l => l.id === listId);
@@ -322,10 +323,10 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                     </motion.div>
 
                     <div>
-                      <h3 className="text-base font-semibold text-gray-900 mb-2 uppercase tracking-wider">
+                      <h3 className="text-base font-semibold text-ink mb-2 uppercase tracking-wider">
                         Great! No Duplicates Detected
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted">
                         All {analysisResult.uniqueCandidates} candidates have unique email addresses.
                       </p>
                     </div>
@@ -351,22 +352,22 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                           </div>
                         </div>
 
-                        <h3 className="text-base font-semibold text-gray-900 mb-2 uppercase tracking-wider">
+                        <h3 className="text-base font-semibold text-ink mb-2 uppercase tracking-wider">
                           Duplicate Email Addresses Detected
                         </h3>
 
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-paper-2 rounded-lg">
                           <div className="text-center">
-                            <div className="text-4xl font-bold text-gray-900">{analysisResult.totalCandidates}</div>
-                            <div className="text-[10px] text-gray-600 uppercase tracking-wider">Total Candidates</div>
+                            <div className="text-4xl font-bold text-ink">{analysisResult.totalCandidates}</div>
+                            <div className="text-[10px] text-muted uppercase tracking-wider">Total Candidates</div>
                           </div>
                           <div className="text-center">
                             <div className="text-4xl font-bold text-amber-600">{analysisResult.totalDuplicates}</div>
-                            <div className="text-[10px] text-gray-600 uppercase tracking-wider">Duplicates</div>
+                            <div className="text-[10px] text-muted uppercase tracking-wider">Duplicates</div>
                           </div>
                           <div className="text-center">
                             <div className="text-4xl font-bold text-green-600">{analysisResult.uniqueCandidates}</div>
-                            <div className="text-[10px] text-gray-600 uppercase tracking-wider">Unique Candidates</div>
+                            <div className="text-[10px] text-muted uppercase tracking-wider">Unique Candidates</div>
                           </div>
                         </div>
                       </div>
@@ -380,10 +381,10 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
 
                       {analysisResult.recommendations.length > 0 && (
                         <div className="space-y-2">
-                          <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wider">Recommendations:</h4>
+                          <h4 className="text-xs font-semibold text-ink uppercase tracking-wider">Recommendations:</h4>
                           <ul className="space-y-1">
                             {analysisResult.recommendations.slice(0, 3).map((recommendation, index) => (
-                              <li key={index} className="text-xs text-gray-600 flex items-start gap-2">
+                              <li key={index} className="text-xs text-muted flex items-start gap-2">
                                 <span className="text-amber-500 mt-0.5">•</span>
                                 {recommendation}
                               </li>
@@ -407,16 +408,16 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="mt-2 p-3 bg-gray-50 rounded-lg text-xs space-y-2 max-h-32 overflow-y-auto"
+                                className="mt-2 p-3 bg-paper-2 rounded-lg text-xs space-y-2 max-h-32 overflow-y-auto"
                               >
                                 {analysisResult.duplicateGroups.slice(0, 5).map((group, index) => (
                                   <div key={index} className="flex justify-between">
-                                    <span className="text-gray-600">{group.duplicateKey}</span>
+                                    <span className="text-muted">{group.duplicateKey}</span>
                                     <span className="text-amber-600">{group.count} times</span>
                                   </div>
                                 ))}
                                 {analysisResult.duplicateGroups.length > 5 && (
-                                  <p className="text-gray-500 text-center">
+                                  <p className="text-muted text-center">
                                     ... and {analysisResult.duplicateGroups.length - 5} more
                                   </p>
                                 )}
@@ -434,7 +435,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
 
           {/* Footer */}
           {step === 'results' && analysisResult && analysisResult.totalDuplicates > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="px-6 py-4 border-t border-rule bg-paper-2">
               <div className="flex justify-end gap-3">
                 <Button
                   variant="outline"
@@ -445,13 +446,13 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                 </Button>
                 <Button
                   onClick={onContinue}
-                  className="uppercase rounded-sm text-white font-medium transition-all duration-200"
+                  className="uppercase rounded-sm text-paper font-medium transition-all duration-200"
                   style={{
-                    backgroundColor: '#222831',
-                    boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                    backgroundColor: 'hsl(var(--ink))',
+                    boxShadow: 'var(--shadow-clay)'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
                 >
                   Continue Anyway
                 </Button>

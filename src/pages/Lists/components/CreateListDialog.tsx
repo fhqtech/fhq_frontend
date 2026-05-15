@@ -249,7 +249,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
       <Dialog open={open && !progressModalOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm">
           <DialogHeader>
-            <DialogTitle className="uppercase tracking-wider text-black">
+            <DialogTitle className="uppercase tracking-wider text-ink">
               Create New Candidate Pool
             </DialogTitle>
             <DialogDescription className="uppercase text-xs tracking-wider">
@@ -269,7 +269,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="mt-2 rounded-sm border-none"
                   style={{
-                    boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                    boxShadow: 'var(--shadow-clay)'
                   }}
                 />
               </div>
@@ -282,7 +282,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   className="mt-2 rounded-sm border-none"
                   style={{
-                    boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                    boxShadow: 'var(--shadow-clay)'
                   }}
                 />
               </div>
@@ -297,8 +297,8 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   onClick={() => setSourceEntryType('google_sheet')}
                   className={`flex-1 px-4 py-2 text-xs font-medium uppercase rounded transition-colors ${
                     sourceEntryType === 'google_sheet'
-                      ? 'bg-[#222831] text-white'
-                      : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
+                      ? 'bg-[hsl(var(--ink))] text-paper'
+                      : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
                   }`}
                 >
                   Google Sheets
@@ -308,8 +308,8 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   onClick={() => setSourceEntryType('manual_entry')}
                   className={`flex-1 px-4 py-2 text-xs font-medium uppercase rounded transition-colors ${
                     sourceEntryType === 'manual_entry'
-                      ? 'bg-[#222831] text-white'
-                      : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
+                      ? 'bg-[hsl(var(--ink))] text-paper'
+                      : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
                   }`}
                 >
                   Manual Entry
@@ -396,18 +396,18 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                               }
                             }
                           }}
-                          className={`rounded-sm border-none transition-all duration-300 bg-white pr-24 ${
+                          className={`rounded-sm border-none transition-all duration-300 bg-paper pr-24 ${
                             row.status === 'valid' ? 'ring-2 ring-green-500' :
                             row.status === 'error' ? 'ring-2 ring-red-500' : ''
                           }`}
                           style={{
-                            boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                            boxShadow: 'var(--shadow-clay)'
                           }}
                         />
                         {/* Status indicator */}
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                           {row.status === 'validating' && (
-                            <CircleNotch className="w-4 h-4 animate-spin text-[#222831]" />
+                            <CircleNotch className="w-4 h-4 animate-spin text-[hsl(var(--ink))]" />
                           )}
                           {row.status === 'valid' && (
                             <span className="text-xs text-green-600 font-medium flex items-center gap-1">
@@ -452,7 +452,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                       sheetName: ''
                     }]);
                   }}
-                  className="text-[#222831] hover:text-[#393E46] uppercase text-xs mt-2"
+                  className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] uppercase text-xs mt-2"
                 >
                   <Plus className="w-3 h-3 mr-1" />
                   Add Another Sheet
@@ -493,16 +493,16 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                         <div key={candidate.id} className="grid grid-cols-12 gap-2 items-start">
                           <div className="col-span-5">
                             <Input
-                              placeholder="John Doe"
+                              placeholder="Arjun Mehta"
                               value={candidate.name}
                               onChange={(e) => {
                                 setManualCandidates(prev => prev.map(c =>
                                   c.id === candidate.id ? { ...c, name: e.target.value } : c
                                 ));
                               }}
-                              className={`rounded-sm border-none transition-all duration-300 bg-white text-sm ${showNameError ? 'ring-1 ring-red-500' : ''}`}
+                              className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showNameError ? 'ring-1 ring-red-500' : ''}`}
                               style={{
-                                boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                                boxShadow: 'var(--shadow-clay)'
                               }}
                             />
                             {showNameError && (
@@ -519,9 +519,9 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                                   c.id === candidate.id ? { ...c, email: e.target.value } : c
                                 ));
                               }}
-                              className={`rounded-sm border-none transition-all duration-300 bg-white text-sm ${showEmailError ? 'ring-1 ring-red-500' : ''}`}
+                              className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showEmailError ? 'ring-1 ring-red-500' : ''}`}
                               style={{
-                                boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                                boxShadow: 'var(--shadow-clay)'
                               }}
                             />
                             {showEmailError && (
@@ -558,7 +558,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                         email: ''
                       }]);
                     }}
-                    className="text-[#222831] hover:text-[#393E46] uppercase text-xs mt-2"
+                    className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] uppercase text-xs mt-2"
                   >
                     <Plus className="w-3 h-3 mr-1" />
                     Add Another Candidate
@@ -572,14 +572,14 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="border-slate-300 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateList}
                 disabled={!formData.name.trim()}
-                className="bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
               >
                 Save Candidate Pool
               </Button>
@@ -608,11 +608,11 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-foreground uppercase tracking-wider">OVERALL PROGRESS</span>
-                <span className="text-sm text-foreground-muted font-medium">{overallProgress}%</span>
+                <span className="text-sm text-muted font-medium">{overallProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-sm h-2 overflow-hidden">
+              <div className="w-full bg-paper-3 rounded-sm h-2 overflow-hidden">
                 <div
-                  className="bg-[#222831] h-full transition-all duration-500 ease-out"
+                  className="bg-[hsl(var(--ink))] h-full transition-all duration-500 ease-out"
                   style={{ width: `${overallProgress}%` }}
                 ></div>
               </div>
@@ -625,33 +625,33 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   <div className="flex-shrink-0 mt-0.5">
                     {step.status === 'completed' ? (
                       <div className="w-5 h-5 bg-green-500 rounded-sm flex items-center justify-center">
-                        <CheckCircle className="w-3 h-3 text-white" />
+                        <CheckCircle className="w-3 h-3 text-paper" />
                       </div>
                     ) : step.status === 'active' ? (
-                      <div className="w-5 h-5 bg-[#393E46] rounded-sm flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      <div className="w-5 h-5 bg-[hsl(var(--ink-soft))] rounded-sm flex items-center justify-center">
+                        <div className="w-2 h-2 bg-paper rounded-full animate-pulse"></div>
                       </div>
                     ) : step.status === 'error' ? (
                       <div className="w-5 h-5 bg-red-500 rounded-sm flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-2 h-2 bg-paper rounded-full"></div>
                       </div>
                     ) : (
-                      <div className="w-5 h-5 bg-gray-200 rounded-sm flex items-center justify-center">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <div className="w-5 h-5 bg-paper-3 rounded-sm flex items-center justify-center">
+                        <div className="w-2 h-2 bg-muted rounded-full"></div>
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium uppercase tracking-wider ${
                       step.status === 'completed' ? 'text-green-600' :
-                      step.status === 'active' ? 'text-[#393E46]' :
+                      step.status === 'active' ? 'text-[hsl(var(--ink-soft))]' :
                       step.status === 'error' ? 'text-red-700' :
-                      'text-gray-400'
+                      'text-muted-2'
                     }`}>
                       {step.title}
                     </p>
                     {step.message && (
-                      <p className="text-xs text-gray-500 mt-1">{step.message}</p>
+                      <p className="text-xs text-muted mt-1">{step.message}</p>
                     )}
                   </div>
                 </div>
@@ -667,13 +667,13 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   setProgressSteps([]);
                   setOverallProgress(0);
                 }}
-                className="uppercase rounded-sm text-white font-medium tracking-wider transition-all duration-200"
+                className="uppercase rounded-sm text-paper font-medium tracking-wider transition-all duration-200"
                 style={{
-                  backgroundColor: '#222831',
-                  boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                  backgroundColor: 'hsl(var(--ink))',
+                  boxShadow: 'var(--shadow-clay)'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#393E46'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222831'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
               >
                 DONE
               </Button>

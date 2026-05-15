@@ -84,12 +84,13 @@ export function EvidencePanel({ node, status, onClose }: EvidencePanelProps) {
         {/* Evidence findings */}
         {node.evidence && node.evidence.length > 0 && (
           <section className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <h4 className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
               Evidence from the interview
             </h4>
             <ul className="space-y-2">
               {node.evidence.map((line, i) => (
-                <li key={i} className="rounded border-l-2 border-slate-300 bg-slate-50 px-3 py-2 text-slate-700">
+                /* TAG-quote idiom: deliberate side accent on the marquee component. See styles.css .tag-panel-quote and DESIGN.md exception. */
+                <li key={i} className="rounded-md border-l-2 border-gold bg-paper-2 px-3 py-2 text-ink-soft">
                   {line}
                 </li>
               ))}

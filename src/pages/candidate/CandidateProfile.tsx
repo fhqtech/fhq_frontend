@@ -88,17 +88,17 @@ export default function CandidateProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-funnel-cream flex items-center justify-center text-foreground-muted">
+      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center text-muted">
         Loading your profile…
       </div>
     );
   }
   if (!profile) {
     return (
-      <div className="min-h-screen bg-funnel-cream flex items-center justify-center px-4">
-        <div className="max-w-md bg-white border border-border rounded-xl p-6 text-center">
+      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4">
+        <div className="max-w-md bg-paper border border-border rounded-xl p-6 text-center">
           <h2 className="font-semibold mb-2">No profile yet</h2>
-          <p className="text-sm text-foreground-muted">
+          <p className="text-sm text-muted">
             Accept an interview invitation to create your profile.
           </p>
         </div>
@@ -120,8 +120,8 @@ export default function CandidateProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-funnel-cream">
-      <header className="bg-white border-b border-border">
+    <div className="min-h-[100dvh] bg-paper-2">
+      <header className="bg-paper border-b border-border">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/candidate/dashboard" className="text-sm text-primary hover:underline">
             ← Dashboard
@@ -171,13 +171,13 @@ export default function CandidateProfile() {
         <Section title="Self-assessment">
           {PSYCH_FIELDS.map((f) => (
             <div key={f.key as string} className="mb-3">
-              <label className="block text-xs font-medium uppercase tracking-wider text-foreground-muted mb-1">
+              <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
                 {f.label}
               </label>
               <select
                 value={profile.psychAssessment?.[f.key] || ''}
                 onChange={(e) => updatePsych(f.key, e.target.value)}
-                className="w-full h-10 px-3 rounded-md border border-border bg-white text-sm focus:outline-none focus:border-accent"
+                className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-none focus:border-accent"
               >
                 <option value="">— Pick one —</option>
                 {f.options.map((o) => (
@@ -191,7 +191,7 @@ export default function CandidateProfile() {
         </Section>
 
         {error && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          <div className="text-sm text-danger bg-danger-soft border border-rule rounded-md px-3 py-2">
             {error}
           </div>
         )}
@@ -200,12 +200,12 @@ export default function CandidateProfile() {
           <button
             onClick={save}
             disabled={saving}
-            className="h-10 px-6 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white font-medium rounded-md text-sm"
+            className="h-10 px-6 bg-primary hover:bg-primary/90 disabled:opacity-50 text-paper font-medium rounded-md text-sm"
           >
             {saving ? 'Saving…' : 'Save changes'}
           </button>
           {savedAt && Date.now() - savedAt < 5000 && (
-            <span className="text-xs text-emerald-700">Saved</span>
+            <span className="text-xs text-success">Saved</span>
           )}
         </div>
       </main>
@@ -215,7 +215,7 @@ export default function CandidateProfile() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-border p-5">
+    <div className="bg-paper rounded-xl border border-border p-5">
       <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground mb-4">
         {title}
       </h3>
@@ -227,14 +227,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, value, readOnly = false }: { label: string; value?: string; readOnly?: boolean }) {
   return (
     <div className="mb-3">
-      <label className="block text-xs font-medium uppercase tracking-wider text-foreground-muted mb-1">
+      <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
         {label}
       </label>
       <input
         type="text"
         value={value || ''}
         readOnly={readOnly}
-        className="w-full h-10 px-3 rounded-md border border-border bg-gray-50 text-foreground-muted text-sm cursor-not-allowed"
+        className="w-full h-10 px-3 rounded-md border border-border bg-paper-2 text-muted text-sm cursor-not-allowed"
       />
     </div>
   );
@@ -253,7 +253,7 @@ function Input({
 }) {
   return (
     <div className="mb-3">
-      <label className="block text-xs font-medium uppercase tracking-wider text-foreground-muted mb-1">
+      <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
         {label}
       </label>
       <input
@@ -261,7 +261,7 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-10 px-3 rounded-md border border-border bg-white text-sm focus:outline-none focus:border-accent"
+        className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-none focus:border-accent"
       />
     </div>
   );

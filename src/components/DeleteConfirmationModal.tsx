@@ -89,15 +89,15 @@ export function DeleteConfirmationModal({
 
           {/* Sources List */}
           {impact.sources.length > 0 && (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h4 className="font-medium text-gray-800 mb-2">
+            <div className="p-4 bg-paper-2 rounded-lg border border-rule">
+              <h4 className="font-medium text-ink mb-2">
                 Sources to be deleted:
               </h4>
               <div className="space-y-1 max-h-24 overflow-y-auto">
                 {impact.sources.map(source => (
                   <div key={source.id} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-700">{source.name}</span>
-                    <span className="text-gray-500 text-xs">
+                    <span className="text-ink-soft">{source.name}</span>
+                    <span className="text-muted text-xs">
                       {source.candidateCount} candidates
                     </span>
                   </div>

@@ -281,7 +281,7 @@ export function AddToQualifiedListModal({
                 <Button
                   onClick={handleAddToList}
                   disabled={!selectedListId || isLoading}
-                  className="flex-1 bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold"
+                  className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -332,7 +332,7 @@ export function AddToQualifiedListModal({
                 <Button onClick={() => setMode('select-list')} variant="outline" className="rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold">
                   Back
                 </Button>
-                <Button onClick={handleCreateList} disabled={isLoading} className="flex-1 bg-black hover:bg-slate-800 text-white rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold">
+                <Button onClick={handleCreateList} disabled={isLoading} className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold">
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (

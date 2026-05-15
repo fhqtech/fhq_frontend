@@ -81,7 +81,7 @@ export function PageSkeleton({
           <Shimmer className="h-8 w-64" />
           <Shimmer className="h-4 w-96" />
           {message && (
-            <p className="text-sm text-foreground-muted pt-2">{message}</p>
+            <p className="text-sm text-muted pt-2">{message}</p>
           )}
         </div>
       )}

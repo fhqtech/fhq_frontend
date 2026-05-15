@@ -52,7 +52,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 shadow-sm overflow-hidden">
+    <header className="h-16 bg-paper border-b border-rule flex items-center justify-between px-4 shadow-1 overflow-hidden">
       {/* Left Section: Hamburger + Logo */}
       <div className="flex items-center gap-4">
         {/* Hamburger Menu */}
@@ -60,7 +60,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           variant="ghost"
           size="sm"
           onClick={onMenuClick}
-          className="h-8 w-8 p-0 text-gray-600 hover:text-[#222831] hover:bg-gray-100"
+          aria-label="Toggle navigation menu"
+          className="h-8 w-8 p-0 text-muted hover:text-ink hover:bg-paper-3"
         >
           <Menu className="w-5 h-5" weight="bold" />
         </Button>
@@ -74,11 +75,11 @@ export function Header({ onMenuClick }: HeaderProps) {
             style={{ objectPosition: 'center' }}
           />
           <div className="hidden sm:flex flex-col -ml-4">
-            <span className="font-semibold text-[#222831] text-lg leading-tight">
+            <span className="font-semibold text-ink text-lg leading-tight tracking-tight">
               FunnelHQ
             </span>
-            <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-              Recruiter Portal
+            <span className="text-xs text-muted font-medium uppercase tracking-wide">
+              Workspace
             </span>
           </div>
         </div>
@@ -101,11 +102,11 @@ export function Header({ onMenuClick }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-gray-200 transition-all"
+              className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-rule transition-all"
             >
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback className="bg-[#222831] text-white text-sm font-semibold">
+                <AvatarFallback className="bg-ink text-paper text-sm font-semibold">
                   {user?.name ? getInitials(user.name) : "U"}
                 </AvatarFallback>
               </Avatar>
@@ -124,7 +125,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuItem
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+              className="text-danger focus:text-danger focus:bg-danger-soft cursor-pointer"
             >
               {isLoggingOut ? "Signing out..." : "Sign out"}
             </DropdownMenuItem>

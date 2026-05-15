@@ -20,10 +20,10 @@ export function CandidateRating({
 
   // Color based on rating
   const getRatingColor = (currentRating: number): string => {
-    if (currentRating >= 9) return "text-blue-500"; // Excellent
-    if (currentRating >= 7) return "text-green-500"; // Good
-    if (currentRating >= 4) return "text-yellow-500"; // Average
-    return "text-red-500"; // Poor
+    if (currentRating >= 9) return "text-info"; // Excellent
+    if (currentRating >= 7) return "text-success"; // Good
+    if (currentRating >= 4) return "text-warning"; // Average
+    return "text-danger"; // Poor
   };
 
   const getRatingLabel = (currentRating: number): string => {
@@ -69,7 +69,7 @@ export function CandidateRating({
                 <Star
                   className={cn(
                     starSizes[size],
-                    isFilled ? getRatingColor(rating) : "text-gray-300",
+                    isFilled ? getRatingColor(rating) : "text-muted-2",
                     isFilled && "fill-current"
                   )}
                 />
@@ -93,10 +93,10 @@ export function CandidateRating({
                 "text-sm font-medium px-2 py-0.5 rounded-full",
                 getRatingColor(rating),
                 "bg-opacity-10",
-                rating >= 9 && "bg-blue-100 text-blue-700",
-                rating >= 7 && rating < 9 && "bg-green-100 text-green-700",
-                rating >= 4 && rating < 7 && "bg-yellow-100 text-yellow-700",
-                rating < 4 && "bg-red-100 text-red-700"
+                rating >= 9 && "bg-info-soft text-info",
+                rating >= 7 && rating < 9 && "bg-success-soft text-success",
+                rating >= 4 && rating < 7 && "bg-warning-soft text-warning",
+                rating < 4 && "bg-danger-soft text-danger"
               )}>
                 {getRatingLabel(rating)}
               </span>

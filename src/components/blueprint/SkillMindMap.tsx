@@ -24,7 +24,7 @@ const ProficiencyBadge: React.FC<{ proficiency: ProficiencyLevel }> = ({ profici
       case 'Operational Experience':
         return 'bg-green-100 text-green-700 border-green-500';
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-500';
+        return 'bg-paper-3 text-ink-soft border-rule-strong';
     }
   };
 
@@ -42,7 +42,7 @@ const ProficiencyBadge: React.FC<{ proficiency: ProficiencyLevel }> = ({ profici
       case 'Operational Experience':
         return 'bg-green-700';
       default:
-        return 'bg-gray-700';
+        return 'bg-ink';
     }
   };
 
@@ -85,11 +85,11 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
           return (
             <div
               key={pillarName}
-              className="border border-gray-300 rounded-lg overflow-hidden bg-white transition-all hover:shadow-lg"
+              className="border border-rule-strong rounded-lg overflow-hidden bg-paper transition-all hover:shadow-2"
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
             >
               {/* Pillar Header */}
-              <div className="bg-gradient-to-r from-[#222831] to-[#393E46] text-white p-5">
+              <div className="bg-paper-2 from-[hsl(var(--ink))] to-[hsl(var(--ink-soft))] text-paper p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -97,13 +97,13 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
                         {pillarName}
                       </h3>
                       {pillarWeight && (
-                        <div className="px-2 py-0.5 bg-white/20 rounded text-xs font-semibold">
+                        <div className="px-2 py-0.5 bg-paper/20 rounded text-xs font-semibold">
                           {pillarWeight}%
                         </div>
                       )}
                     </div>
                     {pillarDescription && (
-                      <p className="text-white/90 text-xs leading-relaxed">
+                      <p className="text-paper/90 text-xs leading-relaxed">
                         {pillarDescription}
                       </p>
                     )}
@@ -112,18 +112,18 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
               </div>
 
               {/* Skills List */}
-              <div className="p-5 space-y-4 bg-gray-50">
+              <div className="p-5 space-y-4 bg-paper-2">
                 {pillarNodes.map((node) => (
                     <div
                       key={node.id}
-                      className="border border-gray-200 rounded-md p-4 bg-white hover:border-gray-300 transition-all"
+                      className="border border-rule rounded-md p-4 bg-paper hover:border-rule-strong transition-all"
                       style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
                     >
                       {/* Skill Header - proficiency badge in top right */}
                       <div className="mb-2">
                         <div className="flex items-start justify-between">
                           {node.name !== pillarName && (
-                            <h4 className="text-sm font-bold text-gray-900">
+                            <h4 className="text-sm font-bold text-ink">
                               {node.name}
                             </h4>
                           )}
@@ -138,7 +138,7 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
                         <div className="mb-3">
                           <div className="flex items-center mb-3">
                             <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                            <h5 className="text-sm font-semibold text-gray-700 uppercase">
+                            <h5 className="text-sm font-semibold text-ink-soft uppercase">
                               Focus Areas ({node.focusAreas.length})
                             </h5>
                           </div>
@@ -146,7 +146,7 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
                             {node.focusAreas.map((area, idx) => (
                               <li key={idx} className="flex items-start">
                                 <span className="text-orange-500 mr-2 text-xs">•</span>
-                                <span className="text-xs text-gray-600 leading-relaxed flex-1 uppercase">{area}</span>
+                                <span className="text-xs text-muted leading-relaxed flex-1 uppercase">{area}</span>
                               </li>
                             ))}
                           </ul>
@@ -158,7 +158,7 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
                         <div className="mb-4">
                           <div className="flex items-center mb-2">
                             <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                            <h5 className="text-sm font-semibold text-gray-700 uppercase">
+                            <h5 className="text-sm font-semibold text-ink-soft uppercase">
                               Qualifying Topics
                             </h5>
                           </div>
@@ -177,7 +177,7 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
 
                       {/* Context */}
                       {node.context && (
-                        <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                        <p className="text-xs text-muted leading-relaxed mb-3">
                           {node.context}
                         </p>
                       )}
@@ -187,7 +187,7 @@ const SkillMindMap: React.FC<SkillMindMapProps> = ({ nodes, pillars, className =
                         <div>
                           <div className="flex items-center mb-2">
                             <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                            <h5 className="text-xs font-semibold text-gray-700">
+                            <h5 className="text-xs font-semibold text-ink-soft">
                               Integrates With ({node.connections.length})
                             </h5>
                           </div>

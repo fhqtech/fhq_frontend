@@ -41,11 +41,11 @@ export function NextBestActionCard({
   return (
     <Card
       className={`p-5 flex items-center justify-between gap-4 border-2 ${
-        nba.variant === "default" ? "border-blue-200 bg-blue-50/50" : "border-gray-200"
+        nba.variant === "default" ? "border-blue-200 bg-blue-50/50" : "border-rule"
       } ${className ?? ""}`}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-wider mb-1">
+        <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider mb-1">
           Next Best Action
         </p>
         <h3 className="text-lg font-bold text-foreground truncate">{nba.label}</h3>

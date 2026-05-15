@@ -319,10 +319,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={compact ? 'px-4 py-2 border border-gray-300 rounded bg-white text-sm hover:bg-gray-50 flex items-center gap-2' : 'px-3 py-2'}
+        className={compact ? 'px-4 py-2 border border-rule-strong rounded bg-paper text-sm hover:bg-paper-2 flex items-center gap-2' : 'px-3 py-2'}
       >
         {compact && (
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#222831" viewBox="0 0 256 256">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="hsl(var(--ink))" viewBox="0 0 256 256">
             <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm109.94-52.79a8,8,0,0,0-3.89-5.4l-29.83-17-.12-33.62a8,8,0,0,0-2.83-6.08,111.91,111.91,0,0,0-36.72-20.67,8,8,0,0,0-6.46.59L128,41.85,97.88,25a8,8,0,0,0-6.47-.6A112.1,112.1,0,0,0,54.73,45.15a8,8,0,0,0-2.83,6.07l-.15,33.65-29.83,17a8,8,0,0,0-3.89,5.4,106.47,106.47,0,0,0,0,41.56,8,8,0,0,0,3.89,5.4l29.83,17,.12,33.62a8,8,0,0,0,2.83,6.08,111.91,111.91,0,0,0,36.72,20.67,8,8,0,0,0,6.46-.59L128,214.15,158.12,231a7.91,7.91,0,0,0,3.9,1,8.09,8.09,0,0,0,2.57-.42,112.1,112.1,0,0,0,36.68-20.73,8,8,0,0,0,2.83-6.07l.15-33.65,29.83-17a8,8,0,0,0,3.89-5.4A106.47,106.47,0,0,0,237.94,107.21Zm-15,34.91-28.57,16.25a8,8,0,0,0-3,3c-.58,1-1.19,2.06-1.81,3.06a7.94,7.94,0,0,0-1.22,4.21l-.15,32.25a95.89,95.89,0,0,1-25.37,14.3L134,199.13a8,8,0,0,0-3.91-1h-.19c-1.21,0-2.43,0-3.64,0a8.08,8.08,0,0,0-4.1,1l-28.84,16.1A96,96,0,0,1,67.88,201l-.11-32.2a8,8,0,0,0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.09,8.09,0,0,0-3-3.06l-28.6-16.29a90.49,90.49,0,0,1,0-28.26L61.67,97.63a8,8,0,0,0,3-3c.58-1,1.19-2.06,1.81-3.06a7.94,7.94,0,0,0,1.22-4.21l.15-32.25a95.89,95.89,0,0,1,25.37-14.3L122,56.87a8,8,0,0,0,4.1,1c1.21,0,2.43,0,3.64,0a8.08,8.08,0,0,0,4.1-1l28.84-16.1A96,96,0,0,1,188.12,55l.11,32.2a8,8,0,0,0,1.22,4.22c.62,1,1.23,2,1.8,3.06a8.09,8.09,0,0,0,3,3.06l28.6,16.29A90.49,90.49,0,0,1,222.9,142.12Z"></path>
           </svg>
         )}
@@ -333,10 +333,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
         <DialogContent className="max-w-4xl !rounded">
           <DialogHeader className="pb-6 pr-8">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-2xl font-bold text-[#222831]">Manage Projects</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-[hsl(var(--ink))]">Manage Projects</DialogTitle>
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="bg-[#222831] text-white hover:bg-[#393E46] border-0 shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                className="bg-[hsl(var(--ink))] text-paper hover:bg-[hsl(var(--ink-soft))] border-0 shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New project
@@ -347,7 +347,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
           <div className="flex flex-col">
             {/* Workspace Selector */}
             <div className="mb-4">
-              <Label htmlFor="workspace-selector" className="text-sm font-semibold text-[#222831] mb-2 block">
+              <Label htmlFor="workspace-selector" className="text-sm font-semibold text-[hsl(var(--ink))] mb-2 block">
                 Select Workspace
               </Label>
               <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
@@ -383,17 +383,17 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
             <div className="border rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] mb-12">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50/50">
-                    <TableHead className="font-semibold text-[#222831] text-base">Name</TableHead>
-                    <TableHead className="font-semibold text-[#222831] text-base">ID</TableHead>
-                    <TableHead className="w-[80px] font-semibold text-[#222831] text-base text-center">Star</TableHead>
-                    <TableHead className="w-[150px] font-semibold text-[#222831] text-base text-center">Actions</TableHead>
+                  <TableRow className="bg-paper-2/50">
+                    <TableHead className="font-semibold text-[hsl(var(--ink))] text-base">Name</TableHead>
+                    <TableHead className="font-semibold text-[hsl(var(--ink))] text-base">ID</TableHead>
+                    <TableHead className="w-[80px] font-semibold text-[hsl(var(--ink))] text-base text-center">Star</TableHead>
+                    <TableHead className="w-[150px] font-semibold text-[hsl(var(--ink))] text-base text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredProjects.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-gray-500 py-12 text-sm">
+                      <TableCell colSpan={4} className="text-center text-muted py-12 text-sm">
                         No projects found
                       </TableCell>
                     </TableRow>
@@ -407,11 +407,11 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                             handleProjectChange(project.id);
                           }
                         }}
-                        className={`cursor-pointer hover:bg-gray-50/50 transition-colors ${
+                        className={`cursor-pointer hover:bg-paper-2/50 transition-colors ${
                           project.id === currentProject?.id ? 'bg-blue-50/30' : ''
                         } ${switchingProjectId === project.id ? 'opacity-50' : ''}`}
                       >
-                        <TableCell className="font-medium text-[#222831] text-sm" onClick={(e) => editingProjectId === project.id && e.stopPropagation()}>
+                        <TableCell className="font-medium text-[hsl(var(--ink))] text-sm" onClick={(e) => editingProjectId === project.id && e.stopPropagation()}>
                           {editingProjectId === project.id ? (
                             <div className="flex items-center gap-2">
                               <Input
@@ -451,10 +451,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                                   handleCancelEdit();
                                 }}
                                 disabled={isUpdating}
-                                className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                                className="p-1 hover:bg-paper-3 rounded transition-colors disabled:opacity-50"
                                 title="Cancel"
                               >
-                                <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                               </button>
@@ -477,7 +477,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="text-gray-600 text-sm font-mono">
+                        <TableCell className="text-muted text-sm font-mono">
                           {project.id}
                         </TableCell>
                         <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
@@ -489,7 +489,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                               className={`h-5 w-5 ${
                                 starredProjects.has(project.id)
                                   ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300 hover:text-gray-400'
+                                  : 'text-muted-2 hover:text-muted-2'
                               }`}
                             />
                           </button>
@@ -498,10 +498,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={(e) => handleEditProject(project, e)}
-                              className="p-1.5 hover:bg-gray-200 rounded transition-colors"
+                              className="p-1.5 hover:bg-paper-3 rounded transition-colors"
                               title="Edit project"
                             >
-                              <Pencil className="h-4 w-4 text-gray-600" />
+                              <Pencil className="h-4 w-4 text-muted" />
                             </button>
                             <button
                               onClick={(e) => handleDeleteProject(project.id, e)}
@@ -542,11 +542,11 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-md !rounded">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-[#222831]">Create New Project</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-[hsl(var(--ink))]">Create New Project</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div>
-              <label htmlFor="projectName" className="text-sm font-medium text-[#222831] mb-2 block">
+              <label htmlFor="projectName" className="text-sm font-medium text-[hsl(var(--ink))] mb-2 block">
                 Project Name
               </label>
               <Input
@@ -577,7 +577,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
               <Button
                 onClick={handleCreateProject}
                 disabled={!newProjectName.trim() || isCreating}
-                className="bg-[#222831] text-white hover:bg-[#393E46] border-0"
+                className="bg-[hsl(var(--ink))] text-paper hover:bg-[hsl(var(--ink-soft))] border-0"
               >
                 {isCreating ? (
                   <>

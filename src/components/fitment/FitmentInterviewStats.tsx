@@ -16,12 +16,12 @@ export function FitmentInterviewStats({ interviews }: FitmentInterviewStatsProps
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-brand-primary-light rounded-lg flex items-center justify-center">
-              <Target className="w-6 h-6 text-brand-primary" />
+            <div className="w-12 h-12 bg-paper-3 rounded-lg flex items-center justify-center">
+              <Target className="w-6 h-6 text-ink" />
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{totalFitments}</p>
-              <p className="text-sm text-foreground-muted uppercase text-xs tracking-wider">Total Fitments</p>
+              <p className="text-sm text-muted uppercase text-xs tracking-wider">Total Fitments</p>
             </div>
           </div>
         </CardContent>
@@ -34,7 +34,7 @@ export function FitmentInterviewStats({ interviews }: FitmentInterviewStatsProps
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{completedCount}</p>
-              <p className="text-sm text-foreground-muted uppercase text-xs tracking-wider">Completed</p>
+              <p className="text-sm text-muted uppercase text-xs tracking-wider">Completed</p>
             </div>
           </div>
         </CardContent>
@@ -47,7 +47,7 @@ export function FitmentInterviewStats({ interviews }: FitmentInterviewStatsProps
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{inProgressCount}</p>
-              <p className="text-sm text-foreground-muted uppercase text-xs tracking-wider">In Progress</p>
+              <p className="text-sm text-muted uppercase text-xs tracking-wider">In Progress</p>
             </div>
           </div>
         </CardContent>

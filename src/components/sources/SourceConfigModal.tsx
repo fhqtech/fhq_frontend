@@ -259,9 +259,9 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
                 placeholder="https://docs.google.com/spreadsheets/d/..."
                 value={formData.googleSheetUrl}
                 onChange={(e) => setFormData(prev => ({ ...prev, googleSheetUrl: e.target.value }))}
-                className="mt-2 rounded-sm border-none transition-all duration-300 bg-white"
+                className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
                 style={{
-                  boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                  boxShadow: 'var(--shadow-clay)'
                 }}
               />
               <div className="mt-2">
@@ -289,9 +289,9 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
                 type="file"
                 accept=".xlsx,.xls,.csv"
                 onChange={handleFileUpload}
-                className="mt-2 rounded-sm border-none transition-all duration-300 bg-white"
+                className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
                 style={{
-                  boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                  boxShadow: 'var(--shadow-clay)'
                 }}
               />
               {formData.file && (
@@ -311,9 +311,9 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
               placeholder="Additional notes about this source..."
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="mt-2 rounded-sm border-none transition-all duration-300 bg-white"
+              className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
               style={{
-                boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                boxShadow: 'var(--shadow-clay)'
               }}
               rows={3}
             />
@@ -341,7 +341,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
           <Button
             onClick={handleSave}
             disabled={formData.candidateCount === 0}
-            className="bg-brand-primary hover:bg-brand-primary/90 uppercase rounded-sm"
+            className="bg-ink hover:bg-ink/90 uppercase rounded-sm"
           >
             Add Source
           </Button>

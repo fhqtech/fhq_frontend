@@ -5,6 +5,7 @@ import { CandidateRating } from "./CandidateRating";
 import { CandidateNotes } from "./CandidateNotes";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, X } from "lucide-react";
+import { SpinnerWithCopy } from "@/components/ui/spinner";
 
 interface RecruiterRating {
   rating: number;
@@ -141,8 +142,7 @@ export function RatingPanel({
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <span className="ml-2 text-muted-foreground">Loading rating...</span>
+            <SpinnerWithCopy size="lg" label="Loading rating…" />
           </div>
         </CardContent>
       </Card>

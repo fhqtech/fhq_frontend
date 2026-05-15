@@ -18,8 +18,8 @@ const SliderInput = ({ label, value, min, max, step, unit, prefix = "", onChange
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
-        <span className="text-white/70 text-sm font-medium">{label}</span>
-        <span className="text-white font-semibold">
+        <span className="text-paper/70 text-sm font-medium">{label}</span>
+        <span className="text-paper font-semibold">
           {prefix}{value.toLocaleString()}{unit}
         </span>
       </div>
@@ -31,9 +31,9 @@ const SliderInput = ({ label, value, min, max, step, unit, prefix = "", onChange
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer slider-input"
+          className="w-full h-1.5 bg-paper/10 rounded-full appearance-none cursor-pointer slider-input"
           style={{
-            background: `linear-gradient(to right, #005aef ${percentage}%, rgba(255,255,255,0.1) ${percentage}%)`
+            background: `linear-gradient(to right, hsl(var(--gold)) ${percentage}%, rgba(255,255,255,0.1) ${percentage}%)`
           }}
         />
       </div>
@@ -96,17 +96,17 @@ const SavingsCalculator = () => {
   }, [monthlySavings]);
 
   return (
-    <section className="relative bg-black py-24">
+    <section className="relative bg-ink py-24">
       <div className="max-w-5xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-light text-white tracking-wide mb-4">
+          <h2 className="text-4xl md:text-5xl font-light text-paper tracking-wide mb-4">
             Savings{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005aef] to-[#00b1ff]">
+            <span className="text-ink  bg-paper-2 from-[hsl(var(--gold))] to-[hsl(var(--gold))]">
               Calculator
             </span>
           </h2>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
+          <p className="text-paper/50 text-lg max-w-2xl mx-auto">
             Discover your potential savings with FunnelHQ. See how much time and money you can save on candidate screening.
           </p>
         </div>
@@ -116,14 +116,14 @@ const SavingsCalculator = () => {
           <div className="relative">
             <button
               onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-paper/5 border border-white/10 rounded-lg text-paper hover:bg-paper/10 transition-colors"
             >
               <span>{currency.code}</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
             </button>
 
             {showCurrencyDropdown && (
-              <div className="absolute top-full mt-2 left-0 bg-[#0a0a0a] border border-white/10 rounded-lg overflow-hidden z-10 min-w-[100px]">
+              <div className="absolute top-full mt-2 left-0 bg-[hsl(var(--ink))] border border-white/10 rounded-lg overflow-hidden z-10 min-w-[100px]">
                 {currencies.map((curr) => (
                   <button
                     key={curr.code}
@@ -131,8 +131,8 @@ const SavingsCalculator = () => {
                       setCurrency(curr);
                       setShowCurrencyDropdown(false);
                     }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition-colors ${
-                      curr.code === currency.code ? 'bg-white/5 text-[#00b1ff]' : 'text-white/70'
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-paper/10 transition-colors ${
+                      curr.code === currency.code ? 'bg-paper/5 text-[hsl(var(--gold))]' : 'text-paper/70'
                     }`}
                   >
                     {curr.code}
@@ -144,7 +144,7 @@ const SavingsCalculator = () => {
         </div>
 
         {/* Calculator Card */}
-        <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-8 md:p-10">
+        <div className="bg-[hsl(var(--ink))] border border-white/10 rounded-2xl p-8 md:p-10">
           <div className="grid md:grid-cols-2 gap-10">
             {/* Left: Sliders */}
             <div className="space-y-8">
@@ -201,24 +201,24 @@ const SavingsCalculator = () => {
             </div>
 
             {/* Right: Results */}
-            <div className="flex flex-col items-center justify-center text-center bg-gradient-to-br from-[#005aef]/5 via-transparent to-[#00b1ff]/5 rounded-xl p-8 border border-white/5">
-              <p className="text-white/60 text-lg mb-2">You can save up to</p>
-              <div className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#005aef] to-[#00b1ff] mb-2">
+            <div className="flex flex-col items-center justify-center text-center bg-paper-2 from-[hsl(var(--gold))]/5 via-transparent to-[hsl(var(--gold))]/5 rounded-xl p-8 border border-white/5">
+              <p className="text-paper/60 text-lg mb-2">You can save up to</p>
+              <div className="text-5xl md:text-6xl font-bold text-ink  bg-paper-2 from-[hsl(var(--gold))] to-[hsl(var(--gold))] mb-2">
                 {currency.symbol}{Math.round(animatedSavings).toLocaleString()}
               </div>
-              <p className="text-white/60 text-lg">per month</p>
+              <p className="text-paper/60 text-lg">per month</p>
 
               <div className="mt-8 pt-8 border-t border-white/10 w-full">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-white/40">Hours Saved</p>
-                    <p className="text-white font-semibold text-lg">
+                    <p className="text-paper/40">Hours Saved</p>
+                    <p className="text-paper font-semibold text-lg">
                       {Math.round((screeningsPerMonth * (avgTimePerScreening / 60) * (efficiencyImprovement / 100))).toLocaleString()} hrs
                     </p>
                   </div>
                   <div>
-                    <p className="text-white/40">Annual Savings</p>
-                    <p className="text-white font-semibold text-lg">
+                    <p className="text-paper/40">Annual Savings</p>
+                    <p className="text-paper font-semibold text-lg">
                       {currency.symbol}{Math.round(animatedSavings * 12).toLocaleString()}
                     </p>
                   </div>
@@ -230,7 +230,7 @@ const SavingsCalculator = () => {
 
         {/* Bottom CTA */}
         <div className="text-center mt-8">
-          <p className="text-white/40 text-sm">
+          <p className="text-paper/40 text-sm">
             Based on your current screening workflow. Actual savings may vary.
           </p>
         </div>
@@ -244,9 +244,9 @@ const SavingsCalculator = () => {
           width: 18px;
           height: 18px;
           border-radius: 50%;
-          background: #005aef;
+          background: hsl(var(--gold));
           cursor: pointer;
-          border: 3px solid #0a0a0a;
+          border: 3px solid hsl(var(--ink));
           box-shadow: 0 0 10px rgba(0, 90, 239, 0.5);
           transition: all 0.2s ease;
         }
@@ -260,9 +260,9 @@ const SavingsCalculator = () => {
           width: 18px;
           height: 18px;
           border-radius: 50%;
-          background: #005aef;
+          background: hsl(var(--gold));
           cursor: pointer;
-          border: 3px solid #0a0a0a;
+          border: 3px solid hsl(var(--ink));
           box-shadow: 0 0 10px rgba(0, 90, 239, 0.5);
         }
       `}</style>

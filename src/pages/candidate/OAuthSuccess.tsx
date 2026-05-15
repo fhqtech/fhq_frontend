@@ -30,17 +30,17 @@ export default function OAuthSuccess() {
   }, [navigate, setSessionFromToken]);
 
   return (
-    <div className="min-h-screen bg-funnel-cream flex items-center justify-center px-4">
+    <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4">
       {error ? (
-        <div className="max-w-md bg-white rounded-xl border border-border p-6 text-center">
+        <div className="max-w-md bg-paper rounded-xl border border-border p-6 text-center">
           <h2 className="text-lg font-semibold mb-2">Sign-in failed</h2>
-          <p className="text-sm text-foreground-muted mb-4">{error}</p>
+          <p className="text-sm text-muted mb-4">{error}</p>
           <a href="/candidate/login" className="text-primary underline text-sm">
             Back to sign in
           </a>
         </div>
       ) : (
-        <div className="text-foreground-muted text-sm flex items-center gap-3">
+        <div className="text-muted text-sm flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           Signing you in…
         </div>

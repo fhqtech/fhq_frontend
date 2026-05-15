@@ -11,11 +11,11 @@ const problems = [
 
 export function ProblemSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-black">
+    <section className="relative min-h-[100dvh] flex items-center justify-center bg-ink">
       {/* Content */}
       <div className="max-w-4xl mx-auto px-6 py-24">
         {/* Headline */}
-        <h2 className="text-4xl md:text-6xl font-light text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter mb-16 text-center">
+        <h2 className="text-4xl md:text-6xl font-light text-ink  bg-paper-2 from-white /40 tracking-tighter mb-16 text-center">
           Finance hiring breaks at the first conversation.
         </h2>
 
@@ -27,7 +27,7 @@ export function ProblemSection() {
               className="flex items-center gap-4"
             >
               <X className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <p className="text-lg md:text-xl text-white/70 font-light">
+              <p className="text-lg md:text-xl text-paper/70 font-light">
                 {problem}
               </p>
             </div>
@@ -36,7 +36,7 @@ export function ProblemSection() {
 
         {/* Closing */}
         <div className="mt-16 text-center">
-          <p className="text-xl md:text-2xl text-white/50 font-light">
+          <p className="text-xl md:text-2xl text-paper/50 font-light">
             The result? <span className="text-red-400">Lost talent, wasted time, and rising recruitment costs.</span>
           </p>
         </div>

@@ -107,16 +107,16 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
                 key={option.type}
                 type="button"
                 onClick={() => handleAddSource(option.type)}
-                className="h-10 text-xs font-medium px-6 rounded uppercase transition-all duration-200 flex items-center gap-2 hover:text-white"
+                className="h-10 text-xs font-medium px-6 rounded uppercase transition-all duration-200 flex items-center gap-2 hover:text-paper"
                 style={{
                   border: 'none',
                   position: 'relative',
                   overflow: 'hidden',
                   backgroundColor: 'transparent',
-                  boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5'
+                  boxShadow: 'var(--shadow-clay)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#393E46';
+                  e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
@@ -147,7 +147,7 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
                   <span className="text-lg">{getSourceIcon(source.type)}</span>
                   <div>
                     <p className="font-medium text-sm">{source.name}</p>
-                    <p className="text-xs text-foreground-muted">
+                    <p className="text-xs text-muted">
                       {source.candidateCount} candidates • {source.type.replace('_', ' ')}
                     </p>
                   </div>

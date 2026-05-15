@@ -29,7 +29,7 @@ export function KPICard({ title, value, subtitle, icon: Icon, trend, variant = '
   };
 
   return (
-    <Card className={`p-6 transition-all duration-200 hover:shadow-lg ${variantStyles[variant]}`}>
+    <Card className={`p-6 transition-all duration-200 hover:shadow-2 ${variantStyles[variant]}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>

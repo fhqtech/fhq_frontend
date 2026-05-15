@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Warning } from 'phosphor-react';
 import { Button } from './button';
+import { Spinner } from './spinner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 
 interface DeleteConfirmationModalProps {
@@ -33,7 +34,7 @@ export function DeleteConfirmationModal({
 
   return (
     <div 
-      className="fixed bg-black/50 flex items-center justify-center p-4"
+      className="fixed bg-ink/50 flex items-center justify-center p-4"
       style={{
         position: 'fixed',
         top: 0,
@@ -47,17 +48,18 @@ export function DeleteConfirmationModal({
         padding: '16px'
       }}
     >
-      <Card className="w-full max-w-md border-error">
+      <Card className="w-full max-w-md border-danger">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-2 text-error">
+            <CardTitle className="flex items-center space-x-2 text-danger">
               <Warning className="w-5 h-5" weight="fill" />
               <span>Delete Interview</span>
             </CardTitle>
             <button
               onClick={handleClose}
               disabled={isDeleting}
-              className="text-foreground-muted hover:text-foreground disabled:opacity-50"
+              aria-label="Close dialog"
+              className="text-muted hover:text-foreground disabled:opacity-50"
             >
               <X className="w-5 h-5" />
             </button>
@@ -67,14 +69,14 @@ export function DeleteConfirmationModal({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-error-light/10 border border-error/20 rounded-lg">
+          <div className="p-4 bg-danger-light/10 border border-danger/20 rounded-lg">
             <p className="text-sm font-medium mb-2">You are about to delete:</p>
             <p className="text-sm font-mono bg-white/80 p-2 rounded border">
               {interviewName}
             </p>
           </div>
 
-          <p className="text-sm text-foreground-muted">
+          <p className="text-sm text-muted">
             This interview and all associated data will be permanently deleted.
           </p>
 
@@ -90,11 +92,11 @@ export function DeleteConfirmationModal({
             <Button
               onClick={handleConfirm}
               disabled={isConfirmDisabled}
-              className="flex-1 bg-error hover:bg-error/90 text-white border-error"
+              className="flex-1 bg-danger hover:bg-danger/90 text-white border-danger"
             >
               {isDeleting ? (
                 <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <Spinner size="sm" variant="inverse" />
                   <span>Deleting...</span>
                 </div>
               ) : (

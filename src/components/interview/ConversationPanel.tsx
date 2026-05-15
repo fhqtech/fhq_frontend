@@ -49,10 +49,10 @@ const TypingIndicator = ({ interviewerName = "AI Interviewer" }: { interviewerNa
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-750 rounded-2xl p-6 shadow-lg min-h-[120px] flex flex-col justify-center border border-blue-100 dark:border-slate-700">
+      <div className="bg-paper-2   rounded-2xl p-6 shadow-2 min-h-[120px] flex flex-col justify-center border border-rule ">
         <div className="flex items-center justify-between mb-3">
           <motion.span
-            className="text-sm text-slate-600 dark:text-slate-400 font-medium"
+            className="text-sm text-muted font-medium"
             key={typingText}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -62,17 +62,17 @@ const TypingIndicator = ({ interviewerName = "AI Interviewer" }: { interviewerNa
           </motion.span>
           <div className="flex items-center space-x-1">
             <motion.div
-              className="h-2 w-2 bg-blue-500 rounded-full"
+              className="h-2 w-2 bg-info rounded-full"
               animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 1, repeat: Infinity, delay: 0 }}
             />
             <motion.div
-              className="h-2 w-2 bg-purple-500 rounded-full"
+              className="h-2 w-2 bg-gold rounded-full"
               animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
             />
             <motion.div
-              className="h-2 w-2 bg-pink-500 rounded-full"
+              className="h-2 w-2 bg-gold rounded-full"
               animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
             />
@@ -81,24 +81,24 @@ const TypingIndicator = ({ interviewerName = "AI Interviewer" }: { interviewerNa
         <div className="flex items-center justify-center">
           <div className="flex items-center space-x-2">
             <motion.div
-              className="h-3 w-3 bg-slate-400 rounded-full"
+              className="h-3 w-3 bg-muted rounded-full"
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
             />
             <motion.div
-              className="h-3 w-3 bg-slate-400 rounded-full"
+              className="h-3 w-3 bg-muted rounded-full"
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
             />
             <motion.div
-              className="h-3 w-3 bg-slate-400 rounded-full"
+              className="h-3 w-3 bg-muted rounded-full"
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
             />
           </div>
         </div>
       </div>
-      <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-blue-50 dark:border-b-slate-800"></div>
+      <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-blue-50 "></div>
     </motion.div>
   );
 };
@@ -204,7 +204,7 @@ const ConversationPanel = ({
               transition: { duration: 2, repeat: Infinity }
             } : {}}
           >
-            <div className={`bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-2xl p-6 text-left text-xl shadow-lg min-h-[120px] transition-all duration-300 ${isIdle ? 'ring-2 ring-blue-200 dark:ring-blue-800 ring-opacity-60' : ''
+            <div className={`bg-paper text-ink rounded-2xl p-6 text-left text-xl shadow-2 min-h-[120px] transition-all duration-300 ${isIdle ? 'ring-2 ring-gold ring-opacity-60' : ''
               }`}>
               {/* This 'p' tag with 'whitespace-pre-wrap' is essential for rendering the newline characters correctly. */}
               <p ref={textRef} className="whitespace-pre-wrap"></p>
@@ -217,13 +217,13 @@ const ConversationPanel = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <span className="text-sm text-slate-500 dark:text-slate-400 italic">
+                  <span className="text-sm text-muted italic">
                     Take your time...
                   </span>
                 </motion.div>
               )}
             </div>
-            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-white dark:border-b-slate-800"></div>
+            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-white "></div>
           </motion.div>
         ) : null}
       </div>

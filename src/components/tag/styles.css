@@ -1,0 +1,420 @@
+/* TAG component styles — ported from funnelhq.co/tag.html.
+   All selectors are scoped under .tag-frame so they don't leak. */
+
+.tag-frame {
+  --tag-paper: #FCFBF7;
+  --tag-paper-2: #FFFFFF;
+  --tag-paper-3: #F5F3EC;
+  --tag-ink: #0A1220;
+  --tag-muted: #3E4A62;
+  --tag-muted-2: #7A8396;
+  --tag-rule: rgba(10, 18, 32, 0.07);
+  --tag-rule-strong: rgba(10, 18, 32, 0.18);
+  --tag-gold: #8E6F2E;
+  --tag-r-sm: 6px;
+  --tag-r-md: 10px;
+  --tag-r-lg: 14px;
+  --tag-ease-spring: cubic-bezier(.2, .72, .28, 1);
+  background: var(--tag-paper);
+  font-family: "Geist", system-ui, -apple-system, sans-serif;
+  color: var(--tag-ink);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  padding: 18px 12px;
+}
+
+/* --- Stats strip --- */
+.tag-stats-strip {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin: 0 auto 18px;
+  flex-wrap: wrap;
+}
+.tag-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+}
+.tag-stat-num {
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.tag-stat-lbl {
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* --- Card frame --- */
+.tag-card {
+  position: relative;
+  background: var(--tag-paper-2);
+  border: 1px solid var(--tag-rule);
+  border-radius: var(--tag-r-lg);
+  display: flex;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(10, 18, 32, 0.03),
+    0 20px 60px -30px rgba(10, 18, 32, 0.14);
+}
+.tag-main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 24px 24px 20px;
+  overflow: hidden;
+}
+.tag-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(142, 111, 46, 0.025) 0%, transparent 60%);
+  pointer-events: none;
+}
+.tag-main svg.tag-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  touch-action: none;
+}
+
+/* --- Legend --- */
+.tag-legend {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--tag-rule);
+  border-radius: var(--tag-r-md);
+  padding: 12px 14px 10px;
+  font-size: 12.5px;
+  box-shadow: 0 4px 18px -10px rgba(10, 18, 32, 0.10);
+  z-index: 3;
+}
+.tag-legend-title {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tag-muted-2);
+  margin-bottom: 8px;
+}
+.tag-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+}
+.tag-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.tag-swatch.dashed {
+  background: transparent;
+  border-style: dashed;
+}
+.tag-legend-row span:last-child {
+  color: var(--tag-ink);
+}
+
+/* --- Zoom controls --- */
+.tag-zoom {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--tag-rule);
+  border-radius: var(--tag-r-md);
+  padding: 4px;
+  z-index: 3;
+  box-shadow: 0 4px 18px -10px rgba(10, 18, 32, 0.10);
+}
+.tag-zbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--tag-ink);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+.tag-zbtn:hover { background: var(--tag-paper-3); }
+
+.tag-hint {
+  position: absolute;
+  bottom: 22px;
+  left: 18px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tag-muted-2);
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  padding: 6px 10px;
+  border-radius: var(--tag-r-sm);
+  pointer-events: none;
+}
+
+/* --- Side panel — content rules used inside Dialog modal --- */
+.tag-panel-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tag-panel-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 28px;
+  text-align: center;
+}
+
+.tag-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid var(--tag-rule);
+}
+.tag-panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.tag-panel-tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.tag-panel-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  color: var(--tag-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 140ms, color 140ms;
+}
+.tag-panel-close:hover {
+  background: var(--tag-paper-3);
+  color: var(--tag-ink);
+}
+
+.tag-panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px 28px;
+}
+.tag-panel-scroll::-webkit-scrollbar { width: 6px; }
+.tag-panel-scroll::-webkit-scrollbar-thumb {
+  background: var(--tag-rule-strong);
+  border-radius: 3px;
+}
+
+.tag-panel-sub {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+.tag-panel-title {
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+.tag-panel-level {
+  font-size: 13px;
+  margin: 0 0 22px;
+}
+
+.tag-panel-score {
+  padding: 16px 18px;
+  border-radius: var(--tag-r-md);
+  margin-bottom: 22px;
+}
+.tag-score-track {
+  height: 6px;
+  background: rgba(10, 18, 32, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.tag-score-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  transition: transform 600ms var(--tag-ease-spring) 200ms;
+}
+.tag-score-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.tag-score-num {
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+.tag-score-num .tag-score-max {
+  font-size: 13px;
+  margin-left: 2px;
+}
+.tag-score-caption {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tag-panel-section { margin-bottom: 20px; }
+.tag-panel-section:last-child { margin-bottom: 0; }
+.tag-panel-section-title {
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tag-panel-section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--tag-rule);
+}
+.tag-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tag-panel-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+.tag-panel-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+}
+.tag-panel-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 0;
+}
+.tag-panel-quote {
+  margin: 0;
+  padding: 14px 16px;
+  border-left: 3px solid var(--tag-gold);
+  border-radius: 0 var(--tag-r-md) var(--tag-r-md) 0;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.tag-panel-quote::before {
+  content: "“";
+  color: var(--tag-gold);
+  font-size: 22px;
+  margin-right: 2px;
+}
+.tag-panel-quote::after {
+  content: "”";
+  color: var(--tag-gold);
+  font-size: 22px;
+  margin-left: 2px;
+}
+
+/* --- Insights cards --- */
+.tag-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+.tag-insight {
+  border-radius: var(--tag-r-md);
+  padding: 20px 18px 18px;
+  transition: transform 260ms var(--tag-ease-spring), box-shadow 260ms ease;
+}
+.tag-insight:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px -20px rgba(10, 18, 32, 0.18);
+}
+.tag-insight-kicker {
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* --- Node hover state --- */
+.tag-svg .tag-role-node,
+.tag-svg [data-node-id] {
+  cursor: pointer;
+}
+.tag-svg g[transform]:hover circle,
+.tag-svg g[transform]:hover rect {
+  transition: filter 180ms ease, transform 180ms var(--tag-ease-spring);
+  filter: drop-shadow(0 6px 18px rgba(10, 18, 32, 0.18));
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .tag-insights-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .tag-frame { padding: 12px 8px; }
+  .tag-main { padding: 14px; }
+  .tag-stat { padding: 8px 14px; }
+  .tag-stat-num { font-size: 28px; }
+  .tag-insights-grid { grid-template-columns: 1fr; }
+  .tag-legend { top: 12px; left: 12px; padding: 9px 11px; font-size: 11px; }
+  .tag-zoom { bottom: 12px; right: 12px; }
+  .tag-hint { display: none; }
+}

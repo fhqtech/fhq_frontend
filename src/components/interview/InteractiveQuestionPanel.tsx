@@ -34,7 +34,7 @@ const MCQTask = ({ options, onSubmit }: { options: string[]; onSubmit: (answer: 
     <div className="space-y-4 w-full max-w-lg">
       <RadioGroup onValueChange={setSelectedValue} className="space-y-2">
         {options.map((option, index) => (
-          <div key={index} className="flex items-center space-x-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div key={index} className="flex items-center space-x-2 bg-paper-2 p-4 rounded-lg border border-rule ">
             <RadioGroupItem value={option} id={`option-${index}`} />
             <Label htmlFor={`option-${index}`} className="flex-1 text-base cursor-pointer">
               {option}
@@ -54,7 +54,7 @@ const LongTextTask = ({ description }: { description: string }) => {
   return (
     <div className="p-6 flex flex-col gap-6 h-full">
       <ScrollArea className="flex-grow pr-4">
-        <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+        <p className="text-sm text-ink-soft whitespace-pre-wrap">
           {description}
         </p>
       </ScrollArea>
@@ -75,8 +75,8 @@ const TextInputTask = ({ description, onSubmit }: { description: string; onSubmi
 
   return (
     <div className="space-y-4 w-full max-w-lg">
-      <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-        <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+      <div className="bg-paper-2 p-4 rounded-lg border border-rule ">
+        <p className="text-sm text-ink-soft whitespace-pre-wrap">
           {description}
         </p>
       </div>
@@ -111,13 +111,13 @@ const RatingTask = ({ description, scale, onSubmit }: {
 
   return (
     <div className="space-y-4 w-full max-w-lg">
-      <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-        <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+      <div className="bg-paper-2 p-4 rounded-lg border border-rule ">
+        <p className="text-sm text-ink-soft whitespace-pre-wrap">
           {description}
         </p>
       </div>
       <div className="space-y-3">
-        <div className="flex justify-between text-sm text-slate-500">
+        <div className="flex justify-between text-sm text-muted">
           <span>{scale.labels?.[0] || `${scale.min}`}</span>
           <span>{scale.labels?.[1] || `${scale.max}`}</span>
         </div>
@@ -156,12 +156,12 @@ export const InteractiveQuestionPanel = ({ task, onSubmit }: InteractiveQuestion
   const TaskHeader = () => (
     <div className="mb-6">
       {task.title && (
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
+        <h3 className="text-lg font-semibold text-ink mb-2">
           {task.title}
         </h3>
       )}
       {task.instructions && (
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-muted ">
           {task.instructions}
         </p>
       )}
@@ -192,7 +192,7 @@ export const InteractiveQuestionPanel = ({ task, onSubmit }: InteractiveQuestion
       
       default:
         return (
-          <div className="text-yellow-700 dark:text-yellow-300 p-4 bg-yellow-500/10 rounded-lg flex items-center space-x-3">
+          <div className="text-warning p-4 bg-warning/10 rounded-lg flex items-center space-x-3">
             <AlertTriangle className="w-6 h-6" />
             <div>
               <p className="font-bold">Unsupported Task Type</p>
@@ -205,7 +205,7 @@ export const InteractiveQuestionPanel = ({ task, onSubmit }: InteractiveQuestion
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div className="bg-paper rounded-lg p-6 border border-rule shadow-1">
       <TaskHeader />
       {renderTask()}
     </div>

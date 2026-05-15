@@ -17,14 +17,14 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
 
   if (!data || !data.evaluation_pillars) {
     return (
-      <div className="enhanced-blueprint-display space-y-6 relative bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-        <p className="text-gray-500">Loading blueprint data...</p>
+      <div className="enhanced-blueprint-display space-y-6 relative bg-paper p-6 rounded-lg border border-rule shadow-1">
+        <p className="text-muted">Loading blueprint data...</p>
       </div>
     );
   }
 
   return (
-    <div className="enhanced-blueprint-display space-y-6 relative bg-white p-6 rounded-sm border border-gray-200" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+    <div className="enhanced-blueprint-display space-y-6 relative bg-paper p-6 rounded-sm border border-rule" style={{ boxShadow: 'var(--shadow-clay)' }}>
 
       {/* Mission Statement - HIDDEN */}
       {/* <MissionSection mission={data.role_summary.mission} /> */}
@@ -33,13 +33,13 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
       <div className="space-y-8">
         {/* Tab Buttons */}
         <div className="flex justify-center">
-          <div className="flex bg-gray-100 rounded-sm p-1">
+          <div className="flex bg-paper-3 rounded-sm p-1">
             <button
               onClick={() => setActiveTab('overview')}
               className={`px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${
                 activeTab === 'overview'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-paper text-ink shadow-1'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               Overview
@@ -48,8 +48,8 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
               onClick={() => setActiveTab('skilltree')}
               className={`px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${
                 activeTab === 'skilltree'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-paper text-ink shadow-1'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               Skills Tree
@@ -66,26 +66,26 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
 };
 
 const BlueprintHeader = () => (
-  <div className="text-center py-4 bg-gray-50 rounded-lg border border-gray-100">
-    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+  <div className="text-center py-4 bg-paper-2 rounded-lg border border-rule">
+    <h1 className="text-2xl font-bold text-ink mb-2">
       Enhanced Interview Blueprint
     </h1>
-    <p className="text-sm text-gray-600">
+    <p className="text-sm text-muted">
       Comprehensive AI-powered evaluation framework with skill relationships
     </p>
   </div>
 );
 
 const MissionSection = ({ mission }: { mission: string }) => (
-  <Card className="border border-gray-200">
+  <Card className="border border-rule">
     <CardHeader className="pb-3">
-      <CardTitle className="text-lg font-semibold text-gray-900">
+      <CardTitle className="text-lg font-semibold text-ink">
         Mission Statement
       </CardTitle>
     </CardHeader>
     <CardContent className="pt-0">
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-        <p className="text-base text-gray-700 leading-relaxed">
+      <div className="bg-paper-2 rounded-lg p-4 border border-rule">
+        <p className="text-base text-ink-soft leading-relaxed">
           "{mission}"
         </p>
       </div>
@@ -100,18 +100,18 @@ const OverviewSection = ({ data }: { data: EnhancedBlueprintData }) => (
 
     {/* Quick Stats */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="rounded-sm p-6 bg-white" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+      <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
         <div className="flex items-center gap-4">
           <p className="text-5xl font-bold text-foreground">
             {data.evaluation_pillars.length}
           </p>
-          <div className="text-sm text-foreground-muted uppercase text-xs tracking-wider leading-tight">
+          <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
             <div>Evaluation</div>
             <div>Pillars</div>
           </div>
         </div>
       </div>
-      <div className="rounded-sm p-6 bg-white" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
+      <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
         <div className="flex items-center gap-4">
           <p className="text-5xl font-bold text-foreground">
             {data.evaluation_pillars.reduce((acc, p) => {
@@ -120,7 +120,7 @@ const OverviewSection = ({ data }: { data: EnhancedBlueprintData }) => (
               return acc + (criteriaCount || skillsCount);
             }, 0)}
           </p>
-          <div className="text-sm text-foreground-muted uppercase text-xs tracking-wider leading-tight">
+          <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
             <div>Skills to</div>
             <div>Assess</div>
           </div>
@@ -141,19 +141,19 @@ const OverviewSection = ({ data }: { data: EnhancedBlueprintData }) => (
 
 const ResponsibilitiesSection = ({ responsibilities }: { responsibilities: string[] }) => (
   <div>
-    <h2 className="text-lg font-semibold mb-3 text-gray-900">
+    <h2 className="text-lg font-semibold mb-3 text-ink">
       Key Responsibilities
     </h2>
-    <Card className="bg-blue-100/40 backdrop-blur-sm border border-blue-300/90 shadow-sm">
+    <Card className="bg-blue-100/40 backdrop-blur-sm border border-blue-300/90 shadow-1">
       <CardContent className="p-4">
-        <div className="bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/60">
+        <div className="bg-paper/40 backdrop-blur-sm rounded-lg p-3 border border-white/60">
           <ul className="space-y-2">
             {responsibilities.slice(0, Math.ceil(responsibilities.length / 2)).map((responsibility: string, index: number) => (
               <li key={index} className="flex items-start gap-2">
                 <div className="w-6 h-6 bg-blue-200/95 backdrop-blur-sm text-blue-800 font-medium rounded-full flex items-center justify-center flex-shrink-0 text-xs border border-blue-400/90">
                   {index + 1}
                 </div>
-                <span className="text-sm text-gray-700 leading-relaxed">
+                <span className="text-sm text-ink-soft leading-relaxed">
                   {responsibility}
                 </span>
               </li>
@@ -173,15 +173,15 @@ const QualifyingQuestionsSection = ({ questions }: { questions: string[] | strin
   }
 
   return (
-    <div className="bg-white rounded-sm border border-gray-200 p-6" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
-      <h2 className="text-lg font-bold uppercase tracking-wider mb-4 text-gray-900">
+    <div className="bg-paper rounded-sm border border-rule p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
+      <h2 className="text-lg font-bold uppercase tracking-wider mb-4 text-ink">
         Qualifying Topics
       </h2>
       <div className="flex flex-wrap gap-2">
         {topicsArray.map((topic: string, index: number) => (
           <div
             key={index}
-            className="inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-sm text-xs font-medium text-gray-900"
+            className="inline-flex items-center px-3 py-2 bg-paper border border-rule-strong rounded-sm text-xs font-medium text-ink"
           >
             {topic}
           </div>
@@ -197,11 +197,11 @@ const CandidateProfileSection = ({ profile }: { profile: string }) => {
   }
 
   return (
-    <div className="bg-green-100/40 backdrop-blur-sm border border-green-300/90 rounded-sm p-6" style={{ boxShadow: 'inset 1px 1px 2px #e8e8e8, 2px 2px 4px #d5d5d5' }}>
-      <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">
+    <div className="bg-green-100/40 backdrop-blur-sm border border-green-300/90 rounded-sm p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
+      <h3 className="text-lg font-bold uppercase tracking-wider text-ink mb-4">
         Ideal Candidate Profile
       </h3>
-      <p className="text-xs text-gray-700 leading-relaxed">
+      <p className="text-xs text-ink-soft leading-relaxed">
         {profile}
       </p>
     </div>

@@ -53,7 +53,7 @@ const statusConfig = {
   },
   "draft": {
     label: "Draft",
-    className: "bg-gray-100 text-gray-600 border-gray-200"
+    className: "bg-paper-3 text-muted border-rule"
   },
   "active": {
     label: "Active",
@@ -94,7 +94,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     return (
       <span className={cn(
         "inline-flex items-center px-2.5 py-1 rounded-sm text-[10px] font-bold border",
-        "bg-muted text-foreground-muted border-border",
+        "bg-muted text-muted border-border",
         className
       )}>
         Unknown

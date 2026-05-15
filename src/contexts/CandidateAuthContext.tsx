@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from 'react';
+import { identify, reset as analyticsReset } from '@/lib/analytics';
 
 interface CandidateAccount {
   id: string;
@@ -101,6 +102,11 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
       const data = await resp.json();
       localStorage.setItem(STORAGE_KEY, data.token);
       setAccount(data.account as CandidateAccount);
+      identify({
+        user_id: data.account.id,
+        user_kind: "applicant",
+        email: data.account.email,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -168,6 +174,7 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
       }
       localStorage.removeItem(STORAGE_KEY);
       setAccount(null);
+      analyticsReset();
     } finally {
       setIsLoading(false);
     }

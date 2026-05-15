@@ -329,7 +329,7 @@ export default function TestAssets() {
   ];
 
   return (
-    <div className="w-screen h-screen bg-black relative">
+    <div className="w-screen h-screen bg-ink relative">
       <Canvas
         camera={{ position: [0, 0, 15], fov: 50 }}
         gl={{
@@ -352,8 +352,8 @@ export default function TestAssets() {
               px-4 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider
               transition-all duration-200
               ${mode === key
-                ? 'text-white shadow-lg scale-105'
-                : 'text-gray-400 bg-gray-800/50 hover:bg-gray-700/50 hover:text-white'
+                ? 'text-paper shadow-2 scale-105'
+                : 'text-muted-2 bg-ink/50 hover:bg-ink/50 hover:text-paper'
               }
             `}
             style={{
@@ -368,13 +368,13 @@ export default function TestAssets() {
 
       {/* Logo - Top Left */}
       <div className="absolute top-6 left-6">
-        <h1 className="text-xl font-bold text-white whitespace-nowrap">FLOWDOT AI</h1>
-        <p className="text-xs text-slate-400 whitespace-nowrap">Candidate Portal</p>
+        <h1 className="text-xl font-bold text-paper whitespace-nowrap">FunnelHQ</h1>
+        <p className="text-xs text-muted-2 whitespace-nowrap">Applicant Portal</p>
       </div>
 
       {/* Interview Title & Connection Status - Center Top */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-        <h2 className="text-white text-lg font-semibold mb-2">Senior Product Manager</h2>
+        <h2 className="text-paper text-lg font-semibold mb-2">Senior Product Manager</h2>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-red-500">
             <Clock className="w-4 h-4" />
@@ -388,17 +388,17 @@ export default function TestAssets() {
       </div>
 
       {/* Camera Feed Tile - Larger black rectangle at top right */}
-      <div className="absolute top-6 right-6 w-72 h-52 bg-black rounded-lg border border-gray-700 flex items-center justify-center">
+      <div className="absolute top-6 right-6 w-72 h-52 bg-ink rounded-lg border border-ink flex items-center justify-center">
         <div className="text-center">
-          <Video className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-          <span className="text-gray-600 text-xs uppercase tracking-wider">Camera Feed</span>
+          <Video className="w-12 h-12 text-muted mx-auto mb-2" />
+          <span className="text-muted text-xs uppercase tracking-wider">Camera Feed</span>
         </div>
       </div>
 
       {/* Transcript Box - Below Camera Feed */}
-      <div className="absolute top-[240px] right-6 w-72 h-[420px] bg-slate-900/80 rounded-lg border border-gray-700 flex flex-col">
-        <div className="px-3 py-2 border-b border-gray-700">
-          <span className="text-slate-400 text-xs uppercase tracking-wider font-medium">Transcript</span>
+      <div className="absolute top-[240px] right-6 w-72 h-[420px] bg-ink/80 rounded-lg border border-ink flex flex-col">
+        <div className="px-3 py-2 border-b border-ink">
+          <span className="text-muted-2 text-xs uppercase tracking-wider font-medium">Transcript</span>
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
           {/* AI Message - Left aligned */}
@@ -409,7 +409,7 @@ export default function TestAssets() {
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
             <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
-              <p className="text-slate-300 text-xs leading-relaxed">Hello! Welcome to your interview for the Senior Product Manager position. Can you start by telling me about yourself?</p>
+              <p className="text-muted-2 text-xs leading-relaxed">Hello! Welcome to your interview for the Senior Product Manager position. Can you start by telling me about yourself?</p>
             </div>
           </div>
 
@@ -421,7 +421,7 @@ export default function TestAssets() {
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
             <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
-              <p className="text-slate-300 text-xs leading-relaxed">Thank you! I'm a product manager with 6 years of experience in B2B SaaS. I've led cross-functional teams and launched multiple products.</p>
+              <p className="text-muted-2 text-xs leading-relaxed">Thank you! I'm a product manager with 6 years of experience in B2B SaaS. I've led cross-functional teams and launched multiple products.</p>
             </div>
           </div>
 
@@ -433,7 +433,7 @@ export default function TestAssets() {
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
             <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
-              <p className="text-slate-300 text-xs leading-relaxed">That's great! Can you walk me through a challenging product decision you had to make?</p>
+              <p className="text-muted-2 text-xs leading-relaxed">That's great! Can you walk me through a challenging product decision you had to make?</p>
             </div>
           </div>
 
@@ -445,7 +445,7 @@ export default function TestAssets() {
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
             <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
-              <p className="text-slate-300 text-xs leading-relaxed">Sure! At my previous company, we had to decide between building a new feature or improving our core product...</p>
+              <p className="text-muted-2 text-xs leading-relaxed">Sure! At my previous company, we had to decide between building a new feature or improving our core product...</p>
             </div>
           </div>
 
@@ -457,7 +457,7 @@ export default function TestAssets() {
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
             <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
-              <p className="text-slate-300 text-xs leading-relaxed">How did you approach that decision? What factors did you consider?</p>
+              <p className="text-muted-2 text-xs leading-relaxed">How did you approach that decision? What factors did you consider?</p>
             </div>
           </div>
 
@@ -469,7 +469,7 @@ export default function TestAssets() {
               className="w-6 h-6 rounded-full flex-shrink-0"
             />
             <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
-              <p className="text-slate-300 text-xs leading-relaxed">We analyzed user feedback, looked at retention metrics, and ran customer interviews to understand their pain points...</p>
+              <p className="text-muted-2 text-xs leading-relaxed">We analyzed user feedback, looked at retention metrics, and ran customer interviews to understand their pain points...</p>
             </div>
           </div>
         </div>
@@ -483,32 +483,32 @@ export default function TestAssets() {
         </button>
 
         {/* Device Selector */}
-        <button className="flex items-center gap-2 h-10 px-3 border border-slate-600 rounded-md bg-transparent text-slate-300 text-xs">
+        <button className="flex items-center gap-2 h-10 px-3 border border-rule-strong rounded-md bg-transparent text-muted-2 text-xs">
           <span>MacBook Pro Mic</span>
           <ChevronDown className="w-3 h-3" />
         </button>
 
         {/* Calibration Button */}
-        <button className="h-10 w-10 flex items-center justify-center border border-slate-600 rounded-md hover:bg-slate-800">
-          <Settings className="w-4 h-4 text-slate-400" />
+        <button className="h-10 w-10 flex items-center justify-center border border-rule-strong rounded-md hover:bg-ink">
+          <Settings className="w-4 h-4 text-muted-2" />
         </button>
 
         {/* Speech Rate Control - 3 Radio Buttons */}
-        <div className="flex items-center gap-0.5 bg-slate-800 rounded-md p-0.5">
-          <button className="px-3 py-1.5 rounded text-xs text-slate-400 hover:bg-slate-700 transition-colors">
+        <div className="flex items-center gap-0.5 bg-ink rounded-md p-0.5">
+          <button className="px-3 py-1.5 rounded text-xs text-muted-2 hover:bg-ink transition-colors">
             Slow
           </button>
-          <button className="px-3 py-1.5 rounded text-xs bg-sky-600 text-white">
+          <button className="px-3 py-1.5 rounded text-xs bg-sky-600 text-paper">
             Normal
           </button>
-          <button className="px-3 py-1.5 rounded text-xs text-slate-400 hover:bg-slate-700 transition-colors">
+          <button className="px-3 py-1.5 rounded text-xs text-muted-2 hover:bg-ink transition-colors">
             Fast
           </button>
         </div>
 
         {/* End Call Button */}
         <button className="h-12 w-12 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded-full">
-          <PhoneDisconnectIcon size={20} className="text-white" />
+          <PhoneDisconnectIcon size={20} className="text-paper" />
         </button>
       </div>
     </div>

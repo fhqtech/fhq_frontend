@@ -8,8 +8,10 @@ const SIZE = {
 } as const;
 
 const VARIANT = {
-  default: "text-foreground-muted",
-  brand: "text-brand-primary",
+  default: "text-muted",
+  brand: "text-ink",
+  gold: "text-gold-ink",
+  danger: "text-danger",
   inverse: "text-white",
 } as const;
 
@@ -53,6 +55,35 @@ export function SpinnerWithCopy({
     >
       <Loader2 className={cn(SIZE[size], "animate-spin")} aria-hidden="true" />
       <span>{label}</span>
+    </div>
+  );
+}
+
+/**
+ * PageSpinner — full-screen centered loader for route-level Suspense
+ * fallbacks and page-loading shells. Replaces the ad-hoc
+ * `<div className="min-h-[100dvh] flex items-center justify-center">
+ *    <Loader2 className="animate-spin"/></div>` pattern.
+ */
+export function PageSpinner({
+  label = "Loading…",
+  variant = "gold",
+  className,
+}: { label?: string; variant?: keyof typeof VARIANT; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "min-h-[100dvh] w-full bg-paper-2 flex flex-col items-center justify-center gap-3 text-sm text-muted",
+        className,
+      )}
+    >
+      <Loader2
+        className={cn(SIZE.lg, VARIANT[variant], "animate-spin")}
+        aria-hidden="true"
+      />
+      <span role="status" aria-live="polite">
+        {label}
+      </span>
     </div>
   );
 }

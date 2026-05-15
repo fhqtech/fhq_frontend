@@ -103,14 +103,21 @@ export const resumeInterview = async (
 };
 
 /**
- * Get current interview status (no auth required for candidates)
+ * Get current interview status. Candidate-token gated as of S1.2 —
+ * previously anonymous, which let anyone enumerate interview_ids.
  */
-export const getInterviewStatus = async (interviewId: string): Promise<InterviewStatusResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/interviews/${interviewId}/status`, {
+export const getInterviewStatus = async (
+  interviewId: string,
+  candidateToken?: string,
+): Promise<InterviewStatusResponse> => {
+  const tok =
+    candidateToken ||
+    (typeof window !== 'undefined' ? sessionStorage.getItem('candidateToken') || '' : '');
+  const url = new URL(`${API_BASE_URL}/api/interviews/${interviewId}/status`);
+  if (tok) url.searchParams.set('candidate_token', tok);
+  const response = await fetch(url.toString(), {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json' },
   });
 
   if (!response.ok) {

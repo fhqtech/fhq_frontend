@@ -50,7 +50,7 @@ export function CandidateNotes({
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className={cn(
-          isNearLimit && "text-orange-500 font-medium"
+          isNearLimit && "text-orange-ink font-medium"
         )}>
           {characterCount} / {maxLength} characters
         </span>

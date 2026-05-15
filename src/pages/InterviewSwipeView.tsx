@@ -227,14 +227,14 @@ export default function InterviewSwipeView() {
   // OTP Verification Screen
   if (!otpVerified) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white via-slate-200 to-black flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-[100dvh] bg-paper-2 from-white via-slate-200 to-black flex items-center justify-center p-4 relative overflow-hidden">
         {/* Logo and Text - Top Left (matching Sidebar) */}
         <div className="absolute top-6 left-2 z-20">
           <div className="flex items-center justify-start">
             <img src="/logo.png" alt="FunnelHQ" className="w-14 h-9 object-cover" style={{ objectPosition: 'center' }} />
             <div className="-ml-1">
-              <div className="font-semibold text-black whitespace-nowrap text-lg">FunnelHQ</div>
-              <div className="text-xs text-black/70 font-medium -mt-1">Review Portal</div>
+              <div className="font-semibold text-ink whitespace-nowrap text-lg">FunnelHQ</div>
+              <div className="text-xs text-ink/70 font-medium -mt-1">Review Portal</div>
             </div>
           </div>
         </div>
@@ -256,9 +256,9 @@ export default function InterviewSwipeView() {
           }
         `}</style>
 
-        <Card className="w-full max-w-md shadow-2xl rounded-sm border-none relative z-10 bg-white/95 backdrop-blur-sm">
+        <Card className="w-full max-w-md shadow-3 rounded-sm border-none relative z-10 bg-paper/95 backdrop-blur-sm">
           <CardHeader className="px-8">
-            <CardTitle className="text-2xl text-center uppercase tracking-wider text-black">Enter Access Code</CardTitle>
+            <CardTitle className="text-2xl text-center text-ink">Enter Access Code</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 px-8 pb-8">
             <div className="space-y-3">
@@ -267,7 +267,7 @@ export default function InterviewSwipeView() {
                 placeholder="Your Name *"
                 value={reviewerName}
                 onChange={(e) => setReviewerName(e.target.value)}
-                className="text-center border-slate-300 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                className="text-center border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                 required
                 autoFocus
               />
@@ -305,7 +305,7 @@ export default function InterviewSwipeView() {
                     }, 300);
                   }
                 }}
-                className="text-center text-3xl font-mono tracking-widest border-slate-300 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] py-6"
+                className="text-center text-3xl font-mono tracking-widest border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] py-6"
               />
               {otpError && (
                 <p className="text-sm text-destructive text-center uppercase tracking-wide font-medium">{otpError}</p>
@@ -315,9 +315,9 @@ export default function InterviewSwipeView() {
         </Card>
 
         {/* Footer - Fixed at bottom */}
-        <div className="absolute bottom-6 left-0 right-0 text-center text-white text-xs z-20">
-          <p className="text-white/90">Swipe right to shortlist • Swipe left to reject</p>
-          <p className="mt-1 text-white/60">© 2025 FunnelHQ. All rights reserved.</p>
+        <div className="absolute bottom-6 left-0 right-0 text-center text-paper text-xs z-20">
+          <p className="text-paper/90">Swipe right to shortlist • Swipe left to reject</p>
+          <p className="mt-1 text-paper/60">© 2025 FunnelHQ. All rights reserved.</p>
         </div>
       </div>
     );
@@ -329,10 +329,10 @@ export default function InterviewSwipeView() {
     const rejectCount = Array.from(decisions.values()).filter(d => d === 'reject').length;
 
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-sm border border-slate-300">
+      <div className="min-h-[100dvh] bg-paper flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-sm border border-rule-strong">
           <CardHeader>
-            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2 uppercase tracking-wider text-black">
+            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2 text-ink">
               <Check className="w-6 h-6 text-green-600" />
               Session Complete!
             </CardTitle>
@@ -344,11 +344,11 @@ export default function InterviewSwipeView() {
               </p>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="p-4 bg-green-50 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-green-200">
-                  <div className="text-3xl font-bold text-black">{shortlistCount}</div>
+                  <div className="text-3xl font-bold text-ink">{shortlistCount}</div>
                   <div className="text-sm text-green-600 uppercase tracking-wide">Shortlisted</div>
                 </div>
                 <div className="p-4 bg-red-50 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-red-200">
-                  <div className="text-3xl font-bold text-black">{rejectCount}</div>
+                  <div className="text-3xl font-bold text-ink">{rejectCount}</div>
                   <div className="text-sm text-red-600 uppercase tracking-wide">Rejected</div>
                 </div>
               </div>
@@ -367,7 +367,7 @@ export default function InterviewSwipeView() {
 
   // Swipe Interface
   return (
-    <div className="min-h-screen bg-white p-4 pb-safe">
+    <div className="min-h-[100dvh] bg-paper p-4 pb-safe">
       {/* Header */}
       <div className="max-w-md mx-auto mb-4">
         <div className="flex items-center justify-between mb-2">
@@ -380,12 +380,12 @@ export default function InterviewSwipeView() {
               setCandidates([]);
               setCurrentIndex(0);
             }}
-            className="border-slate-300 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+            className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Exit
           </Button>
-          <div className="text-sm font-bold uppercase tracking-wider text-black">
+          <div className="text-sm font-bold uppercase tracking-wider text-ink">
             {currentIndex + 1} / {candidates.length}
             {hasMore && '+'}
           </div>
@@ -428,7 +428,7 @@ export default function InterviewSwipeView() {
           </animated.div>
         ) : (
           <div className="flex items-center justify-center min-h-[700px]">
-            <Loader2 className="w-8 h-8 animate-spin text-black" />
+            <Loader2 className="w-8 h-8 animate-spin text-ink" />
           </div>
         )}
       </div>
@@ -447,7 +447,7 @@ export default function InterviewSwipeView() {
         <Button
           size="lg"
           variant="default"
-          className="w-16 h-16 rounded-full shadow-lg bg-green-600 hover:bg-green-700"
+          className="w-16 h-16 rounded-full shadow-2 bg-green-600 hover:bg-green-700"
           onClick={() => handleSwipe('right')}
           disabled={loading || !currentCandidate}
         >
@@ -457,14 +457,14 @@ export default function InterviewSwipeView() {
 
       {/* Loading indicator */}
       {loading && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-          <Loader2 className="w-8 h-8 animate-spin text-white" />
+        <div className="fixed inset-0 bg-ink/20 flex items-center justify-center z-50">
+          <Loader2 className="w-8 h-8 animate-spin text-paper" />
         </div>
       )}
 
       {/* Fetching more indicator */}
       {fetchingMore && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-ink/70 text-paper px-4 py-2 rounded-full text-sm">
           Loading more candidates...
         </div>
       )}

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Search, Filter, Loader2, Users, TrendingUp, Star, CheckCircle } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageSkeleton } from "@/components/ui/shimmer";
 
 export default function CandidateListDetail() {
@@ -113,7 +114,7 @@ export default function CandidateListDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-[100dvh] bg-background p-6">
       <div className="container mx-auto space-y-6">
         {/* Header */}
         <div>
@@ -185,18 +186,17 @@ export default function CandidateListDetail() {
 
         {/* Candidates Grid or Empty State */}
         {candidates.length === 0 ? (
-          <div className="text-center py-16 bg-card rounded-lg border">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Candidate Data Available</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Candidates will appear here once they complete interviews.
-              Make sure interviews are assigned to this list.
-            </p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="No applicant data yet"
+            description="Applicants will appear here once they complete interviews. Make sure interviews are assigned to this list."
+          />
         ) : filteredCandidates.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No candidates match your filters</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="No matching applicants"
+            description="No applicants match your filters. Loosen the filters above to see more."
+          />
         ) : (
           <>
             {/* Charts */}

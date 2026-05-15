@@ -145,62 +145,62 @@ const AcceptInvitation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-[100dvh] bg-paper-2    flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-paper rounded-2xl shadow-2 p-8">
         {status === 'loading' && (
           <div className="text-center">
             <Loader2 className="w-16 h-16 text-indigo-600 animate-spin mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Processing Invitation</h2>
-            <p className="text-slate-600">Please wait while we add you to the workspace...</p>
+            <h2 className="text-2xl font-bold text-ink mb-2">Processing Invitation</h2>
+            <p className="text-muted">Please wait while we add you to the workspace...</p>
           </div>
         )}
 
         {status === 'success' && (
           <div className="text-center">
             <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Success!</h2>
-            <p className="text-slate-600 mb-4">{message}</p>
+            <h2 className="text-2xl font-bold text-ink mb-2">Success!</h2>
+            <p className="text-muted mb-4">{message}</p>
             {invitationDetails && (
-              <div className="bg-slate-50 rounded-lg p-4 mb-4 text-left">
-                <p className="text-sm text-slate-500 mb-1">List</p>
-                <p className="font-semibold text-slate-900">{invitationDetails.listName}</p>
-                <p className="text-sm text-slate-500 mt-3 mb-1">Role</p>
-                <p className="font-semibold text-slate-900">{invitationDetails.role}</p>
-                <p className="text-sm text-slate-500 mt-3 mb-1">Invited by</p>
-                <p className="font-semibold text-slate-900">{invitationDetails.inviterName}</p>
+              <div className="bg-paper-2 rounded-lg p-4 mb-4 text-left">
+                <p className="text-sm text-muted mb-1">List</p>
+                <p className="font-semibold text-ink">{invitationDetails.listName}</p>
+                <p className="text-sm text-muted mt-3 mb-1">Role</p>
+                <p className="font-semibold text-ink">{invitationDetails.role}</p>
+                <p className="text-sm text-muted mt-3 mb-1">Invited by</p>
+                <p className="font-semibold text-ink">{invitationDetails.inviterName}</p>
               </div>
             )}
-            <p className="text-sm text-slate-500">Redirecting to Control Tower...</p>
+            <p className="text-sm text-muted">Redirecting to Control Tower...</p>
           </div>
         )}
 
         {status === 'wrong_user' && (
           <div className="text-center">
             <XCircle className="w-16 h-16 text-orange-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Wrong Account</h2>
-            <p className="text-slate-600 mb-4">{message}</p>
+            <h2 className="text-2xl font-bold text-ink mb-2">Wrong Account</h2>
+            <p className="text-muted mb-4">{message}</p>
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-left">
-              <p className="text-sm text-slate-500 mb-1">Invitation sent to</p>
-              <p className="font-semibold text-slate-900 mb-3">{invitedEmail}</p>
-              <p className="text-sm text-slate-500 mb-1">Currently logged in as</p>
-              <p className="font-semibold text-slate-900">{currentEmail}</p>
+              <p className="text-sm text-muted mb-1">Invitation sent to</p>
+              <p className="font-semibold text-ink mb-3">{invitedEmail}</p>
+              <p className="text-sm text-muted mb-1">Currently logged in as</p>
+              <p className="font-semibold text-ink">{currentEmail}</p>
             </div>
             <div className="space-y-3">
               <button
                 onClick={handleLogoutAndRetry}
-                className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-paper font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 <LogOut className="w-5 h-5" />
                 Logout and Login with Correct Account
               </button>
               <button
                 onClick={handleDismiss}
-                className="w-full px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl transition-colors"
+                className="w-full px-6 py-3 bg-paper-3 hover:bg-paper-4 text-ink-soft font-semibold rounded-xl transition-colors"
                 aria-label="Dismiss this invitation and continue using your current account"
               >
                 Skip this invitation
               </button>
-              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              <p className="text-xs text-muted mt-2 leading-relaxed">
                 Skipping won't accept the invitation. To join this list as {invitedEmail}, log out and log back in with that email.
               </p>
             </div>
@@ -210,11 +210,11 @@ const AcceptInvitation = () => {
         {status === 'error' && (
           <div className="text-center">
             <XCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Error</h2>
-            <p className="text-slate-600 mb-6">{message}</p>
+            <h2 className="text-2xl font-bold text-ink mb-2">Error</h2>
+            <p className="text-muted mb-6">{message}</p>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors"
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-paper font-semibold rounded-xl transition-colors"
             >
               Go to Login
             </button>

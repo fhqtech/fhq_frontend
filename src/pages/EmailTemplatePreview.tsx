@@ -49,7 +49,7 @@ const EmailTemplatePreview = () => {
                                 This AI-powered interview will help us better understand your skills and experience.
                             </p>
 
-                            <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
+                            <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-left: 4px solid #C8A24B; border-radius: 4px;">
                                 <p style="margin: 0 0 10px; color: #1a1a1a; font-size: 14px; font-weight: 600;">
                                     Interview Details:
                                 </p>
@@ -107,22 +107,22 @@ const EmailTemplatePreview = () => {
   `;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-[100dvh] bg-paper-2 p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Email Template Preview - Prelims</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Controls */}
-          <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border">
+          <div className="lg:col-span-1 bg-paper p-6 rounded-lg shadow-1 border">
             <h2 className="text-xl font-semibold mb-4">Dynamic Content</h2>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="candidateName">Candidate Name</Label>
+                <Label htmlFor="candidateName">Applicant name</Label>
                 <Input
                   id="candidateName"
                   value={candidateName}
                   onChange={(e) => setCandidateName(e.target.value)}
-                  placeholder="John Doe"
+                  placeholder="Priya Sharma"
                 />
               </div>
 
@@ -195,17 +195,17 @@ const EmailTemplatePreview = () => {
 
           {/* Preview */}
           <div className="lg:col-span-2">
-            <div className="bg-white p-6 rounded-lg shadow-sm border mb-4">
+            <div className="bg-paper p-6 rounded-lg shadow-1 border mb-4">
               <h2 className="text-xl font-semibold mb-4">Email Preview</h2>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted mb-4">
                 Subject: Interview Invitation - {interviewTitle}
               </p>
             </div>
 
-            <div className="bg-gray-100 p-4 rounded-lg border">
+            <div className="bg-paper-3 p-4 rounded-lg border">
               <iframe
                 srcDoc={htmlTemplate}
-                className="w-full bg-white rounded"
+                className="w-full bg-paper rounded"
                 style={{ height: '800px', border: 'none' }}
                 title="Email Preview"
               />

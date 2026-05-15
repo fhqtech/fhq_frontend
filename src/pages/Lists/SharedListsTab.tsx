@@ -185,7 +185,7 @@ export function SharedListsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading shared candidate pools...</div>
+        <div className="text-muted">Loading shared candidate pools...</div>
       </div>
     );
   }
@@ -194,35 +194,35 @@ export function SharedListsTab() {
     <div className="pt-2 pl-1 pr-4 pb-4">
       {/* Search and Filters */}
       {sharedLists.length > 0 && (
-        <div className="sticky top-0 z-10 bg-gray-50 pb-4 flex items-center gap-3">
+        <div className="sticky top-0 z-10 bg-paper-2 pb-4 flex items-center gap-3">
           <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search shared candidate pools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-paper"
             />
           </div>
           <div className="flex gap-2">
             <Button
               variant={listFilter === 'all' ? 'default' : 'outline'}
               onClick={() => setListFilter('all')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${listFilter === 'all' ? 'bg-black hover:bg-slate-800 text-white' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${listFilter === 'all' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               All
             </Button>
             <Button
               variant={listFilter === 'normal' ? 'default' : 'outline'}
               onClick={() => setListFilter('normal')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${listFilter === 'normal' ? 'bg-black hover:bg-slate-800 text-white' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${listFilter === 'normal' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Normal
             </Button>
             <Button
               variant={listFilter === 'curated' ? 'default' : 'outline'}
               onClick={() => setListFilter('curated')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${listFilter === 'curated' ? 'bg-black hover:bg-slate-800 text-white' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${listFilter === 'curated' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Curated
             </Button>
@@ -233,18 +233,18 @@ export function SharedListsTab() {
       {sharedLists.length === 0 ? (
         <div className="text-center py-8">
           <img src={coffeeSvg} alt="No shared pools" className="w-96 h-96 mx-auto mb-6 object-contain" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-3 uppercase tracking-wider">No shared candidate pools</h3>
-          <p className="text-sm text-gray-500 uppercase tracking-wider">
+          <h3 className="text-xl font-semibold text-ink mb-3 uppercase tracking-wider">No shared candidate pools</h3>
+          <p className="text-sm text-muted uppercase tracking-wider">
             When other projects share candidate pools with you, they'll appear here
           </p>
         </div>
       ) : filteredLists.length === 0 ? (
         <div className="text-center py-12">
-          <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <Search className="h-8 w-8 text-gray-400" />
+          <div className="bg-paper-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <Search className="h-8 w-8 text-muted-2" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No lists found</h3>
-          <p className="text-gray-500">
+          <h3 className="text-lg font-medium text-ink mb-2">No lists found</h3>
+          <p className="text-muted">
             Try adjusting your search or filter criteria
           </p>
         </div>

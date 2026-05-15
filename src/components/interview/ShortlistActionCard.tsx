@@ -114,10 +114,10 @@ export function ShortlistActionCard({ interviewId, interviewName }: ShortlistAct
   // Loading state
   if (loading) {
     return (
-      <Card className="p-4 bg-gray-50 border-gray-200 mb-6">
+      <Card className="p-4 bg-paper-2 border-rule mb-6">
         <div className="flex items-center justify-center py-2">
-          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-          <span className="ml-2 text-sm text-gray-500">Loading shortlist data...</span>
+          <Loader2 className="h-5 w-5 animate-spin text-muted-2" />
+          <span className="ml-2 text-sm text-muted">Loading shortlist data...</span>
         </div>
       </Card>
     );
@@ -126,14 +126,14 @@ export function ShortlistActionCard({ interviewId, interviewName }: ShortlistAct
   // No swipe decisions yet
   if (shortlistedCount === 0 && rejectedCount === 0) {
     return (
-      <Card className="p-4 bg-gray-50 border-gray-200 mb-6">
+      <Card className="p-4 bg-paper-2 border-rule mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gray-200">
-            <Users className="h-4 w-4 text-gray-500" />
+          <div className="p-2 rounded-lg bg-paper-3">
+            <Users className="h-4 w-4 text-muted" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600">No candidates reviewed yet</p>
-            <p className="text-xs text-gray-400">Use the mobile swipe feature to review candidates</p>
+            <p className="text-sm font-medium text-muted">No candidates reviewed yet</p>
+            <p className="text-xs text-muted-2">Use the mobile swipe feature to review candidates</p>
           </div>
         </div>
       </Card>
@@ -143,14 +143,14 @@ export function ShortlistActionCard({ interviewId, interviewName }: ShortlistAct
   // No shortlisted candidates
   if (shortlistedCount === 0) {
     return (
-      <Card className="p-4 bg-amber-50 border-amber-200 mb-6">
+      <Card className="p-4 bg-gold-soft border-rule mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-amber-100">
-            <Users className="h-4 w-4 text-amber-600" />
+          <div className="p-2 rounded-lg bg-gold-soft">
+            <Users className="h-4 w-4 text-gold-ink" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-amber-700">No candidates shortlisted</p>
-            <p className="text-xs text-amber-600">{rejectedCount} candidate{rejectedCount !== 1 ? 's' : ''} reviewed but none shortlisted</p>
+            <p className="text-sm font-medium text-gold-ink">No candidates shortlisted</p>
+            <p className="text-xs text-gold-ink">{rejectedCount} candidate{rejectedCount !== 1 ? 's' : ''} reviewed but none shortlisted</p>
           </div>
         </div>
       </Card>
@@ -160,22 +160,22 @@ export function ShortlistActionCard({ interviewId, interviewName }: ShortlistAct
   // List already created
   if (created) {
     return (
-      <Card className="p-4 bg-green-50 border-green-200 mb-6">
+      <Card className="p-4 bg-success-soft border-rule mb-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-100">
-              <Check className="h-4 w-4 text-green-600" />
+            <div className="p-2 rounded-lg bg-success-soft">
+              <Check className="h-4 w-4 text-success" />
             </div>
             <div>
-              <p className="text-sm font-medium text-green-700">Candidate list created!</p>
-              <p className="text-xs text-green-600">Shortlisted - {interviewName}</p>
+              <p className="text-sm font-medium text-success">Candidate list created!</p>
+              <p className="text-xs text-success">Shortlisted - {interviewName}</p>
             </div>
           </div>
           <Button
             size="sm"
             variant="outline"
             onClick={handleViewList}
-            className="border-green-300 text-green-700 hover:bg-green-100"
+            className="border-rule text-success hover:bg-success-soft"
           >
             View List
             <ArrowRight className="ml-1 h-3 w-3" />
@@ -187,17 +187,17 @@ export function ShortlistActionCard({ interviewId, interviewName }: ShortlistAct
 
   // Has shortlisted candidates - show create button
   return (
-    <Card className="p-4 bg-green-50 border-green-200 mb-6">
+    <Card className="p-4 bg-success-soft border-rule mb-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-green-100">
-            <Users className="h-4 w-4 text-green-600" />
+          <div className="p-2 rounded-lg bg-success-soft">
+            <Users className="h-4 w-4 text-success" />
           </div>
           <div>
-            <p className="text-sm font-medium text-green-700">
+            <p className="text-sm font-medium text-success">
               {shortlistedCount} candidate{shortlistedCount !== 1 ? 's' : ''} shortlisted
             </p>
-            <p className="text-xs text-green-600">
+            <p className="text-xs text-success">
               Ready to create a curated candidate list
             </p>
           </div>
@@ -206,7 +206,7 @@ export function ShortlistActionCard({ interviewId, interviewName }: ShortlistAct
           size="sm"
           onClick={handleCreateList}
           disabled={creating}
-          className="bg-green-600 hover:bg-green-700 text-white"
+          className="bg-success hover:bg-success text-paper"
         >
           {creating ? (
             <>

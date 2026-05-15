@@ -3,8 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CandidateAuthProvider } from "@/contexts/CandidateAuthContext";
@@ -16,6 +17,7 @@ import { PageSkeleton } from "@/components/ui/shimmer";
 // Eager: landing-path bundle (marketing → login → OAuth → 404). Keep these
 // in the entry chunk so the first-paint network round trip stays small.
 import MarketingLanding from "./pages/MarketingLanding";
+import StartChooser from "./pages/StartChooser";
 import NotFound from "./pages/NotFound";
 import OAuth2Handler from "./components/auth/OAuth2Handler";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -32,7 +34,6 @@ const CreateInterview = lazy(() => import("./pages/CreateInterview"));
 const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
 const FitmentInterviews = lazy(() => import("./pages/FitmentInterviews"));
-const FitmentInterviewDetails = lazy(() => import("./pages/FitmentInterviewDetails"));
 const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
 const QuickTour = lazy(() => import("./pages/QuickTour"));
@@ -49,6 +50,8 @@ const InterviewSwipeView = lazy(() => import("./pages/InterviewSwipeView"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
 const TestAssets = lazy(() => import("./pages/TestAssets"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 
 // Phase 4-6: candidate dashboard suite
 const CandidateLogin = lazy(() => import("./pages/candidate/CandidateLogin"));
@@ -61,9 +64,11 @@ const CandidateResults = lazy(() => import("./pages/candidate/CandidateResults")
 const CandidateProfile = lazy(() => import("./pages/candidate/CandidateProfile"));
 const CandidateSettings = lazy(() => import("./pages/candidate/CandidateSettings"));
 
-const queryClient = new QueryClient();
+const LegacyFitmentRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/interviews/${id}`} replace />;
+};
 
-// Environment variables loaded - logging removed for security
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -78,9 +83,14 @@ const App = () => (
           <Routes>
             {/* Marketing landing page (public) */}
             <Route path="/" element={<MarketingLanding />} />
+            <Route path="/start" element={<StartChooser />} />
 
             {/* How It Works page (public) */}
             <Route path="/how-it-works" element={<HowItWorks />} />
+
+            {/* Legal — DPDP-required, linked from CandidateRegistration consent */}
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
 
             {/* Product landing / Login page (no sidebar) */}
             <Route path="/product-landing" element={<ProductLanding />} />
@@ -199,13 +209,7 @@ const App = () => (
               </ProtectedRoute>
             } />
 
-            <Route path="/fitment-interviews/:id" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <FitmentInterviewDetails />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/fitment-interviews/:id" element={<LegacyFitmentRedirect />} />
 
             <Route path="/lists" element={
               <TourGuard>

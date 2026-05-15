@@ -66,7 +66,7 @@ export function ShareListDialog({ open, list, onClose, onShare }: ShareListDialo
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             {availableProjects.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted">
                 No other projects available in this workspace
               </div>
             ) : (

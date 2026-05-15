@@ -315,7 +315,7 @@ export default function ListDetail() {
 
   if (!listDetails) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center flex-1">
+      <div className="h-[100dvh] bg-background flex items-center justify-center flex-1">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">List not found</p>
           <Button onClick={() => navigate("/lists")}>
@@ -328,7 +328,7 @@ export default function ListDetail() {
   }
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden relative flex-1">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative flex-1">
       <main className="flex-1 overflow-hidden relative">
         <div className="h-full flex flex-col pr-8 pb-16 pt-6">
           {/* Header with List Name - Vanishes on scroll */}
@@ -337,17 +337,17 @@ export default function ListDetail() {
               <Button
                 variant="outline"
                 onClick={() => navigate("/lists")}
-                className="bg-white rounded border border-border hover:bg-accent transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                className="bg-paper rounded border border-border hover:bg-accent transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 <span className="uppercase tracking-wider text-sm font-semibold">Back to Lists</span>
               </Button>
-              <h1 className="text-2xl font-bold uppercase tracking-tight flex-1">{listDetails.name}</h1>
+              <h1 className="text-2xl font-bold flex-1">{listDetails.name}</h1>
               {/* T3: jump into the aggregate Pool TAG view */}
               <Button
                 variant="default"
                 onClick={() => navigate(`/lists/${listId}/pool`)}
-                className="bg-slate-900 text-white hover:bg-slate-800"
+                className="bg-ink text-paper hover:bg-ink"
               >
                 <span className="uppercase tracking-wider text-xs font-semibold">Pool TAG view →</span>
               </Button>
@@ -362,7 +362,7 @@ export default function ListDetail() {
                   variant="outline"
                   onClick={() => navigate("/lists")}
                   size="sm"
-                  className="bg-white rounded border border-border hover:bg-accent transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                  className="bg-paper rounded border border-border hover:bg-accent transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   <span className="uppercase tracking-wider text-xs font-semibold">Back</span>
@@ -373,10 +373,10 @@ export default function ListDetail() {
           )}
 
           {/* AI Search Bar - Sticky */}
-          <div className={`flex-shrink-0 transition-all duration-300 sticky top-0 bg-background/95 backdrop-blur-sm z-20 ${isScrolled ? 'py-3 shadow-sm' : 'py-2'}`}>
+          <div className={`flex-shrink-0 transition-all duration-300 sticky top-0 bg-background/95 backdrop-blur-sm z-20 ${isScrolled ? 'py-3 shadow-1' : 'py-2'}`}>
             <div className="relative max-w-4xl mx-auto">
               {!isScrolled && <div className="absolute inset-0 bg-primary/10 rounded-lg blur-sm" />}
-              <div className={`relative bg-card border border-border rounded-lg shadow-sm transition-all duration-300 ${isScrolled ? 'p-2.5' : 'p-3'}`}>
+              <div className={`relative bg-card border border-border rounded-lg shadow-1 transition-all duration-300 ${isScrolled ? 'p-2.5' : 'p-3'}`}>
                 <div className={`flex items-center transition-all duration-300 ${isScrolled ? 'gap-2' : 'gap-3'}`}>
                   {!isScrolled && (
                     <div className="p-2 rounded-lg bg-primary/10">
@@ -547,11 +547,11 @@ export default function ListDetail() {
         </div>
 
         {/* Right Side - Analytics Panel (Full Height Sidebar) */}
-        <div className={`fixed top-0 right-0 h-screen bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-2xl ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
+        <div className={`fixed top-0 right-0 h-[100dvh] bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-3 ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
           {/* Toggle Button - Top Right Corner */}
           <button
             onClick={() => setIsAnalyticsPanelOpen(!isAnalyticsPanelOpen)}
-            className="absolute top-14 -left-10 h-10 w-10 bg-background/90 backdrop-blur-lg border border-border/50 rounded-lg hover:bg-accent/10 hover:border-primary/30 transition-all duration-300 flex items-center justify-center shadow-md group"
+            className="absolute top-14 -left-10 h-10 w-10 bg-background/90 backdrop-blur-lg border border-border/50 rounded-lg hover:bg-accent/10 hover:border-primary/30 transition-all duration-300 flex items-center justify-center shadow-2 group"
           >
             {isAnalyticsPanelOpen ? (
               <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -610,7 +610,7 @@ export default function ListDetail() {
 
       {/* Floating Action Bar for Multi-Select Mode */}
       {isMultiSelectMode && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border shadow-2xl z-50 p-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border shadow-3 z-50 p-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-sm px-3 py-1">

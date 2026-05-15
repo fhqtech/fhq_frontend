@@ -70,9 +70,9 @@ export function Stepper({
                 <div className={cn(
                   "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 relative",
                   isCompleted && "bg-success border-success text-white shadow-md",
-                  isActive && !isCompleted && !hasError && "border-brand-primary bg-brand-primary text-white shadow-lg ring-2 ring-brand-primary/20",
-                  hasError && "border-error bg-error text-white",
-                  !isActive && !isCompleted && !hasError && "border-border bg-surface text-foreground-muted hover:border-brand-primary/50"
+                  isActive && !isCompleted && !hasError && "border-ink bg-ink text-white shadow-lg ring-2 ring-ink/20",
+                  hasError && "border-danger bg-danger text-white",
+                  !isActive && !isCompleted && !hasError && "border-border bg-surface text-muted hover:border-ink/50"
                 )}>
                   {hasError ? (
                     <X className="w-5 h-5" weight="bold" />
@@ -89,10 +89,10 @@ export function Stepper({
                 <div className="space-y-0.5">
                   <div className={cn(
                     "text-xs font-bold uppercase tracking-wider transition-colors",
-                    isActive && "text-brand-primary",
+                    isActive && "text-ink",
                     isCompleted && "text-success",
-                    hasError && "text-error",
-                    !isActive && !isCompleted && !hasError && "text-foreground-muted"
+                    hasError && "text-danger",
+                    !isActive && !isCompleted && !hasError && "text-muted"
                   )}>
                     {step.title}
                     {step.isOptional && (
@@ -106,7 +106,7 @@ export function Stepper({
                     <div className={cn(
                       "text-[9px] transition-colors max-w-[120px]",
                       isActive && "text-foreground",
-                      !isActive && "text-foreground-muted"
+                      !isActive && "text-muted"
                     )}>
                       {step.description}
                     </div>
@@ -182,7 +182,7 @@ export function StepperNavigation({
         {previousLabel}
       </Button>
 
-      <div className="flex items-center space-x-2 text-sm text-foreground-muted">
+      <div className="flex items-center space-x-2 text-sm text-muted">
         <span>{currentStep + 1}</span>
         <span>of</span>
         <span>{totalSteps}</span>
@@ -191,7 +191,7 @@ export function StepperNavigation({
       <Button
         onClick={isLastStep ? onSubmit : onNext}
         disabled={isNextDisabled || isLoading}
-        className="bg-gradient-primary border-0 shadow-brand"
+        className="bg-ink border-0 shadow-2"
       >
         {isLoading ? "Processing..." : isLastStep ? submitLabel : nextLabel}
       </Button>

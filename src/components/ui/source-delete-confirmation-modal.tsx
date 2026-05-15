@@ -25,7 +25,7 @@ export function SourceDeleteConfirmationModal({
 
   return (
     <div 
-      className="fixed bg-black/50 flex items-center justify-center p-4"
+      className="fixed bg-ink/50 flex items-center justify-center p-4"
       style={{
         position: 'fixed',
         top: 0,
@@ -42,7 +42,7 @@ export function SourceDeleteConfirmationModal({
       <Card className="w-full max-w-md">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-2 text-error">
+            <CardTitle className="flex items-center space-x-2 text-danger">
               <Warning className="w-5 h-5" weight="fill" />
               <span>Delete Candidate Source</span>
             </CardTitle>
@@ -51,7 +51,8 @@ export function SourceDeleteConfirmationModal({
               size="sm"
               onClick={onClose}
               disabled={isDeleting}
-              className="text-foreground-muted hover:text-foreground"
+              aria-label="Close dialog"
+              className="text-muted hover:text-foreground"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -61,11 +62,11 @@ export function SourceDeleteConfirmationModal({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-error-light/10 border border-error/20 rounded-lg">
+          <div className="p-4 bg-danger-light/10 border border-danger/20 rounded-lg">
             <p className="text-sm text-foreground">
               Are you sure you want to delete <strong>"{sourceName}"</strong>?
             </p>
-            <p className="text-sm text-foreground-muted mt-2">
+            <p className="text-sm text-muted mt-2">
               This will remove access to <strong>{candidateCount} candidates</strong> from this interview.
             </p>
           </div>
@@ -82,7 +83,7 @@ export function SourceDeleteConfirmationModal({
               variant="destructive"
               onClick={onConfirm}
               disabled={isDeleting}
-              className="bg-error hover:bg-error/90 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {isDeleting ? (
                 <>
