@@ -708,7 +708,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
                 {/* Key Strengths */}
                 <Card className="p-4">
                   <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
+                    <TrendingUp className="h-5 w-5 text-success" />
                     Key Strengths
                   </h3>
                   {aiInsightsData.keyStrengths.length > 0 ? (

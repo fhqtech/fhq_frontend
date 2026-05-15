@@ -127,7 +127,7 @@ export default function ProductLanding() {
 
           <div className="my-5 flex items-center gap-3">
             <div className="flex-1 h-px bg-rule" />
-            <span className="font-mono uppercase tracking-wider text-[10px] text-muted">
+            <span className="font-mono text-[10px] text-muted">
               or sign in with email
             </span>
             <div className="flex-1 h-px bg-rule" />
@@ -135,7 +135,7 @@ export default function ProductLanding() {
 
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-mono uppercase tracking-wider text-muted">
+              <Label htmlFor="email" className="text-xs font-mono text-muted">
                 Email
               </Label>
               <Input
@@ -149,7 +149,7 @@ export default function ProductLanding() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-mono uppercase tracking-wider text-muted">
+              <Label htmlFor="password" className="text-xs font-mono text-muted">
                 Password
               </Label>
               <Input

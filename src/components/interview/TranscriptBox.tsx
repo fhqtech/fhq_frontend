@@ -33,7 +33,7 @@ export function TranscriptBox({
     <div className={`bg-ink/95 rounded-lg border border-ink flex flex-col ${className}`}>
       {/* Header */}
       <div className="px-3 py-2 border-b border-ink">
-        <span className="text-muted-2 text-xs uppercase tracking-wider font-normal">TRANSCRIPT</span>
+        <span className="text-muted-2 text-xs font-normal">TRANSCRIPT</span>
       </div>
 
       {/* Messages Container */}

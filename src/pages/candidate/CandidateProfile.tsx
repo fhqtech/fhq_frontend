@@ -126,7 +126,7 @@ export default function CandidateProfile() {
           <Link to="/candidate/dashboard" className="text-sm text-primary hover:underline">
             ← Dashboard
           </Link>
-          <h1 className="text-sm font-semibold tracking-wider uppercase">Profile</h1>
+          <h1 className="text-sm font-semibold">Profile</h1>
           <span />
         </div>
       </header>
@@ -171,7 +171,7 @@ export default function CandidateProfile() {
         <Section title="Self-assessment">
           {PSYCH_FIELDS.map((f) => (
             <div key={f.key as string} className="mb-3">
-              <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
+              <label className="block text-xs font-medium text-muted mb-1">
                 {f.label}
               </label>
               <select
@@ -216,7 +216,7 @@ export default function CandidateProfile() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-paper rounded-xl border border-border p-5">
-      <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground mb-4">
+      <h3 className="text-sm font-semibold text-foreground mb-4">
         {title}
       </h3>
       {children}
@@ -227,7 +227,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, value, readOnly = false }: { label: string; value?: string; readOnly?: boolean }) {
   return (
     <div className="mb-3">
-      <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
+      <label className="block text-xs font-medium text-muted mb-1">
         {label}
       </label>
       <input
@@ -253,7 +253,7 @@ function Input({
 }) {
   return (
     <div className="mb-3">
-      <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
+      <label className="block text-xs font-medium text-muted mb-1">
         {label}
       </label>
       <input

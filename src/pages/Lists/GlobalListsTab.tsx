@@ -137,8 +137,8 @@ export function GlobalListsTab() {
       {globalLists.length === 0 ? (
         <div className="text-center py-8">
           <img src={rollerSkatingSvg} alt="No global pools" className="w-96 h-96 mx-auto mb-6 object-contain" />
-          <h3 className="text-xl font-semibold text-ink mb-3 uppercase tracking-wider">No global candidate pools</h3>
-          <p className="text-sm text-muted uppercase tracking-wider">
+          <h3 className="text-xl font-semibold text-ink mb-3">No global candidate pools</h3>
+          <p className="text-sm text-muted">
             Workspace administrators can create global candidate pools in Control Tower
           </p>
         </div>

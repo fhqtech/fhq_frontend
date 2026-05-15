@@ -61,32 +61,32 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center gap-2 p-4 bg-green-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <CheckCircle className="w-5 h-5 text-green-600" weight="fill" />
+          <div className="flex items-center gap-2 p-4 bg-success-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
+            <CheckCircle className="w-5 h-5 text-success" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Automated Screening</h4>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AI conducts interviews automatically</p>
+              <h4 className="font-semibold text-sm text-foreground">Automated Screening</h4>
+              <p className="text-[10px] text-muted-foreground">AI conducts interviews automatically</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <BarChart3 className="w-5 h-5 text-blue-600" weight="fill" />
+          <div className="flex items-center gap-2 p-4 bg-info-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
+            <BarChart3 className="w-5 h-5 text-info" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Smart Analytics</h4>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Detailed insights and scoring</p>
+              <h4 className="font-semibold text-sm text-foreground">Smart Analytics</h4>
+              <p className="text-[10px] text-muted-foreground">Detailed insights and scoring</p>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 bg-orange-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <Target className="w-5 h-5 text-orange-600" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Role-Specific Fitment</h4>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Assess for specific positions</p>
+              <h4 className="font-semibold text-sm text-foreground">Role-Specific Fitment</h4>
+              <p className="text-[10px] text-muted-foreground">Assess for specific positions</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-4 bg-purple-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <Clock className="w-5 h-5 text-purple-600" weight="fill" />
+          <div className="flex items-center gap-2 p-4 bg-paper-3 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
+            <Clock className="w-5 h-5 text-gold-ink" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-foreground">Save Time</h4>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">80% less screening time</p>
+              <h4 className="font-semibold text-sm text-foreground">Save Time</h4>
+              <p className="text-[10px] text-muted-foreground">80% less screening time</p>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         </div>
 
         <div className="space-y-3">
-          <h4 className="font-semibold uppercase tracking-wider">How It Works:</h4>
+          <h4 className="font-semibold">How It Works:</h4>
           <div className="space-y-2">
             <div
               className="flex items-center gap-3 p-4 bg-paper rounded-sm"
@@ -138,8 +138,8 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">1</div>
               <div>
-                <p className="font-semibold uppercase tracking-wider text-sm">Create Accounting Interview</p>
-                <p className="text-xs text-muted uppercase tracking-wider">Set up questions covering tax, financial reporting, and analytical skills</p>
+                <p className="font-semibold text-sm">Create Accounting Interview</p>
+                <p className="text-xs text-muted">Set up questions covering tax, financial reporting, and analytical skills</p>
               </div>
             </div>
             <div
@@ -148,8 +148,8 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">2</div>
               <div>
-                <p className="font-semibold uppercase tracking-wider text-sm">Bulk Import Candidates</p>
-                <p className="text-xs text-muted uppercase tracking-wider">Upload CSV/Excel with 500 candidate details</p>
+                <p className="font-semibold text-sm">Bulk Import Candidates</p>
+                <p className="text-xs text-muted">Upload CSV/Excel with 500 candidate details</p>
               </div>
             </div>
             <div
@@ -158,8 +158,8 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">3</div>
               <div>
-                <p className="font-semibold uppercase tracking-wider text-sm">AI Conducts Interviews</p>
-                <p className="text-xs text-muted uppercase tracking-wider">Each candidate gets personalized phone/video interview</p>
+                <p className="font-semibold text-sm">AI Conducts Interviews</p>
+                <p className="text-xs text-muted">Each candidate gets personalized phone/video interview</p>
               </div>
             </div>
             <div
@@ -168,8 +168,8 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-paper text-sm font-bold">4</div>
               <div>
-                <p className="font-semibold uppercase tracking-wider text-sm">Review Results</p>
-                <p className="text-xs text-muted uppercase tracking-wider">Get scored candidates ranked by performance</p>
+                <p className="font-semibold text-sm">Review Results</p>
+                <p className="text-xs text-muted">Get scored candidates ranked by performance</p>
               </div>
             </div>
           </div>
@@ -251,7 +251,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Bot className="w-5 h-5 text-ink" />
                 Interview Creation
               </CardTitle>
@@ -268,7 +268,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
 
           <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Users className="w-5 h-5 text-info" />
                 Candidate Management
               </CardTitle>
@@ -285,7 +285,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
 
           <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Target className="w-5 h-5 text-warning" />
                 Fitment Assessment
               </CardTitle>
@@ -302,7 +302,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
 
           <Card className="shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wider">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <BarChart3 className="w-5 h-5 text-success" />
                 Analytics & Insights
               </CardTitle>
@@ -319,7 +319,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         </div>
 
         <div className="bg-ink/10 p-6 rounded-lg border border-ink/20">
-          <h4 className="font-bold text-lg mb-2 text-ink uppercase tracking-wider">Communication Channels</h4>
+          <h4 className="font-bold text-lg mb-2 text-ink">Communication Channels</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="flex items-center gap-3">
               <Mail className="w-6 h-6 text-ink" />
@@ -360,14 +360,14 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           <div className="text-left flex-1 pt-8 space-y-4">
             <div>
               <h3 className="text-2xl font-bold mb-1">YOU'RE ALL SET!</h3>
-              <p className="text-sm text-muted-foreground uppercase tracking-wider">
+              <p className="text-sm text-muted-foreground">
                 NOW YOU UNDERSTAND HOW TO LEVERAGE FUNNELHQ FOR EFFICIENT, SCALABLE HIRING.
               </p>
             </div>
 
             <div className="bg-paper p-6 rounded-sm shadow-1" style={{ boxShadow: 'var(--shadow-clay)' }}>
-              <h4 className="font-bold mb-2 uppercase tracking-wider">Pro Tips for Success</h4>
-              <ul className="text-[10px] text-left space-y-2 text-muted-foreground uppercase tracking-wider">
+              <h4 className="font-bold mb-2">Pro Tips for Success</h4>
+              <ul className="text-[10px] text-left space-y-2 text-muted-foreground">
                 <li>• Start with a small batch (10-20 candidates) to test your interview setup</li>
                 <li>• Use clear, specific job descriptions for better fitment interview results</li>
                 <li>• Set up multiple communication channels to maximize candidate response rates</li>
@@ -381,11 +381,11 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         <div className="flex items-start gap-8">
           <div style={{ width: '280px', flexShrink: 0 }}></div>
           <div className="flex-1 p-6 bg-paper rounded-sm text-left">
-            <h4 className="font-bold mb-4 uppercase tracking-wider text-base">
+            <h4 className="font-bold mb-4 text-base">
               Create your first interview in under 5 minutes
             </h4>
             <Button
-              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper uppercase tracking-wider text-xs font-bold px-8"
+              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper text-xs font-bold px-8"
               onClick={() => navigate("/interviews/create")}
             >
               Create Interview
@@ -484,7 +484,7 @@ export default function QuickTour() {
         <div className="flex items-center justify-between pt-4 pb-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Product Quick Tour</h1>
-            <p className="text-muted mt-2 text-xs uppercase tracking-wider">
+            <p className="text-muted mt-2 text-xs">
               Learn how to maximize your hiring efficiency with AI Recruiter
             </p>
           </div>
@@ -493,7 +493,7 @@ export default function QuickTour() {
               variant="outline"
               onClick={handleSkipTour}
               disabled={isSkipping || isCompleting}
-              className="flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
+              className="flex items-center gap-2 text-xs font-bold"
             >
               <X className="w-4 h-4" />
               {isSkipping ? "Skipping..." : "Skip Tour"}
@@ -503,7 +503,7 @@ export default function QuickTour() {
 
         {/* Progress Bar */}
         <div className="space-y-2 pb-4">
-          <div className="flex justify-between text-sm text-muted-foreground uppercase tracking-wider font-bold">
+          <div className="flex justify-between text-sm text-muted-foreground font-bold">
             <span>Step {currentStep + 1} of {tourSteps.length}</span>
             <span>{Math.round(((currentStep + 1) / tourSteps.length) * 100)}% Complete</span>
           </div>
@@ -523,7 +523,7 @@ export default function QuickTour() {
               variant={index === currentStep ? "default" : "outline-solid"}
               size="sm"
               onClick={() => handleStepClick(index)}
-              className={`${index === currentStep ? "bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0" : ""} text-[10px] px-3 py-1 h-8 whitespace-nowrap shrink-0 uppercase tracking-wider font-bold`}
+              className={`${index === currentStep ? "bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0" : ""} text-[10px] px-3 py-1 h-8 whitespace-nowrap shrink-0   font-bold`}
             >
               <span className="hidden md:inline">{step.title}</span>
               <span className="md:hidden">{index + 1}</span>
@@ -542,13 +542,13 @@ export default function QuickTour() {
       >
         <div className="text-center pb-6 p-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Badge variant="secondary" className="uppercase tracking-wider text-xs rounded-sm">Step {currentStep + 1}</Badge>
+            <Badge variant="secondary" className=" text-xs rounded-sm">Step {currentStep + 1}</Badge>
           </div>
           {currentStep !== 4 && (
             <>
               <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
               {currentStepData.subtitle && (
-                <p className="text-sm text-muted-foreground uppercase tracking-wider mt-2">{currentStepData.subtitle}</p>
+                <p className="text-sm text-muted-foreground mt-2">{currentStepData.subtitle}</p>
               )}
             </>
           )}
@@ -564,7 +564,7 @@ export default function QuickTour() {
           variant="outline"
           onClick={handlePrevious}
           disabled={currentStep === 0}
-          className="flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
+          className="flex items-center gap-2 text-xs font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
           Previous
@@ -575,7 +575,7 @@ export default function QuickTour() {
             <Button
               onClick={handleCompleteTour}
               disabled={isCompleting || isSkipping}
-              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0 flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
+              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0 flex items-center gap-2 text-xs font-bold"
             >
               <CheckCircle className="w-4 h-4" />
               {isCompleting ? "Completing..." : "Finish Tour"}
@@ -583,7 +583,7 @@ export default function QuickTour() {
           ) : (
             <Button
               onClick={handleNext}
-              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper flex items-center gap-2 uppercase tracking-wider text-xs font-bold"
+              className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper flex items-center gap-2 text-xs font-bold"
             >
               Next
               <ArrowRight className="w-4 h-4" />

@@ -735,7 +735,7 @@ export const InterviewSession = ({
 
       {/* Interview Title & Connection Status - Center Top */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10">
-        <h2 className="text-muted-2 text-sm font-normal uppercase tracking-wider mb-2">{interviewConfig.title}</h2>
+        <h2 className="text-muted-2 text-sm font-normal mb-2">{interviewConfig.title}</h2>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-danger">
             <Clock className="w-4 h-4" />
@@ -963,7 +963,7 @@ export const InterviewSession = ({
 
               {/* Center button */}
               <div className="relative z-10 w-24 h-24 rounded-full bg-ink border border-rule-strong shadow-2 flex items-center justify-center group-hover:bg-ink transition-colors">
-                <span className="text-xs font-normal text-muted-2 uppercase tracking-wider">I'm here</span>
+                <span className="text-xs font-normal text-muted-2">I'm here</span>
               </div>
             </button>
           </motion.div>

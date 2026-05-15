@@ -19,9 +19,9 @@ interface BlueprintPreviewRailProps {
 }
 
 const TYPE_STYLES: Record<PreviewSkill["skill_type"], { bg: string; border: string; text: string; dot: string }> = {
-  technical: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-800", dot: "bg-blue-500" },
-  behavioral: { bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-800", dot: "bg-purple-500" },
-  cultural: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-800", dot: "bg-amber-500" },
+  technical: { bg: "bg-info-soft", border: "border-info/30", text: "text-info", dot: "bg-info" },
+  behavioral: { bg: "bg-paper-3", border: "border-rule", text: "text-gold-ink", dot: "bg-ink" },
+  cultural: { bg: "bg-warning-soft", border: "border-warning/30", text: "text-amber-800", dot: "bg-amber-500" },
 };
 
 export function BlueprintPreviewRail({ title, type, description }: BlueprintPreviewRailProps) {
@@ -76,8 +76,8 @@ export function BlueprintPreviewRail({ title, type, description }: BlueprintPrev
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-blue-600" />
-          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-soft">
+          <Sparkles className="w-4 h-4 text-info" />
+          <h4 className="text-xs font-mono font-bold text-ink-soft">
             Blueprint Preview
           </h4>
         </div>
@@ -104,7 +104,7 @@ export function BlueprintPreviewRail({ title, type, description }: BlueprintPrev
           <span className="text-xs">Generating preview…</span>
         </div>
       ) : error ? (
-        <p className="text-xs text-red-600 py-6 text-center">{error}</p>
+        <p className="text-xs text-danger py-6 text-center">{error}</p>
       ) : preview ? (
         <>
           {loading && (
@@ -112,7 +112,7 @@ export function BlueprintPreviewRail({ title, type, description }: BlueprintPrev
               <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Refreshing…
             </div>
           )}
-          <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider">
+          <p className="text-[10px] text-muted-foreground mb-3">
             {preview.skills.length} skills the interview will assess
           </p>
 

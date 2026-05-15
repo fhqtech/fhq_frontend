@@ -36,7 +36,7 @@ export function DeleteConfirmationModal({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-lg">
-            <FileX className="w-5 h-5 text-red-600" />
+            <FileX className="w-5 h-5 text-danger" />
             <span>Delete List: {impact.listName}</span>
           </DialogTitle>
         </DialogHeader>
@@ -62,14 +62,14 @@ export function DeleteConfirmationModal({
 
           {/* Affected Interviews */}
           {hasAffectedInterviews && (
-            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+            <div className="p-4 bg-danger-soft rounded-lg border border-danger/30">
               <h4 className="font-medium text-red-800 mb-2">
                 ⚠️ Used in {impact.affectedInterviews.length} Interview(s)
               </h4>
               <div className="space-y-2 max-h-32 overflow-y-auto">
                 {impact.affectedInterviews.map(interview => (
                   <div key={interview.id} className="flex items-center justify-between text-sm">
-                    <span className="text-red-700 font-medium">{interview.title}</span>
+                    <span className="text-danger font-medium">{interview.title}</span>
                     <div className="flex items-center space-x-2">
                       <Badge
                         variant={interview.status === 'active' ? 'destructive' : 'secondary'}
@@ -77,7 +77,7 @@ export function DeleteConfirmationModal({
                       >
                         {interview.status}
                       </Badge>
-                      <span className="text-red-600 text-xs">
+                      <span className="text-danger text-xs">
                         {interview.candidateCount} candidates
                       </span>
                     </div>
@@ -108,7 +108,7 @@ export function DeleteConfirmationModal({
 
           {/* Warning Message */}
           {hasAffectedInterviews && (
-            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div className="p-3 bg-warning-soft rounded-lg border border-warning/30">
               <p className="text-sm text-yellow-800">
                 <strong>Warning:</strong> Force deleting will remove this list from all interviews and
                 may affect their candidate counts. This action cannot be undone.

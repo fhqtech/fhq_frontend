@@ -360,7 +360,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                       <div className="flex items-center gap-2">
                         <span>{workspace.name}</span>
                         {workspace.ownerId === user?.id && (
-                          <span className="text-xs text-blue-600">(Owner)</span>
+                          <span className="text-xs text-info">(Owner)</span>
                         )}
                       </div>
                     </SelectItem>
@@ -408,7 +408,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                           }
                         }}
                         className={`cursor-pointer hover:bg-paper-2/50 transition-colors ${
-                          project.id === currentProject?.id ? 'bg-blue-50/30' : ''
+                          project.id === currentProject?.id ? 'bg-info-soft/30' : ''
                         } ${switchingProjectId === project.id ? 'opacity-50' : ''}`}
                       >
                         <TableCell className="font-medium text-[hsl(var(--ink))] text-sm" onClick={(e) => editingProjectId === project.id && e.stopPropagation()}>
@@ -434,13 +434,13 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                                   handleUpdateProject(project.id);
                                 }}
                                 disabled={isUpdating || !editedName.trim()}
-                                className="p-1 hover:bg-green-50 rounded transition-colors disabled:opacity-50"
+                                className="p-1 hover:bg-success-soft rounded transition-colors disabled:opacity-50"
                                 title="Save"
                               >
                                 {isUpdating ? (
-                                  <Loader2 className="h-4 w-4 text-green-600 animate-spin" />
+                                  <Loader2 className="h-4 w-4 text-success animate-spin" />
                                 ) : (
-                                  <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                   </svg>
                                 )}
@@ -462,17 +462,17 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                           ) : (
                             <div className="flex items-center gap-2">
                               {switchingProjectId === project.id && (
-                                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                <Loader2 className="h-4 w-4 animate-spin text-info" />
                               )}
                               <span>{project.name}</span>
                               {project.id === currentProject?.id && (
-                                <span className="ml-2 text-xs text-blue-600 font-semibold">(Current)</span>
+                                <span className="ml-2 text-xs text-info font-semibold">(Current)</span>
                               )}
                               {project.ownerId === user?.id && (
-                                <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Owner</span>
+                                <span className="text-xs text-info bg-info-soft px-2 py-0.5 rounded-full">Owner</span>
                               )}
                               {project.admins?.includes(user?.id || '') && project.ownerId !== user?.id && (
-                                <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Admin</span>
+                                <span className="text-xs text-gold-ink bg-paper-3 px-2 py-0.5 rounded-full">Admin</span>
                               )}
                             </div>
                           )}
@@ -506,13 +506,13 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                             <button
                               onClick={(e) => handleDeleteProject(project.id, e)}
                               disabled={deletingProjectId === project.id}
-                              className="p-1.5 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                              className="p-1.5 hover:bg-danger-soft rounded transition-colors disabled:opacity-50"
                               title="Delete project"
                             >
                               {deletingProjectId === project.id ? (
-                                <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                <Loader2 className="h-4 w-4 text-danger animate-spin" />
                               ) : (
-                                <Trash2 className="h-4 w-4 text-red-600" />
+                                <Trash2 className="h-4 w-4 text-danger" />
                               )}
                             </button>
                           </div>

@@ -22,7 +22,7 @@ const badgeVariants = cva(
         info: "border-transparent bg-info-soft text-info",
       },
       kicker: {
-        true: "font-mono uppercase tracking-wide text-[11px]",
+        true: "font-mono   text-[11px]",
         false: "",
       },
     },

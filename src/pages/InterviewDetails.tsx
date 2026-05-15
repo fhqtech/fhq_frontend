@@ -1258,10 +1258,10 @@ export default function InterviewDetails() {
  ) : (
  <>
  <h1 className="text-4xl font-bold text-foreground mb-2">{interview?.title}</h1>
- <p className="text-foreground text-sm font-semibold uppercase tracking-wider mt-1">
+ <p className="font-mono text-sm text-muted-2 mt-1">
  #{id}
  </p>
- <p className="text-muted text-[10px] uppercase tracking-wider mt-0.5">
+ <p className="text-muted text-xs mt-0.5">
  Created on {interview?.created}
  </p>
  </>
@@ -1404,8 +1404,8 @@ export default function InterviewDetails() {
  <div className="flex items-center gap-4">
  <img src={aiAvatar} alt="AI" className="w-10 h-10 rounded-full" />
  <div>
- <h3 className="text-lg font-semibold uppercase tracking-wider">Interview Configuration</h3>
- <p className="text-[10px] text-muted mt-1 uppercase tracking-wider">Current settings and interview blueprint</p>
+ <h3 className="text-lg font-semibold text-ink">Interview configuration</h3>
+ <p className="text-xs text-muted mt-1">Current settings and interview blueprint</p>
  </div>
  </div>
 
@@ -1434,7 +1434,7 @@ export default function InterviewDetails() {
  return (
  <div className="flex items-center gap-2 px-3 py-2 bg-gold-soft border border-rule rounded-sm">
  <CircleNotch className="w-3.5 h-3.5 text-gold-ink animate-spin" />
- <span className="text-xs font-medium text-gold-ink uppercase tracking-wider">Blueprint Generating...</span>
+ <span className="text-xs font-medium text-gold-ink">Blueprint generating…</span>
  </div>
  );
  }
@@ -1443,14 +1443,14 @@ export default function InterviewDetails() {
  return (
  <div className="flex items-center gap-2 px-3 py-2 bg-danger-soft border border-rule rounded-sm">
  <AlertTriangle className="w-3.5 h-3.5 text-danger" />
- <span className="text-xs font-medium text-ink uppercase tracking-wider">Blueprint Failed</span>
+ <span className="text-xs font-medium text-ink">Blueprint failed</span>
  <Button
  onClick={() => navigate(`/create-interview?edit=${id}`)}
  size="sm"
  variant="destructive"
- className="px-2 py-1 text-xs h-6 rounded-sm uppercase font-bold"
+ className="px-2 py-1 text-xs h-6 rounded-sm"
  >
- Fix Description
+ Fix description
  </Button>
  </div>
  );
@@ -1460,7 +1460,7 @@ export default function InterviewDetails() {
  return (
  <div className="flex items-center gap-2 px-3 py-2 bg-gold-soft border border-rule rounded-sm">
  <FileCheck className="w-3.5 h-3.5 text-gold-ink" />
- <span className="text-xs font-medium text-ink uppercase tracking-wider">Blueprint Ready</span>
+ <span className="text-xs font-medium text-ink">Blueprint ready</span>
  <Button
  type="button"
  onClick={(e) => {
@@ -1470,7 +1470,7 @@ export default function InterviewDetails() {
  }}
  size="sm"
  variant="gold"
- className="px-3 py-1 text-xs h-7 rounded-sm uppercase font-bold"
+ className="px-3 py-1 text-xs h-7 rounded-sm"
  >
  View
  </Button>
@@ -1480,12 +1480,12 @@ export default function InterviewDetails() {
  size="sm"
  disabled={isRegeneratingBlueprint}
  variant="outline"
- className="px-3 py-1 text-xs h-7 rounded-sm uppercase font-medium"
+ className="px-3 py-1 text-xs h-7 rounded-sm"
  >
  {isRegeneratingBlueprint ? (
  <>
  <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
- Regenerating...
+ Regenerating…
  </>
  ) : (
  <>
@@ -1501,19 +1501,20 @@ export default function InterviewDetails() {
 
  if (effectiveStatus === 'missing') {
  return (
- <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-sm">
- <Settings className="w-3.5 h-3.5 text-yellow-600" />
- <span className="text-xs font-medium text-ink uppercase tracking-wider">Blueprint Not Found</span>
+ <div className="flex items-center gap-2 px-3 py-2 bg-warning-soft border border-rule rounded-sm">
+ <Settings className="w-3.5 h-3.5 text-warning" />
+ <span className="text-xs font-medium text-ink">Blueprint not found</span>
  <Button
  onClick={handleCheckBlueprint}
  size="sm"
  disabled={isCheckingBlueprint}
- className="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 text-xs h-6 rounded-sm uppercase font-bold"
+ variant="outline"
+ className="px-2 py-1 text-xs h-6 rounded-sm"
  >
  {isCheckingBlueprint ? (
  <RefreshCw className="w-3 h-3 animate-spin" />
  ) : (
- 'Check Again'
+ 'Check again'
  )}
  </Button>
  <Button
@@ -1521,7 +1522,7 @@ export default function InterviewDetails() {
  size="sm"
  variant="gold"
  disabled={isRegeneratingBlueprint}
- className="px-2 py-1 text-xs h-6 rounded-sm uppercase font-bold"
+ className="px-2 py-1 text-xs h-6 rounded-sm"
  >
  {isRegeneratingBlueprint ? (
  <RefreshCw className="w-3 h-3 animate-spin" />
@@ -1537,7 +1538,7 @@ export default function InterviewDetails() {
  return (
  <div className="flex items-center gap-2 px-3 py-2 bg-paper-2 border border-rule rounded-sm">
  <Settings className="w-3.5 h-3.5 text-muted animate-spin" />
- <span className="text-xs font-medium text-ink uppercase tracking-wider">Checking...</span>
+ <span className="text-xs font-medium text-ink">Checking…</span>
  </div>
  );
  })()}
@@ -1546,18 +1547,18 @@ export default function InterviewDetails() {
  {!loadingInterview && interview && (
  <div className="flex gap-2">
  {interview.status === 'draft' && (
- <Button onClick={handleStartInterview} variant="gold" className="rounded-sm uppercase font-bold text-xs h-9 px-4">
+ <Button onClick={handleStartInterview} variant="gold" className="rounded-sm text-sm h-9 px-4">
  <Play className="w-4 h-4 mr-1.5" />
- Start Interview
+ Start interview
  </Button>
  )}
  {interview.status === 'active' && (
  <>
- <Button onClick={handlePauseInterview} variant="outline" disabled={isUpdatingStatus} className="rounded-sm uppercase font-bold text-xs h-7 px-3">
+ <Button onClick={handlePauseInterview} variant="outline" disabled={isUpdatingStatus} className="rounded-sm text-xs h-7 px-3">
  <Pause className="w-3.5 h-3.5 mr-1.5" />
- {isUpdatingStatus ? 'Pausing...' : 'Pause'}
+ {isUpdatingStatus ? 'Pausing…' : 'Pause'}
  </Button>
- <Button onClick={handleStopInterview} variant="destructive" disabled={isUpdatingStatus} className="rounded-sm uppercase font-bold text-xs h-7 px-3">
+ <Button onClick={handleStopInterview} variant="destructive" disabled={isUpdatingStatus} className="rounded-sm text-xs h-7 px-3">
  <Square className="w-3.5 h-3.5 mr-1.5" />
  Stop
  </Button>
@@ -1565,11 +1566,11 @@ export default function InterviewDetails() {
  )}
  {interview.status === 'paused' && (
  <>
- <Button onClick={handleResumeInterview} variant="gold" className="rounded-sm uppercase font-bold text-xs h-7 px-3" disabled={isUpdatingStatus}>
+ <Button onClick={handleResumeInterview} variant="gold" className="rounded-sm text-xs h-7 px-3" disabled={isUpdatingStatus}>
  <Play className="w-3.5 h-3.5 mr-1.5" />
- {isUpdatingStatus ? 'Resuming...' : 'Resume'}
+ {isUpdatingStatus ? 'Resuming…' : 'Resume'}
  </Button>
- <Button onClick={handleStopInterview} variant="destructive" disabled={isUpdatingStatus} className="rounded-sm uppercase font-bold text-xs h-7 px-3">
+ <Button onClick={handleStopInterview} variant="destructive" disabled={isUpdatingStatus} className="rounded-sm text-xs h-7 px-3">
  <Square className="w-3.5 h-3.5 mr-1.5" />
  Stop
  </Button>
@@ -1591,28 +1592,28 @@ export default function InterviewDetails() {
  <div className="flex items-end gap-16">
  {/* Type */}
  <div className="flex flex-col">
- <Label className="text-[10px] text-muted font-medium uppercase tracking-wider mb-2">Type</Label>
- <p className="text-sm font-bold text-ink uppercase tracking-wider">{interview.type?.toUpperCase()}</p>
+ <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2">Type</Label>
+ <p className="text-sm font-semibold text-ink capitalize">{interview.type}</p>
  </div>
 
  {/* Voice */}
  <div className="flex flex-col">
- <Label className="text-[10px] text-muted font-medium uppercase tracking-wider mb-2">Voice</Label>
- <p className="text-sm font-bold text-ink uppercase tracking-wider">{interview.voiceType?.toUpperCase()}</p>
+ <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2">Voice</Label>
+ <p className="text-sm font-semibold text-ink capitalize">{interview.voiceType}</p>
  </div>
 
  {/* Communications */}
  <div className="flex flex-col">
- <Label className="text-[10px] text-muted font-medium uppercase tracking-wider mb-2">Communications</Label>
+ <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2">Communications</Label>
  <div className="flex gap-2 flex-wrap">
  {interview.communications.email && (
- <span className="text-sm font-bold text-ink uppercase tracking-wider">EMAIL</span>
+ <span className="text-sm font-semibold text-ink">Email</span>
  )}
  {interview.communications.phone && (
- <span className="text-sm font-bold text-ink uppercase tracking-wider">PHONE</span>
+ <span className="text-sm font-semibold text-ink">Phone</span>
  )}
  {interview.communications.sms && (
- <span className="text-sm font-bold text-ink uppercase tracking-wider">SMS</span>
+ <span className="text-sm font-semibold text-ink">SMS</span>
  )}
  </div>
  </div>
@@ -1634,8 +1635,8 @@ export default function InterviewDetails() {
 
  {/* Second Row: Description */}
  <div>
- <Label className="text-sm font-medium text-muted uppercase tracking-wider">Description</Label>
- <p className="text-foreground text-sm mt-1">{interview.description}</p>
+ <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Description</Label>
+ <p className="text-foreground text-sm mt-2">{interview.description}</p>
  </div>
  </div>
 
@@ -1656,13 +1657,13 @@ export default function InterviewDetails() {
  <div className="flex items-center gap-4">
  <CloudArrowDown size={48} weight="thin" />
  <div className="flex-1">
- <h3 className="text-lg font-semibold uppercase tracking-wider">Candidate Sources</h3>
- <p className="text-[10px] text-muted mt-1 uppercase tracking-wider">Sync new candidates from updated Google Sheets</p>
+ <h3 className="text-lg font-semibold text-ink">Applicant sources</h3>
+ <p className="text-xs text-muted mt-1">Sync new applicants from updated Google Sheets</p>
  {interview?.status && interview.status !== 'draft' && (
- <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-sm">
- <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
- <p className="text-[10px] text-amber-700 uppercase tracking-wider">
- Note: Google Sheet syncing is disabled once the interview has started
+ <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-warning-soft border border-rule rounded-sm">
+ <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+ <p className="text-xs text-ink-soft">
+ Google Sheet syncing is disabled once the interview has started.
  </p>
  </div>
  )}
@@ -1717,15 +1718,15 @@ export default function InterviewDetails() {
  </div>
  <div className="flex-1 min-w-0">
  <div className="mb-2">
- <p className="font-semibold text-ink text-base mb-1 uppercase tracking-wider">{source.name}</p>
+ <p className="font-semibold text-ink text-base mb-1">{source.name}</p>
  <p className="text-xs text-muted font-mono tracking-wide">ID: {source.id}</p>
  </div>
  <div className="flex items-center gap-2 mb-3">
- <Badge className="text-[10px] bg-info-soft text-info border-rule hover:bg-info-soft rounded-sm font-bold uppercase">
+ <Badge className="text-[10px] bg-info-soft text-info border-rule hover:bg-info-soft rounded-sm font-medium">
  Google Sheets
  </Badge>
- <span className="text-xs text-ink-soft font-semibold uppercase">
- {source.candidateCount || 0} candidates
+ <span className="text-xs text-ink-soft font-medium">
+ {source.candidateCount || 0} applicants
  </span>
  {source.lastExtractedAt && (
  <span className="text-xs text-muted">
@@ -1736,13 +1737,13 @@ export default function InterviewDetails() {
  {hasUpdates && (
  <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-soft border border-rule rounded-sm">
  <AlertTriangle className="h-3.5 w-3.5 text-orange-ink" />
- <span className="text-xs text-orange-ink font-semibold uppercase tracking-wider">{updateInfo.newRows} new candidates available</span>
+ <span className="text-xs text-orange-ink font-medium">{updateInfo.newRows} new applicants available</span>
  </div>
  )}
  {updateInfo && !updateInfo.hasNew && (
  <div className="flex items-center gap-2 px-3 py-1.5 bg-success-soft border border-rule rounded-sm">
  <CheckCircle className="h-3.5 w-3.5 text-success" />
- <span className="text-xs text-success font-semibold uppercase tracking-wider">Up to date</span>
+ <span className="text-xs text-success font-medium">Up to date</span>
  </div>
  )}
  </div>
@@ -1786,14 +1787,14 @@ export default function InterviewDetails() {
  {interview?.status === 'draft' ? (
  <div className="text-center py-12 space-y-4">
  <div>
- <h3 className="text-2xl font-semibold text-foreground">Interview Not Started</h3>
- <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wider">
- Start the interview to begin collecting candidate responses
+ <h3 className="text-2xl font-semibold text-foreground">Interview not started</h3>
+ <p className="text-sm text-muted mt-2">
+ Start the interview to begin collecting applicant responses.
  </p>
  </div>
- <Button onClick={handleStartInterview} variant="gold" className="h-9 px-6 rounded-sm uppercase font-bold text-xs">
+ <Button onClick={handleStartInterview} variant="gold" className="h-9 px-6 rounded-sm">
  <Play className="w-4 h-4 mr-1.5" />
- Start Interview
+ Start interview
  </Button>
  </div>
  ) : (
@@ -1813,8 +1814,8 @@ export default function InterviewDetails() {
  <CardHeader className="pb-3">
  <div className="flex items-center justify-between mb-2">
  <div className="flex items-center gap-6">
- <CardTitle className="text-lg uppercase tracking-wider">
- Candidate Results
+ <CardTitle className="text-lg text-ink">
+ Applicant results
  </CardTitle>
  {/* Legend */}
  <div className="flex items-center gap-3 text-xs">
@@ -1824,15 +1825,15 @@ export default function InterviewDetails() {
  </div>
  <div className="flex items-center gap-1.5">
  <div className="w-3 h-3 bg-gold"></div>
- <span className="text-muted">{'< 2 weeks'}</span>
+ <span className="text-muted">&lt; 2 weeks</span>
  </div>
  <div className="flex items-center gap-1.5">
  <div className="w-3 h-3 bg-orange"></div>
- <span className="text-muted">{'> 1 month'}</span>
+ <span className="text-muted">&gt; 1 month</span>
  </div>
  <div className="flex items-center gap-1.5">
  <div className="w-3 h-3 bg-rule-strong"></div>
- <span className="text-muted">Not Specified</span>
+ <span className="text-muted">Not specified</span>
  </div>
  </div>
  </div>
@@ -1841,14 +1842,14 @@ export default function InterviewDetails() {
  size="sm"
  onClick={refreshCandidates}
  disabled={loadingCandidates}
- className="flex items-center gap-1 h-7 text-xs px-2 rounded-sm uppercase font-bold"
+ className="flex items-center gap-1 h-7 text-xs px-2 rounded-sm"
  >
  <RefreshCw className={`w-3 h-3 ${loadingCandidates ? 'animate-spin' : ''}`} />
  Refresh
  </Button>
  </div>
- <CardDescription className="text-xs uppercase tracking-wider">
- Detailed view of all candidates and their interview performance
+ <CardDescription className="text-sm text-muted">
+ Detailed view of all applicants and their interview performance.
  </CardDescription>
  </CardHeader>
 
@@ -1915,8 +1916,8 @@ export default function InterviewDetails() {
  <>
  {/* Re-invite stuck candidates */}
  {candidates.some((c) => ['scheduling', 'expired', 'invited'].includes((c.status || '').toLowerCase())) && (
- <div className="flex items-center justify-between p-3 mb-2 mt-4 rounded-sm bg-amber-50 border border-amber-200">
- <div className="text-sm text-amber-900">
+ <div className="flex items-center justify-between p-3 mb-2 mt-4 rounded-sm bg-warning-soft border border-warning/30">
+ <div className="text-sm text-warning">
  {candidates.filter((c) => ['scheduling', 'expired', 'invited'].includes((c.status || '').toLowerCase())).length}{' '}
  candidate(s) haven't started yet. Re-send their invitation email.
  </div>
@@ -1925,7 +1926,7 @@ export default function InterviewDetails() {
  variant="outline"
  onClick={handleResendStuck}
  disabled={isResendingInvites}
- className="rounded-sm uppercase font-bold text-xs h-8 px-3 border-amber-400 text-amber-900 hover:bg-amber-100"
+ className="rounded-sm uppercase font-bold text-xs h-8 px-3 border-warning/30 text-warning hover:bg-warning-soft"
  >
  {isResendingInvites ? 'Resending…' : 'Re-invite'}
  </Button>
@@ -2023,11 +2024,11 @@ export default function InterviewDetails() {
  }}>
  <DialogContent className="sm:max-w-md">
  <DialogHeader>
- <DialogTitle className="flex items-center gap-2 uppercase tracking-wider">
+ <DialogTitle className="flex items-center gap-2 text-ink">
  {isStartingInterview ? (
  <>
  <Spinner size="sm" variant="brand" />
- Starting Interview
+ Starting interview
  </>
  ) : startingProgress?.startsWith('Error:') ? (
  <>

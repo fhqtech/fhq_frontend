@@ -47,7 +47,7 @@ export const AiInterviewer = ({ isListening, isSpeaking }: AiInterviewerProps) =
       </AnimatePresence>
 
       {/* The central avatar image */}
-      <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-2 border-4 border-white ">
+      <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-2 border-4 border-white">
         <img src={aiAvatar} alt="AI Interviewer" className="w-full h-full object-cover" />
       </div>
     </div>

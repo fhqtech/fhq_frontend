@@ -138,7 +138,7 @@ export const InterviewThankYou = ({
               <div className="px-6 py-6">
                 {/* Role title and type badge on same line */}
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-sm font-bold text-ink-soft uppercase tracking-wider">
+                  <h2 className="text-sm font-bold text-ink-soft">
                     {interviewData.title}
                   </h2>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-soft text-info">
@@ -167,8 +167,8 @@ export const InterviewThankYou = ({
               </div>
 
               {/* What's Next Section */}
-              <div className="px-8 py-6 bg-paper-2 from-gray-50 ">
-                <h3 className="text-sm font-bold text-ink-soft uppercase tracking-wide mb-4">What happens next?</h3>
+              <div className="px-8 py-6 bg-paper-2 from-gray-50">
+                <h3 className="text-sm font-bold text-ink-soft mb-4">What happens next?</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-success-soft rounded-full flex items-center justify-center shrink-0 mt-0.5">

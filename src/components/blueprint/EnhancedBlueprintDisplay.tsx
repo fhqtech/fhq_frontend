@@ -36,7 +36,7 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
           <div className="flex bg-paper-3 rounded-sm p-1">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${
+              className={`px-4 py-2 rounded-sm text-xs font-bold   transition-colors ${
                 activeTab === 'overview'
                   ? 'bg-paper text-ink shadow-1'
                   : 'text-muted hover:text-ink'
@@ -46,7 +46,7 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
             </button>
             <button
               onClick={() => setActiveTab('skilltree')}
-              className={`px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${
+              className={`px-4 py-2 rounded-sm text-xs font-bold   transition-colors ${
                 activeTab === 'skilltree'
                   ? 'bg-paper text-ink shadow-1'
                   : 'text-muted hover:text-ink'
@@ -144,13 +144,13 @@ const ResponsibilitiesSection = ({ responsibilities }: { responsibilities: strin
     <h2 className="text-lg font-semibold mb-3 text-ink">
       Key Responsibilities
     </h2>
-    <Card className="bg-blue-100/40 backdrop-blur-xs border border-blue-300/90 shadow-1">
+    <Card className="bg-info-soft/40 backdrop-blur-xs border border-info/40 shadow-1">
       <CardContent className="p-4">
         <div className="bg-paper/40 backdrop-blur-xs rounded-lg p-3 border border-white/60">
           <ul className="space-y-2">
             {responsibilities.slice(0, Math.ceil(responsibilities.length / 2)).map((responsibility: string, index: number) => (
               <li key={index} className="flex items-start gap-2">
-                <div className="w-6 h-6 bg-blue-200/95 backdrop-blur-xs text-blue-800 font-medium rounded-full flex items-center justify-center shrink-0 text-xs border border-blue-400/90">
+                <div className="w-6 h-6 bg-info-soft backdrop-blur-xs text-info font-medium rounded-full flex items-center justify-center shrink-0 text-xs border border-info/40">
                   {index + 1}
                 </div>
                 <span className="text-sm text-ink-soft leading-relaxed">
@@ -174,7 +174,7 @@ const QualifyingQuestionsSection = ({ questions }: { questions: string[] | strin
 
   return (
     <div className="bg-paper rounded-sm border border-rule p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
-      <h2 className="text-lg font-bold uppercase tracking-wider mb-4 text-ink">
+      <h2 className="text-lg font-bold mb-4 text-ink">
         Qualifying Topics
       </h2>
       <div className="flex flex-wrap gap-2">
@@ -197,8 +197,8 @@ const CandidateProfileSection = ({ profile }: { profile: string }) => {
   }
 
   return (
-    <div className="bg-green-100/40 backdrop-blur-xs border border-green-300/90 rounded-sm p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
-      <h3 className="text-lg font-bold uppercase tracking-wider text-ink mb-4">
+    <div className="bg-success-soft/40 backdrop-blur-xs border border-success/30/90 rounded-sm p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
+      <h3 className="text-lg font-bold text-ink mb-4">
         Ideal Candidate Profile
       </h3>
       <p className="text-xs text-ink-soft leading-relaxed">

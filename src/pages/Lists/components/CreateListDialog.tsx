@@ -249,7 +249,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
       <Dialog open={open && !progressModalOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm">
           <DialogHeader>
-            <DialogTitle className="uppercase tracking-wider text-ink">
+            <DialogTitle className=" text-ink">
               Create New Candidate Pool
             </DialogTitle>
             <DialogDescription className="uppercase text-xs tracking-wider">
@@ -323,7 +323,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                 <div className="flex items-center justify-between">
                   <Label className="uppercase text-xs tracking-wider">Google Sheets Sources</Label>
                   {sheetUrlRows.some(r => r.status === 'valid') && (
-                    <span className="text-xs font-medium text-green-600">
+                    <span className="text-xs font-medium text-success">
                       {sheetUrlRows.filter(r => r.status === 'valid').reduce((sum, r) => sum + r.candidateCount, 0)} candidate{sheetUrlRows.filter(r => r.status === 'valid').reduce((sum, r) => sum + r.candidateCount, 0) !== 1 ? 's' : ''} ready
                     </span>
                   )}
@@ -410,13 +410,13 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                             <CircleNotch className="w-4 h-4 animate-spin text-[hsl(var(--ink))]" />
                           )}
                           {row.status === 'valid' && (
-                            <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                            <span className="text-xs text-success font-medium flex items-center gap-1">
                               <CheckCircle className="w-4 h-4" />
                               {row.candidateCount}
                             </span>
                           )}
                           {row.status === 'error' && (
-                            <span className="text-xs text-red-600">
+                            <span className="text-xs text-danger">
                               <X className="w-4 h-4" />
                             </span>
                           )}
@@ -430,7 +430,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                           onClick={() => {
                             setSheetUrlRows(prev => prev.filter(r => r.id !== row.id));
                           }}
-                          className="h-10 w-10 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="h-10 w-10 p-0 text-danger hover:text-danger hover:bg-danger-soft"
                         >
                           <Trash className="w-4 h-4" />
                         </Button>
@@ -467,16 +467,16 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                 <div className="flex items-center justify-between">
                   <Label className="uppercase text-xs tracking-wider">Enter Candidates</Label>
                   {manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length > 0 && (
-                    <span className="text-xs font-medium text-green-600">
+                    <span className="text-xs font-medium text-success">
                       {manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length} candidate{manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length !== 1 ? 's' : ''} ready
                     </span>
                   )}
                 </div>
                 <div className="mt-2">
                   {/* Table Header */}
-                  <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wider text-muted-foreground font-medium px-1 mb-2">
-                    <div className="col-span-5">Name <span className="text-red-600">*</span></div>
-                    <div className="col-span-6">Email <span className="text-red-600">*</span></div>
+                  <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground font-medium px-1 mb-2">
+                    <div className="col-span-5">Name <span className="text-danger">*</span></div>
+                    <div className="col-span-6">Email <span className="text-danger">*</span></div>
                     <div className="col-span-1"></div>
                   </div>
 
@@ -506,7 +506,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                               }}
                             />
                             {showNameError && (
-                              <p className="text-xs text-red-500 mt-1">Name is required</p>
+                              <p className="text-xs text-danger mt-1">Name is required</p>
                             )}
                           </div>
                           <div className="col-span-6">
@@ -525,7 +525,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                               }}
                             />
                             {showEmailError && (
-                              <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+                              <p className="text-xs text-danger mt-1">Invalid email format</p>
                             )}
                           </div>
                           <div className="col-span-1 flex justify-center pt-1">
@@ -536,7 +536,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                                 onClick={() => {
                                   setManualCandidates(prev => prev.filter(c => c.id !== candidate.id));
                                 }}
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                className="h-8 w-8 p-0 text-danger hover:text-danger hover:bg-danger-soft"
                               >
                                 <Trash className="w-4 h-4" />
                               </Button>
@@ -572,14 +572,14 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateList}
                 disabled={!formData.name.trim()}
-                className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
               >
                 Save Candidate Pool
               </Button>
@@ -592,10 +592,10 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
       <Dialog open={progressModalOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle className="uppercase tracking-wider">
+            <DialogTitle className=" ">
               {overallProgress === 100 ? 'CANDIDATE POOL READY!' : 'CREATING CANDIDATE POOL'}
             </DialogTitle>
-            <DialogDescription className="uppercase tracking-wider text-xs">
+            <DialogDescription className=" text-xs">
               {overallProgress === 100
                 ? (formData.name ? `${formData.name.toUpperCase()} IS READY TO USE` : 'CANDIDATE POOL IS READY TO USE')
                 : (formData.name ? `SETTING UP ${formData.name.toUpperCase()}` : 'SETTING UP CANDIDATE POOL')
@@ -607,7 +607,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
             {/* Overall Progress Bar */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-foreground uppercase tracking-wider">OVERALL PROGRESS</span>
+                <span className="text-sm font-medium text-foreground">OVERALL PROGRESS</span>
                 <span className="text-sm text-muted font-medium">{overallProgress}%</span>
               </div>
               <div className="w-full bg-paper-3 rounded-sm h-2 overflow-hidden">
@@ -642,10 +642,10 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium uppercase tracking-wider ${
-                      step.status === 'completed' ? 'text-green-600' :
+                    <p className={`text-sm font-medium   ${
+                      step.status === 'completed' ? 'text-success' :
                       step.status === 'active' ? 'text-[hsl(var(--ink-soft))]' :
-                      step.status === 'error' ? 'text-red-700' :
+                      step.status === 'error' ? 'text-danger' :
                       'text-muted-2'
                     }`}>
                       {step.title}

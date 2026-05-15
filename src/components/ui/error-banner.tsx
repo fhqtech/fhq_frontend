@@ -1,7 +1,7 @@
 /**
  * ErrorBanner — inline error surface.
  *
- * Replaces ad-hoc red Cards / red toasts / `text-red-700 bg-red-50` blocks
+ * Replaces ad-hoc red Cards / red toasts / `text-danger bg-danger-soft` blocks
  * (designer review found 6 distinct treatments). Use for inline errors
  * tied to a section. For transient/global errors prefer the toast hook.
  *

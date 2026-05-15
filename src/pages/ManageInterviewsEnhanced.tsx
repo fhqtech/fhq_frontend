@@ -346,7 +346,7 @@ export default function ManageInterviewsEnhanced() {
  if (!type) return 'bg-muted text-muted border border-border';
  switch (type.toLowerCase()) {
  case 'screening': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
- case 'fitment': return 'bg-blue-100 text-blue-700 border border-blue-200';
+ case 'fitment': return 'bg-info-soft text-info border border-info/30';
  default: return 'bg-muted text-muted border border-border';
  }
  };
@@ -386,25 +386,20 @@ export default function ManageInterviewsEnhanced() {
  <div className="flex justify-between items-start">
  <div className="space-y-1">
  <h1 className="text-3xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
- <p className="text-muted text-xs uppercase tracking-wider">{pageDescription}</p>
+ <p className="text-muted text-sm">{pageDescription}</p>
  </div>
  <Button
- className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
+ variant="default"
+ className="text-paper font-medium rounded-sm transition-all duration-200"
  style={{
  minWidth: '9em',
  height: '3em',
- fontSize: '14px',
- border: 'none',
- backgroundColor: 'hsl(var(--ink))',
  boxShadow: 'var(--shadow-clay)',
- textTransform: 'uppercase'
  }}
- onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
- onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
  onClick={() => navigate(`/interviews/create?type=${interviewType}`)}
  >
  <Plus className="w-4 h-4 mr-2" />
- Create New Interview
+ Create new interview
  </Button>
  </div>
 
@@ -457,9 +452,9 @@ export default function ManageInterviewsEnhanced() {
  }}
  >
  <div className="px-6 py-5">
- <h3 className="text-lg font-semibold uppercase tracking-wider">All Interviews ({filteredInterviews.length})</h3>
- <p className="text-xs text-muted mt-1 uppercase tracking-wider">
- Manage your AI interviews, monitor progress, and control settings
+ <h3 className="text-lg font-semibold text-ink">All interviews ({filteredInterviews.length})</h3>
+ <p className="text-sm text-muted mt-1">
+ Manage your AI interviews, monitor progress, and control settings.
  </p>
  </div>
  <div className="p-6">
@@ -484,12 +479,12 @@ export default function ManageInterviewsEnhanced() {
  <Table>
  <TableHeader>
  <TableRow>
- <TableHead className="min-w-[140px] text-xs uppercase tracking-wider">Interview</TableHead>
- <TableHead className="w-[70px] text-xs uppercase tracking-wider">Status</TableHead>
- <TableHead className="w-[60px] text-xs uppercase tracking-wider text-center">Candidates</TableHead>
- <TableHead className="w-[70px] hidden lg:table-cell text-xs uppercase tracking-wider text-center">Participation</TableHead>
- <TableHead className="w-[60px] hidden md:table-cell text-xs uppercase tracking-wider text-center">Duration</TableHead>
- <TableHead className="w-[100px] hidden lg:table-cell text-xs uppercase tracking-wider">Created</TableHead>
+ <TableHead className="min-w-[140px] font-mono uppercase tracking-[0.18em] text-[11px] text-muted">Interview</TableHead>
+ <TableHead className="w-[70px] font-mono uppercase tracking-[0.18em] text-[11px] text-muted">Status</TableHead>
+ <TableHead className="w-[60px] font-mono uppercase tracking-[0.18em] text-[11px] text-muted text-center">Applicants</TableHead>
+ <TableHead className="w-[70px] hidden lg:table-cell font-mono uppercase tracking-[0.18em] text-[11px] text-muted text-center">Participation</TableHead>
+ <TableHead className="w-[60px] hidden md:table-cell font-mono uppercase tracking-[0.18em] text-[11px] text-muted text-center">Duration</TableHead>
+ <TableHead className="w-[100px] hidden lg:table-cell font-mono uppercase tracking-[0.18em] text-[11px] text-muted">Created</TableHead>
  <TableHead className="w-[50px]"></TableHead>
  </TableRow>
  </TableHeader>
@@ -516,7 +511,7 @@ export default function ManageInterviewsEnhanced() {
  >
  <TableCell className="min-w-[140px]">
  <div>
- <div className="font-medium text-foreground text-sm uppercase tracking-wider">{interview.title}</div>
+ <div className="font-medium text-foreground text-sm">{interview.title}</div>
  <div className="text-sm text-muted">ID: {interview.id.slice(0, 8)}...</div>
  </div>
  </TableCell>
@@ -555,7 +550,7 @@ export default function ManageInterviewsEnhanced() {
  </Button>
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end" className="w-40">
- <DropdownMenuLabel className="text-xs py-1 uppercase tracking-wider">Actions</DropdownMenuLabel>
+ <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
  <DropdownMenuItem
  onClick={(e) => {
  e.stopPropagation();
@@ -630,7 +625,7 @@ export default function ManageInterviewsEnhanced() {
  e.stopPropagation();
  handleAction("Resume", interview.id, interview.title);
  }}
- className="cursor-pointer text-xs py-1 text-green-600"
+ className="cursor-pointer text-xs py-1 text-success"
  >
  <Play className="mr-1.5 h-3 w-3" />
  Resume Interview
@@ -775,7 +770,7 @@ export default function ManageInterviewsEnhanced() {
  </DialogHeader>
  <div className="py-6">
  <div className="space-y-4">
- <div className={`text-sm ${startingProgress?.startsWith('Error:') ? 'text-red-600' : 'text-muted'}`}>
+ <div className={`text-sm ${startingProgress?.startsWith('Error:') ? 'text-danger' : 'text-muted'}`}>
  {startingProgress || "Preparing interview..."}
  </div>
  {isStartingInterview && (

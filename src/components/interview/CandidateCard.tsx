@@ -268,7 +268,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
           {blueprint?.hireability_recommendation ? (
             <div
               className={`
-                w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest shadow-2
+                w-full px-4 py-3 text-center font-bold text-[11px]   shadow-2
                 ${blueprint.hireability_recommendation === 'Strongly Recommend' || blueprint.hireability_recommendation === 'Strong Recommend'
                   ? 'bg-success/10 text-success border border-rule/30'
                   : blueprint.hireability_recommendation === 'Recommend'
@@ -285,7 +285,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             </div>
           ) : (
             <>
-              <div className="w-full px-4 py-3 text-center font-bold text-[11px] uppercase tracking-widest bg-muted/50 text-muted-foreground border border-border shadow-2">
+              <div className="w-full px-4 py-3 text-center font-bold text-[11px] bg-muted/50 text-muted-foreground border border-border shadow-2">
                 NOT INTERVIEWED
               </div>
             </>
@@ -301,7 +301,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             const label = isRegistered ? 'Copy Portal Link' : 'Copy Invitation Link';
             return (
               <div className="mt-4 flex items-center justify-center gap-2">
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
+                <span className="text-xs text-muted-foreground font-medium">{label}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -346,7 +346,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             return (
               <div className="mt-3 flex items-center justify-center gap-2">
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border ${chipClass}`}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px]   font-semibold rounded border ${chipClass}`}
                   title={error || (sentAt ? `Sent ${new Date(sentAt).toLocaleString()}` : "")}
                 >
                   {icon}
@@ -356,7 +356,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                   <button
                     onClick={handleResend}
                     disabled={resending}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
                     title="Resend invitation email"
                   >
                     <RefreshCw
@@ -519,7 +519,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
           <div className="mb-4 h-[180px] flex items-center justify-center bg-transparent rounded-lg border border-border/30">
             <div className="text-center">
               <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground uppercase tracking-wide">
+              <p className="text-sm text-muted-foreground">
                 {hasSession ? 'Results Pending' : 'No Interview Yet'}
               </p>
             </div>
@@ -565,7 +565,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
 
             {/* Details Button */}
             <Button
-              className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold text-xs border-none"
+              className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold text-xs border-none"
               onClick={(e) => {
                 e.stopPropagation();
                 onClick?.();

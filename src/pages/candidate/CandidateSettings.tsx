@@ -61,7 +61,7 @@ export default function CandidateSettings() {
           <Link to="/candidate/dashboard" className="text-sm text-gold-ink hover:underline">
             ← Dashboard
           </Link>
-          <h1 className="text-sm font-semibold tracking-wider uppercase">Settings</h1>
+          <h1 className="text-sm font-semibold">Settings</h1>
           <span />
         </div>
       </header>
@@ -167,7 +167,7 @@ export default function CandidateSettings() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-paper rounded-xl border border-rule p-5">
-      <h3 className="text-sm font-semibold uppercase tracking-widest text-ink mb-4">
+      <h3 className="text-sm font-semibold text-ink mb-4">
         {title}
       </h3>
       {children}
@@ -178,7 +178,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-2 border-b border-rule last:border-b-0">
-      <span className="text-xs uppercase tracking-wider text-muted">{label}</span>
+      <span className="text-xs text-muted">{label}</span>
       <span className="text-sm text-ink">{value}</span>
     </div>
   );

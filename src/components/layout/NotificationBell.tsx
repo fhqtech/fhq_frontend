@@ -199,7 +199,7 @@ export function NotificationBell() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-96 p-0">
-        <div className="p-4 border-b border-rule bg-paper-2  ">
+        <div className="p-4 border-b border-rule bg-paper-2">
           <h3 className="font-bold text-ink">Project Invitations</h3>
           <p className="text-xs text-muted mt-1">
             {pendingCount === 0 ? 'No pending invitations' : `You have ${pendingCount} pending ${pendingCount === 1 ? 'invitation' : 'invitations'}`}
@@ -276,7 +276,7 @@ export function NotificationBell() {
                               <button
                                 onClick={() => handleAccept(invitation)}
                                 disabled={isLoading}
-                                className="flex-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-paper text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                className="flex-1 px-3 py-1.5 bg-ink hover:bg-ink-soft text-paper text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                               >
                                 <Check className="w-3 h-3" />
                                 Accept

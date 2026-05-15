@@ -53,7 +53,7 @@ export default function ClaimPassword() {
           </p>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
+              <label className="block text-xs font-medium text-muted mb-1">
                 New password
               </label>
               <input
@@ -66,7 +66,7 @@ export default function ClaimPassword() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
+              <label className="block text-xs font-medium text-muted mb-1">
                 Confirm password
               </label>
               <input

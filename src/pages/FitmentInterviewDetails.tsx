@@ -615,10 +615,10 @@ export default function FitmentInterviewDetails() {
  ) : (
  <>
  <h1 className="text-4xl font-bold text-foreground mb-2">{fitmentInterview?.title}</h1>
- <p className="text-foreground text-sm font-semibold uppercase tracking-wider mt-1">
+ <p className="text-foreground text-sm font-semibold mt-1">
  #{id}
  </p>
- <p className="text-muted text-[10px] uppercase tracking-wider mt-0.5">
+ <p className="text-muted text-[10px] mt-0.5">
  Created on {fitmentInterview?.created}
  </p>
  </>
@@ -689,8 +689,8 @@ export default function FitmentInterviewDetails() {
  <div className="flex items-center gap-4">
  <img src={aiAvatar} alt="AI" className="w-12 h-12 rounded-full" />
  <div className="flex-1">
- <h3 className="text-lg font-semibold uppercase tracking-wider">Fitment Interview Configuration</h3>
- <p className="text-[10px] text-muted mt-1 uppercase tracking-wider">Current settings and linked interviews</p>
+ <h3 className="text-lg font-semibold">Fitment Interview Configuration</h3>
+ <p className="text-[10px] text-muted mt-1">Current settings and linked interviews</p>
  </div>
  </div>
 
@@ -814,7 +814,7 @@ export default function FitmentInterviewDetails() {
  onClick={() => navigate(`/interview/${interview.interviewId}`)}
  >
  <div className="flex items-start justify-between mb-2">
- <h4 className="font-semibold text-sm text-ink uppercase tracking-wider">{interview.interviewTitle}</h4>
+ <h4 className="font-semibold text-sm text-ink">{interview.interviewTitle}</h4>
  </div>
  <p className="text-xs text-muted font-mono break-all">ID: {interview.interviewId}</p>
  </div>
@@ -847,11 +847,11 @@ export default function FitmentInterviewDetails() {
  <div className="flex items-center gap-4">
  <CloudArrowDown size={48} weight="thin" />
  <div className="flex-1">
- <h3 className="text-lg font-semibold uppercase tracking-wider">Candidate Lists</h3>
- <p className="text-[10px] text-muted mt-1 uppercase tracking-wider">View candidate lists attached to this fitment interview</p>
- <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-sm">
- <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
- <p className="text-[10px] text-amber-700 uppercase tracking-wider">
+ <h3 className="text-lg font-semibold">Candidate Lists</h3>
+ <p className="text-[10px] text-muted mt-1">View candidate lists attached to this fitment interview</p>
+ <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-warning-soft border border-warning/30 rounded-sm">
+ <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+ <p className="text-[10px] text-warning">
  Note: Candidates added to these lists after the fitment interview started will not be included
  </p>
  </div>
@@ -904,7 +904,7 @@ export default function FitmentInterviewDetails() {
  {/* Curated Corner Ribbon */}
  {isCurated && (
  <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
- <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-amber-900 text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
+ <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-warning text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
  Curated
  </div>
  </div>
@@ -912,7 +912,7 @@ export default function FitmentInterviewDetails() {
  <div className="flex flex-col h-full">
  <div className="mb-3">
  <h4 className="font-medium text-sm transition-colors group-hover:text-paper">{list.name}</h4>
- <p className="text-[10px] text-muted uppercase tracking-wider mt-1 transition-colors group-hover:text-paper/60">
+ <p className="text-[10px] text-muted mt-1 transition-colors group-hover:text-paper/60">
  #{list.id}
  </p>
  </div>
@@ -951,7 +951,7 @@ export default function FitmentInterviewDetails() {
  <div className="text-center py-12 space-y-4">
  <div>
  <h3 className="text-2xl font-semibold text-foreground">Fitment Assessment Not Started</h3>
- <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wider">
+ <p className="text-xs text-muted-foreground mt-2">
  Begin the fitment assessment to start evaluating candidates and view their results here
  </p>
  </div>
@@ -974,10 +974,10 @@ export default function FitmentInterviewDetails() {
  <div className="mb-6">
  <div className="flex items-center justify-between">
  <div>
- <h2 className="text-lg font-bold uppercase tracking-wider mb-1 text-ink">
+ <h2 className="text-lg font-bold mb-1 text-ink">
  Candidate Fitment Results ({loadingCandidates ? '...' : filteredCandidatesForTable.length})
  </h2>
- <p className="text-sm text-muted uppercase tracking-wider">
+ <p className="text-sm text-muted">
  Detailed view of all candidates and their fitment assessment performance
  </p>
  </div>
@@ -1087,7 +1087,7 @@ export default function FitmentInterviewDetails() {
  <div className="flex items-center gap-2">
  {candidate.name}
  {candidate.sessionId && (
- <Video className="w-4 h-4 text-blue-500" title="Video available" />
+ <Video className="w-4 h-4 text-info" title="Video available" />
  )}
  </div>
  </TableCell>
@@ -1233,7 +1233,7 @@ export default function FitmentInterviewDetails() {
  </DialogHeader>
  <div className="py-6">
  <div className="space-y-4">
- <div className={`text-sm ${startingProgress?.startsWith('Error:') ? 'text-red-600' : 'text-muted'}`}>
+ <div className={`text-sm ${startingProgress?.startsWith('Error:') ? 'text-danger' : 'text-muted'}`}>
  {startingProgress || "Preparing fitment assessment..."}
  </div>
  {isStartingFitment && (

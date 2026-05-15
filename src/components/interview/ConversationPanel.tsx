@@ -47,7 +47,7 @@ const TypingIndicator = ({ interviewerName = "AI Interviewer" }: { interviewerNa
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="bg-paper-2   rounded-2xl p-6 shadow-2 min-h-[120px] flex flex-col justify-center border border-rule ">
+      <div className="bg-paper-2 rounded-2xl p-6 shadow-2 min-h-[120px] flex flex-col justify-center border border-rule">
         <div className="flex items-center justify-between mb-3">
           <motion.span
             className="text-sm text-muted font-medium"
@@ -96,7 +96,7 @@ const TypingIndicator = ({ interviewerName = "AI Interviewer" }: { interviewerNa
           </div>
         </div>
       </div>
-      <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-b-15 border-b-blue-50 "></div>
+      <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-b-15 border-b-blue-50"></div>
     </motion.div>
   );
 };
@@ -212,7 +212,7 @@ const ConversationPanel = ({
                 </motion.div>
               )}
             </div>
-            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-b-15 border-b-white "></div>
+            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-b-15 border-b-white"></div>
           </motion.div>
         ) : null}
       </div>

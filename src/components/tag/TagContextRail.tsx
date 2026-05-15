@@ -27,7 +27,7 @@ export function TagContextRail({ certifications, tools, idealCandidateProfile }:
         <div className="bg-paper border border-rule rounded-md p-3 shadow-1">
           <div className="flex items-center gap-2 mb-3">
             <Award className="w-4 h-4 text-gold-ink" />
-            <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">Certs</p>
+            <p className="text-[10px] font-mono font-bold text-muted">Certs</p>
           </div>
           <ul className="flex flex-col gap-1.5">
             {certifications!.map((cert, i) => (
@@ -44,14 +44,14 @@ export function TagContextRail({ certifications, tools, idealCandidateProfile }:
         <div className="bg-paper border border-rule rounded-md p-3 shadow-1">
           <div className="flex items-center gap-2 mb-3">
             <Wrench className="w-4 h-4 text-gold-ink" />
-            <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">Tools</p>
+            <p className="text-[10px] font-mono font-bold text-muted">Tools</p>
           </div>
           <ul className="flex flex-col gap-2">
             {tools!.map((tool, i) => (
               <li key={i} className="flex flex-col">
                 <span className="text-[11px] font-semibold text-ink-soft">{tool.name}</span>
                 {tool.category && (
-                  <span className="text-[10px] font-mono text-muted-2 uppercase tracking-wider">
+                  <span className="text-[10px] font-mono text-muted-2">
                     {tool.category}
                   </span>
                 )}
@@ -65,7 +65,7 @@ export function TagContextRail({ certifications, tools, idealCandidateProfile }:
         <div className="bg-paper border border-rule rounded-md p-3 shadow-1">
           <div className="flex items-center gap-2 mb-2">
             <User className="w-4 h-4 text-gold-ink" />
-            <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">
+            <p className="text-[10px] font-mono font-bold text-muted">
               Ideal candidate
             </p>
           </div>

@@ -20,9 +20,9 @@ import { downloadCsv } from "@/lib/csv";
 import { usePoolDashboardQuery, type PoolCandidate } from "@/queries/poolQueries";
 
 const QUALITY_COLORS: Record<string, string> = {
-  gap: "bg-red-100 text-red-700",
+  gap: "bg-danger-soft text-danger",
   developing: "bg-orange-100 text-orange-700",
-  strong: "bg-green-100 text-green-700",
+  strong: "bg-success-soft text-success",
   expert: "bg-emerald-100 text-emerald-700",
 };
 
@@ -143,7 +143,7 @@ export default function PoolDashboard() {
       {/* Top widgets: quality + experience + top skills */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="p-4">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+          <h3 className="mb-3 text-xs font-semibold text-muted">
             Quality distribution
           </h3>
           <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function PoolDashboard() {
         </Card>
 
         <Card className="p-4">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+          <h3 className="mb-3 text-xs font-semibold text-muted">
             Experience distribution
           </h3>
           <div className="space-y-2">
@@ -171,7 +171,7 @@ export default function PoolDashboard() {
         </Card>
 
         <Card className="p-4">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+          <h3 className="mb-3 text-xs font-semibold text-muted">
             Top skills (≥70)
           </h3>
           <div className="space-y-2">
@@ -192,7 +192,7 @@ export default function PoolDashboard() {
       <Card className="p-4">
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+            <label className="mb-1 block text-xs font-semibold text-muted">
               Min overall score
             </label>
             <Input
@@ -205,7 +205,7 @@ export default function PoolDashboard() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+            <label className="mb-1 block text-xs font-semibold text-muted">
               Must have skill ≥70
             </label>
             <select
@@ -222,7 +222,7 @@ export default function PoolDashboard() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+            <label className="mb-1 block text-xs font-semibold text-muted">
               Sort
             </label>
             <select
@@ -256,7 +256,7 @@ export default function PoolDashboard() {
 
       {/* Candidate rows */}
       <Card className="overflow-hidden">
-        <div className="border-b bg-paper-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted">
+        <div className="border-b bg-paper-2 px-4 py-2 text-xs font-semibold text-muted">
           Candidates
         </div>
         <div className="divide-y">
@@ -273,7 +273,7 @@ export default function PoolDashboard() {
               <div
                 key={c.id}
                 className={`flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-paper-2 ${
-                  isShortlisted ? "bg-blue-50/40" : ""
+                  isShortlisted ? "bg-info-soft/40" : ""
                 }`}
               >
                 <div className="min-w-0 flex-1">

@@ -206,7 +206,7 @@ export const CalibrationScreen = ({ open, onOpenChange, onComplete }: Calibratio
           key={phase}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-base font-medium text-ink-soft "
+          className="text-base font-medium text-ink-soft"
         >
           {phaseDescriptions[phase]}
         </motion.p>

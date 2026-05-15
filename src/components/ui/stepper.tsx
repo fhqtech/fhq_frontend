@@ -88,7 +88,7 @@ export function Stepper({
                 {/* Step Content */}
                 <div className="space-y-0.5">
                   <div className={cn(
-                    "text-xs font-bold uppercase tracking-wider transition-colors",
+                    "text-xs font-bold   transition-colors",
                     isActive && "text-ink",
                     isCompleted && "text-success",
                     hasError && "text-danger",

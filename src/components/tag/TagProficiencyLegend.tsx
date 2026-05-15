@@ -44,7 +44,7 @@ export function TagProficiencyLegend({ legend }: Props) {
   return (
     <aside className="w-56 shrink-0">
       <div className="bg-paper border border-rule rounded-md p-3 shadow-1">
-        <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider mb-3">
+        <p className="text-[10px] font-mono font-bold text-muted mb-3">
           Proficiency levels
         </p>
         <ul className="flex flex-col gap-2">

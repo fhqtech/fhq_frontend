@@ -126,14 +126,14 @@ export default function CandidateInterviewDetail() {
           <Link to="/candidate/dashboard" className="text-sm text-primary hover:underline">
             ← Dashboard
           </Link>
-          <h1 className="text-sm font-semibold tracking-wider uppercase">{data.title}</h1>
+          <h1 className="text-sm font-semibold">{data.title}</h1>
           <span />
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10">
         <div className="bg-paper rounded-xl border border-border shadow-1 p-6">
-          <p className="text-[10px] uppercase tracking-widest text-muted font-semibold mb-2">
+          <p className="text-[10px] text-muted font-semibold mb-2">
             {data.type === 'fitment' ? 'Fitment interview' : 'Screening interview'}
           </p>
           <h2 className="text-2xl font-semibold mb-4">{data.title}</h2>

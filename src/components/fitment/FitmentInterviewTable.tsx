@@ -40,7 +40,7 @@ export function FitmentInterviewTable({
         <CardContent className="p-0">
           <div className="flex items-center justify-center py-12">
             <CircleNotch className="w-8 h-8 animate-spin text-muted-2" />
-            <span className="ml-2 text-muted uppercase tracking-wider">Loading fitment interviews...</span>
+            <span className="ml-2 text-muted">Loading fitment interviews...</span>
           </div>
         </CardContent>
       </Card>
@@ -53,7 +53,7 @@ export function FitmentInterviewTable({
         <CardContent className="p-0">
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Target className="w-12 h-12 text-muted-2 mb-4" />
-            <h3 className="text-lg font-medium text-ink mb-2 uppercase tracking-wider">No Fitment Interviews</h3>
+            <h3 className="text-lg font-medium text-ink mb-2">No Fitment Interviews</h3>
             <p className="text-muted mb-4 uppercase text-xs tracking-wider">Create your first fitment interview to get started.</p>
             <Button
               onClick={onCreateNew}
@@ -82,11 +82,11 @@ export function FitmentInterviewTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs uppercase tracking-wider">Title</TableHead>
-              <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
-              <TableHead className="text-center text-xs uppercase tracking-wider">Candidates</TableHead>
-              <TableHead className="text-xs uppercase tracking-wider">Linked Interviews</TableHead>
-              <TableHead className="text-xs uppercase tracking-wider">Completion Rate</TableHead>
+              <TableHead className="text-xs">Title</TableHead>
+              <TableHead className="text-xs">Status</TableHead>
+              <TableHead className="text-center text-xs">Candidates</TableHead>
+              <TableHead className="text-xs">Linked Interviews</TableHead>
+              <TableHead className="text-xs">Completion Rate</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -99,7 +99,7 @@ export function FitmentInterviewTable({
               >
                 <TableCell>
                   <div>
-                    <div className="font-medium uppercase tracking-wider">{interview.title}</div>
+                    <div className="font-medium">{interview.title}</div>
                     <div className="text-sm text-muted">ID: {interview.id.slice(0, 8)}...</div>
                   </div>
                 </TableCell>
@@ -119,8 +119,8 @@ export function FitmentInterviewTable({
                         </div>
                       ))}
                       {interview.parentInterviews.length > 3 && (
-                        <div className="bg-blue-50 border border-blue-200 px-2 py-1 rounded flex items-center">
-                          <span className="text-xs text-blue-700 font-medium">+{interview.parentInterviews.length - 3} more</span>
+                        <div className="bg-info-soft border border-info/30 px-2 py-1 rounded flex items-center">
+                          <span className="text-xs text-info font-medium">+{interview.parentInterviews.length - 3} more</span>
                         </div>
                       )}
                     </div>

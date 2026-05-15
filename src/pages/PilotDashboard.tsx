@@ -66,7 +66,7 @@ export default function PilotDashboard() {
   if (error) {
     return (
       <div className="p-12">
-        <Card className="p-6 border-red-200 bg-red-50 text-red-700 flex items-center gap-3">
+        <Card className="p-6 border-danger/30 bg-danger-soft text-danger flex items-center gap-3">
           <AlertTriangle className="w-5 h-5" />
           <span>{error}</span>
         </Card>
@@ -105,7 +105,7 @@ export default function PilotDashboard() {
       </div>
 
       {r.failures_today > 0 && (
-        <Card className="p-4 border-amber-200 bg-amber-50 text-amber-800 flex items-center gap-3">
+        <Card className="p-4 border-warning/30 bg-warning-soft text-amber-800 flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 shrink-0" />
           <div className="text-sm">
             <strong>{r.failures_today}</strong> reviewer failure{r.failures_today > 1 ? "s" : ""} today.
@@ -138,8 +138,8 @@ function StatCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <Card className={`p-4 ${warn ? "border-amber-300 bg-amber-50" : ""}`}>
-      <div className="flex items-center justify-between text-xs uppercase tracking-wider text-muted">
+    <Card className={`p-4 ${warn ? "border-warning/30 bg-warning-soft" : ""}`}>
+      <div className="flex items-center justify-between text-xs text-muted">
         <span>{label}</span>
         {icon}
       </div>

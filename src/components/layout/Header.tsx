@@ -78,7 +78,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <span className="font-semibold text-ink text-lg leading-tight tracking-tight">
               FunnelHQ
             </span>
-            <span className="text-xs text-muted font-medium uppercase tracking-wide">
+            <span className="text-xs text-muted font-medium">
               Workspace
             </span>
           </div>

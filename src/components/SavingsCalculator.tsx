@@ -102,7 +102,7 @@ const SavingsCalculator = () => {
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-light text-paper tracking-wide mb-4">
             Savings{' '}
-            <span className="text-ink  bg-paper-2 from-[hsl(var(--gold))] to-[hsl(var(--gold))]">
+            <span className="text-ink bg-paper-2 from-[hsl(var(--gold))] to-[hsl(var(--gold))]">
               Calculator
             </span>
           </h2>
@@ -203,7 +203,7 @@ const SavingsCalculator = () => {
             {/* Right: Results */}
             <div className="flex flex-col items-center justify-center text-center bg-paper-2 from-[hsl(var(--gold))]/5 via-transparent to-[hsl(var(--gold))]/5 rounded-xl p-8 border border-white/5">
               <p className="text-paper/60 text-lg mb-2">You can save up to</p>
-              <div className="text-5xl md:text-6xl font-bold text-ink  bg-paper-2 from-[hsl(var(--gold))] to-[hsl(var(--gold))] mb-2">
+              <div className="text-5xl md:text-6xl font-bold text-ink bg-paper-2 from-[hsl(var(--gold))] to-[hsl(var(--gold))] mb-2">
                 {currency.symbol}{Math.round(animatedSavings).toLocaleString()}
               </div>
               <p className="text-paper/60 text-lg">per month</p>

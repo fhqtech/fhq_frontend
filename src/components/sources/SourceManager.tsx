@@ -33,7 +33,7 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
       description: 'Import candidates from Google Sheets',
       icon: FileSpreadsheet,
       imageSrc: googleLogo,
-      color: 'bg-green-50 border-green-200 hover:bg-green-100'
+      color: 'bg-success-soft border-success/30 hover:bg-success-soft'
     },
     {
       type: 'excel_file' as const,
@@ -41,7 +41,7 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
       description: 'Upload Excel or CSV file with candidates',
       icon: Upload,
       imageSrc: csvIcon,
-      color: 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+      color: 'bg-info-soft border-info/30 hover:bg-info-soft'
     }
   ];
 
@@ -156,7 +156,7 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemoveSource(source.id)}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
+                  className="h-8 w-8 p-0 text-danger hover:text-red-800"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -165,9 +165,9 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
           </div>
 
           {/* Total Summary */}
-          <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+          <div className="mt-3 p-3 bg-success-soft rounded-lg border border-success/30">
             <div className="flex items-center space-x-2">
-              <span className="text-green-600 font-medium text-sm">
+              <span className="text-success font-medium text-sm">
                 Total: {getTotalCandidates()} candidates from {sources.length} source{sources.length !== 1 ? 's' : ''}
               </span>
             </div>

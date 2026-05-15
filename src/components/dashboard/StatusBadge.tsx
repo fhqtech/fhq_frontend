@@ -65,7 +65,7 @@ const statusConfig = {
   },
   "paused_credits": {
     label: "Credits Exhausted",
-    className: "bg-amber-100 text-amber-700 border-amber-300"
+    className: "bg-warning-soft text-warning border-warning/30"
   },
   "stopped": {
     label: "Stopped",
@@ -73,7 +73,7 @@ const statusConfig = {
   },
   "link_clicked": {
     label: "Link Opened",
-    className: "bg-blue-100 text-blue-700 border-blue-200"
+    className: "bg-info-soft text-info border-info/30"
   },
   "registered": {
     label: "Registered",
@@ -81,7 +81,7 @@ const statusConfig = {
   },
   "linked_to_existing": {
     label: "Link Opened",
-    className: "bg-blue-100 text-blue-700 border-blue-200"
+    className: "bg-info-soft text-info border-info/30"
   }
 };
 

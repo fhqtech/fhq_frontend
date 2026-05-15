@@ -45,7 +45,7 @@ export default function ForgotPassword() {
                 email you a link to set a new password.
               </p>
               <div>
-                <label className="block text-xs font-medium uppercase tracking-wider text-muted mb-1">
+                <label className="block text-xs font-medium text-muted mb-1">
                   Email
                 </label>
                 <input

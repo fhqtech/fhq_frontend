@@ -307,7 +307,7 @@ export default function InterviewSwipeView() {
                 className="text-center text-3xl font-mono tracking-widest border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] py-6"
               />
               {otpError && (
-                <p className="text-sm text-destructive text-center uppercase tracking-wide font-medium">{otpError}</p>
+                <p className="text-sm text-destructive text-center font-medium">{otpError}</p>
               )}
             </div>
           </CardContent>
@@ -332,7 +332,7 @@ export default function InterviewSwipeView() {
         <Card className="w-full max-w-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-sm border border-rule-strong">
           <CardHeader>
             <CardTitle className="text-2xl text-center flex items-center justify-center gap-2 text-ink">
-              <Check className="w-6 h-6 text-green-600" />
+              <Check className="w-6 h-6 text-success" />
               Session Complete!
             </CardTitle>
           </CardHeader>
@@ -342,16 +342,16 @@ export default function InterviewSwipeView() {
                 You've reviewed all {candidates.length} candidates
               </p>
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-4 bg-green-50 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-green-200">
+                <div className="p-4 bg-success-soft rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-success/30">
                   <div className="text-3xl font-bold text-ink">{shortlistCount}</div>
-                  <div className="text-sm text-green-600 uppercase tracking-wide">Shortlisted</div>
+                  <div className="text-sm text-success">Shortlisted</div>
                 </div>
-                <div className="p-4 bg-red-50 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-red-200">
+                <div className="p-4 bg-danger-soft rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-danger/30">
                   <div className="text-3xl font-bold text-ink">{rejectCount}</div>
-                  <div className="text-sm text-red-600 uppercase tracking-wide">Rejected</div>
+                  <div className="text-sm text-danger">Rejected</div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
+              <p className="text-xs text-muted-foreground">
                 Thank you for your review!
               </p>
               <p className="text-xs text-muted-foreground mt-2">
@@ -379,12 +379,12 @@ export default function InterviewSwipeView() {
               setCandidates([]);
               setCurrentIndex(0);
             }}
-            className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+            className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Exit
           </Button>
-          <div className="text-sm font-bold uppercase tracking-wider text-ink">
+          <div className="text-sm font-bold text-ink">
             {currentIndex + 1} / {candidates.length}
             {hasMore && '+'}
           </div>
@@ -413,7 +413,7 @@ export default function InterviewSwipeView() {
               candidate={currentCandidate}
               hideViewButton={true}
             />
-            <div className="text-center text-xs text-muted-foreground mt-4 uppercase tracking-wider">
+            <div className="text-center text-xs text-muted-foreground mt-4">
               Swipe right to shortlist • Swipe left to reject
             </div>
           </motion.div>

@@ -21,7 +21,7 @@ export const InterviewStatusModal: React.FC<InterviewStatusModalProps> = ({
   const getModalContent = () => {
     if (status === 'paused') {
       return {
-        icon: <Pause className="w-12 h-12 text-yellow-500" />,
+        icon: <Pause className="w-12 h-12 text-warning" />,
         title: "Interview Temporarily Paused",
         message: "The interview has been temporarily halted by the recruiter. Please wait for further instructions.",
         description: "This interview is currently on hold. You will be notified when it becomes available again.",
@@ -40,13 +40,13 @@ export const InterviewStatusModal: React.FC<InterviewStatusModalProps> = ({
           }
         ],
         buttonText: "Got it",
-        bgColor: "bg-yellow-50",
-        borderColor: "border-yellow-200",
+        bgColor: "bg-warning-soft",
+        borderColor: "border-warning/30",
         textColor: "text-yellow-800"
       };
     } else {
       return {
-        icon: <Square className="w-12 h-12 text-red-500" />,
+        icon: <Square className="w-12 h-12 text-danger" />,
         title: "Interview Deadline Over",
         message: "This interview has been closed as the deadline has passed.",
         description: "The interview period has ended and submissions are no longer being accepted.",
@@ -65,8 +65,8 @@ export const InterviewStatusModal: React.FC<InterviewStatusModalProps> = ({
           }
         ],
         buttonText: "Understood",
-        bgColor: "bg-red-50",
-        borderColor: "border-red-200",
+        bgColor: "bg-danger-soft",
+        borderColor: "border-danger/30",
         textColor: "text-red-800"
       };
     }

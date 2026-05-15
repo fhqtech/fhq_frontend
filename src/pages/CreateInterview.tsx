@@ -2049,7 +2049,7 @@ export default function CreateInterview() {
               <h2 className="text-2xl font-bold text-foreground mb-3">
                 Screening
               </h2>
-              <p className="text-muted text-sm uppercase tracking-wider leading-relaxed">
+              <p className="text-muted text-sm leading-relaxed">
                 Quick initial assessment to filter candidates at scale
               </p>
             </div>
@@ -2082,7 +2082,7 @@ export default function CreateInterview() {
               <h2 className="text-2xl font-bold text-foreground mb-3">
                 Fitment
               </h2>
-              <p className="text-muted text-sm uppercase tracking-wider leading-relaxed">
+              <p className="text-muted text-sm leading-relaxed">
                 In-depth role-specific evaluation with detailed analysis
               </p>
             </div>
@@ -2268,21 +2268,21 @@ export default function CreateInterview() {
                           <div className="text-xl font-bold text-[hsl(var(--ink))]">
                             {creditInfo.creditCosts[parseInt(formData.duration)] || 0}
                           </div>
-                          <div className="text-[10px] text-muted uppercase tracking-wider">Credits Per Interview</div>
+                          <div className="text-[10px] text-muted">Credits Per Interview</div>
                         </div>
                         <div className="h-6 w-px bg-paper-4"></div>
                         <div className="text-center">
                           <div className="text-xl font-bold text-[#00ADB5]">
                             {creditInfo.available}
                           </div>
-                          <div className="text-[10px] text-muted uppercase tracking-wider">Available Credits</div>
+                          <div className="text-[10px] text-muted">Available Credits</div>
                         </div>
                         <div className="h-6 w-px bg-paper-4"></div>
                         <div className="text-center">
                           <div className="text-xl font-bold text-[hsl(var(--ink-soft))]">
                             {maxCandidates ?? 0}
                           </div>
-                          <div className="text-[10px] text-muted uppercase tracking-wider">Max Candidates</div>
+                          <div className="text-[10px] text-muted">Max Candidates</div>
                         </div>
                       </div>
                     )}
@@ -2495,7 +2495,7 @@ export default function CreateInterview() {
                             <span className="text-[8px] leading-tight">min</span>
                           </Button>
                           {isRecommended && (
-                            <span className="text-[10px] text-[#00ADB5] font-medium uppercase tracking-wider">Recommended</span>
+                            <span className="text-[10px] text-[#00ADB5] font-medium">Recommended</span>
                           )}
                         </div>
                       );
@@ -2564,7 +2564,7 @@ export default function CreateInterview() {
                 <div className="mt-4 flex items-center gap-3 p-3 bg-info-soft/40 border border-rule rounded-sm">
                   <Volume2 className="w-4 h-4 text-info shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Voice preview</p>
+                    <p className="text-[10px] font-mono text-muted mb-0.5">Voice preview</p>
                     <p className="text-xs text-ink-soft truncate italic">"{personalizedGreeting()}"</p>
                   </div>
                   <Button
@@ -2710,7 +2710,7 @@ export default function CreateInterview() {
                       <span className="text-warning text-xl font-bold">!</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-warning uppercase tracking-wide">
+                      <h4 className="text-sm font-semibold text-warning">
                         Over Credit Budget
                       </h4>
                       <p className="text-sm text-warning mt-1">
@@ -2752,7 +2752,7 @@ export default function CreateInterview() {
                 }}>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm">
                     <DialogHeader>
-                      <DialogTitle className="uppercase tracking-wider text-ink">
+                      <DialogTitle className=" text-ink">
                         Create New Candidate Pool
                       </DialogTitle>
                       <DialogDescription className="uppercase text-xs tracking-wider">
@@ -2964,7 +2964,7 @@ export default function CreateInterview() {
                         </div>
                         <div className="mt-2">
                           {/* Table Header */}
-                          <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wider text-muted-foreground font-medium px-1 mb-2">
+                          <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground font-medium px-1 mb-2">
                             <div className="col-span-5">Name <span className="text-danger">*</span></div>
                             <div className="col-span-6">Email <span className="text-danger">*</span></div>
                             <div className="col-span-1"></div>
@@ -3070,7 +3070,7 @@ export default function CreateInterview() {
                           setSourceEntryType('google_sheet');
                           setManualCandidates([{ id: 'candidate_1', name: '', email: '' }]);
                         }}
-                        className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                        className="border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
                       >
                         Cancel
                       </Button>
@@ -3210,7 +3210,7 @@ export default function CreateInterview() {
                           }
                         }}
                         disabled={!createListFormData.name.trim() || isCreatingList}
-                        className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+                        className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
                       >
                         {isCreatingList ? (
                           <>
@@ -3354,7 +3354,7 @@ export default function CreateInterview() {
                               <div className="flex flex-col h-full">
                                 <div className="mb-3">
                                   <h4 className={`font-medium text-sm transition-colors ${!isSelected ? 'group-hover:text-paper' : ''}`}>{list.name}</h4>
-                                  <p className={`text-[10px] text-muted uppercase tracking-wider mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
+                                  <p className={`text-[10px] text-muted   mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
                                     #{list.id}
                                   </p>
                                 </div>
@@ -3590,12 +3590,12 @@ export default function CreateInterview() {
       <Dialog open={progressModalOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md rounded-sm" onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle className="uppercase tracking-wider text-ink">
+            <DialogTitle className=" text-ink">
               {overallProgress === 100
                 ? (wasInterviewStarted ? 'INTERVIEW IS LIVE!' : 'INTERVIEW READY!')
                 : `${isEditMode ? 'UPDATING' : 'CREATING'} INTERVIEW`}
             </DialogTitle>
-            <DialogDescription className="uppercase tracking-wider text-xs">
+            <DialogDescription className=" text-xs">
               {overallProgress === 100
                 ? (wasInterviewStarted
                     ? `${formData.title.toUpperCase()} IS NOW ACTIVE`
@@ -3609,7 +3609,7 @@ export default function CreateInterview() {
             {/* Overall Progress Bar */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-foreground uppercase tracking-wider">OVERALL PROGRESS</span>
+                <span className="text-sm font-medium text-foreground">OVERALL PROGRESS</span>
                 <span className="text-sm text-muted font-medium">{overallProgress}%</span>
               </div>
               <div className="w-full bg-paper-3 rounded-sm h-2 overflow-hidden">
@@ -3644,7 +3644,7 @@ export default function CreateInterview() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium uppercase tracking-wider ${
+                    <p className={`text-sm font-medium   ${
                       step.status === 'completed' ? 'text-success' :
                       step.status === 'active' ? 'text-[hsl(var(--ink-soft))]' :
                       step.status === 'error' ? 'text-danger' :

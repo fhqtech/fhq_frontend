@@ -110,7 +110,7 @@ export default function CandidateResults() {
           <Link to="/candidate/dashboard" className="text-sm text-primary hover:underline">
             ← Dashboard
           </Link>
-          <h1 className="text-sm font-semibold tracking-wider uppercase">Your interview results</h1>
+          <h1 className="text-sm font-semibold">Your interview results</h1>
           <span />
         </div>
       </header>
@@ -127,7 +127,7 @@ export default function CandidateResults() {
         {/* Headline score + recommendation */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 bg-paper rounded-xl border border-border p-5">
-            <p className="text-[10px] uppercase tracking-widest text-muted font-semibold mb-2">
+            <p className="text-[10px] text-muted font-semibold mb-2">
               Overall summary
             </p>
             <p className="text-sm text-foreground/85 leading-relaxed">
@@ -136,7 +136,7 @@ export default function CandidateResults() {
           </div>
 
           <div className="bg-paper rounded-xl border border-border p-5 flex flex-col items-center justify-center">
-            <p className="text-[10px] uppercase tracking-widest text-muted font-semibold mb-2">
+            <p className="text-[10px] text-muted font-semibold mb-2">
               Score
             </p>
             <div className="text-5xl font-light text-primary">
@@ -144,7 +144,7 @@ export default function CandidateResults() {
               <span className="text-base text-muted">/100</span>
             </div>
             <span
-              className={`mt-3 inline-flex items-center px-3 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-full border ${recommendationClasses(
+              className={`mt-3 inline-flex items-center px-3 py-1 text-[10px]   font-semibold rounded-full border ${recommendationClasses(
                 r.recommendation
               )}`}
             >
@@ -158,7 +158,7 @@ export default function CandidateResults() {
           <div className="bg-paper rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-semibold">Talent Analysis Graph</h2>
-              <span className="text-[10px] uppercase tracking-wider text-muted">
+              <span className="text-[10px] text-muted">
                 Click any skill for evidence
               </span>
             </div>
@@ -172,7 +172,7 @@ export default function CandidateResults() {
         {/* Strengths + Gaps */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-paper rounded-xl border border-border p-5">
-            <p className="text-[10px] uppercase tracking-widest text-success font-semibold mb-2">
+            <p className="text-[10px] text-success font-semibold mb-2">
               Strengths
             </p>
             {(r.strengths || []).length === 0 ? (
@@ -187,7 +187,7 @@ export default function CandidateResults() {
           </div>
 
           <div className="bg-paper rounded-xl border border-border p-5">
-            <p className="text-[10px] uppercase tracking-widest text-danger font-semibold mb-2">
+            <p className="text-[10px] text-danger font-semibold mb-2">
               Areas to develop
             </p>
             {(r.gaps || []).length === 0 ? (

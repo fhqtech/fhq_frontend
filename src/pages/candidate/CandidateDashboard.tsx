@@ -51,7 +51,7 @@ function StatusBadge({ status }: { status?: string }) {
       : 'bg-accent/10 text-primary border-accent/30';
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded border ${cls}`}
+      className={`inline-flex items-center px-2 py-0.5 text-[10px]   font-semibold rounded border ${cls}`}
     >
       {(status || 'pending').replace(/_/g, ' ')}
     </span>
@@ -97,7 +97,7 @@ function InvitationCard({ inv }: { inv: Invitation }) {
     <div className="bg-paper rounded-xl border border-border shadow-1 p-5 flex flex-col gap-3 hover:border-accent transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-muted font-semibold">
+          <p className="text-[10px] text-muted font-semibold">
             {inv.interview_type === 'fitment' ? 'Fitment interview' : 'Screening interview'}
           </p>
           <h3 className="text-lg font-semibold text-foreground leading-tight mt-1">
@@ -279,7 +279,7 @@ function Section({
   return (
     <section>
       <div className="flex items-baseline gap-3 mb-4">
-        <h3 className="text-sm uppercase tracking-widest font-semibold text-foreground">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         <span className="text-xs text-muted">{count}</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{children}</div>

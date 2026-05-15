@@ -252,7 +252,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
           {sourceType === 'google_sheet' && (
             <div>
               <Label htmlFor="sheetUrl" className="uppercase text-xs tracking-wider">
-                GOOGLE SHEETS URL <span className="text-red-600">*</span>
+                GOOGLE SHEETS URL <span className="text-danger">*</span>
               </Label>
               <Input
                 id="sheetUrl"
@@ -282,7 +282,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
           {sourceType === 'excel_file' && (
             <div>
               <Label htmlFor="fileUpload" className="uppercase text-xs tracking-wider">
-                UPLOAD FILE <span className="text-red-600">*</span>
+                UPLOAD FILE <span className="text-danger">*</span>
               </Label>
               <Input
                 id="fileUpload"
@@ -295,7 +295,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
                 }}
               />
               {formData.file && (
-                <p className="text-sm text-green-600 mt-1">
+                <p className="text-sm text-success mt-1">
                   ✓ {formData.file.name} uploaded
                 </p>
               )}
@@ -321,7 +321,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
 
           {/* Candidate Count Display */}
           {formData.candidateCount > 0 && (
-            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="p-3 bg-success-soft rounded-lg border border-success/30">
               <p className="text-sm font-medium text-green-800">
                 {formData.candidateCount} candidates found
               </p>
@@ -334,7 +334,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
           <Button
             variant="outline"
             onClick={handleClose}
-            className="uppercase rounded-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="uppercase rounded-sm text-danger hover:text-danger hover:bg-danger-soft"
           >
             Cancel
           </Button>

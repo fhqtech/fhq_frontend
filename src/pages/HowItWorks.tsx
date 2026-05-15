@@ -441,12 +441,12 @@ const BlueprintShowcase = () => {
         <div className="text-center mb-8">
           <h2 className="text-4xl md:text-5xl font-light text-paper tracking-wide mb-3 transition-opacity duration-300">
             {currentSlide === 0 ? (
-              <>How Flowy <span className="text-ink  bg-paper-2  ">Evaluates</span></>
+              <>How Flowy <span className="text-ink bg-paper-2">Evaluates</span></>
             ) : (
-              <>Flowy Can Be <span className="text-ink  bg-paper-2  ">Configured</span></>
+              <>Flowy Can Be <span className="text-ink bg-paper-2">Configured</span></>
             )}
           </h2>
-          <p className="text-paper/50 text-lg uppercase tracking-wide">
+          <p className="text-paper/50 text-lg">
             {currentSlide === 0
               ? "All you need is the description/topics to generate a blueprint"
               : "Define custom blueprints with skills, proficiency levels, tools, and certifications."}
@@ -490,8 +490,8 @@ const BlueprintShowcase = () => {
                   <div className="px-6 py-4 border-b border-white/10 bg-paper/2">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-mono font-bold text-lg text-paper uppercase tracking-wide">{editTitle}</h3>
-                        <span className="text-[10px] font-mono font-bold px-2 py-1 rounded uppercase bg-purple-500/20 text-purple-300">
+                        <h3 className="font-mono font-bold text-lg text-paper">{editTitle}</h3>
+                        <span className="text-[10px] font-mono font-bold px-2 py-1 rounded uppercase bg-ink/20 text-gold-ink">
                           {editType}
                         </span>
                         <span className="bg-paper/10 text-paper/70 text-[10px] font-mono font-bold px-2 py-1 rounded uppercase">
@@ -516,7 +516,7 @@ const BlueprintShowcase = () => {
                       <div className="flex-1 lg:flex-none bg-paper/5 border border-white/10 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-3">
                           <Award className="w-4 h-4 text-amber-400" />
-                          <p className="text-[10px] font-mono font-bold text-paper/40 uppercase tracking-wider">certs</p>
+                          <p className="text-[10px] font-mono font-bold text-paper/40">certs</p>
                         </div>
                         <div className="flex flex-col gap-1.5">
                           {editCertifications.map((cert, i) => (
@@ -529,8 +529,8 @@ const BlueprintShowcase = () => {
                       </div>
                       <div className="flex-1 lg:flex-none bg-paper/5 border border-white/10 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-3">
-                          <Wrench className="w-4 h-4 text-blue-400" />
-                          <p className="text-[10px] font-mono font-bold text-paper/40 uppercase tracking-wider">tools</p>
+                          <Wrench className="w-4 h-4 text-info" />
+                          <p className="text-[10px] font-mono font-bold text-paper/40">tools</p>
                         </div>
                         <div className="flex flex-col gap-2">
                           {editTools.map((tool, i) => (
@@ -557,7 +557,7 @@ const BlueprintShowcase = () => {
                     {/* Right Sidebar - Legend & Skill Info */}
                     <div className="w-full lg:w-64 shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 bg-paper/2 p-4 flex flex-col gap-3">
                       <div className="bg-paper/5 border border-white/10 rounded-lg p-3">
-                        <p className="text-[10px] font-mono font-bold text-paper/40 uppercase tracking-wider mb-3">Proficiency Levels</p>
+                        <p className="text-[10px] font-mono font-bold text-paper/40 mb-3">Proficiency Levels</p>
                         <div className="flex flex-col gap-1.5">
                           {[1, 2, 3, 4, 5].map((level) => (
                             <div key={level} className="flex items-center gap-2">
@@ -573,7 +573,7 @@ const BlueprintShowcase = () => {
                       {selectedSkill ? (
                         <div className="bg-paper/10 border border-white/20 rounded-lg p-4 flex-1">
                           <div className="flex items-start justify-between mb-2">
-                            <p className="font-mono font-bold text-sm text-paper uppercase tracking-wide flex-1">{selectedSkill.name}</p>
+                            <p className="font-mono font-bold text-sm text-paper flex-1">{selectedSkill.name}</p>
                             <button onClick={() => setSelectedSkill(null)} className="bg-paper/10 hover:bg-paper/20 text-paper/60 p-1 rounded transition-colors ml-2">
                               <X className="w-3 h-3" />
                             </button>
@@ -645,7 +645,7 @@ const BlueprintShowcase = () => {
                               </button>
                               <button
                                 onClick={() => setEditType('fitment')}
-                                className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${editType === 'fitment' ? 'bg-blue-500/30 text-blue-300' : 'text-paper/60 hover:text-paper'}`}
+                                className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${editType === 'fitment' ? 'bg-info/30 text-info' : 'text-paper/60 hover:text-paper'}`}
                               >
                                 Fitment
                               </button>
@@ -657,7 +657,7 @@ const BlueprintShowcase = () => {
                           <div className="flex bg-paper/5 rounded-lg p-1 border border-white/10">
                             <button
                               onClick={() => setEditScope('global')}
-                              className={`flex-1 px-4 py-2 rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-2 ${editScope === 'global' ? 'bg-indigo-500/30 text-indigo-300' : 'text-paper/60 hover:text-paper'}`}
+                              className={`flex-1 px-4 py-2 rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-2 ${editScope === 'global' ? 'bg-ink/30 text-paper' : 'text-paper/60 hover:text-paper'}`}
                             >
                               <Globe className="w-3 h-3" /> Global
                             </button>
@@ -684,7 +684,7 @@ const BlueprintShowcase = () => {
                         {/* Skills Section - Takes most space */}
                         <div className="bg-paper/5 border border-white/10 rounded-lg p-4 flex-1 flex flex-col min-h-0">
                           <h4 className="text-xs font-bold text-paper/50 uppercase mb-3 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-purple-500" />
+                            <div className="w-2 h-2 rounded-full bg-ink" />
                             Skills ({editSkills.length})
                           </h4>
                           <div className="flex gap-2 mb-3">
@@ -734,7 +734,7 @@ const BlueprintShowcase = () => {
                                       <option key={l} value={l} className="bg-ink text-paper">L{l}</option>
                                     ))}
                                   </select>
-                                  <button onClick={() => handleRemoveSkill(skill.skill_id)} className="p-0.5 text-paper/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                                  <button onClick={() => handleRemoveSkill(skill.skill_id)} className="p-0.5 text-paper/30 hover:text-danger opacity-0 group-hover:opacity-100 transition-all">
                                     <X className="w-3 h-3" />
                                   </button>
                                 </div>
@@ -748,7 +748,7 @@ const BlueprintShowcase = () => {
                           {/* Tools Section */}
                           <div className="bg-paper/5 border border-white/10 rounded-lg p-3">
                             <h4 className="text-xs font-bold text-paper/50 uppercase mb-2 flex items-center gap-2">
-                              <Wrench className="w-3 h-3 text-blue-400" />
+                              <Wrench className="w-3 h-3 text-info" />
                               Tools ({editTools.length})
                             </h4>
                             <div className="flex gap-2 mb-2">
@@ -764,9 +764,9 @@ const BlueprintShowcase = () => {
                             </div>
                             <div className="flex flex-wrap gap-1 max-h-[60px] overflow-y-auto">
                               {editTools.map((tool, index) => (
-                                <div key={index} className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded group">
-                                  <span className="text-[9px] text-blue-300">{tool.name}</span>
-                                  <button onClick={() => handleRemoveTool(index)} className="text-blue-300/50 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                                <div key={index} className="flex items-center gap-1 px-2 py-0.5 bg-info/10 border border-info/30/20 rounded group">
+                                  <span className="text-[9px] text-info">{tool.name}</span>
+                                  <button onClick={() => handleRemoveTool(index)} className="text-info/50 hover:text-danger opacity-0 group-hover:opacity-100 transition-all">
                                     <X className="w-2 h-2" />
                                   </button>
                                 </div>
@@ -798,7 +798,7 @@ const BlueprintShowcase = () => {
                                     <div className="w-1 h-1 rounded-full bg-amber-400 mt-1 shrink-0" />
                                     <span className="text-[9px] text-paper/60 leading-tight">{cert}</span>
                                   </div>
-                                  <button onClick={() => handleRemoveCertification(index)} className="p-0.5 text-paper/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                                  <button onClick={() => handleRemoveCertification(index)} className="p-0.5 text-paper/30 hover:text-danger opacity-0 group-hover:opacity-100 transition-all">
                                     <X className="w-2 h-2" />
                                   </button>
                                 </div>
@@ -817,11 +817,11 @@ const BlueprintShowcase = () => {
             <div className="flex items-center justify-center gap-3 py-4 border-t border-white/10 bg-paper/2">
               <button
                 onClick={() => setCurrentSlide(0)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${currentSlide === 0 ? 'bg-purple-500 w-8' : 'bg-paper/20 hover:bg-paper/40'}`}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${currentSlide === 0 ? 'bg-ink w-8' : 'bg-paper/20 hover:bg-paper/40'}`}
               />
               <button
                 onClick={() => setCurrentSlide(1)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${currentSlide === 1 ? 'bg-purple-500 w-8' : 'bg-paper/20 hover:bg-paper/40'}`}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${currentSlide === 1 ? 'bg-ink w-8' : 'bg-paper/20 hover:bg-paper/40'}`}
               />
             </div>
           </div>
@@ -839,7 +839,7 @@ const Navigation = () => {
     <nav className="fixed top-0 left-0 w-full z-20 flex justify-between items-center p-6 md:p-8 bg-ink/80 backdrop-blur-xs">
       <div className="flex items-center">
         <button onClick={() => navigate('/')} className="flex flex-col hover:opacity-80 transition-opacity">
-          <span className="text-2xl font-bold text-ink  bg-paper-2 from-white /40 tracking-tighter">
+          <span className="text-2xl font-bold text-ink bg-paper-2 from-white /40 tracking-tighter">
             FunnelHQ
           </span>
         </button>
@@ -862,7 +862,7 @@ const Navigation = () => {
 
 const HowItWorks = () => {
   return (
-    <div className="relative w-full min-h-dvh bg-ink selection:bg-blue-500 selection:text-paper">
+    <div className="relative w-full min-h-dvh bg-ink selection:bg-info selection:text-paper">
       <Navigation />
 
       {/* Main Content with padding for fixed nav */}

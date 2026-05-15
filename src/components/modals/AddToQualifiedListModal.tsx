@@ -185,7 +185,7 @@ export function AddToQualifiedListModal({
         {mode === 'select-list' ? (
           <>
             <DialogHeader>
-              <DialogTitle className="uppercase tracking-wider text-lg font-bold">Add to Curated List</DialogTitle>
+              <DialogTitle className=" text-lg font-bold">Add to Curated List</DialogTitle>
               <DialogDescription>
                 {selectedCandidates.length === 1
                   ? `Add ${selectedCandidates[0].name} to a curated list`
@@ -273,7 +273,7 @@ export function AddToQualifiedListModal({
                 <Button
                   onClick={() => setMode('create-new')}
                   variant="outline"
-                  className="flex-1 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold"
+                  className="flex-1 rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-semibold"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create New List
@@ -281,7 +281,7 @@ export function AddToQualifiedListModal({
                 <Button
                   onClick={handleAddToList}
                   disabled={!selectedListId || isLoading}
-                  className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold"
+                  className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-semibold"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -296,7 +296,7 @@ export function AddToQualifiedListModal({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="uppercase tracking-wider text-lg font-bold">Create New Curated List</DialogTitle>
+              <DialogTitle className=" text-lg font-bold">Create New Curated List</DialogTitle>
               <DialogDescription>
                 {selectedCandidates.length} candidate(s) will be added to this list
               </DialogDescription>
@@ -304,7 +304,7 @@ export function AddToQualifiedListModal({
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block uppercase tracking-wider">
+                <label className="text-sm font-medium mb-2 block">
                   List Name <span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -317,7 +317,7 @@ export function AddToQualifiedListModal({
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block uppercase tracking-wider">Description</label>
+                <label className="text-sm font-medium mb-2 block">Description</label>
                 <Textarea
                   placeholder="Describe this curated list..."
                   value={description}
@@ -329,10 +329,10 @@ export function AddToQualifiedListModal({
 
               {/* Actions */}
               <div className="flex gap-2 pt-4 border-t">
-                <Button onClick={() => setMode('select-list')} variant="outline" className="rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold">
+                <Button onClick={() => setMode('select-list')} variant="outline" className="rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-semibold">
                   Back
                 </Button>
-                <Button onClick={handleCreateList} disabled={isLoading} className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-semibold">
+                <Button onClick={handleCreateList} disabled={isLoading} className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-semibold">
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (

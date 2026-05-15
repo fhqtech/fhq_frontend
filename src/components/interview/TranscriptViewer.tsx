@@ -126,7 +126,7 @@ export function TranscriptViewer({ sessionId }: { sessionId: string }) {
       <div className="flex items-center justify-between border-b bg-paper-2/80 backdrop-blur-sm px-4 py-3">
         <div className="flex items-baseline gap-3">
           <h3 className="text-base font-semibold">Transcript</h3>
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {data.message_count} message{data.message_count === 1 ? "" : "s"}
             {duration ? ` · ${duration}` : ""}
           </span>
@@ -154,7 +154,7 @@ export function TranscriptViewer({ sessionId }: { sessionId: string }) {
                 }`}
               >
                 <div
-                  className={`text-[10px] uppercase tracking-wider mb-1 ${
+                  className={`text-[10px]   mb-1 ${
                     ai ? "text-muted" : "text-primary-foreground/70"
                   }`}
                 >

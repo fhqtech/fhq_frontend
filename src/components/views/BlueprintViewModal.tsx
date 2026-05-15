@@ -65,14 +65,14 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-rule bg-paper-2">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="font-mono font-black text-xl text-ink uppercase tracking-wide">
+              <h2 className="font-mono font-black text-xl text-ink">
                 {blueprint?.role || templateTitle}
               </h2>
               {blueprint?.type && (
                 <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded uppercase ${
                   blueprint.type === 'screening'
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-purple-100 text-purple-700'
+                    ? 'bg-paper-3 text-ink'
+                    : 'bg-paper-3 text-gold-ink'
                 }`}>
                   {blueprint.type}
                 </span>
@@ -105,7 +105,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
           ) : error ? (
             <div className="flex-1 flex items-center justify-center py-20">
               <div className="text-center">
-                <p className="text-red-600 font-medium font-mono">{error}</p>
+                <p className="text-danger font-medium font-mono">{error}</p>
                 <button
                   onClick={loadBlueprint}
                   className="mt-4 px-4 py-2 bg-ink text-paper rounded-lg font-mono font-bold uppercase text-sm hover:bg-ink transition-colors"
@@ -122,8 +122,8 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 {blueprint.certifications_recommended && blueprint.certifications_recommended.length > 0 && (
                   <div className="bg-paper border-2 border-rule rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
-                      <Award className="w-4 h-4 text-amber-500" />
-                      <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">certs</p>
+                      <Award className="w-4 h-4 text-warning" />
+                      <p className="text-[10px] font-mono font-bold text-muted">certs</p>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       {blueprint.certifications_recommended.map((cert, i) => (
@@ -140,8 +140,8 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 {blueprint.tools && blueprint.tools.length > 0 && (
                   <div className="bg-paper border-2 border-rule rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
-                      <Wrench className="w-4 h-4 text-blue-500" />
-                      <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">tools</p>
+                      <Wrench className="w-4 h-4 text-info" />
+                      <p className="text-[10px] font-mono font-bold text-muted">tools</p>
                     </div>
                     <div className="flex flex-col gap-2">
                       {blueprint.tools.map((tool, i) => (
@@ -159,7 +159,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 {/* Ideal Candidate Profile */}
                 {blueprint.ideal_candidate_profile && (
                   <div className="bg-paper border-2 border-rule rounded-lg p-3">
-                    <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider mb-2">Ideal Candidate</p>
+                    <p className="text-[10px] font-mono font-bold text-muted mb-2">Ideal Candidate</p>
                     <p className="text-[10px] font-mono text-muted leading-relaxed">
                       {blueprint.ideal_candidate_profile}
                     </p>
@@ -187,7 +187,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                 ) : blueprint.evaluation_pillars && blueprint.evaluation_pillars.length > 0 ? (
                   // Legacy pillars view
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-muted">
+                    <h3 className="text-xs font-mono font-bold text-muted">
                       Evaluation Pillars
                     </h3>
                     {blueprint.evaluation_pillars.map((pillar, pillarIndex) => (
@@ -227,10 +227,10 @@ const LegacyPillarCard: React.FC<{ pillar: EvaluationPillar; index: number }> = 
   const [isExpanded, setIsExpanded] = useState(index === 0);
 
   const pillarColors = [
-    { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', badge: 'bg-indigo-100' },
+    { bg: 'bg-paper-3', border: 'border-indigo-200', text: 'text-ink', badge: 'bg-paper-3' },
     { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100' },
-    { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100' },
-    { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100' },
+    { bg: 'bg-warning-soft', border: 'border-warning/30', text: 'text-warning', badge: 'bg-warning-soft' },
+    { bg: 'bg-paper-3', border: 'border-rule', text: 'text-gold-ink', badge: 'bg-paper-3' },
     { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', badge: 'bg-rose-100' },
   ];
 

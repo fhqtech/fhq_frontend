@@ -667,7 +667,7 @@ export const InterviewPreCheck = ({
                         )}
                       </div>
                       <div className="text-center px-4">
-                        <p className="text-sm font-semibold text-ink uppercase tracking-wide">
+                        <p className="text-sm font-semibold text-ink">
                           {isUploadingResume ? 'Uploading...' : 'Click to Upload'}
                         </p>
                         <p className="text-xs text-muted mt-0.5">
@@ -682,7 +682,7 @@ export const InterviewPreCheck = ({
 
             {/* OR Divider */}
             <div className="flex items-center justify-end pr-8">
-              <div className="text-xl font-semibold text-muted-2 uppercase tracking-widest">
+              <div className="text-xl font-semibold text-muted-2">
                 OR
               </div>
             </div>
@@ -699,7 +699,7 @@ export const InterviewPreCheck = ({
                     <h2 className="text-2xl font-semibold text-ink">
                       Existing Resumes
                     </h2>
-                    <p className="text-sm text-muted uppercase tracking-wider">Select from uploaded files</p>
+                    <p className="text-sm text-muted">Select from uploaded files</p>
                   </div>
                 </div>
 
@@ -732,7 +732,7 @@ export const InterviewPreCheck = ({
                             <text x="7" y="16" fontSize="6" fontWeight="bold" fill="currentColor">PDF</text>
                           </svg>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold truncate uppercase tracking-wide text-left text-ink">
+                            <p className="text-sm font-semibold truncate text-left text-ink">
                               {resume.filename}
                             </p>
                             <p className="text-xs mt-1 text-left text-muted">
@@ -784,7 +784,7 @@ export const InterviewPreCheck = ({
                       if (selectedResumeId) callPrepareAPI(selectedResumeId);
                     }}
                     disabled={isPreparingResume || !selectedResumeId}
-                    className="bg-danger hover:bg-danger text-paper h-8 px-4 rounded text-xs uppercase tracking-wider"
+                    className="bg-danger hover:bg-danger text-paper h-8 px-4 rounded text-xs"
                   >
                     {isPreparingResume ? (
                       <>
@@ -818,7 +818,7 @@ export const InterviewPreCheck = ({
               <Button
                 onClick={handleContinueToStep2}
                 disabled={!selectedResumeId || isUploadingResume || isPreparingResume || !prepareCompleted || !!prepareError}
-                className="bg-ink hover:bg-ink text-paper rounded h-12 px-8 font-medium shadow-2 hover:shadow-2 transition-all disabled:opacity-50 uppercase tracking-wider text-xs"
+                className="bg-ink hover:bg-ink text-paper rounded h-12 px-8 font-medium shadow-2 hover:shadow-2 transition-all disabled:opacity-50 text-xs"
               >
                 {isPreparingResume ? (
                   <>
@@ -903,7 +903,7 @@ export const InterviewPreCheck = ({
                 <div className="flex items-start gap-4">
                   <span className="font-bold text-ink text-5xl leading-none">1</span>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-ink uppercase tracking-wider">Microphone Check</span>
+                    <span className="font-semibold text-ink">Microphone Check</span>
                     <p className="text-sm text-muted mt-2">
                       Please speak a few words.
                     </p>
@@ -988,7 +988,7 @@ export const InterviewPreCheck = ({
                 <div className="flex items-start gap-4">
                   <span className="font-bold text-ink text-5xl leading-none">2</span>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-ink uppercase tracking-wider">Speaker Check</span>
+                    <span className="font-semibold text-ink">Speaker Check</span>
                     <p className="text-sm text-muted mt-2">
                       Click the button to play a test sound.
                     </p>

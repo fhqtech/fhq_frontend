@@ -683,9 +683,9 @@ export default function CandidateRegistration() {
   if (error) {
     return (
       <div className="min-h-dvh bg-paper-2 flex items-center justify-center">
-        <Card className="w-full max-w-md border-red-200 shadow-2">
+        <Card className="w-full max-w-md border-danger/30 shadow-2">
           <CardContent className="p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+            <AlertCircle className="w-16 h-16 text-danger mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-ink mb-3">Oops! Invalid Invitation</h2>
             <p className="text-muted mb-6">{error}</p>
             <Button
@@ -720,7 +720,7 @@ export default function CandidateRegistration() {
             We found your existing profile. Taking you to your portal...
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-ink-soft">
-            <Zap className="w-4 h-4 animate-pulse text-amber-500" />
+            <Zap className="w-4 h-4 animate-pulse text-warning" />
             <span>Redirecting now...</span>
           </div>
         </div>
@@ -844,7 +844,7 @@ export default function CandidateRegistration() {
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
                     <span className="text-ink font-bold text-2xl shrink-0">1</span>
-                    <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Setup Profile</h4>
+                    <h4 className="font-bold text-ink text-xs whitespace-nowrap">Setup Profile</h4>
                   </div>
                 </div>
 
@@ -853,7 +853,7 @@ export default function CandidateRegistration() {
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
                     <span className="text-ink font-bold text-2xl shrink-0">2</span>
-                    <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Start Interview</h4>
+                    <h4 className="font-bold text-ink text-xs whitespace-nowrap">Start Interview</h4>
                   </div>
                 </div>
 
@@ -862,7 +862,7 @@ export default function CandidateRegistration() {
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
                     <span className="text-ink font-bold text-2xl shrink-0">3</span>
-                    <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Showcase Skills</h4>
+                    <h4 className="font-bold text-ink text-xs whitespace-nowrap">Showcase Skills</h4>
                   </div>
                 </div>
 
@@ -871,7 +871,7 @@ export default function CandidateRegistration() {
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
                     <span className="text-ink font-bold text-2xl shrink-0">4</span>
-                    <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Get Hired</h4>
+                    <h4 className="font-bold text-ink text-xs whitespace-nowrap">Get Hired</h4>
                   </div>
                 </div>
               </div>
@@ -890,15 +890,15 @@ export default function CandidateRegistration() {
                         <div className="flex items-center gap-2 shrink-0">
                           <div className="flex items-center gap-1 bg-paper/10 backdrop-blur-xs px-4 py-2 rounded">
                             <Clock className="w-4 h-4 text-amber-400" />
-                            <span className="text-paper font-medium text-sm uppercase tracking-wide">{invitationDetails?.interview.duration} MIN</span>
+                            <span className="text-paper font-medium text-sm">{invitationDetails?.interview.duration} MIN</span>
                           </div>
                           <div className="flex items-center gap-1 bg-paper/10 backdrop-blur-xs px-4 py-2 rounded">
                             <Zap className="w-4 h-4 text-amber-400" />
-                            <span className="text-paper font-medium text-sm uppercase tracking-wide">AI-POWERED</span>
+                            <span className="text-paper font-medium text-sm">AI-POWERED</span>
                           </div>
                         </div>
                       </div>
-                      <p className="text-muted-2 text-sm font-light uppercase tracking-wide">
+                      <p className="text-muted-2 text-sm font-light">
                         {invitationDetails?.interview.description}
                       </p>
                     </div>
@@ -948,7 +948,7 @@ export default function CandidateRegistration() {
                         setTimeout(() => setCurrentStep(1), 500);
                         setTimeout(() => setIsTransitioning(false), 1000);
                       }}
-                      className="gap-2 h-10 bg-paper-2 from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-paper shadow-2 hover:shadow-2 transition-all px-8 uppercase tracking-wider text-xs font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="gap-2 h-10 bg-paper-2 from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-paper shadow-2 hover:shadow-2 transition-all px-8 text-xs font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Begin Registration
                       <ArrowRight className="w-4 h-4" />
@@ -968,7 +968,7 @@ export default function CandidateRegistration() {
             <CardContent className="p-4 md:p-10">
               <div className="mb-10">
                 <h2 className="text-2xl md:text-3xl font-bold text-ink mb-2">Tell Us About Yourself</h2>
-                <p className="text-muted uppercase tracking-wide">The essentials that make you, you!</p>
+                <p className="text-muted">The essentials that make you, you!</p>
               </div>
 
               <div className="space-y-6">
@@ -979,14 +979,14 @@ export default function CandidateRegistration() {
                     <div className="mb-3">
                       <div className="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256"><path d="M248,124a56.11,56.11,0,0,0-32-50.61V72a48,48,0,0,0-88-26.49A48,48,0,0,0,40,72v1.39a56,56,0,0,0,0,101.2V176a48,48,0,0,0,88,26.49A48,48,0,0,0,216,176v-1.41A56.09,56.09,0,0,0,248,124ZM88,208a32,32,0,0,1-31.81-28.56A55.87,55.87,0,0,0,64,180h8a8,8,0,0,0,0-16H64A40,40,0,0,1,50.67,86.27,8,8,0,0,0,56,78.73V72a32,32,0,0,1,64,0v68.26A47.8,47.8,0,0,0,88,128a8,8,0,0,0,0,16,32,32,0,0,1,0,64Zm104-44h-8a8,8,0,0,0,0,16h8a55.87,55.87,0,0,0,7.81-.56A32,32,0,1,1,168,144a8,8,0,0,0,0-16,47.8,47.8,0,0,0-32,12.26V72a32,32,0,0,1,64,0v6.73a8,8,0,0,0,5.33,7.54A40,40,0,0,1,192,164Zm16-52a8,8,0,0,1-8,8h-4a36,36,0,0,1-36-36V80a8,8,0,0,1,16,0v4a20,20,0,0,0,20,20h4A8,8,0,0,1,208,112ZM60,120H56a8,8,0,0,1,0-16h4A20,20,0,0,0,80,84V80a8,8,0,0,1,16,0v4A36,36,0,0,1,60,120Z"></path></svg>
-                        <h3 className="font-medium text-base text-ink uppercase tracking-wider">Professional Background</h3>
+                        <h3 className="font-medium text-base text-ink">Professional Background</h3>
                       </div>
                     </div>
 
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label htmlFor="jobTitle" className="uppercase text-xs tracking-wider">Title <span className="text-red-600">*</span></Label>
+                          <Label htmlFor="jobTitle" className="uppercase text-xs tracking-wider">Title <span className="text-danger">*</span></Label>
                           <Input
                             id="jobTitle"
                             placeholder="e.g., Senior Accounting Manager"
@@ -997,11 +997,11 @@ export default function CandidateRegistration() {
                               boxShadow: formErrors.jobTitle ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
                             }}
                           />
-                          {formErrors.jobTitle && <p className="text-xs text-red-500 mt-1">{formErrors.jobTitle}</p>}
+                          {formErrors.jobTitle && <p className="text-xs text-danger mt-1">{formErrors.jobTitle}</p>}
                         </div>
 
                         <div>
-                          <Label className="uppercase text-xs tracking-wider">Experience <span className="text-red-600">*</span></Label>
+                          <Label className="uppercase text-xs tracking-wider">Experience <span className="text-danger">*</span></Label>
                           <div className="flex gap-2 mt-2">
                             <div className="flex-1">
                               <Input
@@ -1034,12 +1034,12 @@ export default function CandidateRegistration() {
                               />
                             </div>
                           </div>
-                          {formErrors.experience && <p className="text-xs text-red-500 mt-1">{formErrors.experience}</p>}
+                          {formErrors.experience && <p className="text-xs text-danger mt-1">{formErrors.experience}</p>}
                         </div>
                       </div>
 
                       <div>
-                        <Label className="uppercase text-xs tracking-wider">Available to Start <span className="text-red-600">*</span></Label>
+                        <Label className="uppercase text-xs tracking-wider">Available to Start <span className="text-danger">*</span></Label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {[
                             { label: 'Immediate', value: 'Immediate', color: '#10b981' },
@@ -1084,7 +1084,7 @@ export default function CandidateRegistration() {
                             );
                           })}
                         </div>
-                        {formErrors.availableIn && <p className="text-xs text-red-500 mt-1">{formErrors.availableIn}</p>}
+                        {formErrors.availableIn && <p className="text-xs text-danger mt-1">{formErrors.availableIn}</p>}
                       </div>
                     </div>
                     </div>
@@ -1094,7 +1094,7 @@ export default function CandidateRegistration() {
                     <div className="mb-3">
                       <div className="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256"><path d="M168,56a8,8,0,0,1,8-8h16V32a8,8,0,0,1,16,0V48h16a8,8,0,0,1,0,16H208V80a8,8,0,0,1-16,0V64H176A8,8,0,0,1,168,56Zm62.56,54.68a103.92,103.92,0,1,1-85.24-85.24,8,8,0,0,1-2.64,15.78A88.07,88.07,0,0,0,40,128a87.62,87.62,0,0,0,22.24,58.41A79.66,79.66,0,0,1,98.3,157.66a48,48,0,1,1,59.4,0,79.66,79.66,0,0,1,36.06,28.75A87.62,87.62,0,0,0,216,128a88.85,88.85,0,0,0-1.22-14.68,8,8,0,1,1,15.78-2.64ZM128,152a32,32,0,1,0-32-32A32,32,0,0,0,128,152Zm0,64a87.57,87.57,0,0,0,53.92-18.5,64,64,0,0,0-107.84,0A87.57,87.57,0,0,0,128,216Z"></path></svg>
-                        <h3 className="font-medium text-base text-ink uppercase tracking-wider">Contact Details</h3>
+                        <h3 className="font-medium text-base text-ink">Contact Details</h3>
                       </div>
                     </div>
 
@@ -1112,12 +1112,12 @@ export default function CandidateRegistration() {
                             boxShadow: formErrors.linkedin ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
                           }}
                         />
-                        {formErrors.linkedin && <p className="text-xs text-red-500 mt-1">{formErrors.linkedin}</p>}
+                        {formErrors.linkedin && <p className="text-xs text-danger mt-1">{formErrors.linkedin}</p>}
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label htmlFor="phone" className="uppercase text-xs tracking-wider">Phone Number <span className="text-red-600">*</span></Label>
+                          <Label htmlFor="phone" className="uppercase text-xs tracking-wider">Phone Number <span className="text-danger">*</span></Label>
                           <div className="flex gap-2 mt-2">
                             <select
                               value={formData.countryCode}
@@ -1168,11 +1168,11 @@ export default function CandidateRegistration() {
                               }}
                             />
                           </div>
-                          {formErrors.phone && <p className="text-xs text-red-500 mt-1">{formErrors.phone}</p>}
+                          {formErrors.phone && <p className="text-xs text-danger mt-1">{formErrors.phone}</p>}
                         </div>
 
                         <div className="relative">
-                          <Label htmlFor="location" className="uppercase text-xs tracking-wider">Location <span className="text-red-600">*</span></Label>
+                          <Label htmlFor="location" className="uppercase text-xs tracking-wider">Location <span className="text-danger">*</span></Label>
                           <div className="relative mt-2">
                             <Input
                               id="location"
@@ -1202,7 +1202,7 @@ export default function CandidateRegistration() {
                               </div>
                             )}
                           </div>
-                          {formErrors.location && <p className="text-xs text-red-500 mt-1">{formErrors.location}</p>}
+                          {formErrors.location && <p className="text-xs text-danger mt-1">{formErrors.location}</p>}
                         </div>
                       </div>
                     </div>
@@ -1222,7 +1222,7 @@ export default function CandidateRegistration() {
                           isDragging
                             ? 'border-ink bg-paper'
                             : formErrors.resume
-                              ? 'border-red-500 bg-red-50/30'
+                              ? 'border-danger/30 bg-danger-soft/30'
                               : 'border-rule-strong bg-paper hover:border-rule-strong hover:bg-paper-2'
                         }`}
                         onClick={() => document.getElementById('resumeFile')?.click()}
@@ -1254,7 +1254,7 @@ export default function CandidateRegistration() {
                                 e.stopPropagation();
                                 setFormData(prev => ({ ...prev, resumeFile: null }));
                               }}
-                              className="mt-2 text-muted hover:text-red-600 transition-colors"
+                              className="mt-2 text-muted hover:text-danger transition-colors"
                             >
                               <X className="w-5 h-5" />
                             </button>
@@ -1271,9 +1271,9 @@ export default function CandidateRegistration() {
                         )}
                       </div>
 
-                      {formErrors.resume && <p className="text-xs text-red-500 mt-2">{formErrors.resume}</p>}
+                      {formErrors.resume && <p className="text-xs text-danger mt-2">{formErrors.resume}</p>}
                       {extractionFailed && !formErrors.resume && (
-                        <p className="text-xs text-amber-600 mt-2" role="status">
+                        <p className="text-xs text-warning mt-2" role="status">
                           We couldn't auto-fill from your resume. No worries — please fill in the fields below manually.
                         </p>
                       )}
@@ -1306,11 +1306,11 @@ export default function CandidateRegistration() {
                   as a "Strengthen your profile" nudge — keeps the pre-interview form short. */}
 
               <div className="flex items-center justify-between mt-10 pt-6">
-                <Button onClick={handlePrevious} className="gap-2 border border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-ink-soft bg-paper hover:bg-paper-2 h-11 px-6 uppercase tracking-wider">
+                <Button onClick={handlePrevious} className="gap-2 border border-rule-strong rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-ink-soft bg-paper hover:bg-paper-2 h-11 px-6">
                   <ArrowLeft className="w-4 h-4" />
                   BACK
                 </Button>
-                <Button onClick={handleSubmit} disabled={submitting} className="gap-2 bg-ink hover:bg-ink text-paper border-none rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] h-11 px-6 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed">
+                <Button onClick={handleSubmit} disabled={submitting} className="gap-2 bg-ink hover:bg-ink text-paper border-none rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] h-11 px-6 disabled:opacity-50 disabled:cursor-not-allowed">
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -1349,9 +1349,9 @@ export default function CandidateRegistration() {
                   FunnelHQ is an AI-powered candidate screening platform where professionals take a single interview to unlock multiple job opportunities
                 </p>
                 <div className="flex items-center gap-3 mt-1 whitespace-nowrap">
-                  <a href="#" className="text-blue-600 hover:text-blue-700 text-[10px]">LinkedIn</a>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 text-[10px]">Twitter</a>
-                  <a href="#" className="text-blue-600 hover:text-blue-700 text-[10px]">Facebook</a>
+                  <a href="#" className="text-info hover:text-info text-[10px]">LinkedIn</a>
+                  <a href="#" className="text-info hover:text-info text-[10px]">Twitter</a>
+                  <a href="#" className="text-info hover:text-info text-[10px]">Facebook</a>
                   <span className="text-muted-2">•</span>
                   <a href="#" className="text-muted hover:text-ink text-[10px]">Terms</a>
                   <a href="#" className="text-muted hover:text-ink text-[10px]">Privacy</a>

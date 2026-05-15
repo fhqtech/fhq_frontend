@@ -207,7 +207,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
           {/* Header */}
           <div className="px-6 py-4 border-b border-rule">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-ink uppercase tracking-wider">
+              <h2 className="text-lg font-semibold text-ink">
                 {step === 'analyzing' ? 'Analyzing Candidate Lists' : 'Duplicate Analysis Results'}
               </h2>
               {step === 'results' && (
@@ -229,14 +229,14 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                 {/* Progress Bar */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted uppercase tracking-wider">
+                    <span className="text-muted">
                       Step {currentStage + 1} of {analysisStages.length}
                     </span>
                     <span className="text-muted font-medium">{Math.round(progress)}%</span>
                   </div>
                   <div className="h-2 bg-paper-3 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-paper-2  "
+                      className="h-full bg-paper-2"
                       style={{ width: `${progress}%` }}
                       transition={{ duration: 0.1 }}
                     />
@@ -256,10 +256,10 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                         animate={{ rotate: 360 }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                       >
-                        <ArrowsClockwise className="w-8 h-8 text-blue-500" />
+                        <ArrowsClockwise className="w-8 h-8 text-info" />
                       </motion.div>
                     </div>
-                    <h3 className="text-base font-semibold text-ink uppercase tracking-wider">
+                    <h3 className="text-base font-semibold text-ink">
                       {analysisStages[currentStage]?.title}
                     </h3>
                     <p className="text-sm text-muted">
@@ -269,14 +269,14 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
 
                   {/* Lists being analyzed */}
                   <div className="space-y-2">
-                    <p className="text-xs text-muted uppercase tracking-wider">Analyzing {selectedListIds.length} lists:</p>
+                    <p className="text-xs text-muted">Analyzing {selectedListIds.length} lists:</p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       {selectedListIds.map((listId) => {
                         const list = availableLists.find(l => l.id === listId);
                         return (
                           <motion.div
                             key={listId}
-                            className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs"
+                            className="px-3 py-1 bg-info-soft text-info rounded-full text-xs"
                             animate={{ scale: [1, 1.05, 1] }}
                             transition={{ duration: 2, repeat: Infinity, delay: Math.random() }}
                           >
@@ -292,10 +292,10 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-red-50 border border-red-200 rounded-lg"
+                    className="p-4 bg-danger-soft border border-danger/30 rounded-lg"
                   >
                     <div className="flex items-center gap-2">
-                      <Warning className="w-5 h-5 text-red-600" />
+                      <Warning className="w-5 h-5 text-danger" />
                       <span className="text-sm text-red-800">{error}</span>
                     </div>
                   </motion.div>
@@ -317,13 +317,13 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                       transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
                       className="flex justify-center"
                     >
-                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-10 h-10 text-green-600" />
+                      <div className="w-16 h-16 bg-success-soft rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-10 h-10 text-success" />
                       </div>
                     </motion.div>
 
                     <div>
-                      <h3 className="text-base font-semibold text-ink mb-2 uppercase tracking-wider">
+                      <h3 className="text-base font-semibold text-ink mb-2">
                         Great! No Duplicates Detected
                       </h3>
                       <p className="text-sm text-muted">
@@ -331,7 +331,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                       </p>
                     </div>
 
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="p-4 bg-success-soft border border-success/30 rounded-lg">
                       <p className="text-sm text-green-800">
                         🎉 Continuing to interview details...
                       </p>
@@ -347,32 +347,32 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                     >
                       <div className="text-center">
                         <div className="flex justify-center mb-4">
-                          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
-                            <Info className="w-10 h-10 text-amber-600" />
+                          <div className="w-16 h-16 bg-warning-soft rounded-full flex items-center justify-center">
+                            <Info className="w-10 h-10 text-warning" />
                           </div>
                         </div>
 
-                        <h3 className="text-base font-semibold text-ink mb-2 uppercase tracking-wider">
+                        <h3 className="text-base font-semibold text-ink mb-2">
                           Duplicate Email Addresses Detected
                         </h3>
 
                         <div className="grid grid-cols-3 gap-4 p-4 bg-paper-2 rounded-lg">
                           <div className="text-center">
                             <div className="text-4xl font-bold text-ink">{analysisResult.totalCandidates}</div>
-                            <div className="text-[10px] text-muted uppercase tracking-wider">Total Candidates</div>
+                            <div className="text-[10px] text-muted">Total Candidates</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-4xl font-bold text-amber-600">{analysisResult.totalDuplicates}</div>
-                            <div className="text-[10px] text-muted uppercase tracking-wider">Duplicates</div>
+                            <div className="text-4xl font-bold text-warning">{analysisResult.totalDuplicates}</div>
+                            <div className="text-[10px] text-muted">Duplicates</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-4xl font-bold text-green-600">{analysisResult.uniqueCandidates}</div>
-                            <div className="text-[10px] text-muted uppercase tracking-wider">Unique Candidates</div>
+                            <div className="text-4xl font-bold text-success">{analysisResult.uniqueCandidates}</div>
+                            <div className="text-[10px] text-muted">Unique Candidates</div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="p-4 bg-warning-soft border border-warning/30 rounded-lg">
                         <p className="text-sm text-amber-800">
                           <strong>{analysisResult.duplicateRate}%</strong> of candidates have duplicate email addresses.
                           You'll be sending invitations to <strong>{analysisResult.uniqueCandidates} unique candidates</strong>.
@@ -381,11 +381,11 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
 
                       {analysisResult.recommendations.length > 0 && (
                         <div className="space-y-2">
-                          <h4 className="text-xs font-semibold text-ink uppercase tracking-wider">Recommendations:</h4>
+                          <h4 className="text-xs font-semibold text-ink">Recommendations:</h4>
                           <ul className="space-y-1">
                             {analysisResult.recommendations.slice(0, 3).map((recommendation, index) => (
                               <li key={index} className="text-xs text-muted flex items-start gap-2">
-                                <span className="text-amber-500 mt-0.5">•</span>
+                                <span className="text-warning mt-0.5">•</span>
                                 {recommendation}
                               </li>
                             ))}
@@ -397,7 +397,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                         <div>
                           <button
                             onClick={() => setShowDetails(!showDetails)}
-                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                            className="text-sm text-info hover:text-info underline"
                           >
                             {showDetails ? 'Hide' : 'Show'} duplicate details
                           </button>
@@ -413,7 +413,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                                 {analysisResult.duplicateGroups.slice(0, 5).map((group, index) => (
                                   <div key={index} className="flex justify-between">
                                     <span className="text-muted">{group.duplicateKey}</span>
-                                    <span className="text-amber-600">{group.count} times</span>
+                                    <span className="text-warning">{group.count} times</span>
                                   </div>
                                 ))}
                                 {analysisResult.duplicateGroups.length > 5 && (
@@ -440,7 +440,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                 <Button
                   variant="outline"
                   onClick={onCancel}
-                  className="uppercase rounded-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="uppercase rounded-sm text-danger hover:text-danger hover:bg-danger-soft"
                 >
                   Cancel
                 </Button>

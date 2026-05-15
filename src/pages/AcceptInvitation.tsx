@@ -145,11 +145,11 @@ const AcceptInvitation = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-paper-2    flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-paper-2 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-paper rounded-2xl shadow-2 p-8">
         {status === 'loading' && (
           <div className="text-center">
-            <Loader2 className="w-16 h-16 text-indigo-600 animate-spin mx-auto mb-4" />
+            <Loader2 className="w-16 h-16 text-ink animate-spin mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-ink mb-2">Processing Invitation</h2>
             <p className="text-muted">Please wait while we add you to the workspace...</p>
           </div>
@@ -157,7 +157,7 @@ const AcceptInvitation = () => {
 
         {status === 'success' && (
           <div className="text-center">
-            <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+            <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-ink mb-2">Success!</h2>
             <p className="text-muted mb-4">{message}</p>
             {invitationDetails && (
@@ -188,7 +188,7 @@ const AcceptInvitation = () => {
             <div className="space-y-3">
               <button
                 onClick={handleLogoutAndRetry}
-                className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-paper font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-ink hover:bg-ink-soft text-paper font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 <LogOut className="w-5 h-5" />
                 Logout and Login with Correct Account
@@ -209,12 +209,12 @@ const AcceptInvitation = () => {
 
         {status === 'error' && (
           <div className="text-center">
-            <XCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+            <XCircle className="w-16 h-16 text-danger mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-ink mb-2">Error</h2>
             <p className="text-muted mb-6">{message}</p>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-paper font-semibold rounded-xl transition-colors"
+              className="px-6 py-3 bg-ink hover:bg-ink-soft text-paper font-semibold rounded-xl transition-colors"
             >
               Go to Login
             </button>

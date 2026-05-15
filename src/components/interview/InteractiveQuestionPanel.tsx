@@ -34,7 +34,7 @@ const MCQTask = ({ options, onSubmit }: { options: string[]; onSubmit: (answer: 
     <div className="space-y-4 w-full max-w-lg">
       <RadioGroup onValueChange={setSelectedValue} className="space-y-2">
         {options.map((option, index) => (
-          <div key={index} className="flex items-center space-x-2 bg-paper-2 p-4 rounded-lg border border-rule ">
+          <div key={index} className="flex items-center space-x-2 bg-paper-2 p-4 rounded-lg border border-rule">
             <RadioGroupItem value={option} id={`option-${index}`} />
             <Label htmlFor={`option-${index}`} className="flex-1 text-base cursor-pointer">
               {option}
@@ -75,7 +75,7 @@ const TextInputTask = ({ description, onSubmit }: { description: string; onSubmi
 
   return (
     <div className="space-y-4 w-full max-w-lg">
-      <div className="bg-paper-2 p-4 rounded-lg border border-rule ">
+      <div className="bg-paper-2 p-4 rounded-lg border border-rule">
         <p className="text-sm text-ink-soft whitespace-pre-wrap">
           {description}
         </p>
@@ -111,7 +111,7 @@ const RatingTask = ({ description, scale, onSubmit }: {
 
   return (
     <div className="space-y-4 w-full max-w-lg">
-      <div className="bg-paper-2 p-4 rounded-lg border border-rule ">
+      <div className="bg-paper-2 p-4 rounded-lg border border-rule">
         <p className="text-sm text-ink-soft whitespace-pre-wrap">
           {description}
         </p>
@@ -161,7 +161,7 @@ export const InteractiveQuestionPanel = ({ task, onSubmit }: InteractiveQuestion
         </h3>
       )}
       {task.instructions && (
-        <p className="text-sm text-muted ">
+        <p className="text-sm text-muted">
           {task.instructions}
         </p>
       )}

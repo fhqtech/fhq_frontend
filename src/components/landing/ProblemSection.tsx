@@ -15,7 +15,7 @@ export function ProblemSection() {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-6 py-24">
         {/* Headline */}
-        <h2 className="text-4xl md:text-6xl font-light text-ink  bg-paper-2 from-white /40 tracking-tighter mb-16 text-center">
+        <h2 className="text-4xl md:text-6xl font-light text-ink bg-paper-2 from-white /40 tracking-tighter mb-16 text-center">
           Finance hiring breaks at the first conversation.
         </h2>
 
@@ -26,7 +26,7 @@ export function ProblemSection() {
               key={index}
               className="flex items-center gap-4"
             >
-              <X className="w-5 h-5 text-red-500 shrink-0" />
+              <X className="w-5 h-5 text-danger shrink-0" />
               <p className="text-lg md:text-xl text-paper/70 font-light">
                 {problem}
               </p>

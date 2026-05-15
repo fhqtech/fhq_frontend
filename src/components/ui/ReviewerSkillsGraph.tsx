@@ -406,7 +406,7 @@ export const ReviewerSkillsGraph: React.FC<ReviewerSkillsGraphProps> = ({
                         <div className="flex items-center gap-2 mb-2">
                             <span className="font-bold text-sm text-slate-800">{selectedSkill.name}</span>
                             <span
-                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded uppercase tracking-wide"
+                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded"
                                 style={{
                                     backgroundColor: categoryStyles[selectedSkill.category].bgColor,
                                     color: categoryStyles[selectedSkill.category].borderColor
@@ -437,7 +437,7 @@ export const ReviewerSkillsGraph: React.FC<ReviewerSkillsGraphProps> = ({
                     </div>
                 ) : (
                     <div className="h-10 flex items-center justify-center border-t border-slate-100 pt-2">
-                        <span className="text-[9px] text-slate-400 uppercase tracking-widest font-mono">Click any skill to view evidence</span>
+                        <span className="text-[9px] text-slate-400 font-mono">Click any skill to view evidence</span>
                     </div>
                 )}
             </div>

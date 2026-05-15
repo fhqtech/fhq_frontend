@@ -1695,7 +1695,7 @@ export default function CandidatePortal() {
 
               {activeInterviews.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-ink mb-4 mt-8 uppercase tracking-wider">Active Interviews</h2>
+                  <h2 className="text-xl font-semibold text-ink mb-4 mt-8">Active Interviews</h2>
                   <div className="space-y-4 max-w-4xl">
                     {activeInterviews.map((interview, index) => {
                         const isPreliminary = interview.type === 'regular';
@@ -1801,7 +1801,7 @@ export default function CandidatePortal() {
               {/* Completed Interviews Section */}
               {completedInterviews.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-ink mb-4 mt-8 uppercase tracking-wider">Completed Interviews</h2>
+                  <h2 className="text-xl font-semibold text-ink mb-4 mt-8">Completed Interviews</h2>
                   <div className="space-y-4 max-w-4xl">
                     {completedInterviews.map((interview, index) => {
                         const isPreliminary = interview.type === 'regular';

@@ -162,7 +162,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
             ref={cardRef}
             className={`p-5 h-full transition-all duration-300 shadow-1 hover:shadow-2 cursor-pointer group relative overflow-hidden border ${
               list.isQualified
-                ? 'border-amber-200/60 bg-paper-2 from-amber-50/40 via-yellow-50/20 to-orange-50/30'
+                ? 'border-warning/30/60 bg-paper-2 from-amber-50/40 via-yellow-50/20 to-orange-50/30'
                 : 'border-border hover:border-primary/20'
             }`}
             onClick={!isFlipped ? onClick : undefined}
@@ -171,7 +171,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
             {/* Curated Corner Ribbon */}
             {list.isQualified && (
               <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
-                <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-amber-900 text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
+                <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-warning text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
                   Curated
                 </div>
               </div>
@@ -194,13 +194,13 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                       style={{ backgroundColor: listColor }}
                     />
                     <h3
-                      className="text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate uppercase tracking-wider min-w-0"
+                      className="text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate min-w-0"
                       title={list.name.length > 30 ? list.name : undefined}
                     >
                       {list.name}
                     </h3>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/60 mb-2 uppercase tracking-wider text-left">
+                  <p className="text-[10px] text-muted-foreground/60 mb-2 text-left">
                     #{list.id}
                   </p>
 
@@ -215,10 +215,10 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                             onCopy(list.id, list.name, list.isQualified || false);
                           }
                         }}
-                        className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded border border-border hover:bg-green-50 hover:border-green-200 transition-colors group"
+                        className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded border border-border hover:bg-success-soft hover:border-success/30 transition-colors group"
                       >
-                        <FolderOpen className="h-3.5 w-3.5 text-muted-foreground group-hover:text-green-600" />
-                        <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground group-hover:text-green-600">
+                        <FolderOpen className="h-3.5 w-3.5 text-muted-foreground group-hover:text-success" />
+                        <span className="text-[10px] font-semibold text-muted-foreground group-hover:text-success">
                           Shared with me
                         </span>
                       </div>
@@ -228,10 +228,10 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                         {sharedProjects.length === 0 ? (
                           <div
                             onClick={handleShareClick}
-                            className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                            className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-info-soft hover:border-info/30 transition-colors group"
                           >
-                            <Share2 className="h-3.5 w-3.5 text-muted-foreground group-hover:text-blue-600" />
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground group-hover:text-blue-600">
+                            <Share2 className="h-3.5 w-3.5 text-muted-foreground group-hover:text-info" />
+                            <span className="text-[10px] text-muted-foreground group-hover:text-info">
                               Share
                             </span>
                           </div>
@@ -239,10 +239,10 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                           <>
                             <div
                               onClick={handleShareClick}
-                              className="cursor-pointer flex items-center gap-2 px-2.5 py-1 rounded border border-border hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                              className="cursor-pointer flex items-center gap-2 px-2.5 py-1 rounded border border-border hover:bg-info-soft hover:border-info/30 transition-colors group"
                             >
-                              <Settings className="h-3.5 w-3.5 text-muted-foreground group-hover:text-blue-600" />
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground group-hover:text-blue-600">
+                              <Settings className="h-3.5 w-3.5 text-muted-foreground group-hover:text-info" />
+                              <span className="text-[10px] text-muted-foreground group-hover:text-info">
                                 Shared ({sharedProjects.length})
                               </span>
                             </div>
@@ -252,9 +252,9 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                         {/* Edit and Delete buttons - only for own lists */}
                         <div
                           onClick={handleEdit}
-                          className="cursor-pointer p-1.5 rounded border border-border hover:bg-green-50 hover:border-green-200 transition-colors group"
+                          className="cursor-pointer p-1.5 rounded border border-border hover:bg-success-soft hover:border-success/30 transition-colors group"
                         >
-                          <Edit className="h-3.5 w-3.5 text-muted-foreground group-hover:text-green-600" />
+                          <Edit className="h-3.5 w-3.5 text-muted-foreground group-hover:text-success" />
                         </div>
                         <div
                           onClick={handleDelete}
@@ -273,8 +273,8 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="mb-3">
-                          <span className="text-xs font-semibold uppercase tracking-wider">Share with Projects</span>
-                          <p className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">(Read-only access) - {availableProjects.length} available</p>
+                          <span className="text-xs font-semibold">Share with Projects</span>
+                          <p className="text-[9px] text-muted-foreground mt-0.5">(Read-only access) - {availableProjects.length} available</p>
                         </div>
 
                         {/* Search bar - always visible */}
@@ -309,7 +309,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                                   />
                                   <label
                                     htmlFor={`project-${project.id}`}
-                                    className="text-xs cursor-pointer flex-1 uppercase tracking-wider"
+                                    className="text-xs cursor-pointer flex-1"
                                   >
                                     {project.name}
                                   </label>
@@ -322,7 +322,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                           <Button
                             size="sm"
                             onClick={handleShareSave}
-                            className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold text-[10px] h-7"
+                            className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold text-[10px] h-7"
                           >
                             <Check className="h-3 w-3 mr-1" />
                             Save
@@ -331,7 +331,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                       </div>
                     )}
                   </div>
-                  <p className="text-[10px] text-muted-foreground line-clamp-2 uppercase tracking-wider text-left pt-1">
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 text-left pt-1">
                     {list.description || "No description"}
                   </p>
                 </div>
@@ -433,7 +433,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
               </div>
 
               {/* Date Footer */}
-              <div className="mt-auto pt-3 flex items-center justify-end text-[7px] text-ink uppercase tracking-wider">
+              <div className="mt-auto pt-3 flex items-center justify-end text-[7px] text-ink">
                 <span>
                   Last Updated: {new Date(list.updatedAt).toLocaleDateString('en-GB')} {new Date(list.updatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                 </span>
@@ -448,11 +448,11 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
             <div className="flex flex-col" style={{ height: '100%', maxHeight: '400px' }}>
               {/* Header */}
               <div className="flex items-center justify-between mb-4 shrink-0">
-                <h3 className="text-base font-semibold uppercase tracking-wider">Sources</h3>
+                <h3 className="text-base font-semibold">Sources</h3>
                 <Button
                   variant="ghost"
                   onClick={handleEdit}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 font-semibold uppercase tracking-wider text-xs"
+                  className="text-danger hover:text-danger hover:bg-danger-soft font-semibold text-xs"
                 >
                   Cancel
                 </Button>
@@ -481,11 +481,11 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
 
                         {/* Source Name and Last Updated */}
                         <div className="flex-1 min-w-0 pr-4">
-                          <p className="text-xs font-semibold text-foreground truncate uppercase tracking-wider text-left">
+                          <p className="text-xs font-semibold text-foreground truncate text-left">
                             {source.name || 'Untitled Source'}
                           </p>
                           {source.lastExtractedAt && (
-                            <p className="text-[9px] text-muted-foreground/70 mt-0.5 uppercase tracking-wider text-left">
+                            <p className="text-[9px] text-muted-foreground/70 mt-0.5 text-left">
                               {new Date(source.lastExtractedAt).toLocaleString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
@@ -505,7 +505,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                             variant="outline"
                             onClick={(e) => handleSync(e, source.id)}
                             disabled={syncingSourceId === source.id}
-                            className="shrink-0 uppercase tracking-wider text-[10px] h-7 px-2"
+                            className="shrink-0 text-[10px] h-7 px-2"
                           >
                             {syncingSourceId === source.id ? (
                               <>
@@ -530,7 +530,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
               <div className="mt-4 pt-4 border-t border-border/50 shrink-0">
                 <Button
                   variant="outline"
-                  className="w-full justify-center gap-2 uppercase tracking-wider text-xs"
+                  className="w-full justify-center gap-2 text-xs"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (onAddSource) {

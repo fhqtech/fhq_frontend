@@ -124,7 +124,7 @@ const DynamicBlueprintPage: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center">
           <Spinner size="lg" variant="brand" label="Loading interview blueprint" />
           <div className="mt-6 text-center">
-            <h3 className="text-lg font-semibold uppercase tracking-wider">Loading interview blueprint</h3>
+            <h3 className="text-lg font-semibold">Loading interview blueprint</h3>
             <p className="text-muted">
               Fetching blueprint data for this interview…
             </p>
@@ -159,8 +159,8 @@ const DynamicBlueprintPage: React.FC = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <div className="space-y-6">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                <div className="w-12 h-12 bg-danger-soft rounded-full flex items-center justify-center mx-auto">
+                  <AlertTriangle className="w-6 h-6 text-danger" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-ink">Blueprint Not Available</h3>

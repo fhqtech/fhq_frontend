@@ -260,7 +260,7 @@ export default function Settings() {
               // Pass token in URL - Control Tower will immediately store it and remove from URL
               window.open(`${controlTowerUrl}?workspace=${currentWorkspace.id}&token=${encodeURIComponent(token || '')}`, '_blank', 'noopener,noreferrer');
             }}
-            className="px-6 py-3 bg-[hsl(var(--ink))] text-paper rounded-lg font-semibold hover:bg-[#1a1f26] transition-all duration-200 shadow-2 hover:shadow-2 uppercase tracking-wide"
+            className="px-6 py-3 bg-[hsl(var(--ink))] text-paper rounded-lg font-semibold hover:bg-[#1a1f26] transition-all duration-200 shadow-2 hover:shadow-2"
           >
             <span className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
@@ -359,7 +359,7 @@ export default function Settings() {
                         <div className="flex items-center gap-2">
                           <span>{workspace.name}</span>
                           {workspace.ownerId === user?.id && (
-                            <span className="text-xs text-blue-600">(Owner)</span>
+                            <span className="text-xs text-info">(Owner)</span>
                           )}
                         </div>
                       </SelectItem>
@@ -417,10 +417,10 @@ export default function Settings() {
                                 <Folder className="w-4 h-4 text-muted-foreground" />
                                 <span className="font-medium">{project.name}</span>
                                 {project.ownerId === user?.id && (
-                                  <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Owner</span>
+                                  <span className="text-xs text-info bg-info-soft px-2 py-0.5 rounded-full">Owner</span>
                                 )}
                                 {project.admins?.includes(user?.id || '') && project.ownerId !== user?.id && (
-                                  <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Admin</span>
+                                  <span className="text-xs text-gold-ink bg-paper-3 px-2 py-0.5 rounded-full">Admin</span>
                                 )}
                               </div>
                             </td>
@@ -679,7 +679,7 @@ export default function Settings() {
                             variant="outline"
                             size="sm"
                             onClick={stopAudioPreview}
-                            className="flex items-center gap-1 px-3 py-1 text-xs border-red-500 text-red-500 hover:bg-red-500 hover:text-paper"
+                            className="flex items-center gap-1 px-3 py-1 text-xs border-danger/30 text-danger hover:bg-red-500 hover:text-paper"
                           >
                             <Stop className="w-3 h-3" weight="fill" />
                             Stop

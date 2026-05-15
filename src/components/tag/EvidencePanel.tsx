@@ -26,10 +26,10 @@ const STATUS_LABELS: Record<EvidencePanelProps["status"], string> = {
 };
 
 const STATUS_BG: Record<EvidencePanelProps["status"], string> = {
-  strong: "bg-green-100 text-green-800",
+  strong: "bg-success-soft text-green-800",
   developing: "bg-orange-100 text-orange-800",
-  gap: "bg-red-100 text-red-800",
-  transferable: "bg-purple-100 text-purple-800",
+  gap: "bg-danger-soft text-red-800",
+  transferable: "bg-paper-3 text-gold-ink",
   role_center: "bg-slate-800 text-slate-100",
 };
 
@@ -60,7 +60,7 @@ export function EvidencePanel({ node, status, onClose }: EvidencePanelProps) {
         {/* Proficiency comparison */}
         {(node.required_proficiency || node.demonstrated_proficiency || node.proficiency_label) && status !== "role_center" && (
           <section className="space-y-1.5">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Proficiency</h4>
+            <h4 className="text-xs font-semibold text-slate-500">Proficiency</h4>
             {node.proficiency_label && (
               <p className="text-slate-700"><span className="font-semibold">Assessment:</span> {node.proficiency_label}</p>
             )}
@@ -75,8 +75,8 @@ export function EvidencePanel({ node, status, onClose }: EvidencePanelProps) {
 
         {/* Transferable provenance */}
         {status === "transferable" && node.transferable_from && (
-          <section className="space-y-1.5 rounded bg-purple-50 p-3 text-purple-900">
-            <h4 className="text-xs font-semibold uppercase tracking-wider">Transferred from</h4>
+          <section className="space-y-1.5 rounded bg-paper-3 p-3 text-gold-ink">
+            <h4 className="text-xs font-semibold">Transferred from</h4>
             <p>{node.transferable_from}</p>
           </section>
         )}

@@ -463,7 +463,7 @@ export const SkillsGraph: React.FC<SkillsGraphProps> = ({
       <div className="w-56 shrink-0 flex flex-col gap-3">
         {/* Legend */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-          <p className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-2">Proficiency Levels</p>
+          <p className="text-[10px] font-mono font-bold text-slate-500 mb-2">Proficiency Levels</p>
           <div className="flex flex-col gap-1.5">
             {[1, 2, 3, 4, 5].map((level) => (
               <div key={level} className="flex items-center gap-2">
@@ -488,7 +488,7 @@ export const SkillsGraph: React.FC<SkillsGraphProps> = ({
         {selectedSkill && !selectedProficiencyLevel && (
           <div className="bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl border border-slate-700">
             <div className="flex items-start justify-between mb-2">
-              <p className="font-mono font-bold text-sm uppercase tracking-wide flex-1">{selectedSkill.name}</p>
+              <p className="font-mono font-bold text-sm flex-1">{selectedSkill.name}</p>
               <button
                 onClick={() => {
                   setSelectedSkill(null);
@@ -505,7 +505,7 @@ export const SkillsGraph: React.FC<SkillsGraphProps> = ({
             <p className="text-slate-400 text-xs font-mono leading-relaxed">{selectedSkill.description}</p>
             <div className="mt-2 flex items-center gap-2 text-[10px] font-mono">
               <span className="text-slate-500">Required:</span>
-              <span className="px-2 py-0.5 bg-indigo-600 text-white rounded font-bold">
+              <span className="px-2 py-0.5 bg-ink text-white rounded font-bold">
                 {proficiencyLabels[selectedSkill.expected_proficiency]?.short}
               </span>
             </div>

@@ -71,7 +71,7 @@ export function CreateFitmentDialog({
  }}>
  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
- <DialogTitle className="uppercase tracking-wider">Create Role Fitment Interview - Step {currentStep} of 3</DialogTitle>
+ <DialogTitle className=" ">Create Role Fitment Interview - Step {currentStep} of 3</DialogTitle>
  <DialogDescription className="uppercase text-[10px]">
  {currentStep === 1 && "Enter interview details and job description"}
  {currentStep === 2 && "Select candidate lists for this interview"}
@@ -110,7 +110,7 @@ export function CreateFitmentDialog({
  </CardHeader>
  <CardContent className="space-y-4">
  <div>
- <Label htmlFor="fitmentTitle" className="uppercase text-xs tracking-wider">Interview Title <span className="text-red-600">*</span></Label>
+ <Label htmlFor="fitmentTitle" className="uppercase text-xs tracking-wider">Interview Title <span className="text-danger">*</span></Label>
  <Input
  id="fitmentTitle"
  placeholder="Enter a title for this fitment interview..."
@@ -125,7 +125,7 @@ export function CreateFitmentDialog({
  </div>
 
  <div>
- <Label htmlFor="jobDescription" className="uppercase text-xs tracking-wider">Job Description <span className="text-red-600">*</span></Label>
+ <Label htmlFor="jobDescription" className="uppercase text-xs tracking-wider">Job Description <span className="text-danger">*</span></Label>
  <div className="relative">
  <Textarea
  id="jobDescription"
@@ -150,7 +150,7 @@ export function CreateFitmentDialog({
  </Button>
  <DialogContent className="max-w-4xl max-h-[80vh]">
  <DialogHeader>
- <DialogTitle className="uppercase tracking-wider">Job Description</DialogTitle>
+ <DialogTitle className=" ">Job Description</DialogTitle>
  <DialogDescription className="uppercase text-[10px]">
  Provide a detailed job description and role requirements for the fitment interview.
  </DialogDescription>
@@ -193,7 +193,7 @@ export function CreateFitmentDialog({
  {currentStep === 2 && (
  <Card>
  <CardHeader className="pb-4">
- <CardTitle className="text-lg uppercase tracking-wider">Select Candidate Lists</CardTitle>
+ <CardTitle className="text-lg">Select Candidate Lists</CardTitle>
  <CardDescription className="uppercase text-xs tracking-wider">Choose which candidate lists to include in this fitment interview</CardDescription>
  </CardHeader>
  <CardContent>
@@ -201,11 +201,11 @@ export function CreateFitmentDialog({
  <div className="mb-6 p-4 bg-paper-2 border border-ink/20 rounded-sm">
  <div className="flex items-center justify-between">
  <div>
- <h4 className="font-medium text-foreground mb-1 uppercase tracking-wider text-sm">Create New List Based on Fitment Criteria</h4>
- <p className="text-[10px] text-muted uppercase tracking-wider">Generate candidate lists automatically using AI-powered fitment analysis</p>
+ <h4 className="font-medium text-foreground mb-1 text-sm">Create New List Based on Fitment Criteria</h4>
+ <p className="text-[10px] text-muted">Generate candidate lists automatically using AI-powered fitment analysis</p>
  </div>
  <div className="flex items-center gap-2">
- <span className="text-[8px] px-2 py-1 bg-yellow-100 text-yellow-700 rounded-sm font-bold uppercase">
+ <span className="text-[8px] px-2 py-1 bg-warning-soft text-warning rounded-sm font-bold uppercase">
  Coming Soon
  </span>
  </div>
@@ -273,7 +273,7 @@ export function CreateFitmentDialog({
  {/* Curated Corner Ribbon */}
  {list.collection === 'qualified_candidate_pools' && (
  <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
- <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-amber-900 text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
+ <div className="absolute top-0 right-0 w-28 h-6 bg-paper-2 from-amber-400 to-yellow-500 text-warning text-[10px] font-bold flex items-center justify-center shadow-2 transform rotate-45 translate-x-6 translate-y-2">
  Curated
  </div>
  </div>
@@ -281,7 +281,7 @@ export function CreateFitmentDialog({
  <div className="flex flex-col h-full">
  <div className="mb-3">
  <h4 className={`font-medium text-sm transition-colors ${!isSelected ? 'group-hover:text-paper' : ''}`}>{list.name}</h4>
- <p className={`text-[10px] text-muted uppercase tracking-wider mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
+ <p className={`text-[10px] text-muted   mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
  #{list.id}
  </p>
  </div>
@@ -325,7 +325,7 @@ export function CreateFitmentDialog({
  {isLoadingPrimaryInterviews ? (
  <div className="flex items-center justify-center py-8">
  <CircleNotch className="w-6 h-6 animate-spin text-ink" />
- <span className="ml-2 text-sm text-muted-foreground uppercase tracking-wider">Loading interviews...</span>
+ <span className="ml-2 text-sm text-muted-foreground">Loading interviews...</span>
  </div>
  ) : availablePrimaryInterviews.length > 0 ? (
  <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
@@ -359,7 +359,7 @@ export function CreateFitmentDialog({
  <div className="flex flex-col h-full">
  <div className="mb-3">
  <h4 className={`font-medium text-sm transition-colors ${!isSelected ? 'group-hover:text-paper' : ''}`}>{interview.title}</h4>
- <p className={`text-[10px] text-muted uppercase tracking-wider mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
+ <p className={`text-[10px] text-muted   mt-1 transition-colors ${!isSelected ? 'group-hover:text-paper/60' : ''}`}>
  #{interview.id}
  </p>
  </div>
@@ -372,9 +372,9 @@ export function CreateFitmentDialog({
  <div className="flex items-center justify-between">
  <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold transition-colors ${
  interview.status === 'active'
- ? `bg-green-100 text-green-700 ${!isSelected ? 'group-hover:bg-green-600 group-hover:text-paper' : ''}`
+ ? `bg-success-soft text-success ${!isSelected ? 'group-hover:bg-green-600 group-hover:text-paper' : ''}`
  : interview.status === 'completed'
- ? `bg-blue-100 text-blue-700 ${!isSelected ? 'group-hover:bg-blue-600 group-hover:text-paper' : ''}`
+ ? `bg-info-soft text-info ${!isSelected ? 'group-hover:bg-info group-hover:text-paper' : ''}`
  : `bg-paper-3 text-ink-soft ${!isSelected ? 'group-hover:bg-muted group-hover:text-paper' : ''}`
  }`}>
  {interview.status}
@@ -388,8 +388,8 @@ export function CreateFitmentDialog({
  </div>
  ) : (
  <div className="text-center py-8">
- <div className="text-sm text-muted-foreground mb-3 uppercase tracking-wider">No primary interviews available</div>
- <div className="text-xs text-muted-foreground uppercase tracking-wider">
+ <div className="text-sm text-muted-foreground mb-3">No primary interviews available</div>
+ <div className="text-xs text-muted-foreground">
  You can proceed without linking to primary interviews, or create some interviews first.
  </div>
  </div>

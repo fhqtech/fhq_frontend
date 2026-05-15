@@ -190,7 +190,7 @@ export default function ListsPage() {
           {activeTab === 'yours' && (
             <Button
               onClick={handleCreateList}
-              className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold"
+              className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Candidate Pool

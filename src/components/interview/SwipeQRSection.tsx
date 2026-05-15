@@ -122,7 +122,7 @@ export function SwipeQRSection({ interviewId }: SwipeQRSectionProps) {
               {isRefreshing && (
                 <div className="absolute inset-0 bg-paper/95 backdrop-blur-xs rounded-lg flex flex-col items-center justify-center z-10 gap-1.5">
                   <Loader2 className="h-7 w-7 text-ink animate-spin" />
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-muted">
+                  <span className="text-[9px] font-mono text-muted">
                     Updating
                   </span>
                 </div>
@@ -141,7 +141,7 @@ export function SwipeQRSection({ interviewId }: SwipeQRSectionProps) {
                 />
               </div>
             </div>
-            <p className="text-[10px] font-mono uppercase tracking-wider text-muted text-center mt-2">
+            <p className="text-[10px] font-mono text-muted text-center mt-2">
               {isRefreshing ? "Updating…" : "Scan to review"}
             </p>
 

@@ -340,7 +340,7 @@ export default function ListDetail() {
                 className="bg-paper rounded border border-border hover:bg-accent transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                <span className="uppercase tracking-wider text-sm font-semibold">Back to Lists</span>
+                <span className=" text-sm font-semibold">Back to Lists</span>
               </Button>
               <h1 className="text-2xl font-bold flex-1">{listDetails.name}</h1>
               {/* T3: jump into the aggregate Pool TAG view */}
@@ -349,7 +349,7 @@ export default function ListDetail() {
                 onClick={() => navigate(`/lists/${listId}/pool`)}
                 className="bg-ink text-paper hover:bg-ink"
               >
-                <span className="uppercase tracking-wider text-xs font-semibold">Pool TAG view →</span>
+                <span className=" text-xs font-semibold">Pool TAG view →</span>
               </Button>
             </div>
           )}
@@ -365,7 +365,7 @@ export default function ListDetail() {
                   className="bg-paper rounded border border-border hover:bg-accent transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  <span className="uppercase tracking-wider text-xs font-semibold">Back</span>
+                  <span className=" text-xs font-semibold">Back</span>
                 </Button>
                 <h1 className="text-xl font-semibold uppercase tracking-tight">{listDetails.name}</h1>
               </div>

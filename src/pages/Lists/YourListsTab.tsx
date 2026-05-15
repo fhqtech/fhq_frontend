@@ -547,21 +547,21 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
             <Button
               variant={listFilter === 'all' ? 'default' : 'outline-solid'}
               onClick={() => setListFilter('all')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'all' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)]   text-xs font-bold ${listFilter === 'all' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               All
             </Button>
             <Button
               variant={listFilter === 'normal' ? 'default' : 'outline-solid'}
               onClick={() => setListFilter('normal')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'normal' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)]   text-xs font-bold ${listFilter === 'normal' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Normal
             </Button>
             <Button
               variant={listFilter === 'curated' ? 'default' : 'outline-solid'}
               onClick={() => setListFilter('curated')}
-              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'curated' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
+              className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)]   text-xs font-bold ${listFilter === 'curated' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Curated
             </Button>
@@ -573,11 +573,11 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
       {allLists.length === 0 ? (
         <div className="text-center py-8">
           <img src={doggieSvg} alt="No pools" className="w-96 h-96 mx-auto mb-6 object-contain" />
-          <h3 className="text-xl font-semibold text-ink mb-3 uppercase tracking-wider">No candidate pools yet</h3>
-          <p className="text-sm text-muted mb-6 uppercase tracking-wider">
+          <h3 className="text-xl font-semibold text-ink mb-3">No candidate pools yet</h3>
+          <p className="text-sm text-muted mb-6">
             Create your first candidate pool to start organizing candidates
           </p>
-          <Button onClick={() => setShowCreateDialog(true)} className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider font-bold">
+          <Button onClick={() => setShowCreateDialog(true)} className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold">
             <Plus className="h-4 w-4 mr-2" />
             Create Candidate Pool
           </Button>

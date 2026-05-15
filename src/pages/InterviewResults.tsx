@@ -119,7 +119,7 @@ export default function InterviewResults() {
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex flex-col bg-paper-2   ">
+      <div className="min-h-dvh flex flex-col bg-paper-2">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <div className="mb-8 flex items-center justify-center">
             <Spinner size="lg" variant="brand" label="Processing" />
@@ -136,7 +136,7 @@ export default function InterviewResults() {
           <div className="w-full max-w-md mb-6">
             <div className="w-full bg-paper-3 rounded-full h-3">
               <div
-                className="bg-paper-2 from-primary  h-3 rounded-full transition-all duration-300 ease-out animate-pulse"
+                className="bg-paper-2 from-primary h-3 rounded-full transition-all duration-300 ease-out animate-pulse"
                 style={{ width: '75%' }}
               ></div>
             </div>
@@ -153,7 +153,7 @@ export default function InterviewResults() {
   // Show pending state - results being generated
   if (isResultsPending) {
     return (
-      <div className="min-h-dvh flex flex-col bg-paper-2   ">
+      <div className="min-h-dvh flex flex-col bg-paper-2">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <div className="mb-8 flex items-center justify-center">
             <Spinner size="lg" variant="brand" label="Processing" />
@@ -167,9 +167,9 @@ export default function InterviewResults() {
             Our AI is analyzing the interview conversation and generating a detailed skill assessment...
           </p>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-amber-50 px-4 py-2 rounded-lg border border-amber-200 ">
-            <Clock className="w-4 h-4 text-amber-600" />
-            <span className="text-amber-700 ">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-warning-soft px-4 py-2 rounded-lg border border-warning/30">
+            <Clock className="w-4 h-4 text-warning" />
+            <span className="text-warning">
               Checking again in {10 - (retryCount % 10)} seconds... (Attempt {retryCount + 1}/6)
             </span>
           </div>
@@ -206,7 +206,7 @@ export default function InterviewResults() {
         <Card>
           <div className="flex items-center justify-center min-h-[300px] p-6">
             <div className="text-center">
-              <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+              <AlertTriangle className="w-16 h-16 text-danger mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Error Loading Results</h2>
               <p className="text-muted-foreground mb-4">{error}</p>
               <Button onClick={handleRetry}>
@@ -238,7 +238,7 @@ export default function InterviewResults() {
         <Card>
           <div className="flex items-center justify-center min-h-[300px] p-6">
             <div className="text-center">
-              <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+              <AlertTriangle className="w-16 h-16 text-danger mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Results Not Available</h2>
               <p className="text-muted-foreground mb-4">Unable to load evaluation data</p>
               <Button onClick={handleRetry}>
@@ -259,17 +259,17 @@ export default function InterviewResults() {
 
   const getBadgeClass = (decision: string) => {
     const lowerDecision = decision.toLowerCase();
-    if (lowerDecision.includes("not recommend")) return "bg-red-100 text-red-800 border-red-300";
-    if (lowerDecision.includes("reservations")) return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    if (lowerDecision.includes("recommend")) return "bg-green-100 text-green-800 border-green-300";
+    if (lowerDecision.includes("not recommend")) return "bg-danger-soft text-red-800 border-danger/30";
+    if (lowerDecision.includes("reservations")) return "bg-warning-soft text-yellow-800 border-warning/30";
+    if (lowerDecision.includes("recommend")) return "bg-success-soft text-green-800 border-success/30";
     return "bg-paper-3 text-ink border-rule-strong";
   };
 
   const getIcon = (decision: string) => {
     const lowerDecision = decision.toLowerCase();
-    if (lowerDecision.includes("not recommend")) return <TrendingDown className="w-5 h-5 text-red-600" />;
-    if (lowerDecision.includes("reservations")) return <Lightbulb className="w-5 h-5 text-yellow-600" />;
-    if (lowerDecision.includes("recommend")) return <CheckCircle className="w-5 h-5 text-green-600" />;
+    if (lowerDecision.includes("not recommend")) return <TrendingDown className="w-5 h-5 text-danger" />;
+    if (lowerDecision.includes("reservations")) return <Lightbulb className="w-5 h-5 text-warning" />;
+    if (lowerDecision.includes("recommend")) return <CheckCircle className="w-5 h-5 text-success" />;
     return null;
   };
 
@@ -293,9 +293,9 @@ export default function InterviewResults() {
             </div>
             
 {rawResults?.generated_at && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-paper-2 px-3 py-2 rounded-lg border border-rule ">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-paper-2 px-3 py-2 rounded-lg border border-rule">
                 <Clock className="w-4 h-4 text-muted" />
-                <span className="text-muted ">
+                <span className="text-muted">
                   Generated {new Date(rawResults.generated_at).toLocaleDateString()}
                 </span>
               </div>
@@ -318,11 +318,11 @@ export default function InterviewResults() {
             );
           if (!hasBlueprintError) return null;
           return (
-            <Card className="p-4 mb-6 border-amber-300 bg-amber-50 shadow-2">
-              <h2 className="text-base font-semibold text-amber-900 mb-2">
+            <Card className="p-4 mb-6 border-warning/30 bg-warning-soft shadow-2">
+              <h2 className="text-base font-semibold text-warning mb-2">
                 Interview blueprint is misconfigured
               </h2>
-              <p className="text-sm text-amber-900/90 mb-3">
+              <p className="text-sm text-warning/90 mb-3">
                 This interview's blueprint is missing required fields
                 (skills / skill_layout). The candidate's answers can't be
                 scored against a rubric, so the results below are placeholder
@@ -337,7 +337,7 @@ export default function InterviewResults() {
                 </button>
                 <button
                   onClick={() => navigate(`/interviews/${interviewId}`)}
-                  className="px-3 py-1.5 text-xs font-medium border border-amber-700 text-amber-900 rounded-md"
+                  className="px-3 py-1.5 text-xs font-medium border border-amber-700 text-warning rounded-md"
                 >
                   Back to interview
                 </button>
@@ -389,7 +389,7 @@ export default function InterviewResults() {
                   <h2 className="text-xl font-semibold text-foreground">
                     Talent Analysis Graph
                   </h2>
-                  <span className="text-xs uppercase tracking-wider text-muted">
+                  <span className="text-xs text-muted">
                     Click any node for evidence
                   </span>
                 </div>

@@ -165,7 +165,7 @@ function Hero() {
         <div className="hidden md:block">
           <div className="relative rounded-lg border border-rule bg-paper-2 shadow-2 p-8 aspect-4/3 flex flex-col justify-between">
             <div>
-              <p className="font-mono uppercase tracking-wider text-[10px] text-muted mb-2">
+              <p className="font-mono text-[10px] text-muted mb-2">
                 Sample Talent Analysis Graph
               </p>
               <h3 className="text-xl font-semibold text-ink tracking-tight">
@@ -177,7 +177,7 @@ function Hero() {
                 <div className="text-2xl font-mono font-semibold tabular-nums text-success">
                   4
                 </div>
-                <div className="text-[10px] uppercase tracking-wider text-muted mt-1">
+                <div className="text-[10px] text-muted mt-1">
                   Strong
                 </div>
               </div>
@@ -185,7 +185,7 @@ function Hero() {
                 <div className="text-2xl font-mono font-semibold tabular-nums text-warning">
                   4
                 </div>
-                <div className="text-[10px] uppercase tracking-wider text-muted mt-1">
+                <div className="text-[10px] text-muted mt-1">
                   Developing
                 </div>
               </div>
@@ -193,7 +193,7 @@ function Hero() {
                 <div className="text-2xl font-mono font-semibold tabular-nums text-danger">
                   2
                 </div>
-                <div className="text-[10px] uppercase tracking-wider text-muted mt-1">
+                <div className="text-[10px] text-muted mt-1">
                   Gap
                 </div>
               </div>
@@ -311,7 +311,7 @@ function OutcomeCard({ stat, index }: { stat: Stat; index: number }) {
           stat.num
         )}
       </div>
-      <div className="font-mono uppercase tracking-wider text-[11px] text-muted mt-2 mb-3">
+      <div className="font-mono text-[11px] text-muted mt-2 mb-3">
         {stat.label}
       </div>
       <p className="text-sm text-ink-soft leading-relaxed">{stat.body}</p>
@@ -423,7 +423,7 @@ function Footer() {
           </p>
         </div>
         <div>
-          <h4 className="font-mono uppercase tracking-wider text-[11px] text-muted mb-3">
+          <h4 className="font-mono text-[11px] text-muted mb-3">
             Product
           </h4>
           <ul className="space-y-2 text-ink-soft">
@@ -433,7 +433,7 @@ function Footer() {
           </ul>
         </div>
         <div>
-          <h4 className="font-mono uppercase tracking-wider text-[11px] text-muted mb-3">
+          <h4 className="font-mono text-[11px] text-muted mb-3">
             Company
           </h4>
           <ul className="space-y-2 text-ink-soft">

@@ -112,7 +112,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ criteria }) => {
               <Badge
                 key={idx}
                 variant="secondary"
-                className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100"
+                className="text-xs bg-info-soft text-info hover:bg-info-soft"
               >
                 {integration}
               </Badge>
@@ -124,13 +124,13 @@ const SkillCard: React.FC<SkillCardProps> = ({ criteria }) => {
       {/* Expandable focus areas */}
       {showDetails && (
         <div className="mt-4 pt-3 border-t border-rule">
-          <h5 className="text-xs font-medium text-ink-soft mb-2 uppercase tracking-wide">
+          <h5 className="text-xs font-medium text-ink-soft mb-2">
             Interview Focus Areas
           </h5>
           <ul className="space-y-2">
             {criteria.interview_focus_areas.map((area, idx) => (
               <li key={idx} className="flex items-start gap-2 text-sm text-muted">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0" />
+                <div className="w-1.5 h-1.5 bg-info-soft rounded-full mt-2 shrink-0" />
                 <span className="leading-relaxed">{area}</span>
               </li>
             ))}

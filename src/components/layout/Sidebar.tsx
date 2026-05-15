@@ -130,7 +130,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                   <Button
                     variant="ghost"
                     className={cn(
-                      "w-full justify-between text-left px-3 py-2 rounded-sm transition-all font-semibold! text-xs uppercase tracking-widest",
+                      "w-full justify-between text-left px-3 py-2 rounded-sm transition-all text-sm font-medium",
                       isSubItemActive(item)
                         ? "bg-paper-3 text-ink border-l-2 border-gold"
                         : "text-ink-soft hover:text-ink hover:bg-paper-3",
@@ -151,9 +151,9 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                         key={subItem.url}
                         to={subItem.url}
                         className={({ isActive }) => cn(
-                          "block py-2 px-3 ml-7 text-xs rounded-sm transition-all font-semibold uppercase tracking-wider",
+                          "block py-2 px-3 ml-7 text-sm rounded-sm transition-all",
                           isActive
-                            ? "bg-paper-3 text-ink border-l-2 border-gold"
+                            ? "bg-paper-3 text-ink border-l-2 border-gold font-medium"
                             : "text-muted hover:text-ink hover:bg-paper-3"
                         )}
                       >
@@ -171,7 +171,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
               key={item.title}
               to={item.url}
               className={() => cn(
-                "flex items-center rounded-sm transition-all font-semibold text-xs uppercase tracking-widest",
+                "flex items-center rounded-sm transition-all text-sm font-medium",
                 collapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
                 isActive(item.url)
                   ? "bg-paper-3 text-ink border-l-2 border-gold"
@@ -192,7 +192,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             <Button
               variant="ghost"
               className={cn(
-                "w-full text-danger hover:text-danger hover:bg-danger-soft font-semibold text-xs uppercase tracking-wider",
+                "w-full text-danger hover:text-danger hover:bg-danger-soft text-sm font-medium",
                 collapsed ? "justify-center p-2" : "justify-start"
               )}
               disabled={isLoggingOut}
