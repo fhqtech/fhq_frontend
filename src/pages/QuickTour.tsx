@@ -520,10 +520,10 @@ export default function QuickTour() {
           {tourSteps.map((step, index) => (
             <Button
               key={step.id}
-              variant={index === currentStep ? "default" : "outline"}
+              variant={index === currentStep ? "default" : "outline-solid"}
               size="sm"
               onClick={() => handleStepClick(index)}
-              className={`${index === currentStep ? "bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0" : ""} text-[10px] px-3 py-1 h-8 whitespace-nowrap flex-shrink-0 uppercase tracking-wider font-bold`}
+              className={`${index === currentStep ? "bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0" : ""} text-[10px] px-3 py-1 h-8 whitespace-nowrap shrink-0 uppercase tracking-wider font-bold`}
             >
               <span className="hidden md:inline">{step.title}</span>
               <span className="md:hidden">{index + 1}</span>

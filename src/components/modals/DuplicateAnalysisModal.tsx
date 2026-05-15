@@ -192,7 +192,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
       >
         {/* Backdrop */}
         <motion.div
-          className="absolute inset-0 bg-ink/50 backdrop-blur-sm"
+          className="absolute inset-0 bg-ink/50 backdrop-blur-xs"
           onClick={step === 'results' ? onCancel : undefined}
         />
 

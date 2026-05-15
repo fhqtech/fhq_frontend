@@ -330,7 +330,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl !rounded">
+        <DialogContent className="max-w-4xl rounded!">
           <DialogHeader className="pb-6 pr-8">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-2xl font-bold text-[hsl(var(--ink))]">Manage Projects</DialogTitle>
@@ -540,7 +540,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
 
       {/* Create Project Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-md !rounded">
+        <DialogContent className="max-w-md rounded!">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-[hsl(var(--ink))]">Create New Project</DialogTitle>
           </DialogHeader>

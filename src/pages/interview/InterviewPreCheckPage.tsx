@@ -148,7 +148,7 @@ export default function InterviewPreCheckPage() {
 
   if (contextNotReady) {
     return (
-      <div className="min-h-[100dvh] bg-paper flex items-center justify-center p-8">
+      <div className="min-h-dvh bg-paper flex items-center justify-center p-8">
         <div className="max-w-md text-center space-y-6">
           <div className="mx-auto w-16 h-16 rounded-full bg-gold-soft flex items-center justify-center">
             <AlertTriangle className="w-8 h-8 text-gold-ink" />

@@ -101,7 +101,7 @@ const DynamicBlueprintPage: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-[100dvh] flex flex-col bg-background p-8">
+      <div className="min-h-dvh flex flex-col bg-background p-8">
         <div className="container mx-auto">
           {/* Header with back button */}
           <div className="flex items-center gap-4 mb-8">
@@ -137,7 +137,7 @@ const DynamicBlueprintPage: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-[100dvh] bg-background p-8">
+      <div className="min-h-dvh bg-background p-8">
         <div className="container mx-auto">
           {/* Header with back button */}
           <div className="flex items-center gap-4 mb-8">
@@ -207,7 +207,7 @@ const DynamicBlueprintPage: React.FC = () => {
   // Success state - render the blueprint
   if (blueprintData) {
     return (
-      <div className="h-[100dvh] flex flex-col bg-background">
+      <div className="h-dvh flex flex-col bg-background">
         {/* Fixed Header - never moves */}
         <div className="flex-none bg-background px-6 pt-4 pb-4">
           <div className="flex items-center gap-4">

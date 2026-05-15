@@ -227,7 +227,7 @@ export default function InterviewSwipeView() {
   // OTP Verification Screen
   if (!otpVerified) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 from-white via-slate-200 to-black flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-dvh bg-paper-2 from-white via-slate-200 to-black flex items-center justify-center p-4 relative overflow-hidden">
         {/* Logo and Text - Top Left (matching Sidebar) */}
         <div className="absolute top-6 left-2 z-20">
           <div className="flex items-center justify-start">
@@ -256,7 +256,7 @@ export default function InterviewSwipeView() {
           }
         `}</style>
 
-        <Card className="w-full max-w-md shadow-3 rounded-sm border-none relative z-10 bg-paper/95 backdrop-blur-sm">
+        <Card className="w-full max-w-md shadow-3 rounded-sm border-none relative z-10 bg-paper/95 backdrop-blur-xs">
           <CardHeader className="px-8">
             <CardTitle className="text-2xl text-center text-ink">Enter Access Code</CardTitle>
           </CardHeader>
@@ -329,7 +329,7 @@ export default function InterviewSwipeView() {
     const rejectCount = Array.from(decisions.values()).filter(d => d === 'reject').length;
 
     return (
-      <div className="min-h-[100dvh] bg-paper flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-paper flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-sm border border-rule-strong">
           <CardHeader>
             <CardTitle className="text-2xl text-center flex items-center justify-center gap-2 text-ink">
@@ -367,7 +367,7 @@ export default function InterviewSwipeView() {
 
   // Swipe Interface
   return (
-    <div className="min-h-[100dvh] bg-paper p-4 pb-safe">
+    <div className="min-h-dvh bg-paper p-4 pb-safe">
       {/* Header */}
       <div className="max-w-md mx-auto mb-4">
         <div className="flex items-center justify-between mb-2">

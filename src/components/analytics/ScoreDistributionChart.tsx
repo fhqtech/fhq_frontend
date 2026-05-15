@@ -253,7 +253,7 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
         {/* Key Insight */}
         <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
           <div className="flex items-start gap-1.5">
-            <div className="p-1 rounded-lg bg-primary/10 flex-shrink-0">
+            <div className="p-1 rounded-lg bg-primary/10 shrink-0">
               <Star className="h-3 w-3 text-primary" />
             </div>
             <div>

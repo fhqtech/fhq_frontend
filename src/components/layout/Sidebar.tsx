@@ -104,7 +104,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
     <>
       {/* Logout Overlay */}
       {isLoggingOut && (
-        <div className="fixed inset-0 bg-background z-[9999] flex items-center justify-center">
+        <div className="fixed inset-0 bg-background z-9999 flex items-center justify-center">
           <SpinnerWithCopy size="lg" label="Signing out…" />
         </div>
       )}
@@ -130,7 +130,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                   <Button
                     variant="ghost"
                     className={cn(
-                      "w-full justify-between text-left px-3 py-2 rounded-sm transition-all !font-semibold text-xs uppercase tracking-widest",
+                      "w-full justify-between text-left px-3 py-2 rounded-sm transition-all font-semibold! text-xs uppercase tracking-widest",
                       isSubItemActive(item)
                         ? "bg-paper-3 text-ink border-l-2 border-gold"
                         : "text-ink-soft hover:text-ink hover:bg-paper-3",

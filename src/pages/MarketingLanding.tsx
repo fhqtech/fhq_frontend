@@ -45,7 +45,7 @@ function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-paper/90 backdrop-blur border-b border-rule">
+    <header className="sticky top-0 z-30 bg-paper/90 backdrop-blur-sm border-b border-rule">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
@@ -123,7 +123,7 @@ function Hero() {
           </div>
         </div>
         <div className="hidden md:block">
-          <div className="relative rounded-lg border border-rule bg-paper-2 shadow-2 p-8 aspect-[4/3] flex flex-col justify-between">
+          <div className="relative rounded-lg border border-rule bg-paper-2 shadow-2 p-8 aspect-4/3 flex flex-col justify-between">
             <div>
               <p className="font-mono uppercase tracking-wider text-[10px] text-muted mb-2">
                 Sample Talent Analysis Graph
@@ -399,7 +399,7 @@ function Footer() {
 
 export default function MarketingLanding() {
   return (
-    <div className="min-h-[100dvh] bg-paper text-ink antialiased">
+    <div className="min-h-dvh bg-paper text-ink antialiased">
       <Topbar />
       <main>
         <Hero />

@@ -14,7 +14,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-background">
+    <div className="min-h-dvh flex items-center justify-center bg-background">
       <div className="text-center space-y-6">
         <div className="flex justify-center">
           <AlertCircle className="w-24 h-24 text-ink opacity-60" />

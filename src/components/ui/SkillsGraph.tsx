@@ -460,7 +460,7 @@ export const SkillsGraph: React.FC<SkillsGraphProps> = ({
       </div>
 
       {/* Right sidebar - Legend and Skill Info */}
-      <div className="w-56 flex-shrink-0 flex flex-col gap-3">
+      <div className="w-56 shrink-0 flex flex-col gap-3">
         {/* Legend */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
           <p className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-2">Proficiency Levels</p>
@@ -469,7 +469,7 @@ export const SkillsGraph: React.FC<SkillsGraphProps> = ({
               <div key={level} className="flex items-center gap-2">
                 {/* Color indicator circle */}
                 <div
-                  className="w-3 h-3 rounded-full flex-shrink-0 border-2"
+                  className="w-3 h-3 rounded-full shrink-0 border-2"
                   style={{
                     backgroundColor: proficiencyLabels[level].color,
                     borderColor: proficiencyLabels[level].color

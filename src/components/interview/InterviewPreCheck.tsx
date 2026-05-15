@@ -564,7 +564,7 @@ export const InterviewPreCheck = ({
   const canContinueToStep2 = selectedResumeId !== "" || resumes.length > 0;
 
   return (
-    <div className="min-h-[100dvh] bg-paper">
+    <div className="min-h-dvh bg-paper">
       {/* Header with Logo */}
       <header className="bg-paper border-b border-rule sticky top-0 z-50 shadow-1">
         <div className="w-full px-8 py-2.5 overflow-hidden">
@@ -727,7 +727,7 @@ export const InterviewPreCheck = ({
                         className="p-4 rounded cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
                       >
                         <div className="flex items-start gap-3">
-                          <svg className="w-7 h-7 flex-shrink-0 text-danger" viewBox="0 0 24 24" fill="currentColor">
+                          <svg className="w-7 h-7 shrink-0 text-danger" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
                             <text x="7" y="16" fontSize="6" fontWeight="bold" fill="currentColor">PDF</text>
                           </svg>
@@ -747,13 +747,13 @@ export const InterviewPreCheck = ({
                             </p>
                           </div>
                           {isSettingActive && selectedResumeId === resume.id ? (
-                            <Loader2 className="w-5 h-5 animate-spin text-ink flex-shrink-0" />
+                            <Loader2 className="w-5 h-5 animate-spin text-ink shrink-0" />
                           ) : selectedResumeId === resume.id ? (
                             <div className="flex items-center justify-center w-6 h-6 bg-success rounded-full">
                               <CheckCircle className="w-5 h-5 text-paper" />
                             </div>
                           ) : resume.isActive && (
-                            <Badge className="bg-ink text-paper border-0 text-xs uppercase flex-shrink-0 font-semibold shadow-1">
+                            <Badge className="bg-ink text-paper border-0 text-xs uppercase shrink-0 font-semibold shadow-1">
                               Active
                             </Badge>
                           )}
@@ -776,7 +776,7 @@ export const InterviewPreCheck = ({
               <div className="max-w-6xl mx-auto px-12 pt-4">
                 <div className="flex items-center justify-between gap-4 rounded border border-rule bg-danger-soft px-4 py-3">
                   <div className="flex items-start gap-2 text-sm text-danger">
-                    <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <XCircle className="w-4 h-4 mt-0.5 shrink-0" />
                     <span>{prepareError}</span>
                   </div>
                   <Button
@@ -852,7 +852,7 @@ export const InterviewPreCheck = ({
               <div className="space-y-4">
                 {dosList.map((item, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <div className="flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="flex items-center justify-center shrink-0 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#22c55e" viewBox="0 0 256 256" strokeWidth="8">
                         <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
                       </svg>
@@ -877,7 +877,7 @@ export const InterviewPreCheck = ({
               <div className="space-y-4">
                 {dontsList.map((item, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <div className="flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="flex items-center justify-center shrink-0 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ef4444" viewBox="0 0 256 256" strokeWidth="8">
                         <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
                       </svg>

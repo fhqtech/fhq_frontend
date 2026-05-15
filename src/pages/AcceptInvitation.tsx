@@ -145,7 +145,7 @@ const AcceptInvitation = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2    flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-paper-2    flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-paper rounded-2xl shadow-2 p-8">
         {status === 'loading' && (
           <div className="text-center">

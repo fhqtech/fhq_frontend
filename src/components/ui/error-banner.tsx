@@ -65,7 +65,7 @@ export function ErrorBanner({
       role={tone === "danger" ? "alert" : "status"}
       className={`flex items-start gap-3 rounded-md border ${styles.border} ${styles.bg} px-4 py-3 ${className}`}
     >
-      <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${styles.text}`} aria-hidden />
+      <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${styles.text}`} aria-hidden />
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-semibold ${styles.text}`}>{title}</p>
         {description && (
@@ -90,7 +90,7 @@ export function ErrorBanner({
         <button
           onClick={onDismiss}
           aria-label="Dismiss"
-          className={`flex-shrink-0 -mr-1 -mt-1 p-1 rounded hover:bg-paper-3 ${styles.text}`}
+          className={`shrink-0 -mr-1 -mt-1 p-1 rounded hover:bg-paper-3 ${styles.text}`}
         >
           <X className="w-4 h-4" />
         </button>

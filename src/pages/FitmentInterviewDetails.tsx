@@ -850,7 +850,7 @@ export default function FitmentInterviewDetails() {
  <h3 className="text-lg font-semibold uppercase tracking-wider">Candidate Lists</h3>
  <p className="text-[10px] text-muted mt-1 uppercase tracking-wider">View candidate lists attached to this fitment interview</p>
  <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-sm">
- <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 flex-shrink-0" />
+ <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
  <p className="text-[10px] text-amber-700 uppercase tracking-wider">
  Note: Candidates added to these lists after the fitment interview started will not be included
  </p>
@@ -877,7 +877,7 @@ export default function FitmentInterviewDetails() {
  <div
  key={list.id}
  onClick={() => navigate(`/lists/${list.id}`)}
- className="p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 flex-shrink-0 relative overflow-hidden group hover:text-paper"
+ className="p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 shrink-0 relative overflow-hidden group hover:text-paper"
  style={{
  border: 'none',
  position: 'relative',

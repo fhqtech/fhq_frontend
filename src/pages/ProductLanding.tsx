@@ -76,7 +76,7 @@ export default function ProductLanding() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2 text-ink antialiased">
+    <div className="min-h-dvh bg-paper-2 text-ink antialiased">
       {/* Top bar */}
       <header className="bg-paper border-b border-rule">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">

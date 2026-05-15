@@ -19,7 +19,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col w-full overflow-hidden">
+    <div className="h-dvh bg-background flex flex-col w-full overflow-hidden">
       {/* Header - Fixed at top */}
       <Header onMenuClick={handleMenuClick} />
 

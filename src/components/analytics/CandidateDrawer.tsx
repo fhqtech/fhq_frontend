@@ -439,7 +439,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-3xl flex flex-col p-0">
         {/* Fixed header section */}
-        <div className="flex-shrink-0 px-6 pt-6 pb-2">
+        <div className="shrink-0 px-6 pt-6 pb-2">
           <SheetHeader>
             <div className="flex items-start gap-4">
             <Avatar className="h-16 w-16">
@@ -490,7 +490,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 overflow-hidden">
           {/* Fixed tabs navigation */}
-          <div className="flex-shrink-0 px-6 pt-2 border-b">
+          <div className="shrink-0 px-6 pt-2 border-b">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="insights">AI Insights</TabsTrigger>
@@ -1107,7 +1107,7 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
         </Tabs>
 
         {/* Fixed Actions at bottom */}
-        <div className="flex-shrink-0 flex gap-2 px-6 py-4 border-t bg-background">
+        <div className="shrink-0 flex gap-2 px-6 py-4 border-t bg-background">
           <Button className="flex-1">
             <Download className="h-4 w-4 mr-2" />
             Download Profile

@@ -545,21 +545,21 @@ export const YourListsTab = forwardRef((props: YourListsTabProps, ref) => {
           </div>
           <div className="flex gap-2">
             <Button
-              variant={listFilter === 'all' ? 'default' : 'outline'}
+              variant={listFilter === 'all' ? 'default' : 'outline-solid'}
               onClick={() => setListFilter('all')}
               className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'all' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               All
             </Button>
             <Button
-              variant={listFilter === 'normal' ? 'default' : 'outline'}
+              variant={listFilter === 'normal' ? 'default' : 'outline-solid'}
               onClick={() => setListFilter('normal')}
               className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'normal' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >
               Normal
             </Button>
             <Button
-              variant={listFilter === 'curated' ? 'default' : 'outline'}
+              variant={listFilter === 'curated' ? 'default' : 'outline-solid'}
               onClick={() => setListFilter('curated')}
               className={`rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs font-bold ${listFilter === 'curated' ? 'bg-ink hover:bg-ink text-paper' : ''}`}
             >

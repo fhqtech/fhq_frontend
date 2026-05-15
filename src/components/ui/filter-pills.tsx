@@ -59,7 +59,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
       <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {/* All Pills */}
         <Button
-          variant={!hasActiveFilters ? "default" : "outline"}
+          variant={!hasActiveFilters ? "default" : "outline-solid"}
           size="sm"
           onClick={onClearAll}
           className={cn(
@@ -85,7 +85,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
           return (
             <Button
               key={status.value}
-              variant={isActive ? "default" : "outline"}
+              variant={isActive ? "default" : "outline-solid"}
               size="sm"
               onClick={() => {
                 if (isActive) {
@@ -109,7 +109,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
 
         {/* This Week Quick Button */}
         <Button
-          variant={activeFilters.dateRange?.start ? "default" : "outline"}
+          variant={activeFilters.dateRange?.start ? "default" : "outline-solid"}
           size="sm"
           onClick={onThisWeekFilter}
           className={cn(
@@ -130,7 +130,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
 
         {/* Has Candidates Quick Button */}
         <Button
-          variant={activeFilters.candidateCount?.min ? "default" : "outline"}
+          variant={activeFilters.candidateCount?.min ? "default" : "outline-solid"}
           size="sm"
           onClick={() => {
             if (activeFilters.candidateCount?.min) {

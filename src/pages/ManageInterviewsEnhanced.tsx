@@ -495,7 +495,7 @@ export default function ManageInterviewsEnhanced() {
  // P1 U8: disable row interactions while a destructive
  // action (delete) is in flight to prevent double-fires
  // from impatient clicks.
- className={`cursor-pointer hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${isDeletingInterview ? 'opacity-50 pointer-events-none' : ''}`}
+ className={`cursor-pointer hover:bg-muted/50 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${isDeletingInterview ? 'opacity-50 pointer-events-none' : ''}`}
  role="link"
  tabIndex={0}
  aria-label={`Open interview ${interview.title}`}
@@ -585,7 +585,7 @@ export default function ManageInterviewsEnhanced() {
  className={interview.status === 'draft' ? "cursor-pointer text-xs py-1.5" : "cursor-not-allowed opacity-50 text-xs py-1.5"}
  >
  <div className="flex items-start gap-1.5 w-full">
- <UserPlus className="h-3 w-3 mt-0.5 flex-shrink-0" />
+ <UserPlus className="h-3 w-3 mt-0.5 shrink-0" />
  <div className="flex flex-col gap-0">
  <span>Add Candidates</span>
  {interview.status !== 'draft' && (
@@ -686,7 +686,7 @@ export default function ManageInterviewsEnhanced() {
  return (
  <Button
  key={pageNumber}
- variant={currentPage === pageNumber ? "default" : "outline"}
+ variant={currentPage === pageNumber ? "default" : "outline-solid"}
  size="sm"
  onClick={() => setCurrentPage(pageNumber)}
  className="w-6 h-6 text-xs rounded-sm"

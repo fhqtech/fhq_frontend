@@ -42,7 +42,7 @@ export function TagProficiencyLegend({ legend }: Props) {
   const rows = legend && legend.length > 0 ? legend : DEFAULT_LEGEND;
 
   return (
-    <aside className="w-56 flex-shrink-0">
+    <aside className="w-56 shrink-0">
       <div className="bg-paper border border-rule rounded-md p-3 shadow-1">
         <p className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider mb-3">
           Proficiency levels

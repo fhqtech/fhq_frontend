@@ -13,7 +13,7 @@ interface EmptyStateAction {
   label: string;
   onClick?: () => void;
   href?: string;
-  variant?: "gold" | "default" | "outline" | "ghost";
+  variant?: "gold" | "default" | "outline-solid" | "ghost";
 }
 
 export interface EmptyStateProps {
@@ -52,7 +52,7 @@ export function EmptyState({
             <ActionButton action={primaryAction} variant={primaryAction.variant ?? "gold"} />
           )}
           {secondaryAction && (
-            <ActionButton action={secondaryAction} variant={secondaryAction.variant ?? "outline"} />
+            <ActionButton action={secondaryAction} variant={secondaryAction.variant ?? "outline-solid"} />
           )}
         </div>
       )}
@@ -65,7 +65,7 @@ function ActionButton({
   variant,
 }: {
   action: EmptyStateAction;
-  variant: "gold" | "default" | "outline" | "ghost";
+  variant: "gold" | "default" | "outline-solid" | "ghost";
 }) {
   if (action.href) {
     return (

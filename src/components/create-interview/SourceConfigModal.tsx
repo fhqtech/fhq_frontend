@@ -155,7 +155,7 @@ export function SourceConfigModal({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-ink/70 flex items-center justify-center p-4"
+      className="fixed inset-0 z-9999 bg-ink/70 flex items-center justify-center p-4"
     >
       <div className="bg-paper rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-3 border border-rule">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-rule">

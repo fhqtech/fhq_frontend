@@ -30,7 +30,7 @@ export default function OAuthSuccess() {
   }, [navigate, setSessionFromToken]);
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-paper-2 flex items-center justify-center px-4">
       {error ? (
         <div className="max-w-md bg-paper rounded-xl border border-border p-6 text-center">
           <h2 className="text-lg font-semibold mb-2">Sign-in failed</h2>

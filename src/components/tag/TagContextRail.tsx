@@ -22,7 +22,7 @@ export function TagContextRail({ certifications, tools, idealCandidateProfile }:
   if (!hasCerts && !hasTools && !hasIdeal) return null;
 
   return (
-    <aside className="w-56 flex-shrink-0 flex flex-col gap-3">
+    <aside className="w-56 shrink-0 flex flex-col gap-3">
       {hasCerts && (
         <div className="bg-paper border border-rule rounded-md p-3 shadow-1">
           <div className="flex items-center gap-2 mb-3">
@@ -32,7 +32,7 @@ export function TagContextRail({ certifications, tools, idealCandidateProfile }:
           <ul className="flex flex-col gap-1.5">
             {certifications!.map((cert, i) => (
               <li key={i} className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 flex-shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
                 <span className="text-[11px] text-ink-soft leading-tight">{cert}</span>
               </li>
             ))}

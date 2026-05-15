@@ -106,7 +106,7 @@ export default function PilotDashboard() {
 
       {r.failures_today > 0 && (
         <Card className="p-4 border-amber-200 bg-amber-50 text-amber-800 flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+          <AlertTriangle className="w-5 h-5 shrink-0" />
           <div className="text-sm">
             <strong>{r.failures_today}</strong> reviewer failure{r.failures_today > 1 ? "s" : ""} today.
             Check Firestore <code className="font-mono">reviewer_failures</code> collection for details.
@@ -116,7 +116,7 @@ export default function PilotDashboard() {
 
       {r.failures_today === 0 && successPct === 100 && (
         <Card className="p-4 border-emerald-200 bg-emerald-50 text-emerald-800 flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+          <CheckCircle2 className="w-5 h-5 shrink-0" />
           <div className="text-sm">All reviewer runs successful today.</div>
         </Card>
       )}

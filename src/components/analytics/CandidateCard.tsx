@@ -118,7 +118,7 @@ export function CandidateCard({ candidate, onViewDetails, onToggleStar, onAddToL
 
   return (
     <Card
-      className={`p-4 hover:shadow-2 transition-all duration-300 cursor-pointer group border-border/50 bg-card/50 backdrop-blur-sm relative ${
+      className={`p-4 hover:shadow-2 transition-all duration-300 cursor-pointer group border-border/50 bg-card/50 backdrop-blur-xs relative ${
         isMultiSelectMode && isSelected ? 'border-primary border-2 bg-primary/5' : ''
       }`}
       onClick={handleCardClick}

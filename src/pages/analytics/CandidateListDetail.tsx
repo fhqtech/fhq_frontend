@@ -114,7 +114,7 @@ export default function CandidateListDetail() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background p-6">
+    <div className="min-h-dvh bg-background p-6">
       <div className="container mx-auto space-y-6">
         {/* Header */}
         <div>

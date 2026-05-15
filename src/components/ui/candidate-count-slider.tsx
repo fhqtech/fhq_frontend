@@ -92,7 +92,7 @@ export const CandidateCountSlider: React.FC<CandidateCountSliderProps> = ({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant={hasValue ? "default" : "outline"}
+          variant={hasValue ? "default" : "outline-solid"}
           className={cn(
             "h-7 px-3 text-xs font-medium justify-start text-left",
             hasValue && "bg-ink text-white",

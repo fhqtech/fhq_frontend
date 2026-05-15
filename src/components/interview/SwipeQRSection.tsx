@@ -113,14 +113,14 @@ export function SwipeQRSection({ interviewId }: SwipeQRSectionProps) {
         </div>
 
         {/* Right: QR + OTP */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <div className="relative">
             <div className="absolute -top-2 -right-2 bg-gold text-ink text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md z-10 shadow-1">
               01
             </div>
             <div className="p-3 bg-paper rounded-lg border border-rule shadow-1 relative">
               {isRefreshing && (
-                <div className="absolute inset-0 bg-paper/95 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-10 gap-1.5">
+                <div className="absolute inset-0 bg-paper/95 backdrop-blur-xs rounded-lg flex flex-col items-center justify-center z-10 gap-1.5">
                   <Loader2 className="h-7 w-7 text-ink animate-spin" />
                   <span className="text-[9px] font-mono uppercase tracking-wider text-muted">
                     Updating

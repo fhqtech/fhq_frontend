@@ -6,7 +6,7 @@
  * action per screen.
  */
 
-export type NBAVariant = "default" | "secondary" | "outline" | "destructive";
+export type NBAVariant = "default" | "secondary" | "outline-solid" | "destructive";
 
 export interface NBA {
   label: string;

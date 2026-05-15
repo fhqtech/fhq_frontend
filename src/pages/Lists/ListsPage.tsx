@@ -36,7 +36,7 @@ export default function ListsPage() {
 
   return (
     <div className="h-full bg-paper-2 flex flex-col overflow-hidden pt-6">
-      <div className="flex-shrink-0 bg-paper-2 pr-8 pb-4">
+      <div className="shrink-0 bg-paper-2 pr-8 pb-4">
         <style>{`
           .wrap {
             --round: 10px;
@@ -136,7 +136,7 @@ export default function ListsPage() {
           }
         `}</style>
 
-        <div className="flex items-center justify-between mb-2 flex-shrink-0">
+        <div className="flex items-center justify-between mb-2 shrink-0">
           <div className="wrap">
             <input
               hidden
@@ -212,7 +212,7 @@ export default function ListsPage() {
       </div>
 
       {/* Right Side Analytics Panel */}
-      <div className={`fixed top-0 right-0 h-[100dvh] bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-2xl ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
+      <div className={`fixed top-0 right-0 h-dvh bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-2xl ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
         {/* Toggle Button */}
         <button
           onClick={() => setIsAnalyticsPanelOpen(!isAnalyticsPanelOpen)}
@@ -228,12 +228,12 @@ export default function ListsPage() {
         {isAnalyticsPanelOpen && (
           <div className="h-full flex flex-col overflow-hidden">
             <div className="flex-1 flex flex-col p-2 overflow-hidden">
-              <div className="mb-3 text-center flex-shrink-0">
+              <div className="mb-3 text-center shrink-0">
                 <h3 className="text-base font-semibold text-foreground">Analytics</h3>
               </div>
 
               {/* Compact KPI Cards */}
-              <div className="grid grid-cols-2 gap-2 mb-3 flex-shrink-0">
+              <div className="grid grid-cols-2 gap-2 mb-3 shrink-0">
                 <div className="p-2.5 rounded-lg bg-muted text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />

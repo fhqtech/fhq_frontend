@@ -48,7 +48,7 @@ export function TranscriptBox({
               <img
                 src={aiAvatar}
                 alt="Flowy"
-                className="w-6 h-6 rounded-full flex-shrink-0"
+                className="w-6 h-6 rounded-full shrink-0"
               />
               <div className="max-w-[80%] bg-accent/10 rounded-lg rounded-tl-none px-3 py-2">
                 <p className="text-muted-2 text-xs leading-relaxed">{message.content}</p>
@@ -60,7 +60,7 @@ export function TranscriptBox({
               <img
                 src="https://api.dicebear.com/7.x/initials/svg?seed=candidate"
                 alt="You"
-                className="w-6 h-6 rounded-full flex-shrink-0"
+                className="w-6 h-6 rounded-full shrink-0"
               />
               <div className="max-w-[80%] bg-success/10 rounded-lg rounded-tr-none px-3 py-2">
                 <p className="text-muted-2 text-xs leading-relaxed">{message.content}</p>
@@ -75,7 +75,7 @@ export function TranscriptBox({
             <img
               src="https://api.dicebear.com/7.x/initials/svg?seed=candidate"
               alt="You"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-success/10 rounded-lg rounded-tr-none px-3 py-2">
               {currentUtterance ? (

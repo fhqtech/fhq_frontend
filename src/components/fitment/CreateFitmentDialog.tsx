@@ -240,7 +240,7 @@ export function CreateFitmentDialog({
  <div
  key={`${list.id}-${index}-${isSelected}`}
  onClick={() => onListSelection(list.id)}
- className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 flex-shrink-0 relative overflow-hidden ${
+ className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 shrink-0 relative overflow-hidden ${
  !isSelected ? 'group hover:text-paper' : ''
  }`}
  style={{
@@ -335,7 +335,7 @@ export function CreateFitmentDialog({
  <div
  key={`${interview.id}-${index}-${isSelected}`}
  onClick={() => onPrimaryInterviewSelection(interview.id)}
- className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 flex-shrink-0 relative overflow-hidden ${
+ className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 shrink-0 relative overflow-hidden ${
  !isSelected ? 'group hover:text-paper' : ''
  }`}
  style={{

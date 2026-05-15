@@ -291,7 +291,7 @@ export default function PoolDashboard() {
                   </div>
                   <Button
                     size="sm"
-                    variant={isShortlisted ? "default" : "outline"}
+                    variant={isShortlisted ? "default" : "outline-solid"}
                     onClick={() => toggleShortlist(c.id)}
                   >
                     {isShortlisted ? "Shortlisted" : "Shortlist"}

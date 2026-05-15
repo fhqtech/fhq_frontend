@@ -406,7 +406,7 @@ export default function TestAssets() {
             <img
               src={aiAvatar}
               alt="Flowy"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
               <p className="text-muted-2 text-xs leading-relaxed">Hello! Welcome to your interview for the Senior Product Manager position. Can you start by telling me about yourself?</p>
@@ -418,7 +418,7 @@ export default function TestAssets() {
             <img
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=candidate"
               alt="You"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
               <p className="text-muted-2 text-xs leading-relaxed">Thank you! I'm a product manager with 6 years of experience in B2B SaaS. I've led cross-functional teams and launched multiple products.</p>
@@ -430,7 +430,7 @@ export default function TestAssets() {
             <img
               src={aiAvatar}
               alt="Flowy"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
               <p className="text-muted-2 text-xs leading-relaxed">That's great! Can you walk me through a challenging product decision you had to make?</p>
@@ -442,7 +442,7 @@ export default function TestAssets() {
             <img
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=candidate"
               alt="You"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
               <p className="text-muted-2 text-xs leading-relaxed">Sure! At my previous company, we had to decide between building a new feature or improving our core product...</p>
@@ -454,7 +454,7 @@ export default function TestAssets() {
             <img
               src={aiAvatar}
               alt="Flowy"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-sky-500/10 rounded-lg rounded-tl-none px-3 py-2">
               <p className="text-muted-2 text-xs leading-relaxed">How did you approach that decision? What factors did you consider?</p>
@@ -466,7 +466,7 @@ export default function TestAssets() {
             <img
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=candidate"
               alt="You"
-              className="w-6 h-6 rounded-full flex-shrink-0"
+              className="w-6 h-6 rounded-full shrink-0"
             />
             <div className="max-w-[80%] bg-emerald-500/10 rounded-lg rounded-tr-none px-3 py-2">
               <p className="text-muted-2 text-xs leading-relaxed">We analyzed user feedback, looked at retention metrics, and ran customer interviews to understand their pain points...</p>

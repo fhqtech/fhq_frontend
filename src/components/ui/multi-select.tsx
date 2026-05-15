@@ -84,7 +84,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant={hasValue ? "default" : "outline"}
+          variant={hasValue ? "default" : "outline-solid"}
           className={cn(
             "h-7 px-3 text-xs font-medium justify-start text-left",
             hasValue && "bg-ink text-white",
@@ -93,14 +93,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
         >
           {icon && <span className="w-3 h-3 mr-1">{icon}</span>}
           <span className="truncate flex-1">{getDisplayText()}</span>
-          <ChevronDown className="w-3 h-3 ml-1 flex-shrink-0" />
+          <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
           {hasValue && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 clearAll();
               }}
-              className="ml-1 hover:bg-white/20 rounded-sm p-0.5 flex-shrink-0"
+              className="ml-1 hover:bg-white/20 rounded-sm p-0.5 shrink-0"
             >
               <X className="w-3 h-3" />
             </button>

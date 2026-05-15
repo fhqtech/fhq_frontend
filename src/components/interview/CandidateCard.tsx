@@ -136,15 +136,15 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
     // Priority 2: Availability color coding
     const availability = candidate.availableIn?.toLowerCase() || '';
     if (availability.includes('immediate')) {
-      return 'border-[1.5px] border-rule/30 bg-info/[0.05]';
+      return 'border-[1.5px] border-rule/30 bg-info/5';
     } else if (availability.includes('2 week') || availability.includes('< 2')) {
-      return 'border-[1.5px] border-rule/30 bg-gold/[0.05]';
+      return 'border-[1.5px] border-rule/30 bg-gold/5';
     } else if (availability.includes('month') || availability.includes('> 1')) {
-      return 'border-[1.5px] border-rule/30 bg-orange/[0.05]';
+      return 'border-[1.5px] border-rule/30 bg-orange/5';
     }
 
     // Default: Gray with hover effect
-    return 'border-[1.5px] border-rule-strong/30 bg-muted/[0.05] hover:border-primary/30';
+    return 'border-[1.5px] border-rule-strong/30 bg-muted/5 hover:border-primary/30';
   };
 
   const getExperienceBadge = () => {
@@ -211,7 +211,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <div className="flex flex-col items-center gap-1">
-              <Avatar className="h-12 w-12 flex-shrink-0">
+              <Avatar className="h-12 w-12 shrink-0">
                 <AvatarImage
                   src={candidate.profilePicture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(candidate.name)}`}
                   alt={candidate.name}
@@ -249,7 +249,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
             </div>
           </div>
           {hasScore && (
-            <div className="flex-shrink-0 text-center ml-2">
+            <div className="shrink-0 text-center ml-2">
               <div className={`text-3xl font-bold ${getScoreColor(candidate.score)}`}>
                 {candidate.score}
               </div>
@@ -310,7 +310,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className="flex-shrink-0 p-1.5 rounded bg-ink hover:bg-ink text-paper transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                  className="shrink-0 p-1.5 rounded bg-ink hover:bg-ink text-paper transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                   title={isRegistered ? 'Copy candidate portal URL' : 'Copy registration URL'}
                 >
                   {copied ? (

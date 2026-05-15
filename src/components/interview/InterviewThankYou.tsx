@@ -97,7 +97,7 @@ export const InterviewThankYou = ({
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#EEEEEE] relative overflow-hidden">
+    <div className="min-h-dvh bg-[#EEEEEE] relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-success/30 rounded-full blur-3xl animate-pulse" />
@@ -130,9 +130,9 @@ export const InterviewThankYou = ({
         </div>
       )}
 
-      <div className="relative z-10 flex items-center justify-center min-h-[100dvh] p-6">
+      <div className="relative z-10 flex items-center justify-center min-h-dvh p-6">
         <div className={`w-full max-w-lg transition-all duration-700 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <Card className="bg-paper/80 backdrop-blur-sm shadow-2 border-0 overflow-hidden">
+          <Card className="bg-paper/80 backdrop-blur-xs shadow-2 border-0 overflow-hidden">
             <CardContent className="p-0">
               {/* Header with role title + badge on same line, Lottie on left */}
               <div className="px-6 py-6">
@@ -147,7 +147,7 @@ export const InterviewThankYou = ({
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <LottieSuccessAnimation />
                   </div>
                   <div className="flex-1">
@@ -171,7 +171,7 @@ export const InterviewThankYou = ({
                 <h3 className="text-sm font-bold text-ink-soft uppercase tracking-wide mb-4">What happens next?</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-success-soft rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-success-soft rounded-full flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-xs font-bold text-success">1</span>
                     </div>
                     <div>
@@ -180,7 +180,7 @@ export const InterviewThankYou = ({
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-info-soft rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-info-soft rounded-full flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-xs font-bold text-info">2</span>
                     </div>
                     <div>
@@ -189,7 +189,7 @@ export const InterviewThankYou = ({
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-gold-soft rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-gold-soft rounded-full flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-xs font-bold text-gold-ink">3</span>
                     </div>
                     <div>

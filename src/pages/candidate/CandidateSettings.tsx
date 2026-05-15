@@ -55,7 +55,7 @@ export default function CandidateSettings() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2">
+    <div className="min-h-dvh bg-paper-2">
       <header className="bg-paper border-b border-border">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/candidate/dashboard" className="text-sm text-gold-ink hover:underline">

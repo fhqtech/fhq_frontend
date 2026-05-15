@@ -673,7 +673,7 @@ export default function CandidateRegistration() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center">
         <RippleLoader />
       </div>
     );
@@ -682,7 +682,7 @@ export default function CandidateRegistration() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center">
         <Card className="w-full max-w-md border-red-200 shadow-2">
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
@@ -705,7 +705,7 @@ export default function CandidateRegistration() {
   // Redirecting to portal state
   if (redirectingToPortal) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center">
         <div className="text-center">
           <div className="mb-6 flex justify-center">
             <RippleLoader />
@@ -731,7 +731,7 @@ export default function CandidateRegistration() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center p-4">
         <Card className="w-full max-w-xl border-0 shadow-3">
           <CardContent className="p-10 text-center">
             <h2 className="text-4xl font-bold text-ink mb-8">
@@ -754,7 +754,7 @@ export default function CandidateRegistration() {
 
   // Main registration form - CLEAN DESIGN
   return (
-    <div className="min-h-[100dvh] flex flex-col" style={{
+    <div className="min-h-dvh flex flex-col" style={{
       background: `
         linear-gradient(to bottom, #f8fafc 0%, rgba(248, 250, 252, 0.8) 15%, transparent 35%, transparent 100%),
         linear-gradient(to right, rgba(203, 213, 225, 0.3) 1px, transparent 1px),
@@ -843,34 +843,34 @@ export default function CandidateRegistration() {
               <div className="flex items-center gap-6 mb-8 max-w-5xl">
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
-                    <span className="text-ink font-bold text-2xl flex-shrink-0">1</span>
+                    <span className="text-ink font-bold text-2xl shrink-0">1</span>
                     <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Setup Profile</h4>
                   </div>
                 </div>
 
-                <img src="https://uploads-ssl.webflow.com/618ce467f09b34ebf2fdf6be/62761a51b1164cd877db83aa_Arrow%2012.svg" alt="arrow" className="w-20 h-20 rotate-[10deg]" />
+                <img src="https://uploads-ssl.webflow.com/618ce467f09b34ebf2fdf6be/62761a51b1164cd877db83aa_Arrow%2012.svg" alt="arrow" className="w-20 h-20 rotate-10" />
 
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
-                    <span className="text-ink font-bold text-2xl flex-shrink-0">2</span>
+                    <span className="text-ink font-bold text-2xl shrink-0">2</span>
                     <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Start Interview</h4>
                   </div>
                 </div>
 
-                <img src="https://uploads-ssl.webflow.com/618ce467f09b34ebf2fdf6be/62761a51b1164cd877db83aa_Arrow%2012.svg" alt="arrow" className="w-20 h-20 rotate-[10deg]" />
+                <img src="https://uploads-ssl.webflow.com/618ce467f09b34ebf2fdf6be/62761a51b1164cd877db83aa_Arrow%2012.svg" alt="arrow" className="w-20 h-20 rotate-10" />
 
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
-                    <span className="text-ink font-bold text-2xl flex-shrink-0">3</span>
+                    <span className="text-ink font-bold text-2xl shrink-0">3</span>
                     <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Showcase Skills</h4>
                   </div>
                 </div>
 
-                <img src="https://uploads-ssl.webflow.com/618ce467f09b34ebf2fdf6be/62761a51b1164cd877db83aa_Arrow%2012.svg" alt="arrow" className="w-20 h-20 rotate-[10deg]" />
+                <img src="https://uploads-ssl.webflow.com/618ce467f09b34ebf2fdf6be/62761a51b1164cd877db83aa_Arrow%2012.svg" alt="arrow" className="w-20 h-20 rotate-10" />
 
                 <div className="rounded border bg-card text-card-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)] px-8 py-3 transition-all hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] duration-200 inline-flex">
                   <div className="flex items-center gap-3">
-                    <span className="text-ink font-bold text-2xl flex-shrink-0">4</span>
+                    <span className="text-ink font-bold text-2xl shrink-0">4</span>
                     <h4 className="font-bold text-ink text-xs uppercase tracking-wider whitespace-nowrap">Get Hired</h4>
                   </div>
                 </div>
@@ -887,12 +887,12 @@ export default function CandidateRegistration() {
                         <h3 className="text-2xl font-light text-paper">
                           {invitationDetails?.interview.title}
                         </h3>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className="flex items-center gap-1 bg-paper/10 backdrop-blur-sm px-4 py-2 rounded">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-1 bg-paper/10 backdrop-blur-xs px-4 py-2 rounded">
                             <Clock className="w-4 h-4 text-amber-400" />
                             <span className="text-paper font-medium text-sm uppercase tracking-wide">{invitationDetails?.interview.duration} MIN</span>
                           </div>
-                          <div className="flex items-center gap-1 bg-paper/10 backdrop-blur-sm px-4 py-2 rounded">
+                          <div className="flex items-center gap-1 bg-paper/10 backdrop-blur-xs px-4 py-2 rounded">
                             <Zap className="w-4 h-4 text-amber-400" />
                             <span className="text-paper font-medium text-sm uppercase tracking-wide">AI-POWERED</span>
                           </div>
@@ -1331,7 +1331,7 @@ export default function CandidateRegistration() {
 
       {/* Spacer to push FunnelHQ box to bottom */}
       {currentStep === 0 && (
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
       )}
 
       {/* About FunnelHQ Box */}
@@ -1339,7 +1339,7 @@ export default function CandidateRegistration() {
         <div className="px-8 mt-6">
             <div className="bg-paper border border-rule-strong rounded-lg p-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)] max-w-5xl mx-auto">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="FunnelHQ" className="h-16 object-cover object-top flex-shrink-0" />
+              <img src="/logo.png" alt="FunnelHQ" className="h-16 object-cover object-top shrink-0" />
               <div className="flex flex-col flex-1">
                 <h1 className="text-lg font-bold text-ink whitespace-nowrap">FunnelHQ</h1>
                 <p className="text-[10px] text-muted whitespace-nowrap">Applicant Portal</p>

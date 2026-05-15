@@ -2095,7 +2095,7 @@ export default function CreateInterview() {
   return (
     <div className="h-full flex flex-col">
       {/* Fixed Header & Stepper Section */}
-      <div className="flex-shrink-0 bg-background px-4 pt-10 pb-2">
+      <div className="shrink-0 bg-background px-4 pt-10 pb-2">
         {/* Stepper */}
         <div className="flex justify-center">
           <div className="w-full max-w-5xl px-4">
@@ -2153,7 +2153,7 @@ export default function CreateInterview() {
                       <div className="flex gap-2">
                       <Button
                         type="button"
-                        variant={blueprintMode === 'new' ? 'default' : 'outline'}
+                        variant={blueprintMode === 'new' ? 'default' : 'outline-solid'}
                         className={`h-9 text-xs font-medium px-4 rounded uppercase transition-all duration-200 ${
                           blueprintMode === 'new' ? 'text-paper' : 'hover:text-paper'
                         }`}
@@ -2178,7 +2178,7 @@ export default function CreateInterview() {
                       </Button>
                       <Button
                         type="button"
-                        variant={blueprintMode === 'template' ? 'default' : 'outline'}
+                        variant={blueprintMode === 'template' ? 'default' : 'outline-solid'}
                         className={`h-9 text-xs font-medium px-4 rounded uppercase transition-all duration-200 ${
                           blueprintMode === 'template' ? 'text-paper' : 'hover:text-paper'
                         }`}
@@ -2331,7 +2331,7 @@ export default function CreateInterview() {
                                   {template.title}
                                 </h4>
                                 {selectedTemplate?.id === template.id && (
-                                  <CheckCircle size={16} className="text-success flex-shrink-0" />
+                                  <CheckCircle size={16} className="text-success shrink-0" />
                                 )}
                               </div>
                               <div className="flex flex-wrap gap-1.5 mb-2">
@@ -2417,7 +2417,7 @@ export default function CreateInterview() {
                         <Button
                           key={type.value}
                           type="button"
-                          variant={isSelected ? "default" : "outline"}
+                          variant={isSelected ? "default" : "outline-solid"}
                           className={`h-10 text-xs font-medium px-6 rounded uppercase transition-all duration-200 ${
                             isSelected
                               ? 'text-paper'
@@ -2467,7 +2467,7 @@ export default function CreateInterview() {
                         <div key={duration.value} className="flex flex-col items-center gap-1">
                           <Button
                             type="button"
-                            variant={isSelected ? "default" : "outline"}
+                            variant={isSelected ? "default" : "outline-solid"}
                             className={`w-10 h-10 rounded-full p-0 flex flex-col items-center justify-center gap-0 transition-all duration-200 ${
                               isSelected
                                 ? 'text-paper'
@@ -2562,7 +2562,7 @@ export default function CreateInterview() {
               {/* Preview the AI interviewer's greeting — uses formData.title for personalization. */}
               {formData.title?.trim().length >= 4 && (
                 <div className="mt-4 flex items-center gap-3 p-3 bg-info-soft/40 border border-rule rounded-sm">
-                  <Volume2 className="w-4 h-4 text-info flex-shrink-0" />
+                  <Volume2 className="w-4 h-4 text-info shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Voice preview</p>
                     <p className="text-xs text-ink-soft truncate italic">"{personalizedGreeting()}"</p>
@@ -2572,7 +2572,7 @@ export default function CreateInterview() {
                     variant="outline"
                     size="sm"
                     onClick={isPlayingAudio ? stopAudioPreview : playAudioPreview}
-                    className="rounded-sm uppercase font-bold flex-shrink-0"
+                    className="rounded-sm uppercase font-bold shrink-0"
                   >
                     {isPlayingAudio ? (
                       <><Stop className="w-3 h-3 mr-1" /> Stop</>
@@ -2706,7 +2706,7 @@ export default function CreateInterview() {
                   }}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-warning-soft flex items-center justify-center">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-warning-soft flex items-center justify-center">
                       <span className="text-warning text-xl font-bold">!</span>
                     </div>
                     <div className="flex-1">
@@ -3313,7 +3313,7 @@ export default function CreateInterview() {
                             <div
                               key={`${list.id}-${index}-${isSelected}`}
                               onClick={() => handleListSelection(list.id)}
-                              className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 flex-shrink-0 relative overflow-hidden ${
+                              className={`p-6 rounded cursor-pointer transition-all duration-200 min-h-[150px] w-52 shrink-0 relative overflow-hidden ${
                                 !isSelected ? 'group hover:text-paper' : ''
                               }`}
                               style={{
@@ -3624,7 +3624,7 @@ export default function CreateInterview() {
             <div className="space-y-3 max-h-60 overflow-y-auto">
               {progressSteps.map((step) => (
                 <div key={step.id} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
+                  <div className="shrink-0 mt-0.5">
                     {step.status === 'completed' ? (
                       <div className="w-5 h-5 bg-success rounded-sm flex items-center justify-center">
                         <CheckCircle className="w-3 h-3 text-paper" />
@@ -3697,7 +3697,7 @@ export default function CreateInterview() {
                     style={{ transform: `translateX(-${blueprintGuideSlide * 100}%)` }}
                   >
                     {/* Slide 1 Image */}
-                    <div className="w-full flex-shrink-0">
+                    <div className="w-full shrink-0">
                       <div className="bg-paper-2 rounded-lg p-4">
                         <img
                           src={blueprintGuideImg1}
@@ -3708,7 +3708,7 @@ export default function CreateInterview() {
                     </div>
 
                     {/* Slide 2 Image */}
-                    <div className="w-full flex-shrink-0">
+                    <div className="w-full shrink-0">
                       <div className="bg-paper-2 rounded-lg p-4">
                         <img
                           src={blueprintGuideImg2}
@@ -3745,10 +3745,10 @@ export default function CreateInterview() {
                   className="flex transition-transform duration-300 ease-in-out"
                   style={{ transform: `translateX(-${blueprintGuideSlide * 100}%)` }}
                 >
-                  <p className="w-full flex-shrink-0 mt-3 text-center text-sm text-ink-soft">
+                  <p className="w-full shrink-0 mt-3 text-center text-sm text-ink-soft">
                     <strong>Create reusable Interview Blueprints</strong> from the Control Tower to standardize your interview process across teams.
                   </p>
-                  <p className="w-full flex-shrink-0 mt-3 text-center text-sm text-ink-soft">
+                  <p className="w-full shrink-0 mt-3 text-center text-sm text-ink-soft">
                     <strong>Customize blueprints</strong> to match your specific hiring needs. Edit topics, duration, and interview structure anytime.
                   </p>
                 </div>

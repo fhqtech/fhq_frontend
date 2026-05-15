@@ -37,7 +37,7 @@ export default function CandidateAnalytics() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background p-6">
+    <div className="min-h-dvh bg-background p-6">
       <div className="container mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Candidate Analytics</h1>

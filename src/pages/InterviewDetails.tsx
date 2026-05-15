@@ -1660,7 +1660,7 @@ export default function InterviewDetails() {
  <p className="text-[10px] text-muted mt-1 uppercase tracking-wider">Sync new candidates from updated Google Sheets</p>
  {interview?.status && interview.status !== 'draft' && (
  <div className="mt-2 flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-sm">
- <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 flex-shrink-0" />
+ <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
  <p className="text-[10px] text-amber-700 uppercase tracking-wider">
  Note: Google Sheet syncing is disabled once the interview has started
  </p>
@@ -1712,7 +1712,7 @@ export default function InterviewDetails() {
  >
  <div className="flex items-start justify-between gap-4">
  <div className="flex items-start gap-4 flex-1 min-w-0">
- <div className="w-12 h-12 rounded-sm bg-paper border border-rule flex items-center justify-center flex-shrink-0 p-2">
+ <div className="w-12 h-12 rounded-sm bg-paper border border-rule flex items-center justify-center shrink-0 p-2">
  <img src={googleLogo} alt="Google Sheets" className="w-full h-full object-contain" />
  </div>
  <div className="flex-1 min-w-0">
@@ -1757,7 +1757,7 @@ export default function InterviewDetails() {
  }
  }}
  disabled={isChecking || isSyncing}
- className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper font-bold uppercase text-xs rounded-sm flex-shrink-0 px-4 py-2"
+ className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper font-bold uppercase text-xs rounded-sm shrink-0 px-4 py-2"
  >
  {isChecking || isSyncing ? (
  <>

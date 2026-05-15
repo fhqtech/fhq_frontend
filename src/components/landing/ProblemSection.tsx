@@ -11,7 +11,7 @@ const problems = [
 
 export function ProblemSection() {
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center bg-ink">
+    <section className="relative min-h-dvh flex items-center justify-center bg-ink">
       {/* Content */}
       <div className="max-w-4xl mx-auto px-6 py-24">
         {/* Headline */}
@@ -26,7 +26,7 @@ export function ProblemSection() {
               key={index}
               className="flex items-center gap-4"
             >
-              <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <X className="w-5 h-5 text-red-500 shrink-0" />
               <p className="text-lg md:text-xl text-paper/70 font-light">
                 {problem}
               </p>

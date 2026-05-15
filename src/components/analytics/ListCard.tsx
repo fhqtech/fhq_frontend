@@ -190,7 +190,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center gap-2 mb-1 min-w-0">
                     <div
-                      className="w-4 h-4 rounded-full shadow-2 flex-shrink-0"
+                      className="w-4 h-4 rounded-full shadow-2 shrink-0"
                       style={{ backgroundColor: listColor }}
                     />
                     <h3
@@ -341,14 +341,14 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
               {list.isEnhancementLoading ? (
                 <div className="mb-4 p-3 bg-paper-2 from-primary/10 to-accent/10 rounded-lg border border-primary/20 animate-pulse">
                   <div className="flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5 animate-spin" />
+                    <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5 animate-spin" />
                     <div className="h-4 bg-primary/20 rounded w-3/4"></div>
                   </div>
                 </div>
               ) : list.aiInsights?.summary ? (
                 <div className="mb-4 p-3 bg-paper-2 from-primary/10 to-accent/10 rounded-lg border border-primary/20">
                   <div className="flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                    <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-xs text-foreground/80 italic line-clamp-2">
                       "{list.aiInsights.summary}"
                     </p>
@@ -447,7 +447,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
           <Card className="p-5 shadow-1 border relative h-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-col" style={{ height: '100%', maxHeight: '400px' }}>
               {/* Header */}
-              <div className="flex items-center justify-between mb-4 flex-shrink-0">
+              <div className="flex items-center justify-between mb-4 shrink-0">
                 <h3 className="text-base font-semibold uppercase tracking-wider">Sources</h3>
                 <Button
                   variant="ghost"
@@ -474,7 +474,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                       <div className="flex items-center gap-2">
                         {/* Google Sheets Logo - show for both google_sheets and google_sheet */}
                         {(source.type === 'google_sheets' || source.type === 'google_sheet') && (
-                          <div className="flex-shrink-0 w-6 h-6 bg-paper border border-rule rounded-sm flex items-center justify-center p-1">
+                          <div className="shrink-0 w-6 h-6 bg-paper border border-rule rounded-sm flex items-center justify-center p-1">
                             <img src={googleLogo} alt="Google Sheets" className="w-full h-full object-contain" />
                           </div>
                         )}
@@ -505,7 +505,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                             variant="outline"
                             onClick={(e) => handleSync(e, source.id)}
                             disabled={syncingSourceId === source.id}
-                            className="flex-shrink-0 uppercase tracking-wider text-[10px] h-7 px-2"
+                            className="shrink-0 uppercase tracking-wider text-[10px] h-7 px-2"
                           >
                             {syncingSourceId === source.id ? (
                               <>
@@ -527,7 +527,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
               </div>
 
               {/* Add Source Button */}
-              <div className="mt-4 pt-4 border-t border-border/50 flex-shrink-0">
+              <div className="mt-4 pt-4 border-t border-border/50 shrink-0">
                 <Button
                   variant="outline"
                   className="w-full justify-center gap-2 uppercase tracking-wider text-xs"

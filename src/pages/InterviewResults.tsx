@@ -119,7 +119,7 @@ export default function InterviewResults() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[100dvh] flex flex-col bg-paper-2   ">
+      <div className="min-h-dvh flex flex-col bg-paper-2   ">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <div className="mb-8 flex items-center justify-center">
             <Spinner size="lg" variant="brand" label="Processing" />
@@ -153,7 +153,7 @@ export default function InterviewResults() {
   // Show pending state - results being generated
   if (isResultsPending) {
     return (
-      <div className="min-h-[100dvh] flex flex-col bg-paper-2   ">
+      <div className="min-h-dvh flex flex-col bg-paper-2   ">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
           <div className="mb-8 flex items-center justify-center">
             <Spinner size="lg" variant="brand" label="Processing" />
@@ -274,7 +274,7 @@ export default function InterviewResults() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-subtle p-4">
+    <div className="min-h-dvh bg-gradient-subtle p-4">
       <main className="max-w-6xl mx-auto">
         <header className="mb-6">
           <div className="flex justify-between items-start">

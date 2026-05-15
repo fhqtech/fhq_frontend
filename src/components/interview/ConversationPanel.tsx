@@ -98,7 +98,7 @@ const TypingIndicator = ({ interviewerName = "AI Interviewer" }: { interviewerNa
           </div>
         </div>
       </div>
-      <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-blue-50 "></div>
+      <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-b-15 border-b-blue-50 "></div>
     </motion.div>
   );
 };
@@ -223,7 +223,7 @@ const ConversationPanel = ({
                 </motion.div>
               )}
             </div>
-            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-white "></div>
+            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-b-15 border-b-white "></div>
           </motion.div>
         ) : null}
       </div>

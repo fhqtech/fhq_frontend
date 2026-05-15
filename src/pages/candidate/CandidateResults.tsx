@@ -61,14 +61,14 @@ export default function CandidateResults() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center text-muted">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center text-muted">
         Loading your results…
       </div>
     );
   }
   if (error) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center px-4">
         <div className="max-w-md bg-paper border border-border rounded-xl p-6 text-center">
           <h2 className="font-semibold mb-2">Couldn't load results</h2>
           <p className="text-sm text-muted mb-4">{error}</p>
@@ -81,7 +81,7 @@ export default function CandidateResults() {
   }
   if (!data?.ready) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center px-4">
         <div className="max-w-md bg-paper border border-border rounded-xl p-6 text-center">
           <h2 className="font-semibold mb-2">Results not ready yet</h2>
           <p className="text-sm text-muted mb-4">
@@ -104,7 +104,7 @@ export default function CandidateResults() {
     );
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2">
+    <div className="min-h-dvh bg-paper-2">
       <header className="bg-paper border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/candidate/dashboard" className="text-sm text-primary hover:underline">

@@ -107,7 +107,7 @@ const EmailTemplatePreview = () => {
   `;
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2 p-8">
+    <div className="min-h-dvh bg-paper-2 p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Email Template Preview - Prelims</h1>
 

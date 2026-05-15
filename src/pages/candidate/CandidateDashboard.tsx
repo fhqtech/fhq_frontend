@@ -144,7 +144,7 @@ export default function CandidateDashboard() {
   const closed = (invitations || []).filter((i) => groupOf(i.status) === 'closed');
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2">
+    <div className="min-h-dvh bg-paper-2">
       {/* Header */}
       <header className="bg-paper border-b border-border">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">

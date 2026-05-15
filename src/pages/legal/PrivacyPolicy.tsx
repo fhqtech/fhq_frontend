@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-[100dvh] bg-paper-2 text-ink antialiased">
+    <div className="min-h-dvh bg-paper-2 text-ink antialiased">
       <header className="bg-paper border-b border-rule">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">

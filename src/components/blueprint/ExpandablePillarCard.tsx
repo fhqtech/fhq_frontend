@@ -130,7 +130,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ criteria }) => {
           <ul className="space-y-2">
             {criteria.interview_focus_areas.map((area, idx) => (
               <li key={idx} className="flex items-start gap-2 text-sm text-muted">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0" />
                 <span className="leading-relaxed">{area}</span>
               </li>
             ))}

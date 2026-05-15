@@ -122,7 +122,7 @@ describe("computeInterviewNBA", () => {
   it("unknown status → catch-all open interview", () => {
     const nba = computeInterviewNBA({ id: "iv-1", status: "weird" });
     expect(nba.label).toMatch(/open/i);
-    expect(nba.variant).toBe("outline");
+    expect(nba.variant).toBe("outline-solid");
     expect(nba.href).toBe("/interviews/iv-1");
   });
 });

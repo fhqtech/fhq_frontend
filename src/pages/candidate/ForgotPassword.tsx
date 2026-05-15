@@ -20,7 +20,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4 py-12">
+    <div className="min-h-dvh bg-paper-2 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-semibold text-primary tracking-tight">FunnelHQ</h1>
@@ -53,7 +53,7 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-none focus:border-accent"
+                  className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-hidden focus:border-accent"
                   placeholder="you@email.com"
                 />
               </div>

@@ -422,7 +422,7 @@ export const ReviewerSkillsGraph: React.FC<ReviewerSkillsGraphProps> = ({
                                 {selectedSkill.findings.map((finding, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
                                         <div
-                                            className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0"
+                                            className="w-1 h-1 rounded-full mt-1.5 shrink-0"
                                             style={{ backgroundColor: categoryStyles[selectedSkill.category].color }}
                                         />
                                         <p className="text-[11px] text-slate-700 leading-relaxed font-mono">

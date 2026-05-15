@@ -102,7 +102,7 @@ export const InterviewStatusModal: React.FC<InterviewStatusModalProps> = ({
             <ul className="text-sm text-muted space-y-2">
               {content.actions.map((action, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <span className="flex-shrink-0 mt-0.5">{action.icon}</span>
+                  <span className="shrink-0 mt-0.5">{action.icon}</span>
                   <span>{action.text}</span>
                 </li>
               ))}

@@ -53,7 +53,7 @@ const MCQTask = ({ options, onSubmit }: { options: string[]; onSubmit: (answer: 
 const LongTextTask = ({ description }: { description: string }) => {
   return (
     <div className="p-6 flex flex-col gap-6 h-full">
-      <ScrollArea className="flex-grow pr-4">
+      <ScrollArea className="grow pr-4">
         <p className="text-sm text-ink-soft whitespace-pre-wrap">
           {description}
         </p>

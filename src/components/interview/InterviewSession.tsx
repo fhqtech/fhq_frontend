@@ -698,7 +698,7 @@ export const InterviewSession = ({
   // previously logged to the console only — invisible to the candidate.
   if (!WEBSOCKET_URL || !BACKEND_URL) {
     return (
-      <div className="min-h-[100dvh] w-screen bg-ink text-paper flex items-center justify-center p-8">
+      <div className="min-h-dvh w-screen bg-ink text-paper flex items-center justify-center p-8">
         <div className="max-w-md text-center space-y-6">
           <div className="mx-auto w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center">
             <WifiOff className="w-8 h-8 text-gold-ink" />
@@ -719,7 +719,7 @@ export const InterviewSession = ({
   }
 
   return (
-    <div className="relative w-screen h-[100dvh] bg-ink overflow-hidden">
+    <div className="relative w-screen h-dvh bg-ink overflow-hidden">
       {/* 3D Particle Sphere - Full Screen Canvas */}
       <ParticleSphere
         conversationState={conversationState}
@@ -771,7 +771,7 @@ export const InterviewSession = ({
       {streamWarning && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-20 max-w-md">
           <div className="bg-gold/20 border border-rule/50 text-gold px-4 py-2 rounded text-xs flex items-center gap-2 shadow-2">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+            <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
             <span>{streamWarning}</span>
           </div>
         </div>
@@ -817,7 +817,7 @@ export const InterviewSession = ({
             }
             disabled={conversationState !== ConversationState.LISTENING}
             rows={1}
-            className="flex-1 resize-none bg-ink/80 border border-ink rounded-lg px-3 py-2 text-sm text-paper placeholder-muted-2 disabled:opacity-50 focus:outline-none focus:border-accent"
+            className="flex-1 resize-none bg-ink/80 border border-ink rounded-lg px-3 py-2 text-sm text-paper placeholder-muted-2 disabled:opacity-50 focus:outline-hidden focus:border-accent"
           />
           <button
             type="submit"
@@ -846,7 +846,7 @@ export const InterviewSession = ({
           <select
             value={selectedAudioDevice}
             onChange={(e) => setSelectedAudioDevice(e.target.value)}
-            className="appearance-none flex items-center gap-2 h-10 px-3 pr-8 border border-rule-strong rounded-md bg-transparent text-muted-2 text-xs cursor-pointer focus:outline-none focus:border-accent"
+            className="appearance-none flex items-center gap-2 h-10 px-3 pr-8 border border-rule-strong rounded-md bg-transparent text-muted-2 text-xs cursor-pointer focus:outline-hidden focus:border-accent"
           >
             {audioDevices.map((device) => (
               <option key={device.deviceId} value={device.deviceId} className="bg-ink">

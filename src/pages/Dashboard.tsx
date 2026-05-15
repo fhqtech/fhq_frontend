@@ -168,7 +168,7 @@ export default function Dashboard() {
  {recentInterviews.map((interview) => (
  <TableRow
  key={interview.id}
- className="cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+ className="cursor-pointer focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
  role="link"
  tabIndex={0}
  aria-label={`Open interview ${interview.title ?? interview.id}`}

@@ -88,14 +88,14 @@ export default function CandidateProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center text-muted">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center text-muted">
         Loading your profile…
       </div>
     );
   }
   if (!profile) {
     return (
-      <div className="min-h-[100dvh] bg-paper-2 flex items-center justify-center px-4">
+      <div className="min-h-dvh bg-paper-2 flex items-center justify-center px-4">
         <div className="max-w-md bg-paper border border-border rounded-xl p-6 text-center">
           <h2 className="font-semibold mb-2">No profile yet</h2>
           <p className="text-sm text-muted">
@@ -120,7 +120,7 @@ export default function CandidateProfile() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper-2">
+    <div className="min-h-dvh bg-paper-2">
       <header className="bg-paper border-b border-border">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/candidate/dashboard" className="text-sm text-primary hover:underline">
@@ -177,7 +177,7 @@ export default function CandidateProfile() {
               <select
                 value={profile.psychAssessment?.[f.key] || ''}
                 onChange={(e) => updatePsych(f.key, e.target.value)}
-                className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-none focus:border-accent"
+                className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-hidden focus:border-accent"
               >
                 <option value="">— Pick one —</option>
                 {f.options.map((o) => (
@@ -261,7 +261,7 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-none focus:border-accent"
+        className="w-full h-10 px-3 rounded-md border border-border bg-paper text-sm focus:outline-hidden focus:border-accent"
       />
     </div>
   );

@@ -62,7 +62,7 @@ export function SpinnerWithCopy({
 /**
  * PageSpinner — full-screen centered loader for route-level Suspense
  * fallbacks and page-loading shells. Replaces the ad-hoc
- * `<div className="min-h-[100dvh] flex items-center justify-center">
+ * `<div className="min-h-dvh flex items-center justify-center">
  *    <Loader2 className="animate-spin"/></div>` pattern.
  */
 export function PageSpinner({
@@ -73,7 +73,7 @@ export function PageSpinner({
   return (
     <div
       className={cn(
-        "min-h-[100dvh] w-full bg-paper-2 flex flex-col items-center justify-center gap-3 text-sm text-muted",
+        "min-h-dvh w-full bg-paper-2 flex flex-col items-center justify-center gap-3 text-sm text-muted",
         className,
       )}
     >

@@ -461,7 +461,7 @@ const BlueprintShowcase = () => {
           {currentSlide === 1 && (
             <button
               onClick={() => setCurrentSlide(0)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 p-3 rounded-full bg-paper/10 border border-white/20 backdrop-blur-sm transition-all hover:bg-paper/20"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 p-3 rounded-full bg-paper/10 border border-white/20 backdrop-blur-xs transition-all hover:bg-paper/20"
             >
               <ChevronLeft className="w-6 h-6 text-paper" />
             </button>
@@ -471,13 +471,13 @@ const BlueprintShowcase = () => {
           {currentSlide === 0 && (
             <button
               onClick={() => setCurrentSlide(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 p-3 rounded-full bg-paper/10 border border-white/20 backdrop-blur-sm transition-all hover:bg-paper/20"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 p-3 rounded-full bg-paper/10 border border-white/20 backdrop-blur-xs transition-all hover:bg-paper/20"
             >
               <ChevronRight className="w-6 h-6 text-paper" />
             </button>
           )}
 
-          <div className="relative bg-paper-2 from-white/[0.08] /[0.02] border border-white/10 rounded-2xl overflow-hidden">
+          <div className="relative bg-paper-2 from-white/8 /[0.02] border border-white/10 rounded-2xl overflow-hidden">
             {/* Slides Container */}
             <div className="overflow-hidden">
               <div
@@ -485,9 +485,9 @@ const BlueprintShowcase = () => {
                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}
               >
                 {/* Slide 1: Overview View */}
-                <div className="w-full flex-shrink-0">
+                <div className="w-full shrink-0">
                   {/* Header with Blueprint Title */}
-                  <div className="px-6 py-4 border-b border-white/10 bg-paper/[0.02]">
+                  <div className="px-6 py-4 border-b border-white/10 bg-paper/2">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <h3 className="font-mono font-bold text-lg text-paper uppercase tracking-wide">{editTitle}</h3>
@@ -512,7 +512,7 @@ const BlueprintShowcase = () => {
 
                   <div className="flex flex-col lg:flex-row min-h-[420px]">
                     {/* Left Sidebar - Certs & Tools */}
-                    <div className="w-full lg:w-56 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 bg-paper/[0.02] p-4 flex flex-row lg:flex-col gap-4">
+                    <div className="w-full lg:w-56 shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 bg-paper/2 p-4 flex flex-row lg:flex-col gap-4">
                       <div className="flex-1 lg:flex-none bg-paper/5 border border-white/10 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-3">
                           <Award className="w-4 h-4 text-amber-400" />
@@ -521,7 +521,7 @@ const BlueprintShowcase = () => {
                         <div className="flex flex-col gap-1.5">
                           {editCertifications.map((cert, i) => (
                             <div key={i} className="flex items-start gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                               <span className="text-[10px] font-mono text-paper/60 leading-tight">{cert}</span>
                             </div>
                           ))}
@@ -555,13 +555,13 @@ const BlueprintShowcase = () => {
                     </div>
 
                     {/* Right Sidebar - Legend & Skill Info */}
-                    <div className="w-full lg:w-64 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 bg-paper/[0.02] p-4 flex flex-col gap-3">
+                    <div className="w-full lg:w-64 shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 bg-paper/2 p-4 flex flex-col gap-3">
                       <div className="bg-paper/5 border border-white/10 rounded-lg p-3">
                         <p className="text-[10px] font-mono font-bold text-paper/40 uppercase tracking-wider mb-3">Proficiency Levels</p>
                         <div className="flex flex-col gap-1.5">
                           {[1, 2, 3, 4, 5].map((level) => (
                             <div key={level} className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: proficiencyConfig[level].color }} />
+                              <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: proficiencyConfig[level].color }} />
                               <div className="px-2 py-0.5 rounded bg-paper/10 border border-white/10 flex items-center justify-center min-w-[40px]">
                                 <span className="text-[9px] font-mono font-bold text-paper/70">{proficiencyConfig[level].short}</span>
                               </div>
@@ -598,7 +598,7 @@ const BlueprintShowcase = () => {
                 </div>
 
                 {/* Slide 2: Edit View */}
-                <div className="w-full flex-shrink-0">
+                <div className="w-full shrink-0">
                   <div className="flex flex-col lg:flex-row min-h-[450px]">
                     {/* Left Column - Edit Form */}
                     <div className="w-full lg:w-2/5 p-6 border-b lg:border-b-0 lg:border-r border-white/10 overflow-y-auto flex flex-col">
@@ -609,7 +609,7 @@ const BlueprintShowcase = () => {
                             type="text"
                             value={editTitle}
                             onChange={e => setEditTitle(e.target.value)}
-                            className="w-full px-4 py-3 bg-paper/5 border border-white/20 rounded-lg text-paper text-sm outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                            className="w-full px-4 py-3 bg-paper/5 border border-white/20 rounded-lg text-paper text-sm outline-hidden focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                             placeholder="e.g. Senior Frontend Developer"
                           />
                         </div>
@@ -618,7 +618,7 @@ const BlueprintShowcase = () => {
                           <textarea
                             value={editTopics}
                             onChange={e => setEditTopics(e.target.value)}
-                            className="w-full flex-1 min-h-[120px] px-4 py-3 bg-paper/5 border border-white/20 rounded-lg text-paper text-sm outline-none focus:ring-2 focus:ring-gold focus:border-transparent resize-none transition-all"
+                            className="w-full flex-1 min-h-[120px] px-4 py-3 bg-paper/5 border border-white/20 rounded-lg text-paper text-sm outline-hidden focus:ring-2 focus:ring-gold focus:border-transparent resize-none transition-all"
                             placeholder="e.g. React, TypeScript, System Design..."
                           />
                         </div>
@@ -628,7 +628,7 @@ const BlueprintShowcase = () => {
                             <select
                               value={editDuration}
                               onChange={e => setEditDuration(Number(e.target.value))}
-                              className="w-full px-4 py-2.5 bg-paper/5 border border-white/20 rounded-lg text-paper text-sm outline-none focus:ring-2 focus:ring-gold"
+                              className="w-full px-4 py-2.5 bg-paper/5 border border-white/20 rounded-lg text-paper text-sm outline-hidden focus:ring-2 focus:ring-gold"
                             >
                               <option value={10} className="bg-ink">10 minutes</option>
                               <option value={20} className="bg-ink">20 minutes</option>
@@ -679,7 +679,7 @@ const BlueprintShowcase = () => {
                     </div>
 
                     {/* Right Column - Skills, Tools, Certs */}
-                    <div className="w-full lg:w-3/5 p-4 bg-paper/[0.02] overflow-y-auto flex flex-col">
+                    <div className="w-full lg:w-3/5 p-4 bg-paper/2 overflow-y-auto flex flex-col">
                       <div className="flex-1 flex flex-col gap-3">
                         {/* Skills Section - Takes most space */}
                         <div className="bg-paper/5 border border-white/10 rounded-lg p-4 flex-1 flex flex-col min-h-0">
@@ -693,13 +693,13 @@ const BlueprintShowcase = () => {
                               value={newSkillName}
                               onChange={(e) => setNewSkillName(e.target.value)}
                               placeholder="Add skill..."
-                              className="flex-1 px-3 py-1.5 bg-paper/5 border border-white/20 rounded-lg text-paper text-xs outline-none focus:ring-2 focus:ring-gold"
+                              className="flex-1 px-3 py-1.5 bg-paper/5 border border-white/20 rounded-lg text-paper text-xs outline-hidden focus:ring-2 focus:ring-gold"
                               onKeyDown={(e) => e.key === 'Enter' && handleAddSkill()}
                             />
                             <select
                               value={newSkillProficiency}
                               onChange={(e) => setNewSkillProficiency(Number(e.target.value))}
-                              className="px-3 py-1.5 bg-ink border border-white/20 rounded-lg text-paper text-xs outline-none focus:ring-2 focus:ring-gold"
+                              className="px-3 py-1.5 bg-ink border border-white/20 rounded-lg text-paper text-xs outline-hidden focus:ring-2 focus:ring-gold"
                               style={{ minWidth: '60px' }}
                             >
                               {[1, 2, 3, 4, 5].map(l => (
@@ -723,7 +723,7 @@ const BlueprintShowcase = () => {
                                   <select
                                     value={skill.expected_proficiency}
                                     onChange={(e) => handleUpdateSkillProficiency(skill.skill_id, Number(e.target.value))}
-                                    className="px-2 py-1 rounded text-[10px] font-bold outline-none cursor-pointer transition-colors"
+                                    className="px-2 py-1 rounded text-[10px] font-bold outline-hidden cursor-pointer transition-colors"
                                     style={{
                                       backgroundColor: proficiencyConfig[skill.expected_proficiency]?.color + '30',
                                       color: proficiencyConfig[skill.expected_proficiency]?.color,
@@ -752,7 +752,7 @@ const BlueprintShowcase = () => {
                               Tools ({editTools.length})
                             </h4>
                             <div className="flex gap-2 mb-2">
-                              <input type="text" value={newToolName} onChange={(e) => setNewToolName(e.target.value)} placeholder="Tool name..." className="flex-1 px-2 py-1 bg-paper/5 border border-white/20 rounded text-paper text-[10px] outline-none focus:ring-1 focus:ring-gold" onKeyDown={(e) => e.key === 'Enter' && handleAddTool()} />
+                              <input type="text" value={newToolName} onChange={(e) => setNewToolName(e.target.value)} placeholder="Tool name..." className="flex-1 px-2 py-1 bg-paper/5 border border-white/20 rounded text-paper text-[10px] outline-hidden focus:ring-1 focus:ring-gold" onKeyDown={(e) => e.key === 'Enter' && handleAddTool()} />
                               <button
                                 onClick={handleAddTool}
                                 disabled={!newToolName.trim()}
@@ -781,7 +781,7 @@ const BlueprintShowcase = () => {
                               Certs ({editCertifications.length})
                             </h4>
                             <div className="flex gap-2 mb-2">
-                              <input type="text" value={newCertification} onChange={(e) => setNewCertification(e.target.value)} placeholder="Add cert..." className="flex-1 px-2 py-1 bg-paper/5 border border-white/20 rounded text-paper text-[10px] outline-none focus:ring-1 focus:ring-amber-500" onKeyDown={(e) => e.key === 'Enter' && handleAddCertification()} />
+                              <input type="text" value={newCertification} onChange={(e) => setNewCertification(e.target.value)} placeholder="Add cert..." className="flex-1 px-2 py-1 bg-paper/5 border border-white/20 rounded text-paper text-[10px] outline-hidden focus:ring-1 focus:ring-amber-500" onKeyDown={(e) => e.key === 'Enter' && handleAddCertification()} />
                               <button
                                 onClick={handleAddCertification}
                                 disabled={!newCertification.trim()}
@@ -795,7 +795,7 @@ const BlueprintShowcase = () => {
                               {editCertifications.map((cert, index) => (
                                 <div key={index} className="flex items-center justify-between group">
                                   <div className="flex items-start gap-1.5">
-                                    <div className="w-1 h-1 rounded-full bg-amber-400 mt-1 flex-shrink-0" />
+                                    <div className="w-1 h-1 rounded-full bg-amber-400 mt-1 shrink-0" />
                                     <span className="text-[9px] text-paper/60 leading-tight">{cert}</span>
                                   </div>
                                   <button onClick={() => handleRemoveCertification(index)} className="p-0.5 text-paper/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
@@ -814,7 +814,7 @@ const BlueprintShowcase = () => {
             </div>
 
             {/* Dot Indicators */}
-            <div className="flex items-center justify-center gap-3 py-4 border-t border-white/10 bg-paper/[0.02]">
+            <div className="flex items-center justify-center gap-3 py-4 border-t border-white/10 bg-paper/2">
               <button
                 onClick={() => setCurrentSlide(0)}
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${currentSlide === 0 ? 'bg-purple-500 w-8' : 'bg-paper/20 hover:bg-paper/40'}`}
@@ -836,7 +836,7 @@ const Navigation = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-20 flex justify-between items-center p-6 md:p-8 bg-ink/80 backdrop-blur-sm">
+    <nav className="fixed top-0 left-0 w-full z-20 flex justify-between items-center p-6 md:p-8 bg-ink/80 backdrop-blur-xs">
       <div className="flex items-center">
         <button onClick={() => navigate('/')} className="flex flex-col hover:opacity-80 transition-opacity">
           <span className="text-2xl font-bold text-ink  bg-paper-2 from-white /40 tracking-tighter">
@@ -862,7 +862,7 @@ const Navigation = () => {
 
 const HowItWorks = () => {
   return (
-    <div className="relative w-full min-h-[100dvh] bg-ink selection:bg-blue-500 selection:text-paper">
+    <div className="relative w-full min-h-dvh bg-ink selection:bg-blue-500 selection:text-paper">
       <Navigation />
 
       {/* Main Content with padding for fixed nav */}

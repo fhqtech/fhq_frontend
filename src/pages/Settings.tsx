@@ -600,7 +600,7 @@ export default function Settings() {
                                 value={speed.value}
                                 checked={isSelected}
                                 onChange={(e) => updateSetting('voice', 'speed', e.target.value)}
-                                className="w-4 h-4 rounded-full bg-paper border-2 border-rule-strong checked:border-ink checked:bg-ink focus:outline-none focus:ring-0 focus:ring-offset-0 appearance-none relative checked:after:content-[''] checked:after:w-2 checked:after:h-2 checked:after:rounded-full checked:after:bg-paper checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:transform checked:after:-translate-x-1/2 checked:after:-translate-y-1/2"
+                                className="w-4 h-4 rounded-full bg-paper border-2 border-rule-strong checked:border-ink checked:bg-ink focus:outline-hidden focus:ring-0 focus:ring-offset-0 appearance-none relative checked:after:content-[''] checked:after:w-2 checked:after:h-2 checked:after:rounded-full checked:after:bg-paper checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:transform checked:after:-translate-x-1/2 checked:after:-translate-y-1/2"
                               />
                               <span className="text-xs font-semibold text-ink mt-2">{speed.label}</span>
                               <span className="text-xs text-muted mt-1">{speed.display}</span>
@@ -626,7 +626,7 @@ export default function Settings() {
                           <Button
                             key={accent.value}
                             type="button"
-                            variant={isSelected ? "default" : "outline"}
+                            variant={isSelected ? "default" : "outline-solid"}
                             size="sm"
                             className={`${
                               isSelected

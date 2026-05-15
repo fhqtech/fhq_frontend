@@ -315,7 +315,7 @@ export default function ListDetail() {
 
   if (!listDetails) {
     return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center flex-1">
+      <div className="h-dvh bg-background flex items-center justify-center flex-1">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">List not found</p>
           <Button onClick={() => navigate("/lists")}>
@@ -328,12 +328,12 @@ export default function ListDetail() {
   }
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative flex-1">
+    <div className="h-dvh bg-background flex flex-col overflow-hidden relative flex-1">
       <main className="flex-1 overflow-hidden relative">
         <div className="h-full flex flex-col pr-8 pb-16 pt-6">
           {/* Header with List Name - Vanishes on scroll */}
           {!isScrolled && (
-            <div className="pb-3 flex-shrink-0 transition-all duration-300 flex items-center gap-4">
+            <div className="pb-3 shrink-0 transition-all duration-300 flex items-center gap-4">
               <Button
                 variant="outline"
                 onClick={() => navigate("/lists")}
@@ -356,7 +356,7 @@ export default function ListDetail() {
 
           {/* Header - Sticky when scrolled */}
           {isScrolled && (
-            <div className="flex-shrink-0 sticky top-0 bg-background/95 backdrop-blur-sm z-20 py-2 border-b">
+            <div className="shrink-0 sticky top-0 bg-background/95 backdrop-blur-xs z-20 py-2 border-b">
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
@@ -373,9 +373,9 @@ export default function ListDetail() {
           )}
 
           {/* AI Search Bar - Sticky */}
-          <div className={`flex-shrink-0 transition-all duration-300 sticky top-0 bg-background/95 backdrop-blur-sm z-20 ${isScrolled ? 'py-3 shadow-1' : 'py-2'}`}>
+          <div className={`shrink-0 transition-all duration-300 sticky top-0 bg-background/95 backdrop-blur-xs z-20 ${isScrolled ? 'py-3 shadow-1' : 'py-2'}`}>
             <div className="relative max-w-4xl mx-auto">
-              {!isScrolled && <div className="absolute inset-0 bg-primary/10 rounded-lg blur-sm" />}
+              {!isScrolled && <div className="absolute inset-0 bg-primary/10 rounded-lg blur-xs" />}
               <div className={`relative bg-card border border-border rounded-lg shadow-1 transition-all duration-300 ${isScrolled ? 'p-2.5' : 'p-3'}`}>
                 <div className={`flex items-center transition-all duration-300 ${isScrolled ? 'gap-2' : 'gap-3'}`}>
                   {!isScrolled && (
@@ -412,7 +412,7 @@ export default function ListDetail() {
             {/* Main Content (Scrollable Candidates) */}
             <div className="h-full flex flex-col">
               {/* Search and Filters */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-shrink-0 sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4 shrink-0 sticky top-0 bg-background/95 backdrop-blur-xs py-3 z-10">
                 <div className="relative max-w-4xl mx-auto w-full">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -450,7 +450,7 @@ export default function ListDetail() {
 
               {/* Candidates Grid - Scrollable Content */}
               <div className="flex-1 pb-4">
-                <div className="mb-4 flex-shrink-0">
+                <div className="mb-4 shrink-0">
                   <h2 className="text-xl font-bold uppercase tracking-tight mb-2">CANDIDATES</h2>
                   <p className="text-sm text-muted-foreground">
                     {candidates.length} of {listDetails?.totalCandidates || candidates.length} candidates
@@ -547,7 +547,7 @@ export default function ListDetail() {
         </div>
 
         {/* Right Side - Analytics Panel (Full Height Sidebar) */}
-        <div className={`fixed top-0 right-0 h-[100dvh] bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-3 ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
+        <div className={`fixed top-0 right-0 h-dvh bg-background/90 backdrop-blur-lg border-l border-border/50 transition-all duration-300 z-50 shadow-3 ${isAnalyticsPanelOpen ? 'w-[30%]' : 'w-[12px]'}`}>
           {/* Toggle Button - Top Right Corner */}
           <button
             onClick={() => setIsAnalyticsPanelOpen(!isAnalyticsPanelOpen)}
@@ -563,12 +563,12 @@ export default function ListDetail() {
           {isAnalyticsPanelOpen && (
             <div className="h-full flex flex-col overflow-hidden">
               <div className="flex-1 flex flex-col p-4 overflow-hidden">
-                <div className="mb-4 text-center flex-shrink-0">
+                <div className="mb-4 text-center shrink-0">
                   <h3 className="text-base font-semibold text-foreground">Analytics</h3>
                 </div>
 
                 {/* Compact KPI Cards */}
-                <div className="grid grid-cols-2 gap-2 mb-4 flex-shrink-0">
+                <div className="grid grid-cols-2 gap-2 mb-4 shrink-0">
                   <div className="p-2.5 rounded-lg bg-muted/30 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Users className="h-3.5 w-3.5 text-muted-foreground" />

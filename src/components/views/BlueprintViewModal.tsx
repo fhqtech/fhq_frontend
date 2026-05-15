@@ -54,7 +54,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs"
       onClick={onClose}
     >
       <div
@@ -117,7 +117,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
           ) : blueprint ? (
             <>
               {/* Left Sidebar - Certifications & Tools */}
-              <div className="w-56 flex-shrink-0 border-r-2 border-rule bg-paper-2 p-4 flex flex-col gap-4">
+              <div className="w-56 shrink-0 border-r-2 border-rule bg-paper-2 p-4 flex flex-col gap-4">
                 {/* Certifications */}
                 {blueprint.certifications_recommended && blueprint.certifications_recommended.length > 0 && (
                   <div className="bg-paper border-2 border-rule rounded-lg p-3">
@@ -128,7 +128,7 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
                     <div className="flex flex-col gap-1.5">
                       {blueprint.certifications_recommended.map((cert, i) => (
                         <div key={i} className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                           <span className="text-[10px] font-mono text-muted leading-tight">{cert}</span>
                         </div>
                       ))}
