@@ -12,6 +12,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { NextBestActionCard } from "@/components/dashboard/NextBestActionCard";
+import { BentoGrid, BentoCell } from "@/components/dashboard/BentoGrid";
+import { HeroKPI } from "@/components/dashboard/HeroKPI";
 import { FirstRunStepper } from "@/components/onboarding/FirstRunStepper";
 import { useOnboardingState } from "@/components/onboarding/useOnboardingState";
 import { useAuth } from "@/contexts/AuthContext";
@@ -169,24 +171,32 @@ export default function Dashboard() {
  />
  ) : (
  <>
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
- <StatsCard index={0} title="Active Interviews" value={stats.active} icon={Bot} variant="primary" />
- <StatsCard
- index={1}
- title="Total Candidates"
- value={stats.totalCandidates}
- icon={Users}
- variant="success"
+ <BentoGrid>
+ <BentoCell cols={6} rows={2}>
+ <HeroKPI
+ kicker="Live"
+ label="Active interviews"
+ value={stats.active}
+ icon={Bot}
+ body="Currently running screening or fitment sessions across the project. Live revision updates without refresh."
  />
+ </BentoCell>
+ <BentoCell cols={6}>
+ <StatsCard index={1} title="Total Candidates" value={stats.totalCandidates} icon={Users} variant="success" />
+ </BentoCell>
+ <BentoCell cols={3}>
  <StatsCard index={2} title="Completed" value={stats.completedInterviews} icon={UserCheck} />
+ </BentoCell>
+ <BentoCell cols={3}>
  <StatsCard
  index={3}
- title="Completion Rate"
+ title="Completion rate"
  value={stats.completionRate}
  change={{ value: "%", positive: true }}
  icon={TrendingUp}
  />
- </div>
+ </BentoCell>
+ </BentoGrid>
 
  <Card className="border-border">
  <CardHeader>
