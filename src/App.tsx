@@ -12,6 +12,7 @@ import { CandidateAuthProvider } from "@/contexts/CandidateAuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { ConsentProvider } from "@/contexts/ConsentContext";
 import { ConsentBanner } from "@/components/ConsentBanner";
+import { CommandPalette } from "@/components/CommandPalette";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
 import TourGuard from "@/components/tour/TourGuard";
@@ -85,6 +86,7 @@ const App = () => (
           <BrowserRouter>
           <ErrorBoundary>
           <ConsentBanner />
+          <CommandPalette />
           <Suspense fallback={<PageSkeleton />}>
           <Routes>
             {/* Marketing landing page (public) */}

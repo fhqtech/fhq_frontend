@@ -64,7 +64,10 @@ export function useInvalidateInterviewsOnRevision(
 }
 
 /**
- * Delete an interview, then invalidate the workspace+project list.
+ * Delete an interview — optimistic remove + rollback on error.
+ *
+ * F24.3: row disappears immediately on click. If the server 4xx's,
+ * we put it back. Server-state via TanStack Query onMutate / onError.
  */
 export function useDeleteInterviewMutation(
   workspaceId: string | undefined,
@@ -84,12 +87,63 @@ export function useDeleteInterviewMutation(
       }
       return interviewId;
     },
-    onSuccess: () => {
+    onMutate: async (interviewId) => {
+      if (!workspaceId || !projectId) return;
+      const key = ["interviews", workspaceId, projectId];
+      await qc.cancelQueries({ queryKey: key });
+      const snapshots = qc.getQueriesData({ queryKey: key });
+      qc.setQueriesData({ queryKey: key }, (old: { interviews?: Interview[]; pagination?: unknown } | undefined) => {
+        if (!old?.interviews) return old;
+        return {
+          ...old,
+          interviews: old.interviews.filter((i) => i.id !== interviewId),
+        };
+      });
+      return { snapshots };
+    },
+    onError: (_err, _id, ctx) => {
+      // rollback every snapshot we captured
+      ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data));
+    },
+    onSettled: () => {
       if (workspaceId && projectId) {
         qc.invalidateQueries({ queryKey: ["interviews", workspaceId, projectId] });
       }
     },
   });
+}
+
+/**
+ * Prefetch a single interview's detail on hover. Used by TableRow
+ * onPointerEnter so the click → detail-page transition feels instant.
+ *
+ * Cap at one prefetch per interviewId per session (the React Query cache
+ * survives navigation; a 30s staleTime means cold cache only on the
+ * first hover).
+ */
+export function usePrefetchInterview(
+  workspaceId: string | undefined,
+  projectId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return (interviewId: string) => {
+    if (!workspaceId || !projectId || !interviewId) return;
+    const detailKey = ["interview-detail", workspaceId, projectId, interviewId];
+    qc.prefetchQuery({
+      queryKey: detailKey,
+      staleTime: 30_000,
+      queryFn: async () => {
+        const r = await fetch(
+          `${apiBase()}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/configuration`,
+          { headers: authHeaders() },
+        );
+        if (!r.ok) throw new Error(`Prefetch failed (${r.status})`);
+        return r.json();
+      },
+    }).catch(() => {
+      // Prefetch is best-effort — never throw into the UI
+    });
+  };
 }
 
 /**

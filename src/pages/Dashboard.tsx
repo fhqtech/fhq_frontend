@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { NextBestActionCard } from "@/components/dashboard/NextBestActionCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { useInterviewsQuery, useInvalidateInterviewsOnRevision } from "@/queries/interviewsQueries";
+import { useInterviewsQuery, useInvalidateInterviewsOnRevision, usePrefetchInterview } from "@/queries/interviewsQueries";
 import { computeDashboardNBA, type InterviewSnapshot } from "@/lib/nextBestAction";
 
 export default function Dashboard() {
@@ -43,6 +43,7 @@ export default function Dashboard() {
  );
  useInvalidateInterviewsOnRevision(currentWorkspace?.id, currentProject?.id, liveRevision);
 
+ const prefetchInterview = usePrefetchInterview(currentWorkspace?.id, currentProject?.id);
  const interviewsQuery = useInterviewsQuery(currentWorkspace?.id, currentProject?.id, { limit: 100 });
  const interviews = interviewsQuery.data?.interviews ?? [];
  const loading = interviewsQuery.isPending && Boolean(currentWorkspace && currentProject);
@@ -172,6 +173,8 @@ export default function Dashboard() {
  role="link"
  tabIndex={0}
  aria-label={`Open interview ${interview.title ?? interview.id}`}
+ onPointerEnter={() => prefetchInterview(interview.id)}
+ onFocus={() => prefetchInterview(interview.id)}
  onClick={() => navigate(`/interviews/${interview.id}`)}
  onKeyDown={(e) => {
  if (e.key === 'Enter' || e.key === ' ') {

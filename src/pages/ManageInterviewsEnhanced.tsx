@@ -14,6 +14,7 @@ import {
  useInvalidateInterviewsOnRevision,
  useDeleteInterviewMutation,
  useStartInterviewMutation,
+ usePrefetchInterview,
 } from "@/queries/interviewsQueries";
 import {
  Table,
@@ -124,6 +125,7 @@ export default function ManageInterviewsEnhanced() {
 
  const deleteInterview = useDeleteInterviewMutation(currentWorkspace?.id, currentProject?.id);
  const startInterview = useStartInterviewMutation(currentWorkspace?.id, currentProject?.id);
+ const prefetchInterview = usePrefetchInterview(currentWorkspace?.id, currentProject?.id);
 
  // Filter interviews based on search term and interview type (route-based)
  const filteredInterviews = useMemo(() => {
@@ -499,6 +501,8 @@ export default function ManageInterviewsEnhanced() {
  role="link"
  tabIndex={0}
  aria-label={`Open interview ${interview.title}`}
+ onPointerEnter={() => prefetchInterview(interview.id)}
+ onFocus={() => prefetchInterview(interview.id)}
  onClick={() => handleViewDetails(interview.id)}
  onKeyDown={(e) => {
  if (e.key === 'Enter' || e.key === ' ') {
