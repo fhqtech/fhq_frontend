@@ -228,7 +228,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
       try {
         const authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:8082/api/workspaces`,
+          `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/workspaces`,
           {
             headers: {
               'Authorization': `Bearer ${authToken}`,
@@ -269,7 +269,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
       try {
         const authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:8082/api/workspaces/${selectedWorkspaceId}/projects`,
+          `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/workspaces/${selectedWorkspaceId}/projects`,
           {
             headers: {
               'Authorization': `Bearer ${authToken}`,

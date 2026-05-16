@@ -59,7 +59,7 @@ export function NotificationBell() {
 
       // Fetch ALL invitations across all workspaces
       const response = await fetch(
-        `http://localhost:8082/api/invitations/all?email=${encodeURIComponent(user.email)}`,
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/invitations/all?email=${encodeURIComponent(user.email)}`,
         {
           headers: {
             'Authorization': `Bearer ${authToken}`,
@@ -94,7 +94,7 @@ export function NotificationBell() {
     try {
       const authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8082/api/workspaces/${invitation.workspaceId}/invitations/${invitation.id}/accept`,
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/workspaces/${invitation.workspaceId}/invitations/${invitation.id}/accept`,
         {
           method: 'POST',
           headers: {
@@ -136,7 +136,7 @@ export function NotificationBell() {
     try {
       const authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8082/api/workspaces/${invitation.workspaceId}/invitations/${invitation.id}`,
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/workspaces/${invitation.workspaceId}/invitations/${invitation.id}`,
         {
           method: 'DELETE',
           headers: {
