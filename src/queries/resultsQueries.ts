@@ -25,26 +25,30 @@ export class ResultsPendingError extends Error {
  * Polling: refetchInterval = 10s while pending, max ~1min total wait
  * (TanStack Query handles the timer; the page no longer manages it).
  */
+export const SESSION_RESULTS_POLL_MAX = 6;
+
 export function useSessionResultsQuery(sessionId: string | undefined) {
   return useQuery({
     queryKey: ["results", "session", sessionId],
     enabled: Boolean(sessionId),
     staleTime: 0, // always fresh — results are a one-shot view
-    refetchInterval: (query) => (query.state.error instanceof ResultsPendingError ? 10_000 : false),
+    refetchInterval: (query) => {
+      if (!(query.state.error instanceof ResultsPendingError)) return false;
+      if (query.state.errorUpdateCount >= SESSION_RESULTS_POLL_MAX) return false;
+      return 10_000;
+    },
     queryFn: async (): Promise<InterviewResultsData> => {
       const r = await fetch(`${API_BASE_URL}/api/results/session/${sessionId}`, {
         headers: { "Content-Type": "application/json", ...authHeaders() },
       });
       if (r.status === 404) throw new ResultsPendingError();
+      if (r.status === 403) throw new Error("You don't have access to these results.");
       if (!r.ok) throw new Error(`Failed to fetch results: ${r.statusText}`);
       const data = await r.json();
       if (!data.success || !data.results) throw new Error("Invalid results format");
       return data.results as InterviewResultsData;
     },
-    retry: (failureCount, error) => {
-      if (error instanceof ResultsPendingError) return failureCount < 6;
-      return failureCount < 1;
-    },
+    retry: false,
   });
 }
 

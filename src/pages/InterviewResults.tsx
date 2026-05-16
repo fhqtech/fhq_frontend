@@ -12,11 +12,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromResult } from "@/components/tag/adapters";
 import { track, Events } from "@/lib/analytics";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useSessionResultsQuery,
   useResultsStatusQuery,
   useReanalyzeMutation,
   ResultsPendingError,
+  SESSION_RESULTS_POLL_MAX,
 } from "@/queries/resultsQueries";
 import type { InterviewResultsData } from "@/types/interviewResults";
 
@@ -91,7 +93,7 @@ export default function InterviewResults() {
 
   const resultsQuery = useSessionResultsQuery(sessionId);
   const rawResults = resultsQuery.data ?? null;
-  const retryCount = resultsQuery.failureCount;
+  const retryCount = resultsQuery.errorUpdateCount;
   const isResultsPending = resultsQuery.error instanceof ResultsPendingError;
   const realError =
     resultsQuery.error && !isResultsPending
@@ -122,15 +124,19 @@ export default function InterviewResults() {
     }
   }, [sessionId]);
 
+  const queryClient = useQueryClient();
   const handleRetry = () => {
-    resultsQuery.refetch();
+    // Reset the cumulative errorUpdateCount so the polling window restarts
+    // clean; otherwise we'd sit at the terminal state and refetch() alone
+    // can't drop the counter back to 0.
+    queryClient.resetQueries({ queryKey: ["results", "session", sessionId] });
   };
 
-  // F30.3/F30.4: after the polling exhausts (failureCount >= 6 while still
-  // in pending state), peek at /api/results/status/{sid} to learn whether
-  // the reviewer crashed (reviewer_failure present) vs results truly still
-  // being generated (no failure recorded). Drives terminal-state copy.
-  const pollingExhausted = isResultsPending && retryCount >= 6;
+  // F30.3/F30.4: after the polling exhausts (errorUpdateCount >= cap while
+  // still in pending state), peek at /api/results/status/{sid} to learn
+  // whether the reviewer crashed (reviewer_failure present) vs results truly
+  // still being generated (no failure recorded). Drives terminal-state copy.
+  const pollingExhausted = isResultsPending && retryCount >= SESSION_RESULTS_POLL_MAX;
   const statusQuery = useResultsStatusQuery(sessionId, pollingExhausted);
   const reviewerFailure = statusQuery.data?.reviewer_failure ?? null;
   const reanalyze = useReanalyzeMutation();
@@ -250,7 +256,7 @@ export default function InterviewResults() {
             <Clock className="w-4 h-4" />
             <span className="font-mono tabular-nums">
               {hasAttempted
-                ? `Checking again in ${10 - (retryCount % 10)}s · attempt ${Math.min(retryCount, 6)}/6`
+                ? `Checking again · attempt ${Math.min(retryCount, SESSION_RESULTS_POLL_MAX)}/${SESSION_RESULTS_POLL_MAX}`
                 : "Checking…"}
             </span>
           </div>
@@ -279,9 +285,9 @@ export default function InterviewResults() {
             className="mr-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Interviews
+            Back to interviews
           </Button>
-          <h1 className="text-2xl font-bold">Interview Results</h1>
+          <h1 className="text-2xl font-bold">Interview results</h1>
         </div>
 
         <Card>
@@ -311,9 +317,9 @@ export default function InterviewResults() {
             className="mr-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Interviews
+            Back to interviews
           </Button>
-          <h1 className="text-2xl font-bold">Interview Results</h1>
+          <h1 className="text-2xl font-bold">Interview results</h1>
         </div>
 
         <Card>
