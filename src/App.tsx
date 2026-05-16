@@ -52,7 +52,6 @@ const EmailTemplatePreview = lazy(() => import("./pages/EmailTemplatePreview"));
 const InterviewSwipeView = lazy(() => import("./pages/InterviewSwipeView"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
 const TestAssets = lazy(() => import("./pages/TestAssets"));
-const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const DataAccount = lazy(() => import("./pages/account/DataAccount"));
@@ -92,9 +91,6 @@ const App = () => (
             {/* Marketing landing page (public) */}
             <Route path="/" element={<MarketingLanding />} />
             <Route path="/start" element={<StartChooser />} />
-
-            {/* How It Works page (public) */}
-            <Route path="/how-it-works" element={<HowItWorks />} />
 
             {/* Legal — DPDP-required, linked from CandidateRegistration consent */}
             <Route path="/privacy" element={<PrivacyPolicy />} />

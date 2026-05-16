@@ -5,14 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TranscriptViewer } from "@/components/interview/TranscriptViewer";
-import { CheckCircle, AlertTriangle, Lightbulb, TrendingDown, MessageSquareQuote, ArrowLeft, Clock, RefreshCw } from "lucide-react";
+import { AlertCircle, CheckCircle, AlertTriangle, Lightbulb, Sparkles, TrendingDown, MessageSquareQuote, ArrowLeft, Clock, RefreshCw } from "lucide-react";
 import { RatingPanel } from "@/components/interview/RatingPanel";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromResult } from "@/components/tag/adapters";
 import { track, Events } from "@/lib/analytics";
-import { useSessionResultsQuery, ResultsPendingError } from "@/queries/resultsQueries";
+import {
+  useSessionResultsQuery,
+  useResultsStatusQuery,
+  useReanalyzeMutation,
+  ResultsPendingError,
+} from "@/queries/resultsQueries";
 import type { InterviewResultsData } from "@/types/interviewResults";
 
 // --- LEGACY INTERFACE for backward compatibility ---
@@ -86,13 +91,17 @@ export default function InterviewResults() {
 
   const resultsQuery = useSessionResultsQuery(sessionId);
   const rawResults = resultsQuery.data ?? null;
+  const retryCount = resultsQuery.failureCount;
   const isResultsPending = resultsQuery.error instanceof ResultsPendingError;
   const realError =
     resultsQuery.error && !isResultsPending
       ? (resultsQuery.error instanceof Error ? resultsQuery.error.message : "Failed to load results")
       : null;
   const error = !sessionId ? "No session ID provided" : realError;
-  const isLoading = resultsQuery.isPending && !isResultsPending && Boolean(sessionId);
+  // Single waiting state: covers both first fetch (TQ retrying internally) and
+  // exhausted-retries (ResultsPendingError surfaces). One screen for the whole
+  // ~60s polling window — user always sees the retry counter + Check Now CTA.
+  const isWaiting = (resultsQuery.isPending || isResultsPending) && Boolean(sessionId);
   const evaluation = useMemo(
     () => (rawResults ? transformToLegacyFormat(rawResults) : null),
     [rawResults],
@@ -117,41 +126,111 @@ export default function InterviewResults() {
     resultsQuery.refetch();
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-dvh flex flex-col bg-paper-2">
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-          <div className="mb-8 flex items-center justify-center">
-            <Spinner size="lg" variant="brand" label="Processing" />
-          </div>
+  // F30.3/F30.4: after the polling exhausts (failureCount >= 6 while still
+  // in pending state), peek at /api/results/status/{sid} to learn whether
+  // the reviewer crashed (reviewer_failure present) vs results truly still
+  // being generated (no failure recorded). Drives terminal-state copy.
+  const pollingExhausted = isResultsPending && retryCount >= 6;
+  const statusQuery = useResultsStatusQuery(sessionId, pollingExhausted);
+  const reviewerFailure = statusQuery.data?.reviewer_failure ?? null;
+  const reanalyze = useReanalyzeMutation();
 
-          <h1 className="text-4xl font-bold text-foreground mb-4 animate-pulse">
-            Analyzing Interview Results
-          </h1>
+  const handleReanalyze = async () => {
+    if (!sessionId) return;
+    try {
+      await reanalyze.mutateAsync(sessionId);
+    } catch (e) {
+      // Mutation surfaces error via reanalyze.error; UI shows it below.
+    }
+  };
 
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-            Processing competency assessments and generating comprehensive evaluation...
-          </p>
+  const handleBackToInterview = () => {
+    if (interviewId) {
+      navigate(`/interviews/${interviewId}`);
+    } else {
+      navigate("/interviews/manage");
+    }
+  };
 
-          <div className="w-full max-w-md mb-6">
-            <div className="w-full bg-paper-3 rounded-full h-3">
-              <div
-                className="bg-paper-2 from-primary h-3 rounded-full transition-all duration-300 ease-out animate-pulse"
-                style={{ width: '75%' }}
-              ></div>
+  if (isWaiting) {
+    const hasAttempted = retryCount > 0;
+
+    // Terminal state: polling exhausted. Show diagnostic copy + recovery.
+    if (pollingExhausted) {
+      const isReanalyzePending = reanalyze.isPending;
+      const reanalyzeError = reanalyze.error instanceof Error ? reanalyze.error.message : null;
+
+      return (
+        <div className="min-h-dvh flex flex-col bg-paper-2">
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 max-w-2xl mx-auto">
+            <div className="mb-6 flex items-center justify-center w-14 h-14 rounded-full bg-warning-soft">
+              <AlertCircle className="w-7 h-7 text-warning" />
             </div>
+
+            <h1 className="text-3xl font-semibold tracking-tight text-ink mb-3">
+              We couldn't load the results
+            </h1>
+
+            <p className="text-base text-ink-soft mb-6 leading-relaxed">
+              {reviewerFailure
+                ? "The interview was completed, but the analysis didn't finish. You can re-run the analysis below, or come back later."
+                : "The interview was completed, but no analysis is available yet. Try again in a moment, or re-run the analysis below."}
+            </p>
+
+            {reviewerFailure?.error && (
+              <div className="mb-6 w-full bg-paper border border-rule rounded-md p-4 text-left">
+                <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2">
+                  Diagnostic
+                </p>
+                <p className="text-sm text-ink-soft break-words">
+                  {reviewerFailure.error}
+                </p>
+                {(reviewerFailure.retry_count ?? 0) > 0 && (
+                  <p className="text-xs text-muted mt-2 font-mono tabular-nums">
+                    {reviewerFailure.retry_count} previous retry attempt{reviewerFailure.retry_count === 1 ? "" : "s"}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {reanalyzeError && (
+              <div className="mb-4 w-full bg-danger-soft border border-danger/30 rounded-md p-3 text-left text-sm text-danger">
+                {reanalyzeError}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button variant="outline" onClick={handleBackToInterview}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to interview
+              </Button>
+              <Button variant="outline" onClick={handleRetry}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try again
+              </Button>
+              <Button
+                variant="gold"
+                onClick={handleReanalyze}
+                disabled={isReanalyzePending}
+              >
+                {isReanalyzePending ? (
+                  <Spinner size="sm" variant="inverse" className="mr-2" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                {isReanalyzePending ? "Dispatching…" : "Re-run analysis"}
+              </Button>
+            </div>
+
+            <p className="text-xs text-muted mt-6 max-w-md">
+              Re-run dispatches a fresh analysis on the stored conversation. Poll resumes automatically — you'll see the result within ~1 minute if successful.
+            </p>
           </div>
-
-          <p className="text-sm text-muted-foreground opacity-75">
-            Generating detailed competency analysis...
-          </p>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // Show pending state - results being generated
-  if (isResultsPending) {
+    // Pre-exhaustion: keep the in-flight polling screen.
     return (
       <div className="min-h-dvh flex flex-col bg-paper-2">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
@@ -159,18 +238,20 @@ export default function InterviewResults() {
             <Spinner size="lg" variant="brand" label="Processing" />
           </div>
 
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Generating Interview Results
+          <h1 className="text-3xl font-semibold tracking-tight text-ink mb-3">
+            Generating interview results
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-            Our AI is analyzing the interview conversation and generating a detailed skill assessment...
+          <p className="text-base text-ink-soft max-w-3xl mx-auto mb-8 leading-relaxed">
+            Our AI is analyzing the conversation and generating a detailed skill assessment. This usually takes under a minute.
           </p>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-warning-soft px-4 py-2 rounded-lg border border-warning/30">
-            <Clock className="w-4 h-4 text-warning" />
-            <span className="text-warning">
-              Checking again in {10 - (retryCount % 10)} seconds... (Attempt {retryCount + 1}/6)
+          <div className="flex items-center gap-2 text-sm bg-warning-soft px-4 py-2 rounded-md border border-warning/30 text-warning">
+            <Clock className="w-4 h-4" />
+            <span className="font-mono tabular-nums">
+              {hasAttempted
+                ? `Checking again in ${10 - (retryCount % 10)}s · attempt ${Math.min(retryCount, 6)}/6`
+                : "Checking…"}
             </span>
           </div>
 
@@ -180,7 +261,7 @@ export default function InterviewResults() {
             onClick={handleRetry}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Check Now
+            Check now
           </Button>
         </div>
       </div>

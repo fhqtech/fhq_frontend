@@ -80,7 +80,7 @@ export default function Settings() {
 
   const handleSave = () => {
     toast({
-      title: "Settings Saved",
+      title: "Settings saved",
       description: "Your preferences have been updated successfully.",
     });
   };
@@ -288,7 +288,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5 text-ink" />
-                Profile Information
+                Profile information
               </CardTitle>
               <CardDescription>
                 Update your personal and company information
@@ -297,7 +297,7 @@ export default function Settings() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Full name</Label>
                   <Input
                     id="name"
                     value={settings.profile.name}
@@ -305,7 +305,7 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">Email address</Label>
                   <Input
                     id="email"
                     type="email"
@@ -314,7 +314,7 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">Phone number</Label>
                   <Input
                     id="phone"
                     value={settings.profile.phone}
@@ -322,7 +322,7 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="company">Company Name</Label>
+                  <Label htmlFor="company">Company name</Label>
                   <Input
                     id="company"
                     value={settings.profile.company}
@@ -348,7 +348,7 @@ export default function Settings() {
             <CardContent className="space-y-4">
               {/* Workspace Selector */}
               <div className="space-y-2">
-                <Label htmlFor="workspace-select">Select Workspace</Label>
+                <Label htmlFor="workspace-select">Select workspace</Label>
                 <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
                   <SelectTrigger id="workspace-select" className="w-full">
                     <SelectValue placeholder={isLoadingWorkspaces ? "Loading workspaces..." : "Select a workspace"} />
@@ -460,7 +460,7 @@ export default function Settings() {
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-ink" />
                   <div>
-                    <p className="font-medium text-foreground">Email Notifications</p>
+                    <p className="font-medium text-foreground">Email notifications</p>
                     <p className="text-sm text-muted">Send interview invites via email</p>
                   </div>
                 </div>
@@ -475,10 +475,10 @@ export default function Settings() {
                   <Phone className="w-5 h-5 text-muted-2" />
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="font-medium text-muted">Phone Calls</p>
+                      <p className="font-medium text-muted">Phone calls</p>
                       <p className="text-sm text-muted-2">Enable phone-based interviews</p>
                     </div>
-                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
+                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
                   </div>
                 </div>
                 <Switch
@@ -496,7 +496,7 @@ export default function Settings() {
                       <p className="font-medium text-muted">SMS Messages</p>
                       <p className="text-sm text-muted-2">Send reminders and updates via SMS</p>
                     </div>
-                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
+                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
                   </div>
                 </div>
                 <Switch
@@ -523,7 +523,7 @@ export default function Settings() {
             <CardContent className="space-y-8">
               {/* Voice Type - Single Line */}
               <div>
-                <Label className="text-base font-medium">Voice Type</Label>
+                <Label className="text-base font-medium">Voice type</Label>
                 <div className="flex gap-3 mt-4">
                   {[
                     {
@@ -566,7 +566,7 @@ export default function Settings() {
 
                         {isDisabled && (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xs text-muted bg-paper px-2 py-1 rounded">Coming Soon</span>
+                            <span className="text-xs text-muted bg-paper px-2 py-1 rounded">Coming soon</span>
                           </div>
                         )}
                       </div>
@@ -579,7 +579,7 @@ export default function Settings() {
               <div className="grid grid-cols-2 gap-8">
                 {/* Speaking Speed */}
                 <div>
-                  <Label className="text-base font-medium">Speaking Speed</Label>
+                  <Label className="text-base font-medium">Speaking speed</Label>
                   <div className="mt-4 max-w-sm">
                     <div className="relative flex items-start justify-between">
                       {/* Connecting Line - positioned at radio button level */}
@@ -699,8 +699,8 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-muted-2" />
-                <span className="text-muted">Notification Preferences</span>
-                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
+                <span className="text-muted">Notification preferences</span>
+                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
               </CardTitle>
               <CardDescription className="text-muted-2">
                 Choose when and how you want to be notified
@@ -709,7 +709,7 @@ export default function Settings() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-muted-2">Interview Completed</p>
+                  <p className="font-medium text-muted-2">Interview completed</p>
                   <p className="text-sm text-muted-2">Get notified when interviews are finished</p>
                 </div>
                 <Switch
@@ -720,7 +720,7 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-muted-2">Candidate Shortlisted</p>
+                  <p className="font-medium text-muted-2">Applicant shortlisted</p>
                   <p className="text-sm text-muted-2">Get notified when candidates are shortlisted</p>
                 </div>
                 <Switch
@@ -742,7 +742,7 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-muted-2">Daily Digest</p>
+                  <p className="font-medium text-muted-2">Daily digest</p>
                   <p className="text-sm text-muted-2">Receive daily summary of activities</p>
                 </div>
                 <Switch
@@ -759,8 +759,8 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="w-5 h-5 text-muted-2" />
-                <span className="text-muted">Appearance Settings</span>
-                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming Soon</span>
+                <span className="text-muted">Appearance settings</span>
+                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
               </CardTitle>
               <CardDescription className="text-muted-2">
                 Customize the look and feel of your dashboard
@@ -778,7 +778,7 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between opacity-50 pointer-events-none">
                 <div>
-                  <p className="font-medium text-muted-2">Compact Mode</p>
+                  <p className="font-medium text-muted-2">Compact mode</p>
                   <p className="text-sm text-muted-2">Use a more compact layout to fit more content</p>
                 </div>
                 <Switch checked={false} disabled />

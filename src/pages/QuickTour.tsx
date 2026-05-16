@@ -37,7 +37,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
   {
     id: 1,
     title: "Welcome to FunnelHQ",
-    subtitle: "Your Complete AI-Powered Interview Solution",
+    subtitle: "Your complete AI-powered interview solution",
     content: (
       <div className="space-y-4">
         <div className="text-center">
@@ -64,28 +64,28 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           <div className="flex items-center gap-2 p-4 bg-success-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <CheckCircle className="w-5 h-5 text-success" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm text-foreground">Automated Screening</h4>
+              <h4 className="font-semibold text-sm text-foreground">Automated screening</h4>
               <p className="text-[10px] text-muted-foreground">AI conducts interviews automatically</p>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 bg-info-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <BarChart3 className="w-5 h-5 text-info" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm text-foreground">Smart Analytics</h4>
+              <h4 className="font-semibold text-sm text-foreground">Smart analytics</h4>
               <p className="text-[10px] text-muted-foreground">Detailed insights and scoring</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-4 bg-orange-50 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <Target className="w-5 h-5 text-orange-600" weight="fill" />
+          <div className="flex items-center gap-2 p-4 bg-warning-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
+            <Target className="w-5 h-5 text-warning" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm text-foreground">Role-Specific Fitment</h4>
+              <h4 className="font-semibold text-sm text-foreground">Role-specific fitment</h4>
               <p className="text-[10px] text-muted-foreground">Assess for specific positions</p>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 bg-paper-3 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
             <Clock className="w-5 h-5 text-gold-ink" weight="fill" />
             <div>
-              <h4 className="font-semibold text-sm text-foreground">Save Time</h4>
+              <h4 className="font-semibold text-sm text-foreground">Save time</h4>
               <p className="text-[10px] text-muted-foreground">80% less screening time</p>
             </div>
           </div>
@@ -100,14 +100,14 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
     content: (
       <div className="space-y-6">
         <div className="bg-gradient-subtle p-6 rounded-lg">
-          <h4 className="font-bold text-lg mb-2">The Challenge</h4>
+          <h4 className="font-bold text-lg mb-2">The challenge</h4>
           <p className="text-muted mb-4">
             TechCorp needs to hire 50 junior accountants from 500+ applications. Traditional interviews would take months.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-danger/10 p-4 rounded-lg border border-danger/20">
-              <h5 className="font-semibold text-danger mb-2">Traditional Approach</h5>
+              <h5 className="font-semibold text-danger mb-2">Traditional approach</h5>
               <ul className="text-sm space-y-1 text-muted">
                 <li>• 500 applications to review manually</li>
                 <li>• 200+ phone screenings (40 hours)</li>
@@ -138,7 +138,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">1</div>
               <div>
-                <p className="font-semibold text-sm">Create Accounting Interview</p>
+                <p className="font-semibold text-sm">Create accounting interview</p>
                 <p className="text-xs text-muted">Set up questions covering tax, financial reporting, and analytical skills</p>
               </div>
             </div>
@@ -148,7 +148,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">2</div>
               <div>
-                <p className="font-semibold text-sm">Bulk Import Candidates</p>
+                <p className="font-semibold text-sm">Bulk import applicants</p>
                 <p className="text-xs text-muted">Upload CSV/Excel with 500 candidate details</p>
               </div>
             </div>
@@ -168,7 +168,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             >
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-paper text-sm font-bold">4</div>
               <div>
-                <p className="font-semibold text-sm">Review Results</p>
+                <p className="font-semibold text-sm">Review results</p>
                 <p className="text-xs text-muted">Get scored candidates ranked by performance</p>
               </div>
             </div>
@@ -184,13 +184,13 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
     content: (
       <div className="space-y-6">
         <div className="bg-gradient-subtle p-6 rounded-lg">
-          <h4 className="font-bold text-lg mb-2">The Challenge</h4>
+          <h4 className="font-bold text-lg mb-2">The challenge</h4>
           <p className="text-muted mb-4">
             StartupXYZ needs a Senior React Developer with specific skills in TypeScript, Node.js, and cloud architecture.
           </p>
           
           <div className="bg-info/10 p-4 rounded-lg border border-info/20">
-            <h5 className="font-semibold text-info mb-2">The Opportunity</h5>
+            <h5 className="font-semibold text-info mb-2">The opportunity</h5>
             <p className="text-sm text-muted">
               You already have 50 candidates from previous screening interviews — say, generic Tax Manager screens. Instead of starting from scratch,
               use fitment interviews to assess their specific match for a more specialised role (e.g. Transfer Pricing Manager, GST Litigation Specialist).
@@ -204,7 +204,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             <div className="flex items-center gap-3 p-3 bg-surface rounded-lg">
               <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center text-paper text-sm font-bold">1</div>
               <div>
-                <p className="font-medium">Upload Job Description</p>
+                <p className="font-medium">Upload job description</p>
                 <p className="text-sm text-muted">Paste the specific Senior React Developer requirements</p>
               </div>
             </div>
@@ -225,7 +225,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             <div className="flex items-center gap-3 p-3 bg-surface rounded-lg">
               <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center text-paper text-sm font-bold">4</div>
               <div>
-                <p className="font-medium">Get Fitment Scores</p>
+                <p className="font-medium">Get fitment scores</p>
                 <p className="text-sm text-muted">Each candidate gets a role-specific fitment score (0-100%)</p>
               </div>
             </div>
@@ -233,7 +233,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         </div>
 
         <div className="bg-success/10 p-4 rounded-lg border border-success/20">
-          <h5 className="font-semibold text-success mb-2">Multiple Fitment Interviews</h5>
+          <h5 className="font-semibold text-success mb-2">Multiple fitment interviews</h5>
           <p className="text-sm text-muted">
             The same candidate pool can be assessed for different roles - Frontend Developer, Full-Stack Developer, 
             Tech Lead - each with its own fitment interview and scoring.
@@ -244,7 +244,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
   },
   {
     id: 4,
-    title: "Key Features Walkthrough",
+    title: "Key features walkthrough",
     subtitle: "Master the Platform",
     content: (
       <div className="space-y-6">
@@ -319,19 +319,19 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
         </div>
 
         <div className="bg-ink/10 p-6 rounded-lg border border-ink/20">
-          <h4 className="font-bold text-lg mb-2 text-ink">Communication Channels</h4>
+          <h4 className="font-bold text-lg mb-2 text-ink">Communication channels</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="flex items-center gap-3">
               <Mail className="w-6 h-6 text-ink" />
               <div>
-                <p className="font-medium">Email Invitations</p>
+                <p className="font-medium">Email invitations</p>
                 <p className="text-sm text-muted">Automated personalized emails</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="w-6 h-6 text-ink" />
               <div>
-                <p className="font-medium">Phone Interviews</p>
+                <p className="font-medium">Phone interviews</p>
                 <p className="text-sm text-muted">AI-powered voice calls</p>
               </div>
             </div>
@@ -349,7 +349,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
   },
   {
     id: 5,
-    title: "Get Started",
+    title: "Get started",
     subtitle: "",
     content: (
       <div className="space-y-4">
@@ -483,7 +483,7 @@ export default function QuickTour() {
         {/* Header */}
         <div className="flex items-center justify-between pt-4 pb-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Product Quick Tour</h1>
+            <h1 className="text-3xl font-bold text-foreground">Product quick tour</h1>
             <p className="text-muted mt-2 text-xs">
               Learn how to maximize your hiring efficiency with AI Recruiter
             </p>
@@ -496,7 +496,7 @@ export default function QuickTour() {
               className="flex items-center gap-2 text-xs font-bold"
             >
               <X className="w-4 h-4" />
-              {isSkipping ? "Skipping..." : "Skip Tour"}
+              {isSkipping ? "Skipping..." : "Skip tour"}
             </Button>
           </div>
         </div>
@@ -578,7 +578,7 @@ export default function QuickTour() {
               className="bg-[hsl(var(--ink))] hover:bg-[hsl(var(--ink-soft))] text-paper border-0 flex items-center gap-2 text-xs font-bold"
             >
               <CheckCircle className="w-4 h-4" />
-              {isCompleting ? "Completing..." : "Finish Tour"}
+              {isCompleting ? "Completing..." : "Finish tour"}
             </Button>
           ) : (
             <Button

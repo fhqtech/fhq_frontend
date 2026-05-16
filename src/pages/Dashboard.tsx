@@ -182,7 +182,7 @@ export default function Dashboard() {
  />
  </BentoCell>
  <BentoCell cols={6}>
- <StatsCard index={1} title="Total Candidates" value={stats.totalCandidates} icon={Users} variant="success" />
+ <StatsCard index={1} title="Total applicants" value={stats.totalCandidates} icon={Users} variant="success" />
  </BentoCell>
  <BentoCell cols={3}>
  <StatsCard index={2} title="Completed" value={stats.completedInterviews} icon={UserCheck} />
@@ -209,7 +209,7 @@ export default function Dashboard() {
  <TableRow>
  <TableHead>Title</TableHead>
  <TableHead>Status</TableHead>
- <TableHead className="text-right">Candidates</TableHead>
+ <TableHead className="text-right">Applicants</TableHead>
  <TableHead className="text-right">Created</TableHead>
  </TableRow>
  </TableHeader>

@@ -80,7 +80,6 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
     : null;
 
   // Debug: Log candidate data to check invitation_token
-  console.log('CandidateCard candidate:', candidate.name, 'invitation_token:', candidate.invitation_token, 'blueprint:', blueprint, 'hireability:', blueprint?.hireability_recommendation);
 
   // Build radar data from competencies array in blueprint
   const radarData = blueprint && blueprint.competencies ?
@@ -563,11 +562,20 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
               </svg>
             </button>
 
-            {/* Details Button */}
+            {/* Details Button — disabled when there's no completed session
+                to view (F30.5: prevent silent no-op clicks that used to
+                navigate nowhere). */}
             <Button
-              className="flex-1 bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold text-xs border-none"
+              className="flex-1 bg-ink hover:bg-ink-soft text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold text-xs border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-ink"
+              disabled={!hasSession}
+              title={
+                hasSession
+                  ? "View applicant results"
+                  : "Results available after the applicant completes the interview"
+              }
               onClick={(e) => {
                 e.stopPropagation();
+                if (!hasSession) return;
                 onClick?.();
               }}
             >

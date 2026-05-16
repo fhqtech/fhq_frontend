@@ -18,7 +18,6 @@ export const checkBlueprintExists = async (
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      console.log(`Checking blueprint for interview: ${interviewId} (attempt ${attempt + 1}/${retries})`);
       const response = await fetch(`${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/${interviewId}/blueprint`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -26,18 +25,13 @@ export const checkBlueprintExists = async (
         }
       });
 
-      console.log('Blueprint API response status:', response.status);
-
       if (response.status === 404) {
-        console.log('Blueprint not found (404)');
         return { exists: false };
       }
 
       if (!response.ok) {
-        // Retry on 5xx errors or network issues
         if (response.status >= 500 && attempt < retries - 1) {
-          const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 1s, 2s, 4s
-          console.log(`Blueprint API error (${response.status}), retrying in ${delay}ms...`);
+          const delay = Math.pow(2, attempt) * 1000;
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -59,10 +53,8 @@ export const checkBlueprintExists = async (
       return { exists: false };
 
     } catch (error) {
-      // Retry on network errors
       if (attempt < retries - 1 && error instanceof TypeError) {
         const delay = Math.pow(2, attempt) * 1000;
-        console.log(`Network error checking blueprint, retrying in ${delay}ms...`, error);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }

@@ -39,7 +39,7 @@ import { useAuth } from "@/contexts/AuthContext";
 // Sidebar uses domain language (Interviews / Setup / Screening / Fitment)
 // to match how recruiters actually think about the work.
 const menuItems = [
-  { title: "Quick Tour", url: "/quick-tour", icon: Play },
+  { title: "Quick tour", url: "/quick-tour", icon: Play },
   {
     title: "Interviews",
     icon: Briefcase,
@@ -49,7 +49,7 @@ const menuItems = [
       { title: "Fitment", url: "/interviews/fitment" }
     ]
   },
-  { title: "Talent Pools", url: "/lists", icon: Users },
+  { title: "Talent pools", url: "/lists", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings }
 ];
 

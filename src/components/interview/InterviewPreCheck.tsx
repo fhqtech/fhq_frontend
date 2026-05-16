@@ -609,7 +609,7 @@ export const InterviewPreCheck = ({
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${currentStep === 1 ? 'bg-ink text-paper' : 'bg-success text-paper'}`}>
                 {currentStep === 1 ? '1' : <CheckCircle className="w-6 h-6" />}
               </div>
-              <span className={`text-lg font-semibold uppercase ${currentStep === 1 ? 'text-ink' : 'text-muted'}`}>
+              <span className={`text-lg font-semibold ${currentStep === 1 ? 'text-ink' : 'text-muted'}`}>
                 Resume Upload
               </span>
             </div>
@@ -618,7 +618,7 @@ export const InterviewPreCheck = ({
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${currentStep === 2 ? 'bg-ink text-paper' : 'bg-paper-3 text-muted'}`}>
                 2
               </div>
-              <span className={`text-lg font-semibold uppercase ${currentStep === 2 ? 'text-ink' : 'text-muted'}`}>
+              <span className={`text-lg font-semibold ${currentStep === 2 ? 'text-ink' : 'text-muted'}`}>
                 System Check & Terms
               </span>
             </div>
@@ -721,7 +721,7 @@ export const InterviewPreCheck = ({
                           border: 'none',
                           position: 'relative',
                           overflow: 'hidden',
-                          backgroundColor: 'white',
+                          backgroundColor: 'var(--paper)',
                           boxShadow: 'var(--shadow-clay)'
                         }}
                         className="p-4 rounded cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
@@ -753,7 +753,7 @@ export const InterviewPreCheck = ({
                               <CheckCircle className="w-5 h-5 text-paper" />
                             </div>
                           ) : resume.isActive && (
-                            <Badge className="bg-ink text-paper border-0 text-xs uppercase shrink-0 font-semibold shadow-1">
+                            <Badge className="bg-ink text-paper border-0 text-xs shrink-0 font-semibold shadow-1">
                               Active
                             </Badge>
                           )}
@@ -806,11 +806,11 @@ export const InterviewPreCheck = ({
                   border: 'none',
                   position: 'relative',
                   overflow: 'hidden',
-                  backgroundColor: 'white',
-                  color: '#000000',
+                  backgroundColor: 'var(--paper)',
+                  color: 'var(--ink)',
                   boxShadow: 'var(--shadow-clay)'
                 }}
-                className="h-12 px-8 rounded uppercase text-xs font-medium tracking-wider transition-all duration-200"
+                className="h-12 px-8 rounded text-xs font-medium transition-all duration-200"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Cancel
@@ -846,7 +846,7 @@ export const InterviewPreCheck = ({
               border: 'none',
               boxShadow: 'var(--shadow-clay)'
             }}>
-              <h2 className="text-xl font-bold text-ink mb-4 uppercase tracking-[0.2em]">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 How to Succeed
               </h2>
               <div className="space-y-4">
@@ -858,7 +858,7 @@ export const InterviewPreCheck = ({
                       </svg>
                     </div>
                     <div>
-                      <div className="font-semibold text-ink uppercase">{item.title}</div>
+                      <div className="font-semibold text-ink">{item.title}</div>
                       <div className="text-sm text-muted">{item.description}</div>
                     </div>
                   </div>
@@ -871,7 +871,7 @@ export const InterviewPreCheck = ({
               border: 'none',
               boxShadow: 'var(--shadow-clay)'
             }}>
-              <h2 className="text-xl font-bold text-ink mb-4 uppercase tracking-[0.2em]">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Important Precautions
               </h2>
               <div className="space-y-4">
@@ -883,7 +883,7 @@ export const InterviewPreCheck = ({
                       </svg>
                     </div>
                     <div>
-                      <div className="font-semibold text-ink uppercase">{item.title}</div>
+                      <div className="font-semibold text-ink">{item.title}</div>
                       <div className="text-sm text-muted">{item.description}</div>
                     </div>
                   </div>
@@ -915,11 +915,11 @@ export const InterviewPreCheck = ({
                       onClick={testMicrophone}
                       style={{
                         border: 'none',
-                        backgroundColor: '#000000',
+                        backgroundColor: 'var(--ink)',
                         color: 'white',
                         boxShadow: 'var(--shadow-clay)'
                       }}
-                      className="uppercase text-sm tracking-wider font-medium h-10 px-6 rounded transition-all duration-200"
+                      className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
                       TEST
                     </Button>
@@ -946,7 +946,7 @@ export const InterviewPreCheck = ({
                         color: 'white',
                         boxShadow: 'var(--shadow-clay)'
                       }}
-                      className="uppercase text-sm tracking-wider font-medium h-10 px-6 rounded transition-all duration-200"
+                      className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
                       SUCCESS
                     </Button>
@@ -961,10 +961,10 @@ export const InterviewPreCheck = ({
                         onClick={testMicrophone}
                         style={{
                           border: 'none',
-                          backgroundColor: 'white',
+                          backgroundColor: 'var(--paper)',
                           boxShadow: 'var(--shadow-clay)'
                         }}
-                        className="uppercase text-xs tracking-wider h-8 px-4 rounded transition-all duration-200"
+                        className="text-xs h-8 px-4 rounded transition-all duration-200"
                       >
                         RETRY
                       </Button>
@@ -1000,11 +1000,11 @@ export const InterviewPreCheck = ({
                       onClick={testSpeaker}
                       style={{
                         border: 'none',
-                        backgroundColor: '#000000',
+                        backgroundColor: 'var(--ink)',
                         color: 'white',
                         boxShadow: 'var(--shadow-clay)'
                       }}
-                      className="uppercase text-sm tracking-wider font-medium h-10 px-6 rounded transition-all duration-200"
+                      className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
                       TEST
                     </Button>
@@ -1014,11 +1014,11 @@ export const InterviewPreCheck = ({
                       disabled
                       style={{
                         border: 'none',
-                        backgroundColor: '#000000',
+                        backgroundColor: 'var(--ink)',
                         color: 'white',
                         boxShadow: 'var(--shadow-clay)'
                       }}
-                      className="uppercase text-sm tracking-wider font-medium h-10 px-6 rounded transition-all duration-200"
+                      className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
                       TESTING...
                     </Button>
@@ -1032,7 +1032,7 @@ export const InterviewPreCheck = ({
                         color: 'white',
                         boxShadow: 'var(--shadow-clay)'
                       }}
-                      className="uppercase text-sm tracking-wider font-medium h-10 px-6 rounded transition-all duration-200"
+                      className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
                       SUCCESS
                     </Button>
@@ -1064,11 +1064,11 @@ export const InterviewPreCheck = ({
                 disabled={isSelectingResume}
                 style={{
                   border: 'none',
-                  backgroundColor: 'white',
-                  color: '#000000',
+                  backgroundColor: 'var(--paper)',
+                  color: 'var(--ink)',
                   boxShadow: 'var(--shadow-clay)'
                 }}
-                className="flex-1 h-12 rounded uppercase text-xs font-medium tracking-wider transition-all duration-200"
+                className="flex-1 h-12 rounded text-xs font-medium transition-all duration-200"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
@@ -1076,7 +1076,7 @@ export const InterviewPreCheck = ({
               <Button
                 onClick={handleStartInterview}
                 disabled={!isReadyToStart || isSelectingResume}
-                className="flex-1 bg-ink hover:bg-ink text-paper h-12 rounded uppercase text-xs font-medium tracking-wider shadow-2 hover:shadow-2 transition-all disabled:opacity-50"
+                className="flex-1 bg-ink hover:bg-ink text-paper h-12 rounded text-xs font-medium shadow-2 hover:shadow-2 transition-all disabled:opacity-50"
               >
                 {isSelectingResume ? 'Processing...' : 'Start Interview'}
                 <ArrowRight className="w-4 h-4 ml-2" />

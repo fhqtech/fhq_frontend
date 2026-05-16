@@ -34,7 +34,18 @@ import { checkBlueprintExists } from "@/services/blueprintService";
 import { X } from "lucide-react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useStartInterviewMutation } from "@/queries/interviewsQueries";
+import {
+  useInterviewDetailQuery,
+  useInterviewStatsQuery,
+  useInterviewCandidatesQuery,
+  useInterviewSourcesQuery,
+  useInvalidateInterviewDetailsOnRevision,
+} from "@/queries/interviewDetailsQueries";
 import { interviewApi } from "@/services/interviewApi";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  interviewCandidatesQueryKey,
+} from "@/queries/interviewDetailsQueries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Shimmer, ShimmerCard, ShimmerTable, ShimmerInterviewConfig } from "@/components/ui/shimmer";
@@ -84,50 +95,22 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 }
 
 
-// API functions for backend integration
-const fetchInterviewData = async (workspaceId: string, projectId: string, interviewId: string) => {
- // Backend returns the configuration object directly (not wrapped). Tolerate
- // both shapes so a future wrapping change can't break the page.
- const data: any = await interviewApi.getInterviewConfiguration(workspaceId, projectId, interviewId);
- if (!data) return null;
- if (data.interview) return data.interview;
- // Heuristic: a real config dict has at least an id or a title.
- if (data.id || data.title) return data;
- return null;
-};
+// Data layer lives in src/queries/interviewDetailsQueries.ts (F29.1).
+// The component below consumes those hooks; no manual fetch helpers here.
 
-const fetchCandidates = async (workspaceId: string, projectId: string, interviewId: string, page: number = 1, limit: number = 20) => {
- try {
- const data = await interviewApi.getInterviewCandidates(workspaceId, projectId, interviewId, page, limit);
- return {
- candidates: data.candidates || [],
- totalCandidates: data.totalCandidates || 0,
- totalPages: data.totalPages || 0,
- page: data.page || 1,
- limit: data.limit || 20
+// Map backend status to frontend status (module-scope so it can be referenced
+// by hooks at the top of the component body without TDZ).
+const mapBackendStatus = (backendStatus: string): Status => {
+ const statusMap: Record<string, Status> = {
+ 'pending': 'pending',
+ 'invited': 'pending',
+ 'link_clicked': 'link_clicked',
+ 'registered': 'registered',
+ 'linked_to_existing': 'link_clicked',
+ 'completed': 'completed',
+ 'in_progress': 'in-progress'
  };
- } catch (error) {
- console.error('Error fetching candidates:', error);
- return {
- candidates: [],
- totalCandidates: 0,
- totalPages: 0,
- page: 1,
- limit: 20
- };
- }
-};
-
-const fetchInterviewStats = async (workspaceId: string, projectId: string, interviewId: string) => {
- try {
- const stats = await interviewApi.getInterviewStats(workspaceId, projectId, interviewId);
- console.log('📊 Stats API response:', stats);
- console.log('📊 Total candidates from stats:', stats?.totalCandidates);
- return stats || {};
- } catch (error) {
- console.error('❌ Stats API failed:', error);
- return {};
- }
+ return statusMap[backendStatus] || 'pending';
 };
 
 
@@ -190,20 +173,13 @@ export default function InterviewDetails() {
  const [tableStatusFilter, setTableStatusFilter] = useState("");
  const [tableScoreFilter, setTableScoreFilter] = useState("");
 
- // Backend data state
- const [interview, setInterview] = useState<any>(null);
- const [candidates, setCandidates] = useState<any[]>([]);
- const [stats, setStats] = useState<any>({});
+ // F29.1: server state moved to TanStack Query in interviewDetailsQueries.
+ // Local state below is for things only the page knows about (UI flags,
+ // selections, modal toggles).
  const [duplicateRecords, setDuplicateRecords] = useState<number>(0);
- // Separate loading states for each section
- const [loadingInterview, setLoadingInterview] = useState(true);
- const [loadingCandidates, setLoadingCandidates] = useState(true);
- const [loadingStats, setLoadingStats] = useState(true);
- const [loadingSources, setLoadingSources] = useState(true);
- const [error, setError] = useState<string | null>(null);
 
- // Bumps on every SSE 'update' event from the backend; triggers a refetch
- // of interview + stats so the NBA card recomputes live.
+ // Bumps on every SSE 'update' event from the backend. Wired below to
+ // useInvalidateInterviewDetailsOnRevision so cached queries refetch.
  const [liveRevision, setLiveRevision] = useState(0);
 
  // Live updates via Server-Sent Events. Backend emits an 'update' event
@@ -242,7 +218,7 @@ export default function InterviewDetails() {
  // Pagination state
  const [currentPage, setCurrentPage] = useState(1);
  const [pageSize] = useState(10);
- const [totalCandidates, setTotalCandidates] = useState(0);
+ // totalCandidates derived from useInterviewCandidatesQuery below.
 
  // Blueprint modal state
  const [showBlueprintModal, setShowBlueprintModal] = useState(false);
@@ -253,14 +229,152 @@ export default function InterviewDetails() {
  // Expanded rows state for showing attempts
  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
- // Candidate sources state for sync feature
- const [candidateSources, setCandidateSources] = useState<any[]>([]);
- const [hasSharedLists, setHasSharedLists] = useState(false);
- const [hasQualifiedLists, setHasQualifiedLists] = useState(false);
- const [loadingCandidateSources, setLoadingCandidateSources] = useState(true);
+ // Candidate sources state for sync feature (UI-only flags; data via query)
  const [checkingSourceIds, setCheckingSourceIds] = useState<Set<string>>(new Set());
  const [syncingSourceIds, setSyncingSourceIds] = useState<Set<string>>(new Set());
  const [sourceUpdates, setSourceUpdates] = useState<Record<string, any>>({});
+
+ const queryClient = useQueryClient();
+
+ // ── F29.1: TanStack Query data layer ───────────────────────────────────
+ // Single fetch per concern, deduped + cached. Race-safe via `enabled`.
+ const interviewQuery = useInterviewDetailQuery(
+ currentWorkspace?.id,
+ currentProject?.id,
+ id,
+ );
+ const statsQuery = useInterviewStatsQuery(
+ currentWorkspace?.id,
+ currentProject?.id,
+ id,
+ );
+
+ // Map raw API response → JSX shape (mirrors the old loadInterviewData mapping)
+ const interview = React.useMemo(() => {
+ const raw = interviewQuery.data;
+ if (!raw) return null;
+ return {
+ id: raw.id || id,
+ title: raw.title || 'Interview',
+ type: raw.type || 'General',
+ created: raw.createdAt
+ ? formatCreatedDate(raw.createdAt)
+ : formatCreatedDate(new Date().toISOString()),
+ status: raw.status || 'draft',
+ duration: raw.duration ? `${raw.duration} min` : '30 min',
+ voiceType: raw.voiceType || 'Professional',
+ description: raw.description || 'Interview assessment',
+ candidateCount: raw.candidateCount || raw.candidates || 0,
+ lists: raw.lists || raw.listIds || [],
+ template_id: raw.templateId,
+ template_source: raw.template_source,
+ communications: {
+ email: raw.communications?.email || false,
+ phone: raw.communications?.phone || false,
+ sms: raw.communications?.sms || false,
+ },
+ // Surface blueprint fields directly so child components can read them.
+ blueprintStatus: raw.blueprintStatus,
+ blueprintError: raw.blueprintError,
+ };
+ }, [interviewQuery.data, id]);
+
+ const stats = statsQuery.data ?? {};
+ const loadingInterview = interviewQuery.isPending;
+ const loadingStats = statsQuery.isPending;
+ const error = interviewQuery.error
+ ? (interviewQuery.error instanceof Error
+ ? interviewQuery.error.message
+ : 'Failed to load interview data')
+ : (interviewQuery.data === null && !interviewQuery.isPending
+ ? 'Interview not found'
+ : null);
+
+ const candidatesQuery = useInterviewCandidatesQuery(
+ currentWorkspace?.id,
+ currentProject?.id,
+ id,
+ currentPage,
+ pageSize,
+ interview?.status,
+ );
+ const candidatesRaw = candidatesQuery.data?.candidates ?? [];
+ const candidates = React.useMemo(() => {
+ return candidatesRaw.map((candidate: any, index: number) => ({
+ id: (currentPage - 1) * pageSize + index + 1,
+ candidateId: candidate.candidateId || candidate.id,
+ name: candidate.name || 'Unknown',
+ email: candidate.email || '',
+ phone: candidate.phone || '',
+ status: mapBackendStatus(candidate.status),
+ score: candidate.score !== undefined && candidate.score !== null ? candidate.score : null,
+ humanScore: candidate.human_score !== undefined && candidate.human_score !== null ? candidate.human_score : null,
+ completedAt: candidate.assessment_completed ? candidate.created_at : null,
+ duration: candidate.duration || null,
+ invitation_token: candidate.invitation_token || '',
+ invitation_id: candidate.invitation_id || candidate.id || '',
+ email_sent: candidate.email_sent ?? null,
+ email_sent_at: candidate.email_sent_at || null,
+ email_error: candidate.email_error || null,
+ invitationLink: candidate.invitation_token
+ ? `${import.meta.env.VITE_FRONTEND_BASE_URL || 'http://localhost:8080'}/register/${candidate.invitation_token}`
+ : null,
+ sessionId: candidate.session_id,
+ attempts: candidate.attempts || [],
+ jobTitle: candidate.jobTitle || '',
+ role: candidate.role || '',
+ experience: candidate.experience || '',
+ location: candidate.location || '',
+ availableIn: candidate.availableIn || '',
+ linkedin: candidate.linkedin || '',
+ portfolioUrl: candidate.portfolioUrl || '',
+ profilePicture: candidate.profilePicture || '',
+ session_status: candidate.session_status || 'no_session',
+ swipe_decision: candidate.swipe_decision || null,
+ }));
+ // mapBackendStatus is hoisted below; the dep array intentionally omits it
+ // (stable reference within the component body).
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [candidatesRaw, currentPage, pageSize]);
+ const totalCandidates = candidatesQuery.data?.totalCandidates ?? 0;
+ const loadingCandidates = candidatesQuery.isPending && Boolean(interview && interview.status !== 'draft');
+
+ // Auto-expand rows that have multiple attempts (mirrors the old behavior).
+ useEffect(() => {
+ if (candidatesRaw.length === 0) return;
+ const withAttempts = new Set<number>();
+ candidates.forEach((c) => {
+ if (c.attempts && c.attempts.length > 0) withAttempts.add(c.id);
+ });
+ setExpandedRows((prev) => {
+ // Merge — never collapse a row the user already expanded.
+ const merged = new Set(prev);
+ withAttempts.forEach((id) => merged.add(id));
+ return merged;
+ });
+ // Only re-run when the candidate set changes.
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [candidatesRaw]);
+
+ const sourcesQuery = useInterviewSourcesQuery(
+ currentWorkspace?.id,
+ currentProject?.id,
+ id,
+ interview?.lists,
+ interview?.candidateCount,
+ );
+ const candidateSources = sourcesQuery.data?.sources ?? [];
+ const hasSharedLists = sourcesQuery.data?.hasSharedLists ?? false;
+ const hasQualifiedLists = sourcesQuery.data?.hasQualifiedLists ?? false;
+ const loadingCandidateSources = sourcesQuery.isPending && Boolean(interview);
+
+ // Bridge SSE liveRevision → query invalidation.
+ useInvalidateInterviewDetailsOnRevision(
+ currentWorkspace?.id,
+ currentProject?.id,
+ id,
+ liveRevision,
+ );
 
  // Helper function to format duration from seconds to mm:ss
  const formatDuration = (seconds: number | null) => {
@@ -281,74 +395,43 @@ export default function InterviewDetails() {
  setExpandedRows(newExpanded);
  };
 
- // Refresh candidates data
- const refreshCandidates = async () => {
- if (!id || !interview || interview.status === 'draft' || !currentWorkspace || !currentProject) return;
-
- try {
- setLoadingCandidates(true);
- const result = await fetchCandidates(currentWorkspace.id, currentProject.id, id, currentPage, pageSize);
-
- const mappedCandidates = result.candidates.map((candidate: any, index: number) => {
- console.log('🔍 Candidate data:', candidate);
- console.log('🔍 Attempts:', candidate.attempts);
- return {
- id: (currentPage - 1) * pageSize + index + 1,
- candidateId: candidate.candidateId || candidate.id,
- name: candidate.name || 'Unknown',
- email: candidate.email || '',
- phone: candidate.phone || '',
- status: mapBackendStatus(candidate.status),
- score: candidate.score !== undefined && candidate.score !== null ? candidate.score : null,
- humanScore: candidate.human_score !== undefined && candidate.human_score !== null ? candidate.human_score : null,
- completedAt: candidate.assessment_completed ? candidate.created_at : null,
- duration: candidate.duration || null,
- invitation_token: candidate.invitation_token || '',
- invitation_id: candidate.invitation_id || candidate.id || '',
- email_sent: candidate.email_sent ?? null,
- email_sent_at: candidate.email_sent_at || null,
- email_error: candidate.email_error || null,
- invitationLink: candidate.invitation_token ? `${import.meta.env.VITE_FRONTEND_BASE_URL || 'http://localhost:8080'}/register/${candidate.invitation_token}` : null,
- sessionId: candidate.session_id,
- attempts: candidate.attempts || [],
- // Profile fields
- jobTitle: candidate.jobTitle || '',
- role: candidate.role || '',
- experience: candidate.experience || '',
- location: candidate.location || '',
- availableIn: candidate.availableIn || '',
- linkedin: candidate.linkedin || '',
- portfolioUrl: candidate.portfolioUrl || '',
- profilePicture: candidate.profilePicture || '',
- session_status: candidate.session_status || 'no_session',
- swipe_decision: candidate.swipe_decision || null
+ // Patch the cached interview detail so derived state reflects optimistic
+ // updates from start/pause/stop/resume mutations without a full refetch.
+ // The cache shape is whatever the API returned (raw response); we touch
+ // the same fields the JSX consumes via the `interview` memo.
+ const patchInterviewCache = (patch: Record<string, any>) => {
+ const key = ["interview-detail", currentWorkspace?.id, currentProject?.id, id];
+ queryClient.setQueryData<any>(key, (prev: any) => {
+ if (!prev) return prev;
+ return { ...prev, ...patch };
+ });
  };
+
+ // Refresh candidates: invalidate the cached query → triggers a refetch
+ // through the same useInterviewCandidatesQuery hook. The auto-expand is
+ // handled by the effect colocated with the derived `candidates` value.
+ const refreshCandidates = async () => {
+ if (!id || !interview || interview.status === 'draft') return;
+ try {
+ await queryClient.invalidateQueries({
+ queryKey: interviewCandidatesQueryKey(
+ currentWorkspace?.id,
+ currentProject?.id,
+ id,
+ currentPage,
+ pageSize,
+ ),
  });
-
- setCandidates(mappedCandidates);
- setTotalCandidates(result.totalCandidates);
-
- // Auto-expand rows with multiple attempts
- const candidatesWithAttempts = new Set(
- mappedCandidates
- .filter((c: any) => c.attempts && c.attempts.length > 0)
- .map((c: any) => c.id)
- );
- setExpandedRows(candidatesWithAttempts);
-
  toast({
- title: "Candidates Refreshed",
- description: "Candidate data has been updated successfully"
+ title: "Applicants refreshed",
+ description: "Applicant data has been updated successfully",
  });
- } catch (err) {
- console.error('Error refreshing candidates:', err);
+ } catch {
  toast({
- title: "Refresh Failed",
- description: "Failed to refresh candidate data. Please try again.",
- variant: "destructive"
+ title: "Refresh failed",
+ description: "Failed to refresh applicant data. Please try again.",
+ variant: "destructive",
  });
- } finally {
- setLoadingCandidates(false);
  }
  };
 
@@ -360,167 +443,21 @@ export default function InterviewDetails() {
  const [blueprintStatus, setBlueprintStatus] = useState<string | null>(null); // "generating" | "completed" | "failed"
  const [blueprintError, setBlueprintError] = useState<string | null>(null);
 
- // Load interview data
+ // Sync blueprint status from the interview query result. The local
+ // blueprintStatus/blueprintError state is read by other effects + the
+ // status pill JSX; this keeps it the source of truth without re-fetching.
  useEffect(() => {
- const loadInterviewData = async () => {
- if (!id || !currentWorkspace || !currentProject) return;
-
- try {
- setLoadingInterview(true);
- setError(null);
-
- const interviewData = await fetchInterviewData(currentWorkspace.id, currentProject.id, id);
-
- if (interviewData) {
- const mappedInterview = {
- id: interviewData.id || id,
- title: interviewData.title || 'Interview',
- type: interviewData.type || 'General',
- created: interviewData.createdAt ? formatCreatedDate(interviewData.createdAt) : formatCreatedDate(new Date().toISOString()),
- status: interviewData.status || 'draft',
- duration: interviewData.duration ? `${interviewData.duration} min` : '30 min',
- voiceType: interviewData.voiceType || 'Professional',
- description: interviewData.description || 'Interview assessment',
- candidateCount: interviewData.candidateCount || interviewData.candidates || 0,
- lists: interviewData.lists || interviewData.listIds || [],
- template_id: interviewData.templateId, // Template ID from backend
- template_source: interviewData.template_source, // Track if template is from control_tower or project
- communications: {
- email: interviewData.communications?.email || false,
- phone: interviewData.communications?.phone || false,
- sms: interviewData.communications?.sms || false
+ if (interview?.blueprintStatus) {
+ setBlueprintStatus(interview.blueprintStatus);
+ setBlueprintError(interview.blueprintError || null);
  }
- };
-
- setInterview(mappedInterview);
-
- // Extract blueprint status from interview data
- if (interviewData.blueprintStatus) {
- setBlueprintStatus(interviewData.blueprintStatus);
- setBlueprintError(interviewData.blueprintError || null);
- console.log('Blueprint status:', interviewData.blueprintStatus, 'Error:', interviewData.blueprintError);
- }
- } else {
- setError('Interview not found');
- }
- } catch (err) {
- console.error('Error loading interview:', err);
- setError('Failed to load interview data');
- } finally {
- setLoadingInterview(false);
- }
- };
-
- loadInterviewData();
- }, [id, currentWorkspace, currentProject, liveRevision]);
-
- // Load stats data
- useEffect(() => {
- const loadStatsData = async () => {
- if (!id || !currentWorkspace || !currentProject) return;
-
- try {
- setLoadingStats(true);
- const statsData = await fetchInterviewStats(currentWorkspace.id, currentProject.id, id);
- console.log('📊 Setting stats state to:', statsData);
- setStats(statsData);
- } catch (err) {
- console.error('Error loading stats:', err);
- } finally {
- setLoadingStats(false);
- }
- };
-
- loadStatsData();
- }, [id, currentWorkspace, currentProject, liveRevision]);
+ }, [interview?.blueprintStatus, interview?.blueprintError]);
 
 
 
- // Load candidate sources for this interview
- useEffect(() => {
- const loadCandidateSources = async () => {
- if (!interview) {
- setLoadingCandidateSources(false);
- return;
- }
-
- try {
- setLoadingCandidateSources(true);
- const token = localStorage.getItem('auth_token');
-
- // Use list IDs from interview object (already loaded from first API call)
- const listIds = interview.lists || [];
- console.log('📋 Using list IDs from interview state:', listIds);
-
- if (listIds.length === 0) {
- console.log('⚠️ No listIds found in interview');
- setCandidateSources([]);
- setLoadingCandidateSources(false);
- return;
- }
-
- if (!currentWorkspace || !currentProject) {
- console.log('⚠️ No workspace or project selected');
- setCandidateSources([]);
- setLoadingCandidateSources(false);
- return;
- }
-
- // For each list, get its sources
- const allSources: any[] = [];
- let foundSharedList = false;
- let foundQualifiedList = false;
-
- for (const listId of listIds) {
- try {
- // First, try to get the list from regular lists
- const sources = await listsApi.getListSources(currentWorkspace.id, currentProject.id, listId);
- const googleSheetSources = sources.filter((s: any) => s.type === 'google_sheet');
-
- allSources.push(...googleSheetSources.map((s: any) => ({ ...s, listId })));
-
- // If no sources found but interview has candidates, check if it's a qualified or shared list
- if (sources.length === 0 && interview?.candidateCount > 0) {
- // Try to fetch from qualified lists
- try {
- await qualifiedListsApi.getQualifiedList(currentWorkspace.id, currentProject.id, listId);
- foundQualifiedList = true;
- console.log(`📋 List ${listId} is a qualified/curated list`);
- } catch (qualifiedErr) {
- // Not a qualified list, must be a shared list
- foundSharedList = true;
- console.log(`📋 List ${listId} is a shared list`);
- }
- }
- } catch (err) {
- console.error(`Error loading sources for list ${listId}:`, err);
- // If API call fails, try to determine if it's qualified or shared
- if (interview?.candidateCount > 0) {
- try {
- await qualifiedListsApi.getQualifiedList(currentWorkspace.id, currentProject.id, listId);
- foundQualifiedList = true;
- } catch {
- foundSharedList = true;
- }
- }
- }
- }
-
- setHasSharedLists(foundSharedList);
- setHasQualifiedLists(foundQualifiedList);
- setCandidateSources(allSources);
- console.log('✅ Loaded candidate sources:', allSources, 'Has shared lists:', foundSharedList, 'Has qualified lists:', foundQualifiedList);
- } catch (error) {
- console.error('❌ Error loading candidate sources:', error);
- setCandidateSources([]);
- } finally {
- setLoadingCandidateSources(false);
- }
- };
-
- console.log('🔍 Loading candidate sources - Interview status:', interview?.status, 'Interview ID:', id);
- loadCandidateSources();
- }, [id, interview]);
+ // F29.1: candidate sources fetch moved to useInterviewSourcesQuery (data
+ // layer above). The `enabled` gate there ensures we only fire when the
+ // interview is loaded, killing the old "fires with status=undefined" race.
 
  // Handler to check for new candidates
  const handleCheckForNewCandidates = async (source: any) => {
@@ -582,85 +519,22 @@ export default function InterviewDetails() {
  return newUpdates;
  });
 
- console.log('✅ Sync result:', result);
-
  toast({
  title: "Sync Complete",
  description: result.message
  });
 
- // Refresh all data to update counts everywhere
+ // Refresh all caches after sync. Wait 5s for Firestore eventual
+ // consistency, then invalidate every interview-detail query so the page
+ // re-derives interview / stats / sources / candidates from fresh data.
  if (result.addedCandidates > 0 && id) {
- console.log(`🔄 Refreshing data after adding ${result.addedCandidates} candidates...`);
-
- // Wait for Firestore to complete the update (5 seconds for eventual consistency)
- console.log('⏳ Waiting 5 seconds for Firestore to sync...');
- await new Promise(resolve => setTimeout(resolve, 5000));
- console.log('🔄 Reloading page...');
- window.location.reload();
- return; // Exit early since page will reload
-
- if (!currentWorkspace || !currentProject) {
- throw new Error('No workspace or project selected');
- }
-
- const token = localStorage.getItem('auth_token');
-
- // Reload interview data to update candidateCount
- const interviewData = await fetchInterviewData(currentWorkspace.id, currentProject.id, id);
- console.log('📊 Reloaded interview data:', interviewData);
- if (interviewData) {
- setInterview({
- id: interviewData.id,
- candidateCount: interviewData.candidateCount || interviewData.candidates || 0,
- communications: interviewData.communications || { email: false, phone: false, sms: false },
- status: interviewData.status || 'draft',
- type: interviewData.type,
- voiceType: interviewData.voiceType,
- duration: interviewData.duration,
- blueprintStatus: interviewData.blueprintStatus,
- listIds: interviewData.listIds || []
- });
- }
-
- // Reload stats
- const statsData = await fetchInterviewStats(currentWorkspace.id, currentProject.id, id);
- console.log('📈 Reloaded stats:', statsData);
- setStats(statsData);
-
- // Update total candidates count
- if (statsData?.totalCandidates) {
- console.log(`✅ Setting totalCandidates from stats: ${statsData.totalCandidates}`);
- setTotalCandidates(statsData.totalCandidates);
- } else if (interviewData?.candidateCount) {
- console.log(`✅ Setting totalCandidates from interview: ${interviewData.candidateCount}`);
- setTotalCandidates(interviewData.candidateCount);
- }
-
- // Reload candidate sources to update counts
- try {
- if (currentWorkspace && currentProject) {
- const listIds = interviewData?.listIds || interview?.listIds || [];
- const allSources: any[] = [];
- for (const listId of listIds) {
- try {
- const sources = await listsApi.getListSources(currentWorkspace.id, currentProject.id, listId);
- const googleSheetSources = sources.filter((s: any) => s.type === 'google_sheet');
- allSources.push(...googleSheetSources.map((s: any) => ({ ...s, listId })));
- } catch (err) {
- console.error(`Error loading sources for list ${listId}:`, err);
- }
- }
- setCandidateSources(allSources);
- }
- } catch (err) {
- console.error('Error reloading candidate sources:', err);
- }
-
- // Refresh candidates table if interview is active
- if (interviewData?.status !== 'draft') {
- await refreshCandidates();
- }
+ await new Promise((resolve) => setTimeout(resolve, 5000));
+ await Promise.all([
+ queryClient.invalidateQueries({ queryKey: ["interview-detail", currentWorkspace?.id, currentProject?.id, id] }),
+ queryClient.invalidateQueries({ queryKey: ["interview-stats", currentWorkspace?.id, currentProject?.id, id] }),
+ queryClient.invalidateQueries({ queryKey: ["interview-sources", currentWorkspace?.id, currentProject?.id, id] }),
+ queryClient.invalidateQueries({ queryKey: ["interview-candidates", currentWorkspace?.id, currentProject?.id, id] }),
+ ]);
  }
  } catch (error: any) {
  console.error('Error syncing new candidates:', error);
@@ -708,7 +582,6 @@ export default function InterviewDetails() {
  if (blueprintStatus !== 'generating' || !id) return;
  if (!currentWorkspace || !currentProject) return;
 
- console.log('📡 Starting auto-refresh for blueprint status (generating)');
  let cancelled = false;
  let consecutiveErrors = 0;
  let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -837,95 +710,18 @@ export default function InterviewDetails() {
  }
  };
 
- // Load candidates data with pagination - only when interview starts
- useEffect(() => {
- const loadCandidatesData = async () => {
- if (!id || !interview || interview.status === 'draft' || !currentWorkspace || !currentProject) {
- setLoadingCandidates(false);
- return;
- }
-
- try {
- setLoadingCandidates(true);
- const result = await fetchCandidates(currentWorkspace.id, currentProject.id, id, currentPage, pageSize);
-
- const mappedCandidates = result.candidates.map((candidate: any, index: number) => {
- console.log('🔍 Candidate data (loadCandidatesData):', candidate);
- console.log('🔍 Attempts:', candidate.attempts);
- if (candidate.attempts && candidate.attempts.length > 0) {
- candidate.attempts.forEach((attempt: any, idx: number) => {
- console.log(`🔍 Attempt ${idx + 1} data:`, attempt);
- console.log(`🔍 Attempt ${idx + 1} rating:`, attempt.rating);
- });
- }
- return {
- id: (currentPage - 1) * pageSize + index + 1,
- candidateId: candidate.candidateId || candidate.id,
- name: candidate.name || 'Unknown',
- email: candidate.email || '',
- phone: candidate.phone || '',
- status: mapBackendStatus(candidate.status),
- score: candidate.score !== undefined && candidate.score !== null ? candidate.score : null,
- humanScore: candidate.human_score !== undefined && candidate.human_score !== null ? candidate.human_score : null,
- completedAt: candidate.assessment_completed ? candidate.created_at : null,
- duration: candidate.duration || null,
- invitation_token: candidate.invitation_token || '',
- invitation_id: candidate.invitation_id || candidate.id || '',
- email_sent: candidate.email_sent ?? null,
- email_sent_at: candidate.email_sent_at || null,
- email_error: candidate.email_error || null,
- invitationLink: candidate.invitation_token ? `${import.meta.env.VITE_FRONTEND_BASE_URL || 'http://localhost:8080'}/register/${candidate.invitation_token}` : null,
- sessionId: candidate.session_id,
- attempts: candidate.attempts || [],
- // Profile fields
- jobTitle: candidate.jobTitle || '',
- role: candidate.role || '',
- experience: candidate.experience || '',
- location: candidate.location || '',
- availableIn: candidate.availableIn || '',
- linkedin: candidate.linkedin || '',
- portfolioUrl: candidate.portfolioUrl || '',
- profilePicture: candidate.profilePicture || '',
- session_status: candidate.session_status || 'no_session',
- swipe_decision: candidate.swipe_decision || null
- };
- });
-
- setCandidates(mappedCandidates);
- setTotalCandidates(result.totalCandidates);
- } catch (err) {
- console.error('Error loading candidates:', err);
- } finally {
- setLoadingCandidates(false);
- }
- };
-
- loadCandidatesData();
- }, [id, interview?.status, currentPage, pageSize]);
-
- // Map backend status to frontend status
- const mapBackendStatus = (backendStatus: string): Status => {
- const statusMap: Record<string, Status> = {
- 'pending': 'pending',
- 'invited': 'pending',
- 'link_clicked': 'link_clicked', 
- 'registered': 'registered',
- 'linked_to_existing': 'link_clicked',
- 'completed': 'completed',
- 'in_progress': 'in-progress'
- };
- return statusMap[backendStatus] || 'pending';
- };
+ // F29.1: candidates fetch moved to useInterviewCandidatesQuery (data layer
+ // above). The mapping + auto-expand are colocated with the derived state.
 
  // Error state
  if (error) {
  return (
  <div className="text-center py-12">
- <h2 className="text-2xl font-bold text-foreground">Interview Not Found</h2>
+ <h2 className="text-2xl font-bold text-foreground">Interview not found</h2>
  <p className="text-muted-foreground mt-2">{error}</p>
  <Button onClick={() => navigate("/interviews/manage")} className="mt-4">
  <ArrowLeft className="w-4 h-4 mr-2" />
- Back to Manage Interviews
+ Back to manage interviews
  </Button>
  </div>
  );
@@ -965,7 +761,7 @@ export default function InterviewDetails() {
  await new Promise(resolve => setTimeout(resolve, 800));
  
  // Step 3: Fetching candidates
- setStartingProgress("Loading candidate information...");
+ setStartingProgress("Loading applicant information...");
  await new Promise(resolve => setTimeout(resolve, 600));
 
  // Step 4: Generating invitations
@@ -979,7 +775,7 @@ export default function InterviewDetails() {
  const message = err instanceof Error ? err.message : "Failed to start interview";
  setStartingProgress(`Error: ${message}`);
  toast({
- title: "Error Starting Interview",
+ title: "Error starting interview",
  description: message,
  variant: "destructive"
  });
@@ -992,10 +788,9 @@ export default function InterviewDetails() {
 
  // Update interview state immediately if we got updated data
  if (data.updated_interview) {
- setInterview(prev => prev ? { ...prev, status: 'active', ...data.updated_interview } : null);
+ patchInterviewCache({ status: 'active', ...data.updated_interview });
  } else {
- // Fallback to update status
- setInterview(prev => prev ? { ...prev, status: 'active' } : null);
+ patchInterviewCache({ status: 'active' });
  }
 
  // Show success state briefly before closing
@@ -1006,7 +801,7 @@ export default function InterviewDetails() {
  setStartingProgress("");
 
  toast({
- title: "Interview Started!",
+ title: "Interview started",
  description: `${data.total_invitations_created || ''} invitation links generated for "${interview.title}"`
  });
  } catch (error) {
@@ -1031,7 +826,7 @@ export default function InterviewDetails() {
  ['scheduling', 'expired', 'invited'].includes((c.status || '').toLowerCase())
  );
  if (stuck.length === 0) {
- toast({ title: 'No candidates to re-invite', description: 'Every invitation has been responded to.' });
+ toast({ title: 'No applicants to re-invite', description: 'Every invitation has been responded to.' });
  return;
  }
  setIsResendingInvites(true);
@@ -1065,10 +860,10 @@ export default function InterviewDetails() {
  await pauseInterview(currentWorkspace.id, currentProject.id, id!);
 
  // Update local state
- setInterview(prev => prev ? { ...prev, status: 'paused' } : null);
+ patchInterviewCache({ status: 'paused' });
 
  toast({
- title: "Interview Paused",
+ title: "Interview paused",
  description: "Interview has been paused successfully",
  });
  } catch (error) {
@@ -1091,10 +886,10 @@ export default function InterviewDetails() {
  await stopInterview(currentWorkspace.id, currentProject.id, id!);
 
  // Update local state
- setInterview(prev => prev ? { ...prev, status: 'stopped' } : null);
+ patchInterviewCache({ status: 'stopped' });
 
  toast({
- title: "Interview Stopped",
+ title: "Interview stopped",
  description: "Interview has been stopped permanently",
  });
  } catch (error) {
@@ -1117,10 +912,10 @@ export default function InterviewDetails() {
  await resumeInterview(currentWorkspace.id, currentProject.id, id!);
 
  // Update local state
- setInterview(prev => prev ? { ...prev, status: 'active' } : null);
+ patchInterviewCache({ status: 'active' });
 
  toast({
- title: "Interview Resumed",
+ title: "Interview resumed",
  description: "Interview has been resumed successfully",
  });
  } catch (error) {
@@ -1146,17 +941,6 @@ export default function InterviewDetails() {
  const displayEligibleForFitment = stats?.eligibleForFitment ?? eligibleForShortlist.length;
  const displayParticipationRate = stats?.participationRate ?? participationRate;
 
- // Debug logging
- console.log('🎯 Display values:', {
- stats,
- 'stats.totalCandidates': stats?.totalCandidates,
- totalCandidates,
- displayTotalCandidates,
- displayCompletedCandidates,
- displayEligibleForFitment,
- displayParticipationRate
- });
- 
  // Calculate total duplicates from candidate sources
  const totalDuplicates = 0; // Removed candidate sources API call
 
@@ -1205,8 +989,8 @@ export default function InterviewDetails() {
  // Auto-select candidates based on transcript analysis (score >= 75%)
  setSelectedCandidates(eligibleForShortlist.map(c => c.id));
  toast({
- title: "Candidates Auto-Shortlisted",
- description: `${eligibleForShortlist.length} candidates automatically shortlisted based on transcript analysis (score ≥ 75%).`,
+ title: "Applicants auto-shortlisted",
+ description: `${eligibleForShortlist.length} applicants automatically shortlisted based on transcript analysis (score ≥ 75%).`,
  });
  };
 
@@ -1303,7 +1087,7 @@ export default function InterviewDetails() {
 
  {/* Overview Cards - Compact & Translucent */}
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
- {/* Total Candidates */}
+ {/* Total applicants */}
  <div
  className="rounded-sm p-6 bg-paper transition-shadow duration-200"
  style={{
@@ -1317,9 +1101,9 @@ export default function InterviewDetails() {
  <p className="text-3xl font-bold text-foreground">
  <AnimatedCounter value={displayTotalCandidates} />
  </p>
- <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
+ <div className="text-sm text-muted text-xs tracking-wider leading-tight">
  <div>Total</div>
- <div>Candidates</div>
+ <div>applicants</div>
  </div>
  </div>
  )}
@@ -1339,14 +1123,14 @@ export default function InterviewDetails() {
  <p className="text-3xl font-bold text-foreground">
  <AnimatedCounter value={displayCompletedCandidates} />
  </p>
- <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
+ <div className="text-sm text-muted text-xs tracking-wider leading-tight">
  <div>Completed</div>
  </div>
  </div>
  )}
  </div>
 
- {/* Eligible for Fitment */}
+ {/* Eligible for fitment */}
  <div
  className="rounded-sm p-6 bg-paper transition-shadow duration-200"
  style={{
@@ -1360,15 +1144,15 @@ export default function InterviewDetails() {
  <p className="text-3xl font-bold text-foreground">
  <AnimatedCounter value={displayEligibleForFitment} />
  </p>
- <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
+ <div className="text-sm text-muted text-xs tracking-wider leading-tight">
  <div>Eligible for</div>
- <div>Fitment</div>
+ <div>fitment</div>
  </div>
  </div>
  )}
  </div>
 
- {/* Participation Rate */}
+ {/* Participation rate */}
  <div
  className="rounded-sm p-6 bg-paper transition-shadow duration-200"
  style={{
@@ -1382,9 +1166,9 @@ export default function InterviewDetails() {
  <p className="text-3xl font-bold text-foreground">
  <AnimatedCounter value={displayParticipationRate} suffix="%" />
  </p>
- <div className="text-sm text-muted uppercase text-xs tracking-wider leading-tight">
+ <div className="text-sm text-muted text-xs tracking-wider leading-tight">
  <div>Participation</div>
- <div>Rate</div>
+ <div>rate</div>
  </div>
  </div>
  )}
@@ -1682,17 +1466,17 @@ export default function InterviewDetails() {
  {hasSharedLists && hasQualifiedLists ? (
  <>
  <p className="text-sm font-semibold text-ink-soft mb-1">Source data not available</p>
- <p className="text-xs text-muted">This interview uses candidates from shared and curated lists</p>
+ <p className="text-xs text-muted">This interview uses applicants from shared and curated lists</p>
  </>
  ) : hasSharedLists ? (
  <>
  <p className="text-sm font-semibold text-ink-soft mb-1">Source data not available</p>
- <p className="text-xs text-muted">This interview uses candidates from a shared list</p>
+ <p className="text-xs text-muted">This interview uses applicants from a shared list</p>
  </>
  ) : hasQualifiedLists ? (
  <>
  <p className="text-sm font-semibold text-ink-soft mb-1">Source data not available</p>
- <p className="text-xs text-muted">This interview uses candidates from a curated list</p>
+ <p className="text-xs text-muted">This interview uses applicants from a curated list</p>
  </>
  ) : (
  <p className="text-sm text-muted">No Google Sheet sources found</p>
@@ -2124,8 +1908,8 @@ export default function InterviewDetails() {
  }))}
  onSuccess={() => {
  toast({
- title: 'Candidates shortlisted',
- description: `${eligibleForShortlist.length} candidate(s) added to your qualified list.`,
+ title: 'Applicants shortlisted',
+ description: `${eligibleForShortlist.length} applicant(s) added to your qualified list.`,
  });
  }}
  />

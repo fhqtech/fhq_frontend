@@ -630,7 +630,7 @@ export default function CreateInterview() {
           // Show success message for direct navigation
           if (sourceParam) {
             toast({
-              title: "Ready to Add Candidates",
+              title: "Ready to add applicants",
               description: `Source type "${sourceParam}" is ready for configuration.`,
             });
           }
@@ -2016,7 +2016,7 @@ export default function CreateInterview() {
           <h1 className="text-3xl font-bold text-foreground mb-3">
             Create Interview
           </h1>
-          <p className="text-muted uppercase text-xs tracking-wider">
+          <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
             Choose the type of interview you want to create
           </p>
         </div>
@@ -2030,8 +2030,9 @@ export default function CreateInterview() {
             }}
             className="group relative w-96 p-12 rounded-lg transition-all duration-300 hover:scale-105 cursor-pointer"
             style={{
-              backgroundColor: '#f5f5f5',
-              boxShadow: '6px 6px 12px #d0d0d0, -6px -6px 12px #ffffff'
+              backgroundColor: 'hsl(var(--paper))',
+              border: '1px solid hsl(var(--rule))',
+              boxShadow: 'var(--shadow-1)'
             }}
           >
             <div className="flex flex-col items-center text-center">
@@ -2063,8 +2064,9 @@ export default function CreateInterview() {
             }}
             className="group relative w-96 p-12 rounded-lg transition-all duration-300 hover:scale-105 cursor-pointer"
             style={{
-              backgroundColor: '#f5f5f5',
-              boxShadow: '6px 6px 12px #d0d0d0, -6px -6px 12px #ffffff'
+              backgroundColor: 'hsl(var(--paper))',
+              border: '1px solid hsl(var(--rule))',
+              boxShadow: 'var(--shadow-1)'
             }}
           >
             <div className="flex flex-col items-center text-center">
@@ -2102,7 +2104,7 @@ export default function CreateInterview() {
             <Stepper
               steps={steps.map((step, index) => ({
                 ...step,
-                hasError: index === stepper.currentStep ? !isCurrentStepValid : stepper.stepValidations[index]?.isValid === false
+                hasError: stepper.stepValidations[index]?.isValid === false
               }))}
               currentStep={stepper.currentStep}
               onStepClick={stepper.goToStep}
@@ -2123,7 +2125,7 @@ export default function CreateInterview() {
             style={{
               borderRadius: '0.5em',
               position: 'relative',
-              boxShadow: '3px 3px 6px #d0d0d0, -3px -3px 6px #ffffff'
+              boxShadow: 'var(--shadow-1)'
             }}
           >
             <CardHeader>
@@ -2131,10 +2133,10 @@ export default function CreateInterview() {
                 <div className="flex items-center gap-4">
                   <img src={aiAvatar} alt="AI" className="w-12 h-12 rounded-full" />
                   <div>
-                    <CardTitle className="uppercase font-light tracking-widest">
+                    <CardTitle className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
                       Interview Details
                     </CardTitle>
-                    <CardDescription className="uppercase text-[10px] mt-1">
+                    <CardDescription className="text-xs text-muted mt-1">
                       Configure the basic information about your interview
                     </CardDescription>
                   </div>
@@ -2149,18 +2151,18 @@ export default function CreateInterview() {
                   {/* Mode Toggle */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Label className="uppercase text-xs tracking-wider">Start From</Label>
+                      <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Start From</Label>
                       <div className="flex gap-2">
                       <Button
                         type="button"
                         variant={blueprintMode === 'new' ? 'default' : 'outline-solid'}
-                        className={`h-9 text-xs font-medium px-4 rounded uppercase transition-all duration-200 ${
+                        className={`h-9 text-xs font-medium px-4 rounded  transition-all duration-200 ${
                           blueprintMode === 'new' ? 'text-paper' : 'hover:text-paper'
                         }`}
                         style={{
                           border: 'none',
                           backgroundColor: blueprintMode === 'new' ? 'hsl(var(--ink))' : 'transparent',
-                          boxShadow: 'var(--shadow-clay)'
+                          boxShadow: 'var(--shadow-1)'
                         }}
                         onMouseEnter={(e) => {
                           if (blueprintMode !== 'new') e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
@@ -2179,13 +2181,13 @@ export default function CreateInterview() {
                       <Button
                         type="button"
                         variant={blueprintMode === 'template' ? 'default' : 'outline-solid'}
-                        className={`h-9 text-xs font-medium px-4 rounded uppercase transition-all duration-200 ${
+                        className={`h-9 text-xs font-medium px-4 rounded  transition-all duration-200 ${
                           blueprintMode === 'template' ? 'text-paper' : 'hover:text-paper'
                         }`}
                         style={{
                           border: 'none',
                           backgroundColor: blueprintMode === 'template' ? 'hsl(var(--ink))' : 'transparent',
-                          boxShadow: 'var(--shadow-clay)'
+                          boxShadow: 'var(--shadow-1)'
                         }}
                         onMouseEnter={(e) => {
                           if (blueprintMode !== 'template') e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
@@ -2205,8 +2207,8 @@ export default function CreateInterview() {
                           type="button"
                           className="faq-button-start w-8 h-8 rounded-full border-none flex items-center justify-center cursor-pointer relative"
                           style={{
-                            background: 'linear-gradient(147deg, #00ADB5 0%, hsl(var(--ink)) 74%)',
-                            boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.15)'
+                            backgroundColor: 'hsl(var(--ink))',
+                            boxShadow: 'var(--shadow-1)'
                           }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" className="h-4 w-4 fill-white">
@@ -2216,7 +2218,7 @@ export default function CreateInterview() {
                             className="faq-tooltip-start absolute opacity-0 text-paper py-1 px-2 rounded text-xs flex items-center justify-center pointer-events-none transition-all duration-200 whitespace-nowrap"
                             style={{
                               top: '-40px',
-                              background: 'linear-gradient(147deg, #00ADB5 0%, hsl(var(--ink)) 74%)',
+                              backgroundColor: 'hsl(var(--ink))',
                               letterSpacing: '0.5px'
                             }}
                           >
@@ -2257,41 +2259,34 @@ export default function CreateInterview() {
 
                     {/* Credits Info - Right Side */}
                     {creditInfo && (
-                      <div
-                        className="flex items-center gap-4 px-4 py-2 rounded-lg"
-                        style={{
-                          backgroundColor: '#f8f9fa',
-                          boxShadow: 'var(--shadow-clay)'
-                        }}
-                      >
+                      <div className="flex items-center gap-4 px-4 py-2 rounded-md bg-paper-2 border border-rule shadow-1">
                         <div className="text-center">
-                          <div className="text-xl font-bold text-[hsl(var(--ink))]">
+                          <div className="text-xl font-semibold font-mono tabular-nums text-ink">
                             {creditInfo.creditCosts[parseInt(formData.duration)] || 0}
                           </div>
-                          <div className="text-[10px] text-muted">Credits Per Interview</div>
+                          <div className="text-[10px] text-muted">Credits per interview</div>
                         </div>
-                        <div className="h-6 w-px bg-paper-4"></div>
+                        <div className="h-6 w-px bg-rule"></div>
                         <div className="text-center">
-                          <div className="text-xl font-bold text-[#00ADB5]">
+                          <div className="text-xl font-semibold font-mono tabular-nums text-gold-ink">
                             {creditInfo.available}
                           </div>
-                          <div className="text-[10px] text-muted">Available Credits</div>
+                          <div className="text-[10px] text-muted">Available credits</div>
                         </div>
-                        <div className="h-6 w-px bg-paper-4"></div>
+                        <div className="h-6 w-px bg-rule"></div>
                         <div className="text-center">
-                          <div className="text-xl font-bold text-[hsl(var(--ink-soft))]">
+                          <div className="text-xl font-semibold font-mono tabular-nums text-ink-soft">
                             {maxCandidates ?? 0}
                           </div>
-                          <div className="text-[10px] text-muted">Max Candidates</div>
+                          <div className="text-[10px] text-muted">Max applicants</div>
                         </div>
                       </div>
                     )}
                     {isLoadingCreditInfo && (
                       <div
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg"
+                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-paper-2 border border-rule"
                         style={{
-                          backgroundColor: '#f8f9fa',
-                          boxShadow: 'var(--shadow-clay)'
+                          boxShadow: 'var(--shadow-1)'
                         }}
                       >
                         <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
@@ -2322,8 +2317,8 @@ export default function CreateInterview() {
                               }`}
                               style={{
                                 boxShadow: selectedTemplate?.id === template.id
-                                  ? '2px 2px 6px #c0c0c0, -2px -2px 6px #ffffff'
-                                  : 'var(--shadow-clay)'
+                                  ? 'var(--shadow-2)'
+                                  : 'var(--shadow-1)'
                               }}
                             >
                               <div className="flex items-start justify-between mb-2">
@@ -2335,7 +2330,7 @@ export default function CreateInterview() {
                                 )}
                               </div>
                               <div className="flex flex-wrap gap-1.5 mb-2">
-                                <Badge variant="outline" className="text-[10px] uppercase">
+                                <Badge variant="outline" className="text-[10px]">
                                   {template.type}
                                 </Badge>
                                 <Badge variant="outline" className="text-[10px]">
@@ -2399,14 +2394,14 @@ export default function CreateInterview() {
                     }}
                     className="mt-2 rounded border-none transition-all duration-300 bg-paper"
                     style={{
-                      boxShadow: 'var(--shadow-clay)'
+                      boxShadow: 'var(--shadow-1)'
                     }}
                   />
                 </div>
 
                 {/* Interview Type */}
                 <div className="lg:col-span-2">
-                  <Label className="uppercase text-xs tracking-wider">Interview Type <span className="text-danger">*</span></Label>
+                  <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Interview Type <span className="text-danger">*</span></Label>
                   <div className="flex gap-3 mt-2">
                     {[
                       { value: "screening", label: "Screening" },
@@ -2418,7 +2413,7 @@ export default function CreateInterview() {
                           key={type.value}
                           type="button"
                           variant={isSelected ? "default" : "outline-solid"}
-                          className={`h-10 text-xs font-medium px-6 rounded uppercase transition-all duration-200 ${
+                          className={`h-10 text-xs font-medium px-6 rounded  transition-all duration-200 ${
                             isSelected
                               ? 'text-paper'
                               : 'hover:text-paper'
@@ -2428,7 +2423,7 @@ export default function CreateInterview() {
                             position: 'relative',
                             overflow: 'hidden',
                             backgroundColor: isSelected ? 'hsl(var(--ink))' : 'transparent',
-                            boxShadow: 'var(--shadow-clay)'
+                            boxShadow: 'var(--shadow-1)'
                           }}
                           onMouseEnter={(e) => {
                             if (!isSelected) e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
@@ -2455,7 +2450,7 @@ export default function CreateInterview() {
 
                 {/* Duration */}
                 <div className="lg:col-span-1">
-                  <Label className="uppercase text-xs tracking-wider">Duration <span className="text-danger">*</span></Label>
+                  <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Duration <span className="text-danger">*</span></Label>
                   <div className="flex gap-4 mt-2 justify-start">
                     {[
                       { value: "10", label: "10", recommendedFor: "screening" },
@@ -2478,7 +2473,7 @@ export default function CreateInterview() {
                               position: 'relative',
                               overflow: 'hidden',
                               backgroundColor: isSelected ? 'hsl(var(--ink))' : 'transparent',
-                              boxShadow: 'var(--shadow-clay)'
+                              boxShadow: 'var(--shadow-1)'
                             }}
                             onMouseEnter={(e) => {
                               if (!isSelected) e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
@@ -2495,7 +2490,7 @@ export default function CreateInterview() {
                             <span className="text-[8px] leading-tight">min</span>
                           </Button>
                           {isRecommended && (
-                            <span className="text-[10px] text-[#00ADB5] font-medium">Recommended</span>
+                            <span className="text-[10px] text-gold-ink font-medium">Recommended</span>
                           )}
                         </div>
                       );
@@ -2506,7 +2501,7 @@ export default function CreateInterview() {
 
               {/* Description */}
               <div>
-                <Label htmlFor="description" className="uppercase text-xs tracking-wider">Description <span className="text-danger">*</span></Label>
+                <Label htmlFor="description" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Description <span className="text-danger">*</span></Label>
                 <div className="relative">
                   <Textarea
                     id="description"
@@ -2518,7 +2513,7 @@ export default function CreateInterview() {
                     }}
                     className="mt-2 min-h-[190px] pr-10 resize-none rounded border-none transition-all duration-300 bg-paper"
                     style={{
-                      boxShadow: 'var(--shadow-clay)'
+                      boxShadow: 'var(--shadow-1)'
                     }}
                     required
                   />
@@ -2572,7 +2567,7 @@ export default function CreateInterview() {
                     variant="outline"
                     size="sm"
                     onClick={isPlayingAudio ? stopAudioPreview : playAudioPreview}
-                    className="rounded-sm uppercase font-bold shrink-0"
+                    className="rounded-sm  font-bold shrink-0"
                   >
                     {isPlayingAudio ? (
                       <><Stop className="w-3 h-3 mr-1" /> Stop</>
@@ -2611,7 +2606,7 @@ export default function CreateInterview() {
                   <Button
                     onClick={stepper.currentStep === steps.length - 1 ? handleSubmit : handleNext}
                     disabled={!isCurrentStepValid || (stepper.currentStep === steps.length - 1 && isSubmitting)}
-                    className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
+                    className="text-paper font-medium rounded-sm  transition-all duration-200"
                     style={{
                       width: '9em',
                       height: '3em',
@@ -2620,7 +2615,7 @@ export default function CreateInterview() {
                       position: 'relative',
                       overflow: 'hidden',
                       backgroundColor: 'hsl(var(--ink))',
-                      boxShadow: 'var(--shadow-clay)',
+                      boxShadow: 'var(--shadow-1)',
                       textTransform: 'uppercase'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
@@ -2677,7 +2672,7 @@ export default function CreateInterview() {
             style={{
               borderRadius: '0.5em',
               position: 'relative',
-              boxShadow: '3px 3px 6px #d0d0d0, -3px -3px 6px #ffffff'
+              boxShadow: 'var(--shadow-1)'
             }}
           >
             <CardHeader>
@@ -2685,10 +2680,10 @@ export default function CreateInterview() {
                 <div className="flex items-center gap-4">
                   <CloudArrowUp size={48} weight="thin" />
                   <div>
-                    <CardTitle className="uppercase font-light tracking-widest">
+                    <CardTitle className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
                       Configure Candidate Pool
                     </CardTitle>
-                    <CardDescription className="uppercase text-[10px] mt-1">
+                    <CardDescription className="text-xs text-muted mt-1">
                       Add candidate sources to your interview
                     </CardDescription>
                   </div>
@@ -2755,7 +2750,7 @@ export default function CreateInterview() {
                       <DialogTitle className=" text-ink">
                         Create New Candidate Pool
                       </DialogTitle>
-                      <DialogDescription className="uppercase text-xs tracking-wider">
+                      <DialogDescription className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
                         Add a name and candidate sources
                       </DialogDescription>
                     </DialogHeader>
@@ -2763,7 +2758,7 @@ export default function CreateInterview() {
                     <div className="space-y-4 py-4">
                       {/* Pool Name */}
                       <div>
-                        <Label htmlFor="listName" className="uppercase text-xs tracking-wider">
+                        <Label htmlFor="listName" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
                           Candidate Pool Name <span className="text-danger">*</span>
                         </Label>
                         <Input
@@ -2773,19 +2768,19 @@ export default function CreateInterview() {
                           onChange={(e) => setCreateListFormData(prev => ({ ...prev, name: e.target.value }))}
                           className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
                           style={{
-                            boxShadow: 'var(--shadow-clay)'
+                            boxShadow: 'var(--shadow-1)'
                           }}
                         />
                       </div>
 
                       {/* Source Type Toggle */}
                       <div>
-                        <Label className="uppercase text-xs tracking-wider">Source Type</Label>
+                        <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Source Type</Label>
                         <div className="flex gap-2 mt-2">
                           <button
                             type="button"
                             onClick={() => setSourceEntryType('google_sheet')}
-                            className={`flex-1 px-4 py-2 text-xs font-medium uppercase rounded transition-colors ${
+                            className={`flex-1 px-4 py-2 text-xs font-medium  rounded transition-colors ${
                               sourceEntryType === 'google_sheet'
                                 ? 'bg-[hsl(var(--ink))] text-paper'
                                 : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
@@ -2796,7 +2791,7 @@ export default function CreateInterview() {
                           <button
                             type="button"
                             onClick={() => setSourceEntryType('manual_entry')}
-                            className={`flex-1 px-4 py-2 text-xs font-medium uppercase rounded transition-colors ${
+                            className={`flex-1 px-4 py-2 text-xs font-medium  rounded transition-colors ${
                               sourceEntryType === 'manual_entry'
                                 ? 'bg-[hsl(var(--ink))] text-paper'
                                 : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
@@ -2811,7 +2806,7 @@ export default function CreateInterview() {
                       {sourceEntryType === 'google_sheet' && (
                       <div>
                         <div className="flex items-center justify-between">
-                          <Label className="uppercase text-xs tracking-wider">Google Sheets Sources</Label>
+                          <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Google Sheets Sources</Label>
                           {sheetUrlRows.some(r => r.status === 'valid') && (
                             <span className="text-xs font-medium text-success">
                               {sheetUrlRows.filter(r => r.status === 'valid').reduce((sum, r) => sum + r.candidateCount, 0)} candidate{sheetUrlRows.filter(r => r.status === 'valid').reduce((sum, r) => sum + r.candidateCount, 0) !== 1 ? 's' : ''} ready
@@ -2891,7 +2886,7 @@ export default function CreateInterview() {
                                     row.status === 'error' ? 'ring-2 ring-danger' : ''
                                   }`}
                                   style={{
-                                    boxShadow: 'var(--shadow-clay)'
+                                    boxShadow: 'var(--shadow-1)'
                                   }}
                                 />
                                 {/* Status indicator */}
@@ -2942,7 +2937,7 @@ export default function CreateInterview() {
                               sheetName: ''
                             }]);
                           }}
-                          className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] uppercase text-xs mt-2"
+                          className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] text-xs mt-2"
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Add Another Sheet
@@ -2955,7 +2950,7 @@ export default function CreateInterview() {
                       <div>
                         {/* Title row with candidate count on right */}
                         <div className="flex items-center justify-between">
-                          <Label className="uppercase text-xs tracking-wider">Enter Candidates</Label>
+                          <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Applicants</Label>
                           {manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length > 0 && (
                             <span className="text-xs font-medium text-success">
                               {manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length} candidate{manualCandidates.filter(c => c.name.trim() && c.email.trim() && isValidEmail(c.email)).length !== 1 ? 's' : ''} ready
@@ -2992,7 +2987,7 @@ export default function CreateInterview() {
                                       }}
                                       className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showNameError ? 'ring-1 ring-red-500' : ''}`}
                                       style={{
-                                        boxShadow: 'var(--shadow-clay)'
+                                        boxShadow: 'var(--shadow-1)'
                                       }}
                                     />
                                     {showNameError && (
@@ -3011,7 +3006,7 @@ export default function CreateInterview() {
                                       }}
                                       className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showEmailError ? 'ring-1 ring-red-500' : ''}`}
                                       style={{
-                                        boxShadow: 'var(--shadow-clay)'
+                                        boxShadow: 'var(--shadow-1)'
                                       }}
                                     />
                                     {showEmailError && (
@@ -3048,7 +3043,7 @@ export default function CreateInterview() {
                                 email: ''
                               }]);
                             }}
-                            className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] uppercase text-xs mt-2"
+                            className="text-[hsl(var(--ink))] hover:text-[hsl(var(--ink-soft))] text-xs mt-2"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Add Another Candidate
@@ -3234,7 +3229,7 @@ export default function CreateInterview() {
                           setListViewType('existing');
                           loadAvailableLists('existing');
                         }}
-                        className={`px-4 py-2 text-sm font-medium uppercase rounded transition-colors ${
+                        className={`px-4 py-2 text-sm font-medium  rounded transition-colors ${
                           listViewType === 'existing'
                             ? 'bg-ink text-paper'
                             : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
@@ -3247,7 +3242,7 @@ export default function CreateInterview() {
                           setListViewType('shared');
                           loadAvailableLists('shared');
                         }}
-                        className={`px-4 py-2 text-sm font-medium uppercase rounded transition-colors ${
+                        className={`px-4 py-2 text-sm font-medium  rounded transition-colors ${
                           listViewType === 'shared'
                             ? 'bg-ink text-paper'
                             : 'bg-paper-3 text-muted-foreground hover:bg-paper-3'
@@ -3317,11 +3312,11 @@ export default function CreateInterview() {
                                 !isSelected ? 'group hover:text-paper' : ''
                               }`}
                               style={{
-                                border: isSelected ? '2px solid #22c55e' : 'none',
+                                border: isSelected ? '2px solid hsl(var(--success))' : 'none',
                                 position: 'relative',
                                 overflow: 'hidden',
                                 backgroundColor: 'transparent',
-                                boxShadow: 'var(--shadow-clay)',
+                                boxShadow: 'var(--shadow-1)',
                                 backgroundImage: isCurated
                                   ? 'linear-gradient(to bottom right, rgba(254, 243, 199, 0.4), rgba(254, 252, 232, 0.2), rgba(255, 247, 237, 0.3))'
                                   : 'none'
@@ -3363,7 +3358,7 @@ export default function CreateInterview() {
                                 )}
                                 <div className="mt-auto flex flex-col gap-2">
                                   <div className="flex items-center gap-2">
-                                    <span className={`text-xs text-muted-foreground transition-colors uppercase ${!isSelected ? 'group-hover:text-paper/70' : ''}`}>
+                                    <span className={`text-xs text-muted-foreground transition-colors ${!isSelected ? 'group-hover:text-paper/70' : ''}`}>
                                       {(() => {
                                         const listDuplicateInsights = availableLists.find(l => l.id === list.listId)?.duplicateInsights;
                                         const effectiveCount = listDuplicateInsights && listDuplicateInsights.totalDuplicates > 0
@@ -3387,7 +3382,7 @@ export default function CreateInterview() {
                                   <div className="flex items-center justify-between">
                                     {/* Hide sources count for shared lists and curated lists */}
                                     {!isCurated && listViewType !== 'shared' && (
-                                      <span className={`text-xs text-muted-foreground transition-colors uppercase ${!isSelected ? 'group-hover:text-paper/70' : ''}`}>
+                                      <span className={`text-xs text-muted-foreground transition-colors ${!isSelected ? 'group-hover:text-paper/70' : ''}`}>
                                         {list.sourcesCount} {list.sourcesCount === 1 ? 'Source' : 'Sources'}
                                       </span>
                                     )}
@@ -3412,7 +3407,7 @@ export default function CreateInterview() {
                       {/* Don't see the Candidate Pool you need? - shown when pools exist, only for existing view */}
                       {listViewType === 'existing' && (
                         <div className="p-4 border-2 border-dashed border-rule rounded-lg text-center mt-4">
-                          <div className="text-xs text-muted-foreground mb-2 uppercase">
+                          <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2">
                             Don't see the Candidate Pool you need?
                           </div>
                           <Button
@@ -3421,7 +3416,7 @@ export default function CreateInterview() {
                               setShowCreateListForm(true);
                             }}
                             variant="outline"
-                            className="border-ink text-ink hover:bg-ink hover:text-paper uppercase text-xs h-8 px-3 rounded-sm"
+                            className="border-ink text-ink hover:bg-ink hover:text-paper text-xs h-8 px-3 rounded-sm"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Create New Candidate Pool
@@ -3432,7 +3427,7 @@ export default function CreateInterview() {
                   ) : (
                     <div className="flex justify-center pt-16">
                       <div className="py-12 px-10 border-2 border-dashed border-rule rounded-lg text-center max-w-md">
-                        <div className="text-xs text-muted-foreground mb-4 uppercase">
+                        <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-4">
                           {listViewType === 'existing'
                             ? 'No existing Candidate Pools'
                             : 'No candidate pools shared with you'}
@@ -3445,7 +3440,7 @@ export default function CreateInterview() {
                                 setShowCreateListForm(true);
                               }}
                               variant="outline"
-                              className="border-ink text-ink hover:bg-ink hover:text-paper uppercase text-xs h-8 px-3 rounded-sm"
+                              className="border-ink text-ink hover:bg-ink hover:text-paper text-xs h-8 px-3 rounded-sm"
                             >
                               <Plus className="w-3 h-3 mr-1" />
                               Create New Candidate Pool
@@ -3454,7 +3449,7 @@ export default function CreateInterview() {
                             <div className="mt-6 pt-4 border-t border-rule">
                               <button
                                 onClick={downloadSampleFormat}
-                                className="text-muted-foreground hover:text-ink uppercase text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
+                                className="text-muted-foreground hover:text-ink text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"></path></svg>
                                 Download Sample Format
@@ -3491,7 +3486,7 @@ export default function CreateInterview() {
                     <Button
                       variant="outline"
                       onClick={handlePrevious}
-                      className="text-paper font-medium rounded-sm uppercase transition-all duration-200"
+                      className="text-paper font-medium rounded-sm  transition-all duration-200"
                       style={{
                         width: '9em',
                         height: '3em',
@@ -3500,7 +3495,7 @@ export default function CreateInterview() {
                         position: 'relative',
                         overflow: 'hidden',
                         backgroundColor: 'hsl(var(--ink))',
-                        boxShadow: 'var(--shadow-clay)',
+                        boxShadow: 'var(--shadow-1)',
                         textTransform: 'uppercase'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
@@ -3520,7 +3515,7 @@ export default function CreateInterview() {
                       ? getCandidatesStepButtonConfig().disabled
                       : (!isCurrentStepValid || (stepper.currentStep === steps.length - 1 && isSubmitting))
                     }
-                    className={`font-medium rounded-sm uppercase transition-all duration-200 ${stepper.currentStep === steps.length - 1 ? 'text-ink' : 'text-paper'}`}
+                    className={`font-medium rounded-sm  transition-all duration-200 ${stepper.currentStep === steps.length - 1 ? 'text-ink' : 'text-paper'}`}
                     style={{
                       minWidth: '9em',
                       height: '3em',
@@ -3529,7 +3524,7 @@ export default function CreateInterview() {
                       position: 'relative',
                       overflow: 'visible',
                       backgroundColor: stepper.currentStep === steps.length - 1 ? 'hsl(var(--gold))' : 'hsl(var(--ink))',
-                      boxShadow: 'var(--shadow-clay)',
+                      boxShadow: 'var(--shadow-1)',
                       whiteSpace: 'nowrap',
                       padding: '0 1.5em',
                       textTransform: 'uppercase'
@@ -3679,7 +3674,7 @@ export default function CreateInterview() {
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
           <div className="p-6">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-[hsl(var(--ink))] uppercase">
+              <DialogTitle className="text-xl font-semibold text-ink tracking-tight">
                 Introducing Interview Blueprints
               </DialogTitle>
               <DialogDescription className="text-muted mt-2">
@@ -3761,7 +3756,7 @@ export default function CreateInterview() {
                     key={index}
                     onClick={() => setBlueprintGuideSlide(index)}
                     className={`w-2 h-2 rounded-full transition-colors ${
-                      blueprintGuideSlide === index ? 'bg-[#00ADB5]' : 'bg-paper-4'
+                      blueprintGuideSlide === index ? 'bg-gold' : 'bg-paper-4'
                     }`}
                   />
                 ))}
