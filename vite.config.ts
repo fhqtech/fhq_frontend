@@ -58,42 +58,11 @@ export default defineConfig(({ mode }) => {
       drop: ["debugger"],
     } : undefined,
     build: {
-      // S3.3: split heavy deps into separate chunks so the marketing
-      // landing + auth bundle stays light. Without this, lazy() splits
-      // are defeated because every chunk eager-imports the same
-      // heavyweight libs (recharts, three, framer-motion, lucide).
-      // Numbers are guidance, not contracts — Vite picks the actual graph.
-      rollupOptions: {
-        output: {
-          manualChunks: (id) => {
-            if (!id.includes("node_modules")) return undefined;
-            if (id.includes("react-router") || id.includes("react-dom") || /[/\\]react[/\\]/.test(id)) {
-              return "react-vendor";
-            }
-            if (id.includes("@radix-ui") || id.includes("vaul") || id.includes("cmdk") || id.includes("sonner")) {
-              return "ui-vendor";
-            }
-            if (id.includes("recharts") || id.includes("d3-")) {
-              return "charts-vendor";
-            }
-            if (id.includes("three") || id.includes("@react-three") || id.includes("framer-motion")) {
-              return "anim-vendor";
-            }
-            if (id.includes("assemblyai")) {
-              return "stt-vendor";
-            }
-            if (id.includes("@tanstack")) {
-              return "query-vendor";
-            }
-            if (id.includes("lucide-react") || id.includes("phosphor-react")) {
-              return "icons-vendor";
-            }
-            return "vendor";
-          },
-        },
-      },
-      // Larger chunk-size warning threshold — we deliberately keep some
-      // vendor chunks above 500kb. Anything above 1.5mb still warns.
+      // Manual vendor-chunk splits removed (2026-05-17): with React 19 +
+      // next-themes + @tanstack the manual splits created a cross-chunk
+      // circular import (vendor ⇄ react-vendor) that surfaced in prod as
+      // `Cannot read properties of undefined (reading 'createContext')`.
+      // Letting Rollup auto-chunk is safer and only marginally larger.
       chunkSizeWarningLimit: 1500,
     },
   };
