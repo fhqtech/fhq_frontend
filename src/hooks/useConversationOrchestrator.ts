@@ -1,5 +1,12 @@
 import { useState, useRef, useCallback } from 'react';
 import { ConversationState, HistoryItem } from '@/types/interview';
+import { useToast } from '@/hooks/use-toast';
+
+// Stall thresholds for a single agent turn. Both are wall-clock measured
+// from the moment we call fetch(). 15s = soft warning; 60s = hard abort
+// + recoverable error so the candidate isn't stuck staring at silence.
+const STALL_WARN_MS = 15_000;
+const STALL_ABORT_MS = 60_000;
 
 // Enhanced message interface with metadata
 export interface ConversationMessage {
@@ -53,6 +60,10 @@ export const useConversationOrchestrator = (
   const messageIdCounter = useRef(0);
   const pendingMessageRef = useRef<string>('');
   const sendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const stallWarnTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stallAbortTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stalledRef = useRef<boolean>(false);
+  const { toast } = useToast();
 
   // Sync refs with state
   stateRef.current = state;
@@ -181,12 +192,43 @@ export const useConversationOrchestrator = (
 
       console.log('[ConversationOrchestrator] Sending request to backend:', config.backendUrl);
 
-      const response = await fetch(config.backendUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        signal: abortControllerRef.current.signal,
-      });
+      // Stall watchdogs: warn at 15s, hard-abort at 60s. Without these the
+      // candidate has no signal whether the backend is alive when an agent
+      // turn takes longer than usual.
+      if (stallWarnTimerRef.current) clearTimeout(stallWarnTimerRef.current);
+      if (stallAbortTimerRef.current) clearTimeout(stallAbortTimerRef.current);
+      const localController = abortControllerRef.current;
+      stalledRef.current = false;
+      stallWarnTimerRef.current = setTimeout(() => {
+        toast({
+          title: 'Taking longer than usual…',
+          description: 'Hang tight — the interviewer will reply shortly.',
+        });
+      }, STALL_WARN_MS);
+      stallAbortTimerRef.current = setTimeout(() => {
+        console.warn('[ConversationOrchestrator] Stall abort fired after 60s');
+        stalledRef.current = true;
+        localController?.abort();
+      }, STALL_ABORT_MS);
+
+      let response: Response;
+      try {
+        response = await fetch(config.backendUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+          signal: localController?.signal,
+        });
+      } finally {
+        if (stallWarnTimerRef.current) {
+          clearTimeout(stallWarnTimerRef.current);
+          stallWarnTimerRef.current = null;
+        }
+        if (stallAbortTimerRef.current) {
+          clearTimeout(stallAbortTimerRef.current);
+          stallAbortTimerRef.current = null;
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -250,12 +292,25 @@ export const useConversationOrchestrator = (
 
     } catch (error: any) {
       console.error('[ConversationOrchestrator] Error sending message:', error);
-      
-      if (error.name !== 'AbortError') {
+
+      if (error.name === 'AbortError') {
+        // Distinguish stall-abort (our 60s watchdog) from in-flight reissue
+        // (an incoming candidate utterance pre-empted this turn). Only the
+        // stall case owes the candidate a visible recovery prompt.
+        if (stalledRef.current) {
+          stalledRef.current = false;
+          toast({
+            title: 'Connection issue',
+            description: 'The interviewer didn\'t respond in time. Try speaking again.',
+            variant: 'destructive',
+          });
+          transitionToState(ConversationState.LISTENING);
+        }
+      } else {
         callbacks?.onError?.(error.message || 'Failed to send message');
         transitionToState(ConversationState.IDLE);
       }
-      
+
       return { error: error.message };
     } finally {
       setIsWaitingForResponse(false);
