@@ -368,7 +368,7 @@ export default function TestAssets() {
 
       {/* Logo - Top Left */}
       <div className="absolute top-6 left-6">
-        <h1 className="text-xl font-bold text-paper whitespace-nowrap">FunnelHQ</h1>
+        <h1 className="text-xl font-bold text-paper whitespace-nowrap">FlowDot AI</h1>
         <p className="text-xs text-muted-2 whitespace-nowrap">Applicant Portal</p>
       </div>
 

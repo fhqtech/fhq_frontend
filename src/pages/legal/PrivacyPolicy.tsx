@@ -48,7 +48,7 @@ export default function PrivacyPolicy() {
             <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
               F
             </div>
-            <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </Link>
           <div className="flex items-center gap-4">
             <LanguageToggle />
@@ -76,15 +76,15 @@ export default function PrivacyPolicy() {
 
         <Section title="Who we are">
           <p>
-            FunnelHQ is operated by <strong>FunnelHQ Technologies Pvt. Ltd.</strong>,
+            FlowDot AI is operated by <strong>Graydot Technologies Private Limited</strong>,
             registered in India. We provide AI-assisted hiring tools to finance teams
             and process the personal data of two distinct user groups: <em>workspace
             users</em> (recruiters, hiring managers) and <em>applicants</em> (people
             taking AI assessments).
           </p>
           <p>
-            For DPDP purposes, FunnelHQ is the <strong>Data Fiduciary</strong> for
-            workspace user accounts. For applicant data, FunnelHQ acts as a{' '}
+            For DPDP purposes, FlowDot AI is the <strong>Data Fiduciary</strong> for
+            workspace user accounts. For applicant data, FlowDot AI acts as a{' '}
             <strong>Data Processor</strong> on behalf of the workspace that invited
             the applicant.
           </p>
@@ -210,7 +210,7 @@ export default function PrivacyPolicy() {
             </a>
           </p>
           <p>
-            <strong>Postal:</strong> FunnelHQ Technologies Pvt. Ltd., [registered
+            <strong>Postal:</strong> Graydot Technologies Private Limited, [registered
             office address — to be filled before launch].
           </p>
         </Section>
@@ -218,10 +218,10 @@ export default function PrivacyPolicy() {
 
       <footer className="border-t border-rule bg-paper-2">
         <div className="max-w-3xl mx-auto px-6 py-6 text-xs text-muted flex flex-wrap gap-x-6 gap-y-2">
-          <Link to="/" className="hover:text-ink">FunnelHQ</Link>
+          <Link to="/" className="hover:text-ink">FlowDot AI</Link>
           <Link to="/privacy" className="hover:text-ink">Privacy</Link>
           <Link to="/terms" className="hover:text-ink">Terms</Link>
-          <span>© 2026 FunnelHQ Technologies Pvt. Ltd.</span>
+          <span>© 2026 Graydot Technologies Private Limited</span>
         </div>
       </footer>
     </div>

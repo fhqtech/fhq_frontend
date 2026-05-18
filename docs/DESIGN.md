@@ -1,4 +1,4 @@
-# DESIGN — FunnelHQ
+# DESIGN — FlowDot AI
 
 Visual language: **Indian-finance-trust** — Razorpay / Zerodha tier. Restrained, dense, methodical.
 

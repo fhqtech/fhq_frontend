@@ -1,5 +1,5 @@
 /**
- * Pool TAG Dashboard — T3 of FunnelHQ repositioning.
+ * Pool TAG Dashboard — T3 of FlowDot AI repositioning.
  *
  * Mirrors funnelhq.co/GST_Talent_Dashboard.html: aggregate view of a
  * qualified list's candidates with quality + experience distributions,

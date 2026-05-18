@@ -84,7 +84,7 @@ export default function CandidateDataAccount() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `funnelhq-applicant-data-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `flowdot-applicant-data-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
       toast({ title: "Export ready", description: "Your data download has started." });

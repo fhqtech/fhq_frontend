@@ -1,7 +1,7 @@
 /**
- * Finance-domain i18n constants (T4 of FunnelHQ repositioning).
+ * Finance-domain i18n constants (T4 of FlowDot AI repositioning).
  *
- * FunnelHQ today is finance-only. Every public-facing string that
+ * FlowDot AI today is finance-only. Every public-facing string that
  * references a domain, role, or example lives here so:
  *   1. We can swap the brand surface in one place when copy changes.
  *   2. Adding a second domain becomes a parallel `src/i18n/<domain>.ts`
@@ -54,7 +54,7 @@ export const FINANCE_STRINGS = {
   // Domain-aware empty / verification states
   validation: {
     nonFinanceRoleWarning:
-      'FunnelHQ is calibrated for finance roles (accounting, taxation, management consulting). For tech, sales, or operations hires, the evaluation rubric will not produce reliable signal.',
+      'FlowDot AI is calibrated for finance roles (accounting, taxation, management consulting). For tech, sales, or operations hires, the evaluation rubric will not produce reliable signal.',
   },
 } as const;
 

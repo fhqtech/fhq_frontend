@@ -1193,11 +1193,11 @@ export default function CandidatePortal() {
             <div className="flex items-center relative h-10 -ml-4">
               <img
                 src="/logo.png"
-                alt="FunnelHQ"
+                alt="FlowDot AI"
                 className="h-16 object-cover object-top -mt-2"
               />
               <div className="absolute left-14">
-                <h1 className="text-xl font-bold text-ink whitespace-nowrap">FunnelHQ</h1>
+                <h1 className="text-xl font-bold text-ink whitespace-nowrap">FlowDot AI</h1>
                 <p className="text-[10px] text-muted whitespace-nowrap">Applicant Portal</p>
               </div>
             </div>

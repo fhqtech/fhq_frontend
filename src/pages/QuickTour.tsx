@@ -36,7 +36,7 @@ function LottieAnimation() {
 const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
   {
     id: 1,
-    title: "Welcome to FunnelHQ",
+    title: "Welcome to FlowDot AI",
     subtitle: "Your complete AI-powered interview solution",
     content: (
       <div className="space-y-4">

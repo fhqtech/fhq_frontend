@@ -84,7 +84,7 @@ export default function ProductLanding() {
             <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
               F
             </div>
-            <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </Link>
           <Link to="/start" className="text-sm text-ink-soft hover:text-ink">
             New here? Get started
@@ -181,7 +181,7 @@ export default function ProductLanding() {
         </div>
 
         <p className="mt-8 text-center text-xs text-muted">
-          New to FunnelHQ?{" "}
+          New to FlowDot AI?{" "}
           <Link to="/start" className="text-ink hover:underline">
             Get started
           </Link>

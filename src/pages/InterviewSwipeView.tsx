@@ -230,9 +230,9 @@ export default function InterviewSwipeView() {
         {/* Logo and Text - Top Left (matching Sidebar) */}
         <div className="absolute top-6 left-2 z-20">
           <div className="flex items-center justify-start">
-            <img src="/logo.png" alt="FunnelHQ" className="w-14 h-9 object-cover" style={{ objectPosition: 'center' }} />
+            <img src="/logo.png" alt="FlowDot AI" className="w-14 h-9 object-cover" style={{ objectPosition: 'center' }} />
             <div className="-ml-1">
-              <div className="font-semibold text-ink whitespace-nowrap text-lg">FunnelHQ</div>
+              <div className="font-semibold text-ink whitespace-nowrap text-lg">FlowDot AI</div>
               <div className="text-xs text-ink/70 font-medium -mt-1">Review Portal</div>
             </div>
           </div>
@@ -316,7 +316,7 @@ export default function InterviewSwipeView() {
         {/* Footer - Fixed at bottom */}
         <div className="absolute bottom-6 left-0 right-0 text-center text-paper text-xs z-20">
           <p className="text-paper/90">Swipe right to shortlist • Swipe left to reject</p>
-          <p className="mt-1 text-paper/60">© 2025 FunnelHQ. All rights reserved.</p>
+          <p className="mt-1 text-paper/60">© 2025 FlowDot AI. All rights reserved.</p>
         </div>
       </div>
     );

@@ -31,7 +31,7 @@ export default function StartChooser() {
             <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
               F
             </div>
-            <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </Link>
           <Link
             to="/product-landing"
@@ -49,7 +49,7 @@ export default function StartChooser() {
             Choose your path
           </p>
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-ink mb-3">
-            How will you use FunnelHQ?
+            How will you use FlowDot AI?
           </h1>
           <div className="mx-auto w-16 h-[2px] bg-gold" />
         </div>

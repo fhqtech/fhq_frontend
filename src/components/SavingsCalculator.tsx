@@ -107,7 +107,7 @@ const SavingsCalculator = () => {
             </span>
           </h2>
           <p className="text-paper/50 text-lg max-w-2xl mx-auto">
-            Discover your potential savings with FunnelHQ. See how much time and money you can save on candidate screening.
+            Discover your potential savings with FlowDot AI. See how much time and money you can save on candidate screening.
           </p>
         </div>
 

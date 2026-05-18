@@ -769,11 +769,11 @@ export default function CandidateRegistration() {
           <div className="flex items-center">
             <img
               src="/logo.png"
-              alt="FunnelHQ"
+              alt="FlowDot AI"
               className="h-20 object-contain"
             />
             <div className="-ml-2">
-              <h1 className="text-lg font-bold text-ink">FunnelHQ</h1>
+              <h1 className="text-lg font-bold text-ink">FlowDot AI</h1>
               <p className="text-xs text-muted">Applicant Portal</p>
             </div>
           </div>
@@ -1329,24 +1329,24 @@ export default function CandidateRegistration() {
         )}
       </div>
 
-      {/* Spacer to push FunnelHQ box to bottom */}
+      {/* Spacer to push FlowDot AI box to bottom */}
       {currentStep === 0 && (
         <div className="grow"></div>
       )}
 
-      {/* About FunnelHQ Box */}
+      {/* About FlowDot AI Box */}
       {currentStep === 0 && (
         <div className="px-8 mt-6">
             <div className="bg-paper border border-rule-strong rounded-lg p-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)] max-w-5xl mx-auto">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="FunnelHQ" className="h-16 object-cover object-top shrink-0" />
+              <img src="/logo.png" alt="FlowDot AI" className="h-16 object-cover object-top shrink-0" />
               <div className="flex flex-col flex-1">
-                <h1 className="text-lg font-bold text-ink whitespace-nowrap">FunnelHQ</h1>
+                <h1 className="text-lg font-bold text-ink whitespace-nowrap">FlowDot AI</h1>
                 <p className="text-[10px] text-muted whitespace-nowrap">Applicant Portal</p>
               </div>
               <div className="flex flex-col items-end">
                 <p className="text-xs text-ink-soft whitespace-nowrap">
-                  FunnelHQ is an AI-powered candidate screening platform where professionals take a single interview to unlock multiple job opportunities
+                  FlowDot AI is an AI-powered candidate screening platform where professionals take a single interview to unlock multiple job opportunities
                 </p>
                 <div className="flex items-center gap-3 mt-1 whitespace-nowrap">
                   <a href="#" className="text-info hover:text-info text-[10px]">LinkedIn</a>
@@ -1357,7 +1357,7 @@ export default function CandidateRegistration() {
                   <a href="#" className="text-muted hover:text-ink text-[10px]">Privacy</a>
                   <a href="#" className="text-muted hover:text-ink text-[10px]">Contact</a>
                   <span className="text-muted-2">•</span>
-                  <span className="text-muted text-[10px]">© 2025 FunnelHQ. All rights reserved.</span>
+                  <span className="text-muted text-[10px]">© 2025 FlowDot AI. All rights reserved.</span>
                 </div>
               </div>
             </div>

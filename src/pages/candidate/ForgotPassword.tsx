@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     <div className="min-h-dvh bg-paper-2 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold text-primary tracking-tight">FunnelHQ</h1>
+          <h1 className="text-3xl font-semibold text-primary tracking-tight">FlowDot AI</h1>
           <p className="text-sm text-muted mt-1">Reset your password</p>
         </div>
 

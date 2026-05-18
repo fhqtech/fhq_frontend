@@ -15,7 +15,7 @@ export default function TermsOfService() {
             <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
               F
             </div>
-            <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </Link>
           <Link to="/privacy" className="text-sm text-ink-soft hover:text-ink">
             Privacy
@@ -31,7 +31,7 @@ export default function TermsOfService() {
           Terms of service
         </h1>
         <p className="text-sm text-muted mb-10">
-          Last updated 14 May 2026. By using FunnelHQ you agree to these terms.
+          Last updated 14 May 2026. By using FlowDot AI you agree to these terms.
           They apply to both <em>workspace users</em> (recruiters, hiring managers)
           and <em>applicants</em> (people invited to take an assessment). Where the
           terms differ for the two groups, we say so explicitly.
@@ -39,7 +39,7 @@ export default function TermsOfService() {
 
         <Section title="The service">
           <p>
-            FunnelHQ provides AI-assisted finance hiring assessments. Workspaces
+            FlowDot AI provides AI-assisted finance hiring assessments. Workspaces
             create roles, invite applicants, and receive a Talent Analysis Graph
             (TAG) summarising each applicant's interview performance against a
             calibrated rubric. The TAG is decision support, not a hiring decision —
@@ -50,7 +50,7 @@ export default function TermsOfService() {
         <Section title="Eligibility">
           <p>
             You must be at least 18 years old, legally able to enter into a
-            contract in India, and using FunnelHQ for lawful purposes. Workspace
+            contract in India, and using FlowDot AI for lawful purposes. Workspace
             accounts must be created on behalf of a real organisation.
           </p>
         </Section>
@@ -66,12 +66,12 @@ export default function TermsOfService() {
         <Section title="Acceptable use">
           <p>You agree not to:</p>
           <ul className="list-disc pl-5 space-y-1 text-ink-soft">
-            <li>Use FunnelHQ to discriminate unlawfully on the basis of caste, religion, gender, sexual orientation, disability, or any other protected category.</li>
+            <li>Use FlowDot AI to discriminate unlawfully on the basis of caste, religion, gender, sexual orientation, disability, or any other protected category.</li>
             <li>Reverse-engineer the AI scoring rubric to coach applicants on it.</li>
             <li>Probe, scan, or test the vulnerability of our systems without prior written consent.</li>
             <li>Upload malware, illegal content, or content that violates someone else's rights.</li>
             <li>Use automated tools to create accounts, scrape data, or impersonate applicants.</li>
-            <li>Re-sell access to FunnelHQ without our written agreement.</li>
+            <li>Re-sell access to FlowDot AI without our written agreement.</li>
           </ul>
         </Section>
 
@@ -79,13 +79,13 @@ export default function TermsOfService() {
           <p>
             Workspaces own the role definitions, blueprints, ratings, notes, and
             shortlists they create. Applicants own their resumes, transcripts, and
-            TAG outputs. FunnelHQ has a limited licence to process this data
+            TAG outputs. FlowDot AI has a limited licence to process this data
             solely to operate the service, as described in our{' '}
             <Link to="/privacy" className="text-gold-ink underline">privacy policy</Link>.
           </p>
           <p>
             Workspaces must have a lawful basis (typically consent) for inviting
-            applicants. By sending an invitation through FunnelHQ, the workspace
+            applicants. By sending an invitation through FlowDot AI, the workspace
             warrants that it has obtained that consent.
           </p>
         </Section>
@@ -120,7 +120,7 @@ export default function TermsOfService() {
 
         <Section title="Disclaimers and liability">
           <p>
-            FunnelHQ is provided "as is" without warranties of any kind, except
+            FlowDot AI is provided "as is" without warranties of any kind, except
             those required by law. To the maximum extent permitted by Indian law,
             our aggregate liability for any claim is limited to the fees you paid
             us in the 12 months preceding the claim. Nothing in these terms
@@ -130,7 +130,7 @@ export default function TermsOfService() {
 
         <Section title="Indemnity">
           <p>
-            You agree to indemnify FunnelHQ against claims arising from your
+            You agree to indemnify FlowDot AI against claims arising from your
             misuse of the service, your breach of these terms, or your violation
             of someone else's rights (including data protection law).
           </p>
@@ -158,7 +158,7 @@ export default function TermsOfService() {
 
         <Section title="Contact">
           <p>
-            <strong>FunnelHQ Technologies Pvt. Ltd.</strong>
+            <strong>Graydot Technologies Private Limited</strong>
             <br />
             <a className="text-gold-ink underline" href="mailto:legal@funnelhq.co">
               legal@funnelhq.co
@@ -169,10 +169,10 @@ export default function TermsOfService() {
 
       <footer className="border-t border-rule bg-paper-2">
         <div className="max-w-3xl mx-auto px-6 py-6 text-xs text-muted flex flex-wrap gap-x-6 gap-y-2">
-          <Link to="/" className="hover:text-ink">FunnelHQ</Link>
+          <Link to="/" className="hover:text-ink">FlowDot AI</Link>
           <Link to="/privacy" className="hover:text-ink">Privacy</Link>
           <Link to="/terms" className="hover:text-ink">Terms</Link>
-          <span>© 2026 FunnelHQ Technologies Pvt. Ltd.</span>
+          <span>© 2026 Graydot Technologies Private Limited</span>
         </div>
       </footer>
     </div>

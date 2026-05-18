@@ -217,7 +217,7 @@ export const InterviewThankYou = ({
 
           {/* Powered by */}
           <p className="text-center text-xs text-muted-2 mt-6">
-            Powered by <span className="font-semibold">FunnelHQ</span>
+            Powered by <span className="font-semibold">FlowDot AI</span>
           </p>
         </div>
       </div>

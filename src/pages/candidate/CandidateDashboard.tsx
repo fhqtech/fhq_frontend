@@ -168,7 +168,7 @@ export default function CandidateDashboard() {
       <header className="bg-paper border-b border-border">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-primary tracking-tight">FunnelHQ</h1>
+            <h1 className="text-xl font-semibold text-primary tracking-tight">FlowDot AI</h1>
             <span className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
               Applicant Portal
             </span>
@@ -212,7 +212,7 @@ export default function CandidateDashboard() {
             Welcome back, {account?.name || account?.email}
           </h2>
           <p className="text-sm text-muted mt-1">
-            Your assessments and TAG reports across every FunnelHQ workspace.
+            Your assessments and TAG reports across every FlowDot AI workspace.
           </p>
         </div>
 

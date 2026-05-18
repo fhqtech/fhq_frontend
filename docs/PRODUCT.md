@@ -1,10 +1,10 @@
-# PRODUCT — FunnelHQ
+# PRODUCT — FlowDot AI
 
 register: product
 
 ## Product purpose
 
-FunnelHQ is a finance-hiring decision platform for India. Workspace operators set up Roles, run AI-driven Screening + Fitment interviews against finance domains (Accounting, Taxation, Management Consulting), then read the **Talent Analysis Graph (TAG)** — a radial skill graph with proficiency tiers (L1–L5) — to make hire decisions with depth, not vibes.
+FlowDot AI is a finance-hiring decision platform for India. Workspace operators set up Roles, run AI-driven Screening + Fitment interviews against finance domains (Accounting, Taxation, Management Consulting), then read the **Talent Analysis Graph (TAG)** — a radial skill graph with proficiency tiers (L1–L5) — to make hire decisions with depth, not vibes.
 
 Replaces the resume + spreadsheet + 30-minute screening call loop.
 

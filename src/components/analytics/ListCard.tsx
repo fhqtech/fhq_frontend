@@ -43,7 +43,7 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
 
   // Deterministic color rotation for ListCard accent. Pulls from the
   // shared --chart-{1..7} tokens defined in index.css so the chart
-  // palette stays inside the FunnelHQ finance-trust scheme (no purple /
+  // palette stays inside the FlowDot AI finance-trust scheme (no purple /
   // violet / cyan / indigo). Default falls back to gold (--chart-2).
   const chartTokens = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5', '--chart-6', '--chart-7'];
   const tokenIndex = Math.abs(list.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % chartTokens.length;

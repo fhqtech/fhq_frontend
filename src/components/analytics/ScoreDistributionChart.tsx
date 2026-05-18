@@ -148,7 +148,7 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
           <div>
             <CardTitle className="text-sm">Candidate Distribution</CardTitle>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              <span className="text-primary font-medium">FunnelHQ</span> vs <span className="text-destructive font-medium">ATS</span>
+              <span className="text-primary font-medium">FlowDot AI</span> vs <span className="text-destructive font-medium">ATS</span>
             </p>
             {aiQuery && (
               <div className="mt-1 flex items-center gap-1 text-[10px]">
@@ -212,7 +212,7 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
                 fontSize: "10px"
               }}
               formatter={(value: any, name: string) => {
-                if (name === "aiDensity") return [`${Number(value).toFixed(2)}`, "FunnelHQ"];
+                if (name === "aiDensity") return [`${Number(value).toFixed(2)}`, "FlowDot AI"];
                 if (name === "atsDensity") return [`${Number(value).toFixed(2)}`, "ATS"];
                 if (name === "starredDensity") return [`${Number(value).toFixed(2)}`, "Top Performers"];
                 return [value, name];
@@ -238,14 +238,14 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
               name="ATS"
             />
 
-            {/* FunnelHQ Analysis */}
+            {/* FlowDot AI Analysis */}
             <Area
               type="monotone"
               dataKey="aiDensity"
               stroke="hsl(var(--primary))"
               strokeWidth={2}
               fill="url(#aiDensityGradient)"
-              name="FunnelHQ"
+              name="FlowDot AI"
             />
           </AreaChart>
         </ResponsiveContainer>

@@ -53,7 +53,7 @@ function Topbar() {
           <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
             F
           </div>
-          <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+          <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-sm text-ink-soft">
           {NAV_LINKS.map((l) => (
@@ -140,7 +140,7 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            FunnelHQ runs structured AI assessments calibrated to tax, audit,
+            FlowDot AI runs structured AI assessments calibrated to tax, audit,
             controllership, FP&amp;A and consulting. You meet only the
             applicants worth your time.
           </motion.p>
@@ -333,7 +333,7 @@ function Outcomes() {
             Outcomes
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold text-ink tracking-tight">
-            What hiring teams ship with FunnelHQ.
+            What hiring teams ship with FlowDot AI.
           </h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
@@ -416,7 +416,7 @@ function Footer() {
             <div className="w-7 h-7 rounded-md bg-ink text-paper grid place-items-center font-semibold text-xs">
               F
             </div>
-            <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </div>
           <p className="text-muted leading-relaxed">
             AI-led candidate assessments built for India finance hiring.
@@ -446,7 +446,7 @@ function Footer() {
       </div>
       <div className="border-t border-rule">
         <div className="max-w-6xl mx-auto px-6 py-5 text-xs text-muted flex flex-wrap items-center justify-between gap-3">
-          <span>© {new Date().getFullYear()} FunnelHQ. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} FlowDot AI. All rights reserved.</span>
           <span className="flex flex-wrap items-center gap-4">
             <Link to="/privacy" className="hover:text-ink">Privacy</Link>
             <Link to="/terms" className="hover:text-ink">Terms</Link>

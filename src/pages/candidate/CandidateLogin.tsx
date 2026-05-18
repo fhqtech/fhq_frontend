@@ -57,7 +57,7 @@ export default function CandidateLogin() {
             <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
               F
             </div>
-            <span className="text-ink font-semibold tracking-tight">FunnelHQ</span>
+            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </Link>
           <Link to="/start" className="text-sm text-ink-soft hover:text-ink">
             New here? Get started
@@ -156,7 +156,7 @@ export default function CandidateLogin() {
         </div>
 
         <p className="mt-8 text-center text-xs text-muted">
-          New to FunnelHQ? Accept the invitation email from your hiring workspace to get started.
+          New to FlowDot AI? Accept the invitation email from your hiring workspace to get started.
         </p>
       </main>
     </div>
