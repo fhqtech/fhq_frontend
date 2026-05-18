@@ -29,6 +29,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { LogoMark } from "@/components/ui/logo-mark";
 
 function initialsFrom(input?: string): string {
   if (!input) return "··";
@@ -44,14 +45,6 @@ const NAV_LINKS = [
   { href: "#outcomes", label: "Outcomes" },
   { href: "#faq", label: "FAQ" },
 ];
-
-function LogoMark() {
-  return (
-    <span className="font-mono text-ink text-2xl leading-none tracking-tight select-none">
-      f<span className="text-gold-ink">.</span>
-    </span>
-  );
-}
 
 function Topbar() {
   const { isAuthenticated: workspaceAuth, user } = useAuth();
@@ -76,7 +69,7 @@ function Topbar() {
     <header className="sticky top-0 z-30 bg-paper/90 backdrop-blur-sm border-b border-rule">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <LogoMark />
+          <LogoMark size="md" />
           <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-sm text-ink-soft">
@@ -703,7 +696,7 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-8 text-sm">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2.5 mb-3">
-            <LogoMark />
+            <LogoMark size="md" />
             <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
           </div>
           <p className="text-muted leading-relaxed max-w-sm">

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1190,15 +1191,11 @@ export default function CandidatePortal() {
         <div className="w-full px-8 py-2.5 overflow-hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center relative h-10 -ml-4">
-              <img
-                src="/logo.png"
-                alt="FlowDot AI"
-                className="h-16 object-cover object-top -mt-2"
-              />
-              <div className="absolute left-14">
+            <div className="flex items-center gap-3">
+              <LogoMark size="lg" />
+              <div>
                 <h1 className="text-xl font-bold text-ink whitespace-nowrap">FlowDot AI</h1>
-                <p className="text-[10px] text-muted whitespace-nowrap">Applicant Portal</p>
+                <p className="text-[10px] text-muted whitespace-nowrap">Applicant portal</p>
               </div>
             </div>
 

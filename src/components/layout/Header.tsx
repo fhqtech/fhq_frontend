@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { List as Menu } from "phosphor-react";
 import { Button } from "@/components/ui/button";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { ProjectSelector } from "@/components/workspace/ProjectSelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,14 +68,9 @@ export function Header({ onMenuClick }: HeaderProps) {
         </Button>
 
         {/* Logo + Text */}
-        <div className="flex items-center gap-1 -ml-4">
-          <img
-            src="/logo.png"
-            alt="FlowDot AI"
-            className="w-20 h-20 rounded-full object-cover"
-            style={{ objectPosition: 'center' }}
-          />
-          <div className="hidden sm:flex flex-col -ml-4">
+        <div className="flex items-center gap-2.5">
+          <LogoMark size="lg" />
+          <div className="hidden sm:flex flex-col">
             <span className="font-semibold text-ink text-lg leading-tight tracking-tight">
               FlowDot AI
             </span>

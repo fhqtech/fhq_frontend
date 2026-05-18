@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -229,11 +230,11 @@ export default function InterviewSwipeView() {
       <div className="min-h-dvh bg-paper-2 from-white via-slate-200 to-black flex items-center justify-center p-4 relative overflow-hidden">
         {/* Logo and Text - Top Left (matching Sidebar) */}
         <div className="absolute top-6 left-2 z-20">
-          <div className="flex items-center justify-start">
-            <img src="/logo.png" alt="FlowDot AI" className="w-14 h-9 object-cover" style={{ objectPosition: 'center' }} />
-            <div className="-ml-1">
+          <div className="flex items-center gap-2.5 pl-4">
+            <LogoMark size="lg" />
+            <div>
               <div className="font-semibold text-ink whitespace-nowrap text-lg">FlowDot AI</div>
-              <div className="text-xs text-ink/70 font-medium -mt-1">Review Portal</div>
+              <div className="text-xs text-ink/70 font-medium -mt-1">Review portal</div>
             </div>
           </div>
         </div>

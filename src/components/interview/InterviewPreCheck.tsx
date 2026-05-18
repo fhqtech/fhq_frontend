@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -570,15 +571,11 @@ export const InterviewPreCheck = ({
         <div className="w-full px-8 py-2.5 overflow-hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center relative h-10 -ml-4">
-              <img
-                src="/logo.png"
-                alt="FlowDot AI"
-                className="h-16 object-cover object-top -mt-2"
-              />
-              <div className="absolute left-14">
+            <div className="flex items-center gap-3">
+              <LogoMark size="lg" />
+              <div>
                 <h1 className="text-xl font-bold text-ink whitespace-nowrap">FlowDot AI</h1>
-                <p className="text-[10px] text-muted whitespace-nowrap">Interview Setup</p>
+                <p className="text-[10px] text-muted whitespace-nowrap">Interview setup</p>
               </div>
             </div>
 

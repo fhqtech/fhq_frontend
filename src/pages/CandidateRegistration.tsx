@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -766,15 +767,11 @@ export default function CandidateRegistration() {
       {/* Logo and Title - Top Left - Show only on steps 1+ */}
       {currentStep > 0 && (
         <div className="absolute top-6 left-8 z-50">
-          <div className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="FlowDot AI"
-              className="h-20 object-contain"
-            />
-            <div className="-ml-2">
+          <div className="flex items-center gap-2.5">
+            <LogoMark size="lg" />
+            <div>
               <h1 className="text-lg font-bold text-ink">FlowDot AI</h1>
-              <p className="text-xs text-muted">Applicant Portal</p>
+              <p className="text-xs text-muted">Applicant portal</p>
             </div>
           </div>
         </div>
@@ -1339,10 +1336,10 @@ export default function CandidateRegistration() {
         <div className="px-8 mt-6">
             <div className="bg-paper border border-rule-strong rounded-lg p-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)] max-w-5xl mx-auto">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="FlowDot AI" className="h-16 object-cover object-top shrink-0" />
+              <LogoMark size="lg" />
               <div className="flex flex-col flex-1">
                 <h1 className="text-lg font-bold text-ink whitespace-nowrap">FlowDot AI</h1>
-                <p className="text-[10px] text-muted whitespace-nowrap">Applicant Portal</p>
+                <p className="text-[10px] text-muted whitespace-nowrap">Applicant portal</p>
               </div>
               <div className="flex flex-col items-end">
                 <p className="text-xs text-ink-soft whitespace-nowrap">
