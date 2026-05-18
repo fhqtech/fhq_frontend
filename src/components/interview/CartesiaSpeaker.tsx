@@ -320,60 +320,98 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
         wsRef.current = null;
       }
 
-      const contextId = `context-${Date.now()}`;
-      const wsUrl = `wss://api.cartesia.ai/tts/websocket?api_key=${apiKey}&cartesia_version=2025-04-16`;
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
+      // Initial-connect retry: if the WebSocket fails to open or dies before
+      // we receive the first audio chunk, retry up to 2 times with 500ms +
+      // 1500ms backoff. Once audio starts flowing we treat a drop as a
+      // genuine mid-stream failure and bubble to onError so the orchestrator
+      // stall watchdog can recover.
+      let firstAudioReceived = false;
+      let connectAttempt = 0;
+      const RETRY_DELAYS_MS = [500, 1500];
 
-      ws.onopen = () => {
-        if (ws.readyState !== WebSocket.OPEN) return;
-        // MOCKTAGON: Support different speaking modes
-        if (mode === "first") {
-          // Only speak the first sentence
-          const firstSentence = sentences[0];
+      const openWebSocket = (): Promise<WebSocket> => {
+        return new Promise((resolve, reject) => {
+          const contextId = `context-${Date.now()}`;
+          const wsUrl = `wss://api.cartesia.ai/tts/websocket?api_key=${apiKey}&cartesia_version=2025-04-16`;
+          const ws = new WebSocket(wsUrl);
+          wsRef.current = ws;
+          ws.addEventListener('open', () => resolve(ws), { once: true });
+          ws.addEventListener('error', () => reject(new Error('cartesia-open-failed')), { once: true });
+          // Stash context id so the existing onopen logic can read it.
+          (ws as any).__contextId = contextId;
+        });
+      };
+
+      let ws: WebSocket;
+      while (true) {
+        try {
+          ws = await openWebSocket();
+          break;
+        } catch (err) {
+          if (connectAttempt >= RETRY_DELAYS_MS.length) {
+            if (import.meta.env.DEV) console.error('[Cartesia] open retries exhausted:', err);
+            setIsSpeaking(false);
+            onSpeakingStateChange?.(false);
+            onError?.('websocket');
+            onComplete?.();
+            return;
+          }
+          const delay = RETRY_DELAYS_MS[connectAttempt];
+          connectAttempt += 1;
+          if (import.meta.env.DEV) {
+            console.warn(`[Cartesia] open retry ${connectAttempt}/${RETRY_DELAYS_MS.length} in ${delay}ms`);
+          }
+          await new Promise(r => setTimeout(r, delay));
+        }
+      }
+      const contextId: string = (ws as any).__contextId;
+
+      // Send sentences immediately — socket is already open from openWebSocket().
+      // MOCKTAGON: Support different speaking modes
+      if (mode === "first") {
+        const firstSentence = sentences[0];
+        const message = {
+          model_id: 'sonic-2',
+          voice: { mode: 'id', id: voiceId },
+          language: 'en',
+          context_id: contextId,
+          transcript: firstSentence,
+          continue: false,
+          speed: speechRate,
+          output_format: {
+            container: 'raw',
+            encoding: 'pcm_f32le',
+            sample_rate: 44100,
+          },
+        };
+        ws.send(JSON.stringify(message));
+      } else {
+        sentences.forEach((sentence, index) => {
           const message = {
             model_id: 'sonic-2',
             voice: { mode: 'id', id: voiceId },
             language: 'en',
             context_id: contextId,
-            transcript: firstSentence,
-            continue: false,
-            speed: speechRate, // Control speech speed (Cartesia enum)
+            transcript: sentence,
+            continue: index !== sentences.length - 1,
+            speed: speechRate,
             output_format: {
               container: 'raw',
               encoding: 'pcm_f32le',
               sample_rate: 44100,
             },
           };
+          if (index === 0) console.log('[CartesiaSpeaker] Sending message with speed:', speechRate, message);
           ws.send(JSON.stringify(message));
-        } else {
-          // Full mode: speak all sentences
-          sentences.forEach((sentence, index) => {
-            const message = {
-              model_id: 'sonic-2',
-              voice: { mode: 'id', id: voiceId },
-              language: 'en',
-              context_id: contextId,
-              transcript: sentence,
-              continue: index !== sentences.length - 1,
-              speed: speechRate, // Control speech speed (Cartesia enum)
-              output_format: {
-                container: 'raw',
-                encoding: 'pcm_f32le',
-                sample_rate: 44100,
-              },
-            };
-            if (index === 0) console.log('[CartesiaSpeaker] Sending message with speed:', speechRate, message);
-            ws.send(JSON.stringify(message));
-          });
-        }
-      };
+        });
+      }
 
       ws.onmessage = async (event) => {
         try {
           const dataText = typeof event.data === 'string' ? event.data : new TextDecoder().decode(event.data);
           const parsed = JSON.parse(dataText);
           if (parsed?.type === 'chunk' && parsed?.data) {
+            firstAudioReceived = true;
             const decoded = Uint8Array.from(atob(parsed.data), (c) => c.charCodeAt(0));
             playPcmChunk(decoded);
           }
@@ -382,9 +420,13 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
 
       ws.onerror = (err) => {
         if (import.meta.env.DEV) console.error("[Cartesia] WebSocket error:", err);
+        // Pre-audio errors are handled by the open-retry loop above; this
+        // path catches the rare case of a post-open error before audio.
+        // Once audio is flowing we still bubble to onError so the
+        // orchestrator stall watchdog can recover the turn.
         setIsSpeaking(false);
         onSpeakingStateChange?.(false);
-        onError?.('websocket');  // P1 R6
+        onError?.(firstAudioReceived ? 'websocket-midstream' : 'websocket');
         onComplete?.();
       };
 

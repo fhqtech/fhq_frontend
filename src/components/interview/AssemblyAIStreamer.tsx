@@ -20,12 +20,19 @@ export interface StreamMetrics {
   lastCalibration: Date;
 }
 
+// Reconnect schedule: 1s, 2s, 5s. Three attempts is plenty for a transient
+// network blip — beyond that the candidate's connection is likely truly
+// broken and we should surface a real error rather than retry forever.
+const RECONNECT_DELAYS_MS = [1000, 2000, 5000];
+
 export default class AssemblyAIStreamer {
   private sessionId: string;
   private onTranscriptUpdate: (text: string, isFinal: boolean) => void;
   private onMetricsUpdate: (metrics: StreamMetrics) => void;
   private onConnectionOpen: () => void;
   private onConnectionError: (error: string) => void;
+  private onReconnecting?: (attempt: number, max: number) => void;
+  private onReconnected?: () => void;
   private backendUrl: string;
   private audioDeviceId?: string;
   // C1: invitation token is now required by /api/assemblyai-token.
@@ -38,6 +45,12 @@ export default class AssemblyAIStreamer {
   private mediaStream?: MediaStream;
   private finalTranscriptTimer?: NodeJS.Timeout;
   private accumulatedTranscripts: string[] = [];
+  // Reconnect state: incremented each attempt, reset on successful open.
+  // We retain `accumulatedTranscripts` across reconnects so a mid-turn
+  // utterance isn't lost when the WebSocket flaps.
+  private reconnectAttempt = 0;
+  private reconnectTimer?: NodeJS.Timeout;
+  private isReconnecting = false;
 
   constructor(
     sessionId: string,
@@ -48,6 +61,8 @@ export default class AssemblyAIStreamer {
     backendUrl: string,
     audioDeviceId?: string,
     candidateToken?: string,
+    onReconnecting?: (attempt: number, max: number) => void,
+    onReconnected?: () => void,
   ) {
     this.sessionId = sessionId;
     this.onTranscriptUpdate = onTranscriptUpdate;
@@ -57,6 +72,8 @@ export default class AssemblyAIStreamer {
     this.backendUrl = backendUrl;
     this.audioDeviceId = audioDeviceId;
     this.candidateToken = candidateToken;
+    this.onReconnecting = onReconnecting;
+    this.onReconnected = onReconnected;
   }
 
   /**
@@ -207,20 +224,37 @@ export default class AssemblyAIStreamer {
 
       // Handle connection open
       this.transcriber.on('open', ({ id, expires_at }) => {
-        this.onConnectionOpen();
+        if (this.isReconnecting) {
+          this.isReconnecting = false;
+          this.reconnectAttempt = 0;
+          if (import.meta.env.DEV) console.log('[AssemblyAIStreamer] ✅ Reconnected');
+          this.onReconnected?.();
+        } else {
+          this.onConnectionOpen();
+        }
       });
 
-      // Handle errors
+      // Handle errors — don't tear down here; let `close` decide whether to
+      // reconnect. AssemblyAI emits both error + close on most failures.
       this.transcriber.on('error', (error) => {
         if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] ❌ Error:', error);
-        this.onConnectionError(error.message || 'Speech recognition error');
       });
 
-      // Handle connection close
+      // Handle connection close. Code 1000 = clean close (we asked).
+      // Anything else is unexpected — attempt up to 3 reconnects before
+      // surfacing a hard error to the candidate.
       this.transcriber.on('close', (code, reason) => {
-        if (code !== 1000) {
-          this.onConnectionError(`Connection lost: ${reason || 'Unknown error'}`);
+        if (code === 1000 || !this.isStreaming) {
+          // Clean close, or we already stopped — don't reconnect.
+          return;
         }
+        if (this.reconnectAttempt >= RECONNECT_DELAYS_MS.length) {
+          this.onConnectionError(
+            `Speech recognition lost after ${RECONNECT_DELAYS_MS.length} retries: ${reason || 'connection closed'}`
+          );
+          return;
+        }
+        this._scheduleReconnect(reason || `code=${code}`);
       });
 
       // 5. Connect to AssemblyAI
@@ -292,6 +326,115 @@ export default class AssemblyAIStreamer {
   }
 
   /**
+   * Schedule a reconnect attempt with exponential backoff. Keeps the
+   * mediaStream + audioContext alive so audio capture continues; only
+   * the transcriber WebSocket is rebuilt. accumulatedTranscripts are
+   * intentionally NOT cleared — a mid-turn utterance survives the flap.
+   */
+  private _scheduleReconnect(reason: string) {
+    const delay = RECONNECT_DELAYS_MS[this.reconnectAttempt];
+    this.reconnectAttempt += 1;
+    this.isReconnecting = true;
+    if (import.meta.env.DEV) {
+      console.warn(
+        `[AssemblyAIStreamer] 🔄 Reconnect ${this.reconnectAttempt}/${RECONNECT_DELAYS_MS.length} ` +
+          `in ${delay}ms (reason: ${reason})`
+      );
+    }
+    this.onReconnecting?.(this.reconnectAttempt, RECONNECT_DELAYS_MS.length);
+
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = undefined;
+      void this._reconnectTranscriber();
+    }, delay);
+  }
+
+  /**
+   * Rebuild the transcriber + reconnect WebSocket. Audio capture (mic +
+   * AudioContext) keeps running; the onaudioprocess handler reads
+   * `this.transcriber` lazily so it picks up the new socket the moment
+   * `open` fires.
+   */
+  private async _reconnectTranscriber() {
+    if (!this.isStreaming) return;
+    try {
+      // Tear down only the old transcriber.
+      if (this.transcriber) {
+        try { await this.transcriber.close(); } catch { /* ignore */ }
+        this.transcriber = undefined;
+      }
+
+      const tempToken = await this.fetchTemporaryToken();
+      this.transcriber = new StreamingTranscriber({
+        token: tempToken,
+        sampleRate: 16_000,
+        encoding: 'pcm_s16le',
+        formatTurns: false,
+        endOfTurnConfidenceThreshold: 0.9,
+        minEndOfTurnSilenceWhenConfident: 1500,
+        maxTurnSilence: 1500,
+      });
+
+      // Reattach handlers — closures here capture `this`, so transcript
+      // updates / errors / close events route through the same callbacks.
+      this.transcriber.on('turn', ({ transcript, end_of_turn }) => {
+        const text = transcript.trim();
+        if (!text) return;
+        if (!end_of_turn) {
+          const displayText = this.accumulatedTranscripts.length > 0
+            ? [...this.accumulatedTranscripts, text].join(' ')
+            : text;
+          this.onTranscriptUpdate(displayText, false);
+          return;
+        }
+        this.accumulatedTranscripts.push(text);
+        this.onTranscriptUpdate(this.accumulatedTranscripts.join(' '), false);
+        if (this.finalTranscriptTimer) clearTimeout(this.finalTranscriptTimer);
+        this.finalTranscriptTimer = setTimeout(() => {
+          this.onTranscriptUpdate(this.accumulatedTranscripts.join(' '), true);
+          this.accumulatedTranscripts = [];
+          this.finalTranscriptTimer = undefined;
+        }, 800);
+      });
+      this.transcriber.on('open', () => {
+        if (this.isReconnecting) {
+          this.isReconnecting = false;
+          this.reconnectAttempt = 0;
+          if (import.meta.env.DEV) console.log('[AssemblyAIStreamer] ✅ Reconnected');
+          this.onReconnected?.();
+        }
+      });
+      this.transcriber.on('error', (error) => {
+        if (import.meta.env.DEV) console.error('[AssemblyAIStreamer] ❌ Reconnect error:', error);
+      });
+      this.transcriber.on('close', (code, reason) => {
+        if (code === 1000 || !this.isStreaming) return;
+        if (this.reconnectAttempt >= RECONNECT_DELAYS_MS.length) {
+          this.onConnectionError(
+            `Speech recognition lost after ${RECONNECT_DELAYS_MS.length} retries: ${reason || 'connection closed'}`
+          );
+          return;
+        }
+        this._scheduleReconnect(reason || `code=${code}`);
+      });
+
+      await this.transcriber.connect();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('[AssemblyAIStreamer] Reconnect attempt failed:', error);
+      }
+      if (this.reconnectAttempt >= RECONNECT_DELAYS_MS.length) {
+        this.onConnectionError(
+          error instanceof Error ? error.message : 'Failed to reconnect speech recognition'
+        );
+      } else {
+        this._scheduleReconnect('reconnect-exception');
+      }
+    }
+  }
+
+  /**
    * Mute/unmute audio streaming
    */
   public setMuted(muted: boolean) {
@@ -316,11 +459,18 @@ export default class AssemblyAIStreamer {
    */
   private async cleanup() {
     this.isStreaming = false;
+    this.isReconnecting = false;
 
     // Clear any pending finalization timer
     if (this.finalTranscriptTimer) {
       clearTimeout(this.finalTranscriptTimer);
       this.finalTranscriptTimer = undefined;
+    }
+    // Cancel any scheduled reconnect so we don't reopen a socket we just
+    // explicitly stopped.
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = undefined;
     }
 
     // Close AssemblyAI connection
