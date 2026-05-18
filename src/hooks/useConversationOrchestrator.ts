@@ -215,7 +215,13 @@ export const useConversationOrchestrator = (
       try {
         response = await fetch(config.backendUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            // Backend rate-limits per session when this header is present;
+            // without it, candidates behind a corporate NAT share an IP
+            // and collide on the 100/min cap.
+            'X-Session-Id': config.sessionId,
+          },
           body: JSON.stringify(requestBody),
           signal: localController?.signal,
         });
