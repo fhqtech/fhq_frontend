@@ -10,7 +10,7 @@
  * Mirrors the patterns in interviewsQueries.ts so cache keys stay
  * compatible with usePrefetchInterview's existing key shape.
  */
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { interviewApi } from "@/services/interviewApi";
 import { listsApi } from "@/services/listsApi";
@@ -86,7 +86,13 @@ export function useInterviewDetailQuery(
   return useQuery({
     queryKey: interviewDetailQueryKey(workspaceId, projectId, interviewId),
     enabled: Boolean(workspaceId && projectId && interviewId),
-    staleTime: 30_000,
+    // Detail page is the canonical truth for the user's "current view". Refetch
+    // on mount so stale dashboard cache doesn't flash. placeholderData keeps
+    // the previous render visible while the refetch is in flight so the user
+    // doesn't see a skeleton on every navigation.
+    staleTime: 0,
+    refetchOnMount: "always",
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const data: any = await interviewApi.getInterviewConfiguration(
         workspaceId!,
@@ -272,7 +278,12 @@ export function useInterviewBlueprintQuery(
   return useQuery({
     queryKey: interviewBlueprintQueryKey(workspaceId, projectId, interviewId),
     enabled: Boolean(workspaceId && projectId && interviewId),
-    staleTime: 60_000,
+    // Blueprint status flips quickly between generating/completed/failed.
+    // Always refetch on mount; keep previous data visible while fetching so
+    // the "Blueprint failed" pill doesn't flash if the latest status is OK.
+    staleTime: 0,
+    refetchOnMount: "always",
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const result = await checkBlueprintExists(
         workspaceId!,

@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import { suggestFromTitle, type InterviewSuggestion } from "@/services/suggestionsApi";
+import { previewVoice } from "@/services/voicePreviewApi";
 import { BlueprintPreviewRail } from "@/components/create-interview/BlueprintPreviewRail";
 import { EditModeIndicator } from "@/components/create-interview/EditModeIndicator";
 import { ArrowLeft, FloppyDisk as Save, Users, Robot as Bot, SpeakerHigh as Volume2, Envelope as Mail, Phone, ChatCircle as MessageSquare, Upload, Download, FileXls as FileSpreadsheet, Gear as Settings, Calculator, Receipt, Briefcase, ArrowsOut, CheckCircle, Info, Play, Stop, CircleNotch, Trash, X, Plus, ArrowsClockwise, CloudArrowUp, ClockCounterClockwise, AddressBook, CaretLeft, CaretRight } from "phosphor-react";
@@ -58,7 +59,7 @@ import { creditApi, CreditInfo } from "@/services/creditApi";
 import { track, Events } from "@/lib/analytics";
 
 export default function CreateInterview() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { currentWorkspace, currentProject } = useWorkspace();
   const editId = searchParams.get('edit');
@@ -278,6 +279,11 @@ export default function CreateInterview() {
   // If typeParam is provided in URL, we'll skip the type selection screen
   // Also check formData.type which is now pre-filled from URL params in getInitialFormData
   const [showTypeSelection, setShowTypeSelection] = useState(!isEditMode && !typeParam);
+  // Blueprint preview trigger: incremented on explicit user events (title/
+  // description blur, Enter in title) so the rail only fires Gemini when
+  // the user is "done" typing — not on every keystroke.
+  const [previewTrigger, setPreviewTrigger] = useState(0);
+  const bumpPreview = () => setPreviewTrigger((n) => n + 1);
 
   // Credit info states
   const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
@@ -784,37 +790,34 @@ export default function CreateInterview() {
     return `Hi there, I'm Flowy. I'll be helping you with the ${role} interview today. Ready when you are.`;
   };
 
-  // Try browser SpeechSynthesis first (personalized line). Fall back to the
-  // static accent/speed WAV file if the browser doesn't support TTS or the
-  // requested voice isn't installed.
-  const playAudioPreview = () => {
+  // Calls backend Cartesia preview so the recruiter hears the same voice the
+  // runtime interviewer uses. Falls back to the static accent/speed WAV file
+  // only if Cartesia is unavailable.
+  const playAudioPreview = async () => {
     stopAudioPreview();
-
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
-    if (synth && 'SpeechSynthesisUtterance' in window) {
-      try {
-        const utter = new SpeechSynthesisUtterance(personalizedGreeting());
-        utter.rate = formData.voiceSpeed === 'slow' ? 0.85 : formData.voiceSpeed === 'fast' ? 1.15 : 1.0;
-        utter.pitch = formData.voiceType === 'professional-male' ? 0.85 : 1.05;
-        // Pick a voice matching the requested gender + accent if installed.
-        const voices = synth.getVoices();
-        const accentTag = formData.voiceAccent === 'british' ? 'en-GB' : formData.voiceAccent === 'indian' ? 'en-IN' : 'en-US';
-        const wantMale = formData.voiceType === 'professional-male';
-        const match = voices.find(v => v.lang?.startsWith(accentTag) && (wantMale ? /male/i.test(v.name) : /female/i.test(v.name)))
-                   || voices.find(v => v.lang?.startsWith(accentTag))
-                   || voices.find(v => v.lang?.startsWith('en'));
-        if (match) utter.voice = match;
-        utter.onstart = () => setIsPlayingAudio(true);
-        utter.onend = () => setIsPlayingAudio(false);
-        utter.onerror = () => setIsPlayingAudio(false);
-        synth.speak(utter);
-        return;
-      } catch {
-        // fall through to WAV fallback
-      }
+    setIsPlayingAudio(true);
+    try {
+      const { audio_base64, mime } = await previewVoice({
+        voice_type: formData.voiceType,
+        voice_speed: formData.voiceSpeed,
+        voice_accent: formData.voiceAccent,
+        sample_text: personalizedGreeting(),
+      });
+      const audio = new Audio(`data:${mime || 'audio/mpeg'};base64,${audio_base64}`);
+      setAudioRef(audio);
+      audio.onended = () => { setIsPlayingAudio(false); setAudioRef(null); };
+      audio.onerror = () => {
+        setIsPlayingAudio(false);
+        setAudioRef(null);
+        playWavFallback();
+      };
+      await audio.play();
+    } catch {
+      playWavFallback();
     }
+  };
 
-    // Fallback: original generic WAV preview
+  const playWavFallback = () => {
     const audioFile = getAudioFile(formData.voiceAccent, formData.voiceSpeed);
     const audio = new Audio(audioFile);
     setAudioRef(audio);
@@ -833,9 +836,6 @@ export default function CreateInterview() {
   };
 
   const stopAudioPreview = () => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      try { window.speechSynthesis.cancel(); } catch {}
-    }
     if (audioRef) {
       audioRef.pause();
       audioRef.currentTime = 0;
@@ -1471,6 +1471,10 @@ export default function CreateInterview() {
         description: validation.errors[0] || "Please check your inputs.",
         variant: "destructive"
       });
+      return;
+    }
+    if (success) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -1484,6 +1488,7 @@ export default function CreateInterview() {
 
   const handlePrevious = () => {
     stepper.goToPrevStep();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Blueprint generation function (fire-and-forget with status tracking in backend)
@@ -2027,6 +2032,10 @@ export default function CreateInterview() {
             onClick={() => {
               setFormData(prev => ({ ...prev, type: 'screening' }));
               setShowTypeSelection(false);
+              setSearchParams((prev) => {
+                prev.set('type', 'screening');
+                return prev;
+              }, { replace: true });
             }}
             className="group relative w-96 p-12 rounded-lg transition-all duration-300 hover:scale-105 cursor-pointer"
             style={{
@@ -2061,6 +2070,10 @@ export default function CreateInterview() {
             onClick={() => {
               setFormData(prev => ({ ...prev, type: 'fitment' }));
               setShowTypeSelection(false);
+              setSearchParams((prev) => {
+                prev.set('type', 'fitment');
+                return prev;
+              }, { replace: true });
             }}
             className="group relative w-96 p-12 rounded-lg transition-all duration-300 hover:scale-105 cursor-pointer"
             style={{
@@ -2392,6 +2405,15 @@ export default function CreateInterview() {
                       clearBlueprintOnEdit();
                       setFormData(prev => ({ ...prev, title: e.target.value }));
                     }}
+                    onBlur={() => {
+                      if ((formData.title?.trim().length ?? 0) >= 4) bumpPreview();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if ((formData.title?.trim().length ?? 0) >= 4) bumpPreview();
+                      }
+                    }}
                     className="mt-2 rounded border-none transition-all duration-300 bg-paper"
                     style={{
                       boxShadow: 'var(--shadow-1)'
@@ -2439,6 +2461,10 @@ export default function CreateInterview() {
                               // Auto-select recommended duration: 20min for fitment, 10min for screening
                               duration: type.value === 'fitment' ? '20' : '10'
                             }));
+                            setSearchParams((prev) => {
+                              prev.set('type', type.value);
+                              return prev;
+                            }, { replace: true });
                           }}
                         >
                           {type.label}
@@ -2511,6 +2537,9 @@ export default function CreateInterview() {
                       clearBlueprintOnEdit();
                       setFormData(prev => ({ ...prev, description: e.target.value }));
                     }}
+                    onBlur={() => {
+                      if ((formData.title?.trim().length ?? 0) >= 4) bumpPreview();
+                    }}
                     className="mt-2 min-h-[190px] pr-10 resize-none rounded border-none transition-all duration-300 bg-paper"
                     style={{
                       boxShadow: 'var(--shadow-1)'
@@ -2541,6 +2570,9 @@ export default function CreateInterview() {
                         onChange={(e) => {
                           clearBlueprintOnEdit();
                           setFormData(prev => ({ ...prev, description: e.target.value }));
+                        }}
+                        onBlur={() => {
+                          if ((formData.title?.trim().length ?? 0) >= 4) bumpPreview();
                         }}
                         className="min-h-[300px] resize-none"
                       />
@@ -2660,6 +2692,7 @@ export default function CreateInterview() {
               title={formData.title}
               type={formData.type}
               description={formData.description}
+              triggerKey={previewTrigger}
             />
           )}
           </div>

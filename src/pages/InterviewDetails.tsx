@@ -1095,12 +1095,28 @@ export default function InterviewDetails() {
  <AlertTriangle className="w-3.5 h-3.5 text-danger" />
  <span className="text-xs font-medium text-ink">Blueprint failed</span>
  <Button
- onClick={() => navigate(`/create-interview?edit=${id}`)}
+ onClick={handleRegenerateBlueprint}
+ disabled={isRegeneratingBlueprint}
  size="sm"
  variant="destructive"
  className="px-2 py-1 text-xs h-6 rounded-sm"
  >
- Fix description
+ {isRegeneratingBlueprint ? (
+ <>
+ <CircleNotch className="w-3 h-3 mr-1 animate-spin" />
+ Retrying…
+ </>
+ ) : (
+ 'Try again'
+ )}
+ </Button>
+ <Button
+ onClick={() => navigate(`/interviews/create?edit=${id}`)}
+ size="sm"
+ variant="ghost"
+ className="px-2 py-1 text-xs h-6 rounded-sm"
+ >
+ Edit description
  </Button>
  </div>
  );
