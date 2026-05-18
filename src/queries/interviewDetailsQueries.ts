@@ -278,12 +278,12 @@ export function useInterviewBlueprintQuery(
   return useQuery({
     queryKey: interviewBlueprintQueryKey(workspaceId, projectId, interviewId),
     enabled: Boolean(workspaceId && projectId && interviewId),
-    // Blueprint status flips quickly between generating/completed/failed.
-    // Always refetch on mount; keep previous data visible while fetching so
-    // the "Blueprint failed" pill doesn't flash if the latest status is OK.
+    // Blueprint status is volatile (generating → completed/failed in seconds).
+    // No placeholderData — surfacing another interview's stale "failed" via
+    // cross-query carryover would mislead users into thinking their fresh
+    // submission already failed. A brief skeleton beats a wrong pill.
     staleTime: 0,
     refetchOnMount: "always",
-    placeholderData: keepPreviousData,
     queryFn: async () => {
       const result = await checkBlueprintExists(
         workspaceId!,

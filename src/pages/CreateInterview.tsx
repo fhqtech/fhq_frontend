@@ -2154,12 +2154,23 @@ export default function CreateInterview() {
                     </CardDescription>
                   </div>
                 </div>
-                {isEditMode && <EditModeIndicator lastSavedAt={lastSavedAt} />}
+                {isEditMode ? (
+                  <EditModeIndicator lastSavedAt={lastSavedAt} />
+                ) : creditInfo ? (
+                  <p className="text-[11px] font-mono tabular-nums text-muted">
+                    <span className="text-ink">{creditInfo.creditCosts[parseInt(formData.duration)] || 0}</span> credits per interview
+                    <span className="mx-2 text-rule">·</span>
+                    <span className="text-gold-ink">{creditInfo.available}</span> available
+                    <span className="mx-2 text-rule">·</span>
+                    <span className="text-ink-soft">{maxCandidates ?? 0}</span> max applicants
+                  </p>
+                ) : null}
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Blueprint Mode Toggle - Only in create mode */}
-              {!isEditMode && (
+            <CardContent className="space-y-5">
+              {/* Blueprint Mode Toggle — only when templates exist. Pilot users
+                  with no saved blueprints get a quieter Step 1 by default. */}
+              {!isEditMode && (availableTemplates.length > 0 || isLoadingTemplates) && (
                 <div className="space-y-4">
                   {/* Mode Toggle */}
                   <div className="flex items-center justify-between">
@@ -2214,99 +2225,8 @@ export default function CreateInterview() {
                         <AddressBook size={14} className="mr-1" />
                         Use Blueprint {availableTemplates.length > 0 && `(${availableTemplates.length})`}
                       </Button>
-                      {/* FAQ Hover Button */}
-                      <div className="relative inline-flex items-center ml-2">
-                        <button
-                          type="button"
-                          className="faq-button-start w-8 h-8 rounded-full border-none flex items-center justify-center cursor-pointer relative"
-                          style={{
-                            backgroundColor: 'hsl(var(--ink))',
-                            boxShadow: 'var(--shadow-1)'
-                          }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" className="h-4 w-4 fill-white">
-                            <path d="M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74V320c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7V160c0-70.7-57.3-128-128-128H144C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"></path>
-                          </svg>
-                          <span
-                            className="faq-tooltip-start absolute opacity-0 text-paper py-1 px-2 rounded text-xs flex items-center justify-center pointer-events-none transition-all duration-200 whitespace-nowrap"
-                            style={{
-                              top: '-40px',
-                              backgroundColor: 'hsl(var(--ink))',
-                              letterSpacing: '0.5px'
-                            }}
-                          >
-                            Create or purchase Interview Blueprints from Control Tower
-                            <span
-                              className="absolute w-2 h-2 rotate-45"
-                              style={{
-                                bottom: '-4px',
-                                backgroundColor: 'hsl(var(--ink))'
-                              }}
-                            ></span>
-                          </span>
-                        </button>
-                        <style>{`
-                          .faq-button-start:hover svg {
-                            animation: jello-vertical-start 0.7s both;
-                          }
-                          .faq-button-start:hover .faq-tooltip-start {
-                            opacity: 1 !important;
-                            top: -45px !important;
-                          }
-                          @keyframes jello-vertical-start {
-                            0% { transform: scale3d(1, 1, 1); }
-                            30% { transform: scale3d(0.75, 1.25, 1); }
-                            40% { transform: scale3d(1.25, 0.75, 1); }
-                            50% { transform: scale3d(0.85, 1.15, 1); }
-                            65% { transform: scale3d(1.05, 0.95, 1); }
-                            75% { transform: scale3d(0.95, 1.05, 1); }
-                            100% { transform: scale3d(1, 1, 1); }
-                          }
-                        `}</style>
                       </div>
                     </div>
-                    {availableTemplates.length === 0 && !isLoadingTemplates && (
-                      <span className="text-xs text-muted-2">No blueprints available</span>
-                    )}
-                    </div>
-
-                    {/* Credits Info - Right Side */}
-                    {creditInfo && (
-                      <div className="flex items-center gap-4 px-4 py-2 rounded-md bg-paper-2 border border-rule shadow-1">
-                        <div className="text-center">
-                          <div className="text-xl font-semibold font-mono tabular-nums text-ink">
-                            {creditInfo.creditCosts[parseInt(formData.duration)] || 0}
-                          </div>
-                          <div className="text-[10px] text-muted">Credits per interview</div>
-                        </div>
-                        <div className="h-6 w-px bg-rule"></div>
-                        <div className="text-center">
-                          <div className="text-xl font-semibold font-mono tabular-nums text-gold-ink">
-                            {creditInfo.available}
-                          </div>
-                          <div className="text-[10px] text-muted">Available credits</div>
-                        </div>
-                        <div className="h-6 w-px bg-rule"></div>
-                        <div className="text-center">
-                          <div className="text-xl font-semibold font-mono tabular-nums text-ink-soft">
-                            {maxCandidates ?? 0}
-                          </div>
-                          <div className="text-[10px] text-muted">Max applicants</div>
-                        </div>
-                      </div>
-                    )}
-                    {isLoadingCreditInfo && (
-                      <div
-                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-paper-2 border border-rule"
-                        style={{
-                          boxShadow: 'var(--shadow-1)'
-                        }}
-                      >
-                        <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
-                        <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
-                        <div className="h-6 w-16 bg-paper-3 rounded animate-pulse"></div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Template Selection List */}
@@ -2393,7 +2313,17 @@ export default function CreateInterview() {
                     Interview Title <span className="text-danger">*</span>
                     {isSuggesting && (
                       <span className="text-[10px] font-mono normal-case text-info inline-flex items-center gap-1">
-                        <CircleNotch className="w-3 h-3 animate-spin" /> AI is filling defaults…
+                        <CircleNotch className="w-3 h-3 animate-spin" /> Suggesting defaults…
+                        <TooltipProvider delayDuration={150}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-3 h-3 text-muted cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[220px] text-[11px]">
+                              Only fills empty fields. Your edits stay.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </span>
                     )}
                   </Label>

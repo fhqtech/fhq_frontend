@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { previewBlueprint, type BlueprintPreview } from "@/services/blueprintPreviewApi";
 import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromPreview } from "@/components/tag/adapters";
+import { PreviewBlueprintModal } from "@/components/create-interview/PreviewBlueprintModal";
 
 interface BlueprintPreviewRailProps {
   title: string;
@@ -41,6 +42,7 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
   const [error, setError] = useState<string | null>(null);
   const [generatedAt, setGeneratedAt] = useState<number | null>(null);
   const [_tick, setTick] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
   const lastTriggerRef = useRef<number>(-1);
   const lastInputRef = useRef<string>("");
   const inFlightControllerRef = useRef<AbortController | null>(null);
@@ -209,16 +211,22 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
           </p>
 
           {/* Radial TAG preview — same component used on the result page,
-              fed by tagFromPreview() with no scores / no annotations. */}
-          <div className="-mx-2 mb-2">
+              fed by tagFromPreview() with no scores / no annotations.
+              Click opens PreviewBlueprintModal for a full-size view. */}
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="block w-full -mx-2 mb-2 cursor-pointer hover:opacity-90 transition-opacity rounded-sm"
+            aria-label="Open full preview"
+          >
             <TalentAnalysisGraph
               data={tagFromPreview(title, preview.skills)}
               mode="blueprint"
             />
-          </div>
+          </button>
 
           <p className="text-[10px] text-muted-2 text-center mb-3">
-            Hover a skill to see its name and type.
+            Click to explore the full preview.
           </p>
 
           <div className="border-t border-rule pt-3 flex items-center justify-between">
@@ -246,6 +254,16 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
             <Sparkles className="w-3 h-3 mr-1" /> Generate preview
           </Button>
         </div>
+      )}
+
+      {preview && (
+        <PreviewBlueprintModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={title}
+          type={type}
+          skills={preview.skills}
+        />
       )}
     </div>
   );

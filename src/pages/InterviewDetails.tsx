@@ -418,12 +418,20 @@ export default function InterviewDetails() {
  // Sync blueprint status from the interview query result. The local
  // blueprintStatus/blueprintError state is read by other effects + the
  // status pill JSX; this keeps it the source of truth without re-fetching.
+ //
+ // Guard: only adopt the status when the raw query payload's id matches the
+ // URL id. TanStack's cross-query data can briefly surface a sibling
+ // interview's payload during navigation; without this guard a freshly
+ // created interview can flash "Blueprint failed" inherited from whichever
+ // interview the user was looking at moments earlier.
  useEffect(() => {
+ const rawId = (interviewQuery.data as any)?.id;
+ if (rawId && id && rawId !== id) return;
  if (interview?.blueprintStatus) {
  setBlueprintStatus(interview.blueprintStatus);
  setBlueprintError(interview.blueprintError || null);
  }
- }, [interview?.blueprintStatus, interview?.blueprintError]);
+ }, [interview?.blueprintStatus, interview?.blueprintError, interviewQuery.data, id]);
 
 
 
@@ -1081,10 +1089,24 @@ export default function InterviewDetails() {
  );
 
  if (effectiveStatus === 'generating') {
+ // Show the "preview locked in" caption only on fresh interviews — keeps
+ // it useful right after create without showing on every later visit.
+ const createdAtRaw = (interviewQuery.data as any)?.createdAt;
+ const createdMs = createdAtRaw
+ ? (typeof createdAtRaw === 'string' ? Date.parse(createdAtRaw) : Number(createdAtRaw))
+ : NaN;
+ const isFresh = Number.isFinite(createdMs) && (Date.now() - createdMs) < 120_000;
  return (
+ <div className="flex flex-col gap-1">
  <div className="flex items-center gap-2 px-3 py-2 bg-gold-soft border border-rule rounded-sm">
  <CircleNotch className="w-3.5 h-3.5 text-gold-ink animate-spin" />
  <span className="text-xs font-medium text-gold-ink">Blueprint generating…</span>
+ </div>
+ {isFresh && (
+ <p className="text-[10px] text-muted font-mono px-1">
+ Preview locked in. Building proficiency anchors and rubric (~30s).
+ </p>
+ )}
  </div>
  );
  }
