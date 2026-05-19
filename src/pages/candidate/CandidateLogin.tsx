@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { MadeInIndiaMark } from "@/components/brand/MadeInIndiaMark";
+import { LogoMark } from "@/components/ui/logo-mark";
 
 export default function CandidateLogin() {
   const navigate = useNavigate();
@@ -54,11 +55,8 @@ export default function CandidateLogin() {
       {/* Top bar — identical to ProductLanding */}
       <header className="bg-paper border-b border-rule">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
-              F
-            </div>
-            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
+          <Link to="/" aria-label="FlowDot AI home">
+            <LogoMark size="md" withWordmark />
           </Link>
           <Link to="/start" className="text-sm text-ink-soft hover:text-ink">
             New here? Get started

@@ -9,6 +9,7 @@
  */
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { LogoMark } from "@/components/ui/logo-mark";
 
 function LanguageToggle() {
   const { t, i18n } = useTranslation("privacy");
@@ -44,11 +45,8 @@ export default function PrivacyPolicy() {
     <div className="min-h-dvh bg-paper-2 text-ink antialiased">
       <header className="bg-paper border-b border-rule">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
-              F
-            </div>
-            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
+          <Link to="/" aria-label="FlowDot AI home">
+            <LogoMark size="md" withWordmark />
           </Link>
           <div className="flex items-center gap-4">
             <LanguageToggle />

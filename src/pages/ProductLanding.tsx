@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { LogoMark } from "@/components/ui/logo-mark";
 
 export default function ProductLanding() {
   const [email, setEmail] = useState("");
@@ -80,11 +81,8 @@ export default function ProductLanding() {
       {/* Top bar */}
       <header className="bg-paper border-b border-rule">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-ink text-paper grid place-items-center font-semibold text-sm">
-              F
-            </div>
-            <span className="text-ink font-semibold tracking-tight">FlowDot AI</span>
+          <Link to="/" aria-label="FlowDot AI home">
+            <LogoMark size="md" withWordmark />
           </Link>
           <Link to="/start" className="text-sm text-ink-soft hover:text-ink">
             New here? Get started
