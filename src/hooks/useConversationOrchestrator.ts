@@ -34,6 +34,12 @@ interface ConversationOrchestratorConfig {
     name: string;
     email: string;
   };
+  // Phase 3: when provided, the orchestrator uses the SSE streaming
+  // endpoint instead of the JSON request/response endpoint. Tokens are
+  // surfaced via callbacks?.onSentence as sentence boundaries are
+  // detected, so the consumer (CartesiaSpeaker) can start speaking
+  // before the full reply is generated.
+  streamingBackendUrl?: string;
 }
 
 export interface InteractiveTask {
@@ -52,6 +58,14 @@ interface ConversationCallbacks {
   onMessageAdded?: (message: ConversationMessage) => void;
   onInteractiveTask?: (task: InteractiveTask) => void;
   onError?: (error: string) => void;
+  /**
+   * Phase 3 streaming: fired once per detected sentence boundary while
+   * the agent is producing tokens. `isLast=true` on the final emission
+   * so the consumer can flush its WebSocket. If the consumer ignores
+   * this callback the orchestrator still falls back to setting the
+   * full text on completion via onMessageAdded.
+   */
+  onSentence?: (sentence: string, isLast: boolean) => void;
 }
 
 export const useConversationOrchestrator = (
@@ -137,6 +151,163 @@ export const useConversationOrchestrator = (
     }));
   }, []);
 
+  /**
+   * Phase 3: SSE token-streaming consumer. Reads the raw response body,
+   * parses SSE `event: <name>\ndata: <payload>\n\n` frames, accumulates
+   * tokens, and emits sentence boundaries via `callbacksRef.current.onSentence`.
+   * Returns the same shape sendMessage returns so the caller is agnostic.
+   */
+  const _runStreaming = useCallback(async (cfg: typeof config, requestBody: any) => {
+    const url = cfg.streamingBackendUrl!;
+    const localController = abortControllerRef.current;
+    const idempotencyKey =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${cfg.sessionId}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    if (stallWarnTimerRef.current) clearTimeout(stallWarnTimerRef.current);
+    if (stallAbortTimerRef.current) clearTimeout(stallAbortTimerRef.current);
+    stalledRef.current = false;
+    stallWarnTimerRef.current = setTimeout(() => {
+      toast({ title: 'Taking longer than usual…', description: 'Hang tight.' });
+    }, STALL_WARN_MS);
+    stallAbortTimerRef.current = setTimeout(() => {
+      stalledRef.current = true;
+      localController?.abort();
+    }, STALL_ABORT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+          'X-Session-Id': cfg.sessionId,
+          'X-Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify(requestBody),
+        signal: localController?.signal,
+      });
+    } catch (err) {
+      if (stallWarnTimerRef.current) clearTimeout(stallWarnTimerRef.current);
+      if (stallAbortTimerRef.current) clearTimeout(stallAbortTimerRef.current);
+      throw err;
+    }
+    if (!response.ok || !response.body) {
+      if (stallWarnTimerRef.current) clearTimeout(stallWarnTimerRef.current);
+      if (stallAbortTimerRef.current) clearTimeout(stallAbortTimerRef.current);
+      throw new Error(`Stream HTTP error ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let sentenceBuffer = '';
+    let accumulatedText = '';
+    let finalType: string = 'normal';
+    let firstTokenSeen = false;
+
+    // Sentence boundary regex — split on `.!?` followed by whitespace or EOS.
+    const SENTENCE_END_RE = /([.!?]["')\]]?)\s+/;
+
+    const flushSentences = (force: boolean) => {
+      while (true) {
+        const m = sentenceBuffer.match(SENTENCE_END_RE);
+        if (!m || m.index === undefined) break;
+        const end = m.index + m[1].length;
+        const sentence = sentenceBuffer.slice(0, end).trim();
+        sentenceBuffer = sentenceBuffer.slice(end + (m[0].length - m[1].length));
+        if (sentence) {
+          callbacksRef.current?.onSentence?.(sentence, false);
+        }
+      }
+      if (force) {
+        const tail = sentenceBuffer.trim();
+        sentenceBuffer = '';
+        // Emit residual as the final sentence (isLast=true).
+        callbacksRef.current?.onSentence?.(tail, true);
+      }
+    };
+
+    const handleEvent = (eventName: string, dataRaw: string) => {
+      if (eventName === 'token') {
+        let chunk: string;
+        try { chunk = JSON.parse(dataRaw); } catch { chunk = dataRaw; }
+        if (!firstTokenSeen) {
+          firstTokenSeen = true;
+          // The candidate hears audio shortly — drop the soft "taking longer"
+          // warning now even if we're past 15s.
+          if (stallWarnTimerRef.current) {
+            clearTimeout(stallWarnTimerRef.current);
+            stallWarnTimerRef.current = null;
+          }
+          // Move to SPEAKING state — TTS starts on the first sentence.
+          transitionToState(ConversationState.SPEAKING);
+        }
+        accumulatedText += chunk;
+        sentenceBuffer += chunk;
+        flushSentences(false);
+      } else if (eventName === 'end_interview') {
+        // Backend saw [END_INTERVIEW]. Don't stop the stream — the
+        // remaining tokens are still meaningful (the AI's sign-off line).
+        finalType = 'end_interview';
+      } else if (eventName === 'complete') {
+        // Final flush + add AI message to transcript.
+        flushSentences(true);
+        const aiMessage = addMessage('ai', accumulatedText, {
+          taskType: finalType,
+        });
+        return { complete: true, message: aiMessage };
+      } else if (eventName === 'error') {
+        throw new Error(`Stream error: ${dataRaw.slice(0, 200)}`);
+      }
+      return null;
+    };
+
+    try {
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        // SSE frames are separated by a blank line ("\n\n").
+        let sep: number;
+        while ((sep = buffer.indexOf('\n\n')) !== -1) {
+          const frame = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          if (!frame.trim()) continue;
+          let eventName = 'message';
+          let data = '';
+          for (const line of frame.split('\n')) {
+            if (line.startsWith(':')) continue; // SSE comment / heartbeat
+            if (line.startsWith('event:')) eventName = line.slice(6).trim();
+            else if (line.startsWith('data:')) data += line.slice(5).trimStart();
+          }
+          const result = handleEvent(eventName, data);
+          if (result?.complete) {
+            return {
+              message: result.message,
+              textToSpeak: '',  // already streamed via onSentence
+              isInteractive: false,
+              task: null,
+            };
+          }
+        }
+      }
+      // Stream closed without a `complete` event — finalize what we have.
+      flushSentences(true);
+      if (accumulatedText) {
+        const aiMessage = addMessage('ai', accumulatedText, { taskType: 'normal' });
+        return { message: aiMessage, textToSpeak: '', isInteractive: false, task: null };
+      }
+      return {};
+    } finally {
+      if (stallWarnTimerRef.current) clearTimeout(stallWarnTimerRef.current);
+      if (stallAbortTimerRef.current) clearTimeout(stallAbortTimerRef.current);
+    }
+  }, [addMessage, transitionToState, toast]);
+
   // Enhanced message sending with state management and batching
   const sendMessage = useCallback(async (
     content: string,
@@ -211,6 +382,14 @@ export const useConversationOrchestrator = (
       if (truncatedAIMessage) {
         requestBody.truncatedAIMessage = truncatedAIMessage;
         console.log('[ConversationOrchestrator] Including truncated AI message:', truncatedAIMessage);
+      }
+
+      // Phase 3: SSE streaming path. When the host wires `streamingBackendUrl`,
+      // we consume token-level events and emit sentence boundaries via
+      // callbacks.onSentence so TTS can start speaking before the full
+      // reply finishes generating.
+      if (cfg.streamingBackendUrl) {
+        return await _runStreaming(cfg, requestBody);
       }
 
       console.log('[ConversationOrchestrator] Sending request to backend:', cfg.backendUrl);

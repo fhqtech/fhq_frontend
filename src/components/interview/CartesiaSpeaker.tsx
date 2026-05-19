@@ -4,6 +4,14 @@ import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "re
 
 export interface CartesiaSpeakerHandle {
   stop: () => string; // Returns partial text spoken before stop
+  /**
+   * Phase 3 streaming: push a sentence to the persistent Cartesia
+   * WebSocket as the LLM produces it. Set `isLast=true` to flush + close.
+   * First call opens the socket if not already open. Returns a promise
+   * that resolves when the sentence has been queued (NOT when its audio
+   * has played).
+   */
+  pushSentence: (sentence: string, isLast: boolean) => Promise<void>;
 }
 
 interface CartesiaSpeakerProps {
@@ -41,6 +49,11 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
     // C2: in-memory cache of the Cartesia key fetched from backend. Lives
     // only for the lifetime of the component (no localStorage).
     const cartesiaKeyRef = useRef<string | null>(null);
+    // Phase 3 streaming: persistent socket lifecycle across `pushSentence`
+    // calls within a single agent turn. streamingContextIdRef tracks the
+    // Cartesia context_id so all sentences land in the same TTS stream.
+    const streamingContextIdRef = useRef<string | null>(null);
+    const streamingOpenPromiseRef = useRef<Promise<WebSocket> | null>(null);
 
     const fetchCartesiaKey = async (): Promise<string | null> => {
       if (cartesiaKeyRef.current) return cartesiaKeyRef.current;
@@ -177,8 +190,134 @@ const CartesiaSpeaker = forwardRef<CartesiaSpeakerHandle, CartesiaSpeakerProps>(
       return partialText || currentTextRef.current;
     };
 
+    /**
+     * Phase 3 streaming. Opens the persistent socket on first call, then
+     * sends one Cartesia transcript per call with continue=!isLast. Audio
+     * decode/playback uses the same onmessage / playPcmChunk pipeline as
+     * the batched speakSentences path.
+     */
+    const pushSentence = async (sentence: string, isLast: boolean) => {
+      const text = (sentence || "").trim();
+      if (!text && !isLast) return;
+
+      const apiKey = await fetchCartesiaKey();
+      if (!apiKey) {
+        onError?.('missing_api_key');
+        onComplete?.();
+        return;
+      }
+
+      // Ensure AudioContext exists with the analyser chain. Mirrors the
+      // setup in the batched speakSentences path.
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new AudioContext();
+        const gainNode = audioCtxRef.current.createGain();
+        gainNode.gain.value = 1.0;
+        gainNodeRef.current = gainNode;
+        const analyser = audioCtxRef.current.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.3;
+        analyserRef.current = analyser;
+        gainNode.connect(analyser);
+        analyser.connect(audioCtxRef.current.destination);
+      }
+      if (onAudioLevel && analyserRef.current) {
+        stopAudioLevelMonitoring();
+        startAudioLevelMonitoring();
+      }
+
+      // Open the socket on first sentence of the turn.
+      if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
+        streamingContextIdRef.current = `stream-${Date.now()}`;
+        const wsUrl = `wss://api.cartesia.ai/tts/websocket?api_key=${apiKey}&cartesia_version=2025-04-16`;
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+        setIsSpeaking(true);
+        onSpeakingStateChange?.(true);
+
+        streamingOpenPromiseRef.current = new Promise<WebSocket>((resolve, reject) => {
+          ws.addEventListener('open', () => resolve(ws), { once: true });
+          ws.addEventListener('error', () => reject(new Error('cartesia-open-failed')), { once: true });
+        });
+
+        ws.onmessage = async (event) => {
+          try {
+            const dataText = typeof event.data === 'string'
+              ? event.data
+              : new TextDecoder().decode(event.data);
+            const parsed = JSON.parse(dataText);
+            if (parsed?.type === 'chunk' && parsed?.data) {
+              const decoded = Uint8Array.from(atob(parsed.data), (c) => c.charCodeAt(0));
+              playPcmChunk(decoded);
+            } else if (parsed?.type === 'done') {
+              // Cartesia signals the END of the current stream. We wait
+              // for queued audio sources to drain, then close + complete.
+              const drainAndComplete = () => {
+                if (playingSourcesRef.current.size === 0) {
+                  setIsSpeaking(false);
+                  onSpeakingStateChange?.(false);
+                  spokenTextRef.current = currentTextRef.current;
+                  onComplete?.();
+                  if (wsRef.current === ws) {
+                    try { ws.close(); } catch { /* noop */ }
+                    wsRef.current = null;
+                  }
+                  streamingContextIdRef.current = null;
+                } else {
+                  setTimeout(drainAndComplete, 100);
+                }
+              };
+              drainAndComplete();
+            }
+          } catch { /* not JSON, ignore */ }
+        };
+        ws.onerror = () => {
+          if (import.meta.env.DEV) console.error('[Cartesia] streaming ws error');
+          onError?.('websocket');
+          onComplete?.();
+        };
+        ws.onclose = () => {
+          if (wsRef.current === ws) wsRef.current = null;
+        };
+      }
+
+      // Wait until socket is OPEN before sending. The promise resolves
+      // once we get the `open` event; subsequent calls await an
+      // already-resolved promise so the overhead is negligible.
+      try {
+        if (streamingOpenPromiseRef.current) {
+          await streamingOpenPromiseRef.current;
+        }
+      } catch {
+        onError?.('websocket');
+        onComplete?.();
+        return;
+      }
+
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      currentTextRef.current = (currentTextRef.current || '') + (text ? ' ' + text : '');
+      ws.send(JSON.stringify({
+        model_id: 'sonic-2',
+        voice: { mode: 'id', id: voiceId },
+        language: 'en',
+        context_id: streamingContextIdRef.current,
+        transcript: text,
+        continue: !isLast,
+        speed: speechRate,
+        output_format: {
+          container: 'raw',
+          encoding: 'pcm_f32le',
+          sample_rate: 44100,
+        },
+      }));
+    };
+
     useImperativeHandle(ref, () => ({
       stop: stopPlayback,
+      pushSentence,
     }));
 
     const splitSentences = (text: string): string[] => {

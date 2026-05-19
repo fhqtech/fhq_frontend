@@ -80,10 +80,19 @@ export const InterviewSession = ({
   const [elapsedTime, setElapsedTime] = useState(0);
 
   // Use the conversation orchestrator for state management
+  // Phase 3 streaming: when the LLM backend URL is the prelims agent,
+  // derive the SSE endpoint by appending /stream. Falls through to the
+  // batched JSON path if streamingBackendUrl is not set (e.g. legacy
+  // backends or feature-flagged off).
+  const streamingBackendUrl = apiEndpoints.llmBackendUrl
+    ? `${apiEndpoints.llmBackendUrl}/stream`
+    : undefined;
+
   const conversationOrchestrator = useConversationOrchestrator(
     {
       sessionId,
       backendUrl: apiEndpoints.llmBackendUrl,
+      streamingBackendUrl,
       interviewId,
       mode: 'prod',
       enableAutoTransition: true,
@@ -94,16 +103,36 @@ export const InterviewSession = ({
         setIsListening(newState === ConversationState.LISTENING);
         setIsSpeaking(newState === ConversationState.SPEAKING);
       },
+      onSentence: (sentence, isLast) => {
+        // Phase 3: streaming path pushes sentence-by-sentence to Cartesia.
+        // First call within a turn opens the persistent socket; isLast=true
+        // closes it after audio drains.
+        if (!speakerRef.current) return;
+        if (isSpeakingRef.current === false) {
+          // Reset spoken-text tracker on first sentence of a fresh turn.
+          // (Subsequent sentences fall through.)
+        }
+        void speakerRef.current.pushSentence(sentence, isLast);
+      },
       onMessageAdded: (message) => {
         // Update textToSpeak when AI responds
         if (message.role === 'ai') {
 
-          // Stop any currently playing TTS immediately
-          if (speakerRef.current && isSpeakingRef.current) {
+          // Stop any currently playing TTS immediately. Only relevant in
+          // the legacy batched path — the streaming path drives Cartesia
+          // via onSentence so by the time onMessageAdded fires there's
+          // nothing to interrupt.
+          if (!streamingBackendUrl && speakerRef.current && isSpeakingRef.current) {
             speakerRef.current.stop();
           }
 
-          setTextToSpeak(message.content);
+          // Legacy non-streaming path: hand the full text to CartesiaSpeaker
+          // via the `text` prop. Streaming path has already pushed sentences
+          // through onSentence — setting textToSpeak would duplicate the
+          // utterance, so skip it there.
+          if (!streamingBackendUrl) {
+            setTextToSpeak(message.content);
+          }
           // F1: removed `videoTimingRef.current.aiSpeakingStarted(...)` —
           // VideoTimingManager was deleted in S1 (audio-only refactor) but
           // this closure-captured reference survived. It threw a
@@ -446,13 +475,23 @@ export const InterviewSession = ({
     }
 
     // Leading-edge: user just started speaking. If the AI was talking, cut it.
-    if (!isFinal && transcript.trim() && !isUserSpeakingRef.current) {
+    // Phase 3 upgrade: require ≥3 words on the partial transcript before
+    // firing barge-in. Avoids cutting the AI on a candidate's lone "um"
+    // (which AssemblyAI emits as a partial within ~200ms of any breath).
+    // Keep the old behavior outside of SPEAKING — non-barge-in cases just
+    // need the leading-edge guard to flip isUserSpeakingRef.
+    const wordCount = transcript.trim().split(/\s+/).filter(Boolean).length;
+    const isBargeIn = isSpeakingRef.current && wordCount >= 3;
+    if (!isFinal && transcript.trim() && !isUserSpeakingRef.current && (!isSpeakingRef.current || isBargeIn)) {
       isUserSpeakingRef.current = true;
-      if (isSpeakingRef.current) {
+      if (isBargeIn) {
         const partialText = speakerRef.current?.stop();
         if (partialText && partialText.trim()) {
           truncatedAIMessageRef.current = partialText + "...";
         }
+        // Phase 3 upgrade: explicit state transition so the orchestrator's
+        // SPEAKING/LISTENING guards line up with the actual mic state.
+        conversationOrchestrator.transitionToState(ConversationState.LISTENING);
         setIsSpeaking(false);
         streamerRef.current?.setMuted(true);
         setTimeout(() => {
