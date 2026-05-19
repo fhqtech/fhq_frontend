@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2 } from "lucide-react";
+import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2, UserPlus } from "lucide-react";
 import { CloudArrowDown, CaretLeft } from "phosphor-react";
 import googleLogo from "@/assets/google_logo.png";
 import aiAvatar from "@/assets/ai-avatar.png";
@@ -42,6 +42,7 @@ import {
   useInvalidateInterviewDetailsOnRevision,
 } from "@/queries/interviewDetailsQueries";
 import { interviewApi } from "@/services/interviewApi";
+import { AddCandidatesModal } from "@/components/views/AddCandidatesModal";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   interviewCandidatesQueryKey,
@@ -188,6 +189,7 @@ export default function InterviewDetails() {
  const [startModalOpen, setStartModalOpen] = useState(false);
  const [isStartingInterview, setIsStartingInterview] = useState(false);
  const [startingProgress, setStartingProgress] = useState("");
+ const [showAddCandidatesModal, setShowAddCandidatesModal] = useState(false);
 
  // Re-invite (resend invitation email) state
  const [isResendingInvites, setIsResendingInvites] = useState(false);
@@ -1410,6 +1412,15 @@ export default function InterviewDetails() {
  </div>
  </div>
  </div>
+ <div className="flex items-center gap-2">
+ <Button
+ size="sm"
+ onClick={() => setShowAddCandidatesModal(true)}
+ className="flex items-center gap-1 h-7 text-xs px-2 rounded-sm"
+ >
+ <UserPlus className="w-3 h-3" />
+ Add candidates
+ </Button>
  <Button
  variant="outline"
  size="sm"
@@ -1420,6 +1431,7 @@ export default function InterviewDetails() {
  <RefreshCw className={`w-3 h-3 ${loadingCandidates ? 'animate-spin' : ''}`} />
  Refresh
  </Button>
+ </div>
  </div>
  <CardDescription className="text-sm text-muted">
  Detailed view of all applicants and their interview performance.
@@ -1627,6 +1639,13 @@ export default function InterviewDetails() {
  description: `${eligibleForShortlist.length} applicant(s) added to your qualified list.`,
  });
  }}
+ />
+ <AddCandidatesModal
+ isOpen={showAddCandidatesModal}
+ onClose={() => setShowAddCandidatesModal(false)}
+ interviewId={id!}
+ interviewTitle={interview?.title}
+ onInvited={refreshCandidates}
  />
  </div>
  );

@@ -209,6 +209,42 @@ class InterviewApiService {
   }
 
   /**
+   * Invite one or more candidates to an existing interview. Hits the
+   * non-scoped legacy route POST /api/interviews/{id}/invite-candidates,
+   * which mints invitations + sends emails via SES. Returns 200 on
+   * success or 207 multi-status if any single invite failed (e.g.
+   * duplicate, invalid email).
+   */
+  async inviteCandidates(
+    interviewId: string,
+    candidates: Array<{ name: string; email: string }>
+  ): Promise<{
+    success: boolean;
+    invitations_created?: number;
+    emails_sent?: number;
+    emails_failed?: number;
+    errors?: Array<any>;
+  }> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/interviews/${interviewId}/invite-candidates`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ candidates }),
+      }
+    );
+
+    if (!response.ok && response.status !== 207) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || error.error || 'Failed to invite candidates');
+    }
+
+    const data: any = await response.json();
+    // 207 wraps the payload in `detail`; 200 returns it flat. Accept both.
+    return response.status === 207 && data?.detail ? data.detail : data;
+  }
+
+  /**
    * Delete an interview
    */
   async deleteInterview(
