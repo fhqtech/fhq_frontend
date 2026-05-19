@@ -36,10 +36,21 @@ interface ConversationOrchestratorConfig {
   };
 }
 
+export interface InteractiveTask {
+  // Locally-generated on the orchestrator side: 'long_text' (auto-converted
+  // for long replies) or 'interactive_task' (when the backend signals an
+  // interactive turn). Extend the union as new task types are introduced.
+  taskType?: 'long_text' | 'interactive_task' | string;
+  description?: string;
+  // Consumer-side convenience field; set by InterviewSession when it wants
+  // the task to also render as an AI message in the transcript.
+  question?: string;
+}
+
 interface ConversationCallbacks {
   onStateChange?: (state: ConversationState) => void;
   onMessageAdded?: (message: ConversationMessage) => void;
-  onInteractiveTask?: (task: any) => void;
+  onInteractiveTask?: (task: InteractiveTask) => void;
   onError?: (error: string) => void;
 }
 
@@ -50,7 +61,7 @@ export const useConversationOrchestrator = (
   // Core state management
   const [state, setState] = useState<ConversationState>(ConversationState.IDLE);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
-  const [currentInteractiveTask, setCurrentInteractiveTask] = useState<any | null>(null);
+  const [currentInteractiveTask, setCurrentInteractiveTask] = useState<InteractiveTask | null>(null);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   
   // Internal refs for state management
@@ -65,6 +76,16 @@ export const useConversationOrchestrator = (
   const stalledRef = useRef<boolean>(false);
   const { toast } = useToast();
 
+  // TD2: parents pass `config` + `callbacks` as fresh object literals on
+  // every render, which would otherwise recreate every useCallback in this
+  // hook. Mirror them into refs so the useCallbacks can stay stable and
+  // still read the latest values. Updates happen in the body (not effects)
+  // so the ref is always current relative to the render reading it.
+  const configRef = useRef(config);
+  configRef.current = config;
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
+
   // Sync refs with state
   stateRef.current = state;
   messagesRef.current = messages;
@@ -78,10 +99,10 @@ export const useConversationOrchestrator = (
         isSame: prevState === newState
       });
       if (prevState === newState) return prevState; // Avoid redundant transitions
-      callbacks?.onStateChange?.(newState);
+      callbacksRef.current?.onStateChange?.(newState);
       return newState;
     });
-  }, [callbacks]);
+  }, []);
 
   // Generate unique message ID
   const generateMessageId = () => {
@@ -104,9 +125,9 @@ export const useConversationOrchestrator = (
     };
 
     setMessages(prev => [...prev, message]);
-    callbacks?.onMessageAdded?.(message);
+    callbacksRef.current?.onMessageAdded?.(message);
     return message;
-  }, [callbacks]);
+  }, []);
 
   // Convert messages to backend history format
   const convertToHistoryFormat = useCallback((msgs: ConversationMessage[]): HistoryItem[] => {
@@ -177,10 +198,12 @@ export const useConversationOrchestrator = (
     abortControllerRef.current = new AbortController();
 
     try {
+      // TD2: read latest config via the ref so this useCallback stays stable.
+      const cfg = configRef.current;
       // Prepare request in simplified format
       const requestBody: any = {
-        interviewId: config.interviewId,
-        sessionId: config.sessionId,
+        interviewId: cfg.interviewId,
+        sessionId: cfg.sessionId,
         newUserMessage: content
       };
 
@@ -190,7 +213,7 @@ export const useConversationOrchestrator = (
         console.log('[ConversationOrchestrator] Including truncated AI message:', truncatedAIMessage);
       }
 
-      console.log('[ConversationOrchestrator] Sending request to backend:', config.backendUrl);
+      console.log('[ConversationOrchestrator] Sending request to backend:', cfg.backendUrl);
 
       // Stall watchdogs: warn at 15s, hard-abort at 60s. Without these the
       // candidate has no signal whether the backend is alive when an agent
@@ -213,14 +236,26 @@ export const useConversationOrchestrator = (
 
       let response: Response;
       try {
-        response = await fetch(config.backendUrl, {
+        // TD3: client-generated idempotency key. If the browser retries
+        // this POST (network blip, AbortController fired after the server
+        // already received it), the backend dedupes on (sessionId, key)
+        // and returns the cached response — no duplicate conversation
+        // history entry. The key lives only for this turn; a fresh turn
+        // gets a fresh key.
+        const idempotencyKey =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${cfg.sessionId}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+        response = await fetch(cfg.backendUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             // Backend rate-limits per session when this header is present;
             // without it, candidates behind a corporate NAT share an IP
             // and collide on the 100/min cap.
-            'X-Session-Id': config.sessionId,
+            'X-Session-Id': cfg.sessionId,
+            'X-Idempotency-Key': idempotencyKey,
           },
           body: JSON.stringify(requestBody),
           signal: localController?.signal,
@@ -281,7 +316,7 @@ export const useConversationOrchestrator = (
       // Handle interactive tasks
       if (parsedResponse.responseType === 'interactive' && parsedResponse.problemData) {
         setCurrentInteractiveTask(parsedResponse.problemData);
-        callbacks?.onInteractiveTask?.(parsedResponse.problemData);
+        callbacksRef.current?.onInteractiveTask?.(parsedResponse.problemData);
       } else {
         setCurrentInteractiveTask(null);
       }
@@ -313,7 +348,7 @@ export const useConversationOrchestrator = (
           transitionToState(ConversationState.LISTENING);
         }
       } else {
-        callbacks?.onError?.(error.message || 'Failed to send message');
+        callbacksRef.current?.onError?.(error.message || 'Failed to send message');
         transitionToState(ConversationState.IDLE);
       }
 
@@ -321,7 +356,10 @@ export const useConversationOrchestrator = (
     } finally {
       setIsWaitingForResponse(false);
     }
-  }, [config, addMessage, convertToHistoryFormat, transitionToState, callbacks]);
+    // TD2: deps dropped — `config` + `callbacks` now flow through refs;
+    // `addMessage`, `convertToHistoryFormat`, `transitionToState` are
+    // stable thanks to their own ref-based useCallback wrappers above.
+  }, [addMessage, convertToHistoryFormat, transitionToState]);
 
   // Helper function to extract meaningful text from malformed JSON
   const extractTextFromMalformedJson = (rawMessage: string): string | null => {

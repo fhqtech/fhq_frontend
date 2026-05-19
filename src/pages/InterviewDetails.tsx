@@ -162,7 +162,15 @@ export default function InterviewDetails() {
  const token = localStorage.getItem('auth_token');
  if (!token) return;
  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
- const url = `${apiBase}/api/interviews/${id}/events?token=${encodeURIComponent(token)}`;
+ // TD5: prefer the scoped SSE route when we have workspace + project in
+ // context. The unscoped /api/interviews/{id}/events route does an
+ // unbounded collection_group scan and is deprecated. Falls back to the
+ // legacy route only if workspace/project hasn't resolved yet.
+ const wsId = currentWorkspace?.id;
+ const pjId = currentProject?.id;
+ const url = wsId && pjId
+   ? `${apiBase}/api/workspaces/${wsId}/projects/${pjId}/interviews/${id}/events?token=${encodeURIComponent(token)}`
+   : `${apiBase}/api/interviews/${id}/events?token=${encodeURIComponent(token)}`;
  const es = new EventSource(url);
  es.addEventListener('update', () => setLiveRevision((r) => r + 1));
  es.addEventListener('not_found', () => es.close());
@@ -174,7 +182,7 @@ export default function InterviewDetails() {
  }
  };
  return () => es.close();
- }, [id]);
+ }, [id, currentWorkspace?.id, currentProject?.id]);
 
  // Start interview modal states (similar to ManageInterviewsEnhanced)
  const [startModalOpen, setStartModalOpen] = useState(false);

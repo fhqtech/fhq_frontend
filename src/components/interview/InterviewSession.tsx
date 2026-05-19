@@ -5,7 +5,7 @@ import CartesiaSpeaker, { CartesiaSpeakerHandle } from './CartesiaSpeaker';
 import { CalibrationScreen } from './CalibrationScreen';
 import { ParticleSphere } from './ParticleSphere';
 import { TranscriptBox, TranscriptMessage } from './TranscriptBox';
-import { useConversationOrchestrator } from '@/hooks/useConversationOrchestrator';
+import { useConversationOrchestrator, InteractiveTask } from '@/hooks/useConversationOrchestrator';
 import { ConversationState } from '@/types/interview';
 import { StreamMetrics } from './AssemblyAIStreamer';
 import { Mic, MicOff, Settings, ChevronDown, Wifi, WifiOff, Clock, RefreshCw } from 'lucide-react';
@@ -143,7 +143,7 @@ export const InterviewSession = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Interactive question state (still needed for backend handling)
-  const [interactiveTask, setInteractiveTask] = useState<any | null>(null);
+  const [interactiveTask, setInteractiveTask] = useState<InteractiveTask | null>(null);
 
   // Transcript messages for the new UI
   const [transcriptMessages, setTranscriptMessages] = useState<TranscriptMessage[]>([]);
@@ -189,7 +189,12 @@ export const InterviewSession = ({
   const streamerRef = useRef<AssemblyAIStreamer | null>(null);
   const speakerRef = useRef<CartesiaSpeakerHandle>(null);
   const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const inactivityWarningTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // TD4 audit: previously declared `inactivityWarningTimerRef` was never
+  // assigned anywhere — clearing it in resetInactivityTimer() + unmount
+  // cleanup was dead code. The audit's "multi-fire race" concern was
+  // actually resolved by clearing activityTimerRef + countdownIntervalRef
+  // at the top of resetInactivityTimer(). Keeping a comment for the
+  // archaeology so we don't reintroduce the unused ref.
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isSpeakingRef = useRef(isSpeaking);
   const currentUtteranceRef = useRef(currentUtterance);
@@ -380,9 +385,9 @@ export const InterviewSession = ({
 
   // Inactivity detection and auto-close logic
   const resetInactivityTimer = useCallback(() => {
-    // Clear all existing timers
+    // Clear all existing timers. activityTimerRef holds the 30s warning;
+    // countdownIntervalRef holds the 60s tick when warning is visible.
     if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
-    if (inactivityWarningTimerRef.current) clearTimeout(inactivityWarningTimerRef.current);
     if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
 
     // Hide warning if showing
@@ -686,7 +691,6 @@ export const InterviewSession = ({
   useEffect(() => {
     return () => {
       if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
-      if (inactivityWarningTimerRef.current) clearTimeout(inactivityWarningTimerRef.current);
       if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     };
   }, []);
