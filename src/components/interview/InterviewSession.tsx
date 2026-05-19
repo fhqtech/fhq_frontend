@@ -20,15 +20,13 @@ const PhoneDisconnectIcon = ({ size = 20, className = "" }: { size?: number; cla
 
 // Configuration
 const BACKEND_URL = import.meta.env.VITE_LLM_BACKEND_URL;
-const WEBSOCKET_URL = import.meta.env.VITE_STT_WEBSOCKET_URL;
 
-// Validate critical environment variables. These are interview-blocking
-// in production; without them STT and the LLM agent simply can't connect.
-// Sentry capture lets operators see the misconfigured deploy immediately.
-if (!WEBSOCKET_URL) {
-  if (import.meta.env.DEV) console.error('[Interview] CRITICAL ERROR: WEBSOCKET_URL is undefined!');
-  Sentry.captureMessage('VITE_STT_WEBSOCKET_URL missing at runtime', { level: 'error' });
-}
+// Phase 2 PR 8: VITE_STT_WEBSOCKET_URL was a vestigial env var pointing
+// at a legacy Whisper-on-GROQ Cloud Run service in the funnelhq-project
+// GCP project. Nothing in the current STT path actually connects to it —
+// AssemblyAIStreamer talks directly to AssemblyAI via a vended temporary
+// token (POST /api/assemblyai-token). Removing the dead startup guard
+// kills the phantom cross-project dependency.
 if (!BACKEND_URL) {
   if (import.meta.env.DEV) console.error('[Interview] CRITICAL ERROR: BACKEND_URL is undefined!');
   Sentry.captureMessage('VITE_LLM_BACKEND_URL missing at runtime', { level: 'error' });
@@ -696,7 +694,7 @@ export const InterviewSession = ({
   // P0 #8: if a required env var is missing, render a candidate-facing
   // setup-error screen instead of silently failing to connect. This was
   // previously logged to the console only — invisible to the candidate.
-  if (!WEBSOCKET_URL || !BACKEND_URL) {
+  if (!BACKEND_URL) {
     return (
       <div className="min-h-dvh w-screen bg-ink text-paper flex items-center justify-center p-8">
         <div className="max-w-md text-center space-y-6">
