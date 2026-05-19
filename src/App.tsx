@@ -36,7 +36,6 @@ const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
 const CreateInterview = lazy(() => import("./pages/CreateInterview"));
 const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
-const FitmentInterviews = lazy(() => import("./pages/FitmentInterviews"));
 const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
 const QuickTour = lazy(() => import("./pages/QuickTour"));
@@ -201,14 +200,6 @@ const App = () => (
               <ProtectedRoute>
                 <MainLayout>
                   <DynamicBlueprintPage />
-                </MainLayout>
-              </ProtectedRoute>
-            } />
-
-            <Route path="/interviews/fitment" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <FitmentInterviews />
                 </MainLayout>
               </ProtectedRoute>
             } />
