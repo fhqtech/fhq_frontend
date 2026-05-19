@@ -1413,6 +1413,7 @@ export default function InterviewDetails() {
  </div>
  </div>
  <div className="flex items-center gap-2">
+ {interview?.status !== 'stopped' && interview?.status !== 'completed' && (
  <Button
  size="sm"
  onClick={() => setShowAddCandidatesModal(true)}
@@ -1421,6 +1422,7 @@ export default function InterviewDetails() {
  <UserPlus className="w-3 h-3" />
  Add candidates
  </Button>
+ )}
  <Button
  variant="outline"
  size="sm"
