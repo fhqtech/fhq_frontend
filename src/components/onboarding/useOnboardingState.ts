@@ -8,7 +8,10 @@
  */
 import { useCallback, useEffect, useState } from "react";
 
-export type OnboardingStep = "domain" | "first_interview" | "invite";
+// The "domain" and "invite" steps were retired when their UI surfaces
+// turned out not to exist. Older localStorage payloads may still carry
+// those keys; we tolerate them via Partial spreading in read().
+export type OnboardingStep = "first_interview";
 
 export interface OnboardingState {
   steps: Record<OnboardingStep, boolean>;
@@ -16,10 +19,10 @@ export interface OnboardingState {
   completedAt: string | null;
 }
 
-const ALL_STEPS: OnboardingStep[] = ["domain", "first_interview", "invite"];
+const ALL_STEPS: OnboardingStep[] = ["first_interview"];
 
 const blankState = (): OnboardingState => ({
-  steps: { domain: false, first_interview: false, invite: false },
+  steps: { first_interview: false },
   dismissed: false,
   completedAt: null,
 });

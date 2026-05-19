@@ -32,7 +32,7 @@ export default function ProductLanding() {
       localStorage.removeItem("pendingInvitationToken");
       navigate(`/accept-invitation/${pendingInvitationToken}`);
     } else {
-      navigate("/interviews/manage");
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -53,7 +53,7 @@ export default function ProductLanding() {
         localStorage.removeItem("pendingInvitationToken");
         navigate(`/accept-invitation/${pending}`);
       } else {
-        navigate("/interviews/manage");
+        navigate("/dashboard");
       }
     } catch (err) {
       toast({

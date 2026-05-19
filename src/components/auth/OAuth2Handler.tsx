@@ -37,8 +37,8 @@ const OAuth2Handler = () => {
             localStorage.removeItem('pendingInvitationToken');
             navigate(`/accept-invitation/${pendingInvitationToken}`);
           } else {
-            // Navigate to manage interviews after successful authentication
-            navigate('/interviews/manage');
+            // Navigate to dashboard after successful authentication
+            navigate('/dashboard');
           }
         } catch (error) {
           console.error('Error handling OAuth callback:', error);

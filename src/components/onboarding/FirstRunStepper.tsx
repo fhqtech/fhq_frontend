@@ -1,14 +1,12 @@
 /**
  * FirstRunStepper — top-of-dashboard inline stepper for first-time
- * workspace users. Shows until all 3 steps are complete OR the user
- * dismisses.
+ * workspace users. Shows until the first interview is created OR the
+ * user dismisses.
  *
- * Steps:
- *   1. Pick your domain (Accounting / Taxation / Management Consulting)
- *   2. Create your first interview
- *   3. Invite a teammate
- *
- * Uses Driver.js for optional contextual highlights (TODO follow-up).
+ * Previously had three steps (domain, first_interview, invite) but the
+ * domain selector and teammate-invite UIs don't exist yet, so the
+ * stepper now only shows the one real action. When those surfaces ship,
+ * re-add their steps here + the matching entry in STEP_IDS.
  */
 import { Link } from "react-router-dom";
 import { Check, X } from "lucide-react";
@@ -26,35 +24,20 @@ interface StepDef {
 
 const STEPS: StepDef[] = [
   {
-    id: "domain",
-    label: "Pick your domain",
-    description: "Accounting, Taxation, or Management Consulting — drives the rubric used to score applicants.",
-    cta: "Open settings",
-    href: "/settings",
-  },
-  {
     id: "first_interview",
     label: "Create your first interview",
     description: "A 20-minute AI conversation calibrated to a finance role. Takes 3 minutes to set up.",
     cta: "Create interview",
     href: "/interviews/create",
   },
-  {
-    id: "invite",
-    label: "Invite a teammate",
-    description: "Hiring is a team sport. Bring your co-interviewer or hiring manager into the workspace.",
-    cta: "Invite from settings",
-    href: "/settings",
-  },
 ];
 
 export function FirstRunStepper() {
   const { user } = useAuth();
-  const { state, dismiss, completedCount, totalSteps, visible } = useOnboardingState(user?.id);
+  const { state, dismiss, visible } = useOnboardingState(user?.id);
 
   if (!visible) return null;
 
-  const progressPct = (completedCount / totalSteps) * 100;
   const nextIdx = STEPS.findIndex((s) => !state.steps[s.id]);
   const next = nextIdx >= 0 ? STEPS[nextIdx] : null;
 
@@ -66,9 +49,7 @@ export function FirstRunStepper() {
             Get set up
           </p>
           <h2 className="text-lg font-semibold text-ink leading-tight">
-            {completedCount === 0
-              ? "Three steps to your first applicant"
-              : `${completedCount} of ${totalSteps} done — keep going`}
+            One step to your first applicant
           </h2>
         </div>
         <button
@@ -78,14 +59,6 @@ export function FirstRunStepper() {
         >
           <X className="w-4 h-4" />
         </button>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-1 bg-paper-3 rounded-full overflow-hidden mb-4">
-        <div
-          className="h-full bg-gold transition-[width] duration-300 ease-out"
-          style={{ width: `${progressPct}%` }}
-        />
       </div>
 
       <ol className="space-y-2">
