@@ -1,16 +1,17 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TranscriptViewer } from "@/components/interview/TranscriptViewer";
-import { AlertCircle, CheckCircle, AlertTriangle, Lightbulb, Sparkles, TrendingDown, MessageSquareQuote, ArrowLeft, Clock, RefreshCw } from "lucide-react";
+import { AlertCircle, CheckCircle, AlertTriangle, Lightbulb, Sparkles, TrendingDown, MessageSquareQuote, ArrowLeft, Clock, RefreshCw, Maximize2 } from "lucide-react";
 import { RatingPanel } from "@/components/interview/RatingPanel";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromResult } from "@/components/tag/adapters";
+import { TagViewModal } from "@/components/views/TagViewModal";
 import { track, Events } from "@/lib/analytics";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -85,6 +86,8 @@ export default function InterviewResults() {
   // AuthContextType has no getIdToken. Rest of the codebase reads the
   // JWT straight from localStorage. Drop the bogus destructure.
   useAuth();
+
+  const [showTagModal, setShowTagModal] = useState(false);
 
   // Scroll to top immediately when component mounts
   useEffect(() => {
@@ -476,9 +479,20 @@ export default function InterviewResults() {
                   <h2 className="text-xl font-semibold text-foreground">
                     Talent Analysis Graph
                   </h2>
-                  <span className="text-xs text-muted">
-                    Click any node for evidence
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-muted">
+                      Click any node for evidence
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowTagModal(true)}
+                      className="inline-flex items-center gap-1.5 text-xs font-mono text-gold-ink hover:underline"
+                      aria-label="Expand Talent Analysis Graph"
+                    >
+                      <Maximize2 className="h-3.5 w-3.5" />
+                      Expand
+                    </button>
+                  </div>
                 </div>
                 <TalentAnalysisGraph
                   data={tagFromResult(rawResults as any, (rawResults as any).role || "Role")}
@@ -503,6 +517,15 @@ export default function InterviewResults() {
           </Button>
         </div>
       </main>
+
+      {rawResults?.graph_data?.nodes && rawResults.graph_data.nodes.length > 0 && (
+        <TagViewModal
+          isOpen={showTagModal}
+          onClose={() => setShowTagModal(false)}
+          data={tagFromResult(rawResults as any, (rawResults as any).role || "Role")}
+          roleTitle={(rawResults as any).role}
+        />
+      )}
     </div>
   );
 }
