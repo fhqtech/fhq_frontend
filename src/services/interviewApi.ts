@@ -26,6 +26,8 @@ export interface Interview {
   createdAt: string;
   updatedAt: string;
   userId: string;
+  blueprintStatus?: 'pending' | 'generating' | 'completed' | 'failed' | 'ready' | 'error';
+  blueprintError?: string | null;
 }
 
 export interface CreateInterviewRequest {

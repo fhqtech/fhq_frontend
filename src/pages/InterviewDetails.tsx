@@ -577,7 +577,7 @@ export default function InterviewDetails() {
  const tick = async () => {
  if (cancelled) return;
  try {
- const interviewData = await fetchInterviewData(currentWorkspace.id, currentProject.id, id);
+ const interviewData = await interviewApi.getInterview(currentWorkspace.id, currentProject.id, id);
  consecutiveErrors = 0;
 
  if (interviewData && interviewData.blueprintStatus) {
