@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SpinnerWithCopy } from "@/components/ui/spinner";
+import { MadeInIndiaMark } from "@/components/brand/MadeInIndiaMark";
 import { 
   Collapsible,
   CollapsibleContent,
@@ -224,6 +225,11 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        {!collapsed && (
+          <div className="pt-3 mt-3 border-t border-rule flex justify-center">
+            <MadeInIndiaMark size="sm" className="opacity-70" />
+          </div>
+        )}
       </div>
     </div>
     </>

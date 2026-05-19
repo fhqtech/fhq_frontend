@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { MadeInIndiaMark } from "@/components/brand/MadeInIndiaMark";
 
 export default function CandidateLogin() {
   const navigate = useNavigate();
@@ -158,6 +159,9 @@ export default function CandidateLogin() {
         <p className="mt-8 text-center text-xs text-muted">
           New to FlowDot AI? Accept the invitation email from your hiring workspace to get started.
         </p>
+        <div className="mt-6 flex justify-center">
+          <MadeInIndiaMark size="sm" className="opacity-70" />
+        </div>
       </main>
     </div>
   );

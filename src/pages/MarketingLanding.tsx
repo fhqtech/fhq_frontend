@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCandidateAuth } from "@/contexts/CandidateAuthContext";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { MadeInIndiaMark, IndiaFlagGlyph } from "@/components/brand/MadeInIndiaMark";
 import {
   Accordion,
   AccordionItem,
@@ -557,6 +558,7 @@ function SecurityTrust() {
     { icon: ShieldCheck, label: "DPDP-aligned", body: "India Digital Personal Data Protection Act 2023 compliant." },
     { icon: Database, label: "asia-south1", body: "Data residency in Mumbai. Applicant data stays in India." },
     { icon: Lock, label: "Role-based access", body: "Workspace-scoped permissions; full audit trail per action." },
+    { icon: IndiaFlagGlyph, label: "Built in India", body: "By a team based in India for India's finance hiring market." },
   ];
   return (
     <section className="bg-paper">
@@ -569,7 +571,7 @@ function SecurityTrust() {
             Built for the rules you hire under.
           </h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map((it) => {
             const I = it.icon;
             return (
@@ -733,7 +735,8 @@ function Footer() {
           <span className="flex flex-wrap items-center gap-4">
             <Link to="/privacy" className="hover:text-ink">Privacy</Link>
             <Link to="/terms" className="hover:text-ink">Terms</Link>
-            <span className="font-mono">asia-south1 · India</span>
+            <MadeInIndiaMark size="sm" />
+            <span className="font-mono">asia-south1</span>
           </span>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LogoMark } from "@/components/ui/logo-mark";
+import { MadeInIndiaMark } from "@/components/brand/MadeInIndiaMark";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -1083,6 +1084,9 @@ export const InterviewPreCheck = ({
           </div>
         )}
       </div>
+      <footer className="border-t border-rule mt-8 py-6 flex justify-center">
+        <MadeInIndiaMark size="sm" className="opacity-70" />
+      </footer>
     </div>
   );
 };
