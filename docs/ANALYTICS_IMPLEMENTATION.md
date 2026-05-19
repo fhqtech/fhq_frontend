@@ -1,7 +1,7 @@
 # Analytics Integration - Implementation Summary
 
-**Date:** October 14, 2025
-**Status:** ✅ Frontend Complete - Backend APIs Pending
+**Date:** October 14, 2025 · last updated 2026-05-19
+**Status:** ✅ Shipped. Backend analytics routes went live in Phase 5 (May 2026); see [funnelhq_api/routers/analytics.py](../../recruiter-assist-backend/funnelhq_api/routers/analytics.py).
 
 ---
 

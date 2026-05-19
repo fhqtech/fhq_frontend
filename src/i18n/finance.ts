@@ -12,7 +12,7 @@
  */
 
 export const FINANCE_STRINGS = {
-  // Brand surfaces — mirror funnelhq.co/
+  // Brand surfaces — mirror flowdot.in/
   brand: {
     tagline: 'Finance hiring, decided on depth. Not résumés.',
     subtagline: 'AI-native recruitment · Finance only · India',
@@ -47,7 +47,7 @@ export const FINANCE_STRINGS = {
 
   // Sidebar
   nav: {
-    interviews: 'TAGs', // T4: rebrand the nav item — matches funnelhq.co's brand language
+    interviews: 'TAGs', // T4: rebrand the nav item — matches flowdot.in's brand language
     interviewsSubtitle: 'Talent Analysis Graphs',
   },
 
