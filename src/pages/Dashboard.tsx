@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Bot, Users, UserCheck, TrendingUp } from "lucide-react";
 import { PageSkeleton } from "@/components/ui/shimmer";
@@ -20,6 +20,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useInterviewsQuery, useInvalidateInterviewsOnRevision, usePrefetchInterview } from "@/queries/interviewsQueries";
 import { computeDashboardNBA, type InterviewSnapshot } from "@/lib/nextBestAction";
+import { PipelineFunnel } from "@/components/dashboard/PipelineFunnel";
+import { TopCandidatesStrip } from "@/components/dashboard/TopCandidatesStrip";
+import { InterviewRollupTable } from "@/components/dashboard/InterviewRollupTable";
+import { ThroughputChart } from "@/components/dashboard/ThroughputChart";
+import { analyticsApi } from "@/services/analyticsApi";
+import type { ProjectDashboardResponse } from "@/types/analytics";
 
 export default function Dashboard() {
  const [searchParams, setSearchParams] = useSearchParams();
@@ -53,6 +59,23 @@ export default function Dashboard() {
  const interviews = interviewsQuery.data?.interviews ?? [];
  const loading = interviewsQuery.isPending && Boolean(currentWorkspace && currentProject);
  const error = interviewsQuery.error instanceof Error ? interviewsQuery.error.message : null;
+
+ // Phase A: aggregated dashboard panels (funnel / top candidates /
+ // per-interview rollup / throughput). Re-fetched whenever the live
+ // revision bumps so the panels reflect freshly-completed sessions.
+ const [dashboardData, setDashboardData] = useState<ProjectDashboardResponse | null>(null);
+ useEffect(() => {
+ if (!currentWorkspace?.id || !currentProject?.id) return;
+ let cancelled = false;
+ analyticsApi
+ .getProjectDashboard(currentWorkspace.id, currentProject.id)
+ .then((data) => {
+ if (!cancelled) setDashboardData(data);
+ });
+ return () => {
+ cancelled = true;
+ };
+ }, [currentWorkspace?.id, currentProject?.id, liveRevision]);
 
  // F24.8: auto-complete the "first interview" onboarding step once
  // the workspace has any interview at all.
@@ -249,6 +272,17 @@ export default function Dashboard() {
  </Table>
  </CardContent>
  </Card>
+
+ {dashboardData && (
+ <>
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+ <PipelineFunnel funnel={dashboardData.funnel} />
+ <TopCandidatesStrip candidates={dashboardData.top_candidates} />
+ </div>
+ <InterviewRollupTable interviews={dashboardData.interviews_rollup} />
+ <ThroughputChart buckets={dashboardData.throughput} />
+ </>
+ )}
  </>
  )}
  </div>

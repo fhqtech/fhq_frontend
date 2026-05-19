@@ -146,3 +146,47 @@ export interface CandidateListStats {
     [key: string]: number;
   };
 }
+
+// Phase A workspace dashboard
+export interface DashboardFunnel {
+  invited: number;
+  started: number;
+  completed: number;
+  strong_match: number;
+}
+
+export interface DashboardTopCandidate {
+  session_id: string;
+  candidate_id?: string | null;
+  name?: string | null;
+  email?: string | null;
+  interview_id: string;
+  interview_title?: string | null;
+  overall_score?: number | null;
+  recommendation?: string | null;
+  completed_at?: string | null;
+}
+
+export interface DashboardInterviewRollup {
+  id: string;
+  title: string;
+  type?: string | null;
+  status?: string | null;
+  invited: number;
+  completed: number;
+  avg_score?: number | null;
+}
+
+export interface DashboardThroughputBucket {
+  date: string; // YYYY-MM-DD
+  started: number;
+  completed: number;
+}
+
+export interface ProjectDashboardResponse {
+  success: boolean;
+  funnel: DashboardFunnel;
+  top_candidates: DashboardTopCandidate[];
+  interviews_rollup: DashboardInterviewRollup[];
+  throughput: DashboardThroughputBucket[];
+}

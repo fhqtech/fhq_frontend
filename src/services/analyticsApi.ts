@@ -1,5 +1,10 @@
 import { listsApi } from './listsApi';
-import { AnalyticsCandidate, AnalyticsList, CandidateListStats } from '@/types/analytics';
+import {
+  AnalyticsCandidate,
+  AnalyticsList,
+  CandidateListStats,
+  ProjectDashboardResponse,
+} from '@/types/analytics';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
@@ -62,6 +67,27 @@ class AnalyticsApiService {
       return data.stats || null;
     } catch (error) {
       console.error('Failed to fetch list stats:', error);
+      return null;
+    }
+  }
+
+  // Phase A workspace dashboard — single round-trip for all four panels
+  async getProjectDashboard(
+    workspaceId: string,
+    projectId: string,
+  ): Promise<ProjectDashboardResponse | null> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/dashboard`,
+        { headers: this.getAuthHeaders() },
+      );
+      if (!response.ok) {
+        console.warn(`Dashboard endpoint returned ${response.status}`);
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch project dashboard:', error);
       return null;
     }
   }
