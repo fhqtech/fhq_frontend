@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { analyticsApi } from "@/services/analyticsApi";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import type { MatcherResponse } from "@/types/analytics";
+import { SkillChipStrip } from "@/components/skill-matcher/SkillChipStrip";
 
 interface TopMatchesCardProps {
   interviewId: string;
@@ -47,6 +48,7 @@ export function TopMatchesCard({ interviewId, blueprintReady, className }: TopMa
   const [data, setData] = useState<MatcherResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   useEffect(() => {
     if (!blueprintReady) return;
@@ -131,49 +133,43 @@ export function TopMatchesCard({ interviewId, blueprintReady, className }: TopMa
               {(expanded ? data.matches : data.matches.slice(0, 3)).map((m) => (
                 <li
                   key={m.session_id}
-                  className="py-2.5 flex items-center gap-3 cursor-pointer hover:bg-paper-2 -mx-2 px-2 rounded"
+                  className="py-3 cursor-pointer hover:bg-paper-2 -mx-2 px-2 rounded"
                   onClick={() =>
                     navigate(
                       `/interview/${m.source_interview_id}/results/${m.session_id}`,
                     )
                   }
                 >
-                  <div className="h-8 w-8 rounded-full bg-paper-3 grid place-items-center text-[11px] font-mono font-semibold text-ink shrink-0">
-                    {initials(m.candidate_name)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-ink truncate">
-                      {m.candidate_name || m.candidate_email || "Unnamed candidate"}
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-paper-3 grid place-items-center text-[11px] font-mono font-semibold text-ink shrink-0">
+                      {initials(m.candidate_name)}
                     </div>
-                    <div className="text-[11px] text-muted truncate">
-                      from {m.source_interview_title || m.source_interview_id}
-                      {m.gaps.length > 0 && (
-                        <>
-                          {" · "}
-                          <span className="text-danger">
-                            {m.gaps.length} gap{m.gaps.length === 1 ? "" : "s"}
-                          </span>
-                        </>
-                      )}
-                      {m.transferable_strengths.length > 0 && (
-                        <>
-                          {" · "}
-                          <span className="text-success">
-                            +{m.transferable_strengths.length} transferable
-                          </span>
-                        </>
-                      )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-ink truncate">
+                        {m.candidate_name || m.candidate_email || "Unnamed candidate"}
+                      </div>
+                      <div className="text-[11px] text-muted truncate">
+                        from {m.source_interview_title || m.source_interview_id}
+                      </div>
                     </div>
+                    <div
+                      className={cn(
+                        "text-xs font-mono tabular-nums font-semibold px-2 py-0.5 rounded shrink-0",
+                        colorForMatch(m.match_score),
+                      )}
+                    >
+                      {Math.round(m.match_score)}%
+                    </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-muted shrink-0" />
                   </div>
-                  <div
-                    className={cn(
-                      "text-xs font-mono tabular-nums font-semibold px-2 py-0.5 rounded shrink-0",
-                      colorForMatch(m.match_score),
-                    )}
-                  >
-                    {Math.round(m.match_score)}%
-                  </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted shrink-0" />
+                  <SkillChipStrip
+                    gaps={m.gaps}
+                    transferable={m.transferable_strengths}
+                    expanded={expandedRow === m.session_id}
+                    visibleCount={5}
+                    onExpand={() => setExpandedRow(m.session_id)}
+                    className="mt-2 ml-11"
+                  />
                 </li>
               ))}
             </ul>
