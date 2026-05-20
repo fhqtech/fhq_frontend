@@ -172,7 +172,7 @@ export default function CreateInterview() {
 
     // If URL params are present, pre-fill them
     if (hasUrlParams) {
-      if (typeParam && (typeParam === 'screening' || typeParam === 'fitment')) {
+      if (typeParam && (typeParam === 'screening' || typeParam === 'fitment' || typeParam === 'skill_analysis')) {
         defaultData.type = typeParam;
         // Auto-select recommended duration based on type (can be overridden by durationParam)
         defaultData.duration = typeParam === 'fitment' ? '20' : '10';
@@ -2379,10 +2379,11 @@ export default function CreateInterview() {
                 {/* Interview Type */}
                 <div className="lg:col-span-2">
                   <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Interview Type <span className="text-danger">*</span></Label>
-                  <div className="flex gap-3 mt-2">
+                  <div className="flex gap-3 mt-2 flex-wrap">
                     {[
                       { value: "screening", label: "Screening" },
-                      { value: "fitment", label: "Fitment" }
+                      { value: "fitment", label: "Fitment" },
+                      { value: "skill_analysis", label: "Skill analysis" }
                     ].map((type) => {
                       const isSelected = formData.type === type.value;
                       return (

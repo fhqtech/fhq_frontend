@@ -93,11 +93,24 @@ export default function ManageInterviewsEnhanced() {
  const [startingProgress, setStartingProgress] = useState("");
 
  // Determine interview type based on current route
- const interviewType = location.pathname === '/interviews/fitment' ? 'fitment' : 'screening';
- const pageTitle = interviewType === 'fitment' ? 'Role Fitment' : 'Screening';
- const pageDescription = interviewType === 'fitment'
- ? 'Monitor and control all your AI role fitment interviews in one place.'
- : 'Monitor and control all your AI screening interviews in one place.';
+ const interviewType =
+   location.pathname === '/interviews/fitment'
+     ? 'fitment'
+     : location.pathname === '/interviews/skill-analysis'
+     ? 'skill_analysis'
+     : 'screening';
+ const pageTitle =
+   interviewType === 'fitment'
+     ? 'Role Fitment'
+     : interviewType === 'skill_analysis'
+     ? 'Skill Analysis'
+     : 'Screening';
+ const pageDescription =
+   interviewType === 'fitment'
+     ? 'Monitor and control all your AI role fitment interviews in one place.'
+     : interviewType === 'skill_analysis'
+     ? "Discovery interviews that produce a portable candidate-profile TAG. Different from screening: no role; characterises who the candidate is professionally."
+     : 'Monitor and control all your AI screening interviews in one place.';
 
  // Format date to dd mmm yyyy
  const formatDate = (dateString: string) => {

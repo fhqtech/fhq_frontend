@@ -48,7 +48,8 @@ const menuItems = [
     subItems: [
       { title: "Setup", url: "/interviews/create" },
       { title: "Screening", url: "/interviews/manage" },
-      { title: "Fitment", url: "/interviews/fitment" }
+      { title: "Fitment", url: "/interviews/fitment" },
+      { title: "Skill analysis", url: "/interviews/skill-analysis" }
     ]
   },
   { title: "Talent pools", url: "/lists", icon: Users },

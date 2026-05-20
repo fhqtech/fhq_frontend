@@ -173,6 +173,14 @@ const App = () => (
               </TourGuard>
             } />
 
+            <Route path="/interviews/skill-analysis" element={
+              <TourGuard>
+                <MainLayout>
+                  <ManageInterviews />
+                </MainLayout>
+              </TourGuard>
+            } />
+
             <Route path="/interviews/:id" element={
               <TourGuard>
                 <MainLayout>
