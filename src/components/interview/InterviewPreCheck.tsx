@@ -647,31 +647,42 @@ export const InterviewPreCheck = ({
                   />
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative mx-auto max-w-xs h-48 border-[3px] border-dashed rounded-lg cursor-pointer transition-all duration-300 ${
+                    className={`relative mx-auto max-w-xs h-48 border-[3px] border-dashed rounded-lg transition-all duration-300 ${
                       isUploadingResume
-                        ? 'border-rule-strong bg-paper-2/30'
-                        : 'border-rule-strong hover:border-ink hover:bg-paper-2/30'
+                        ? 'border-rule-strong bg-paper-2/40 cursor-default pointer-events-none'
+                        : 'border-rule-strong hover:border-ink hover:bg-paper-2/30 cursor-pointer'
                     } group/upload`}
                     style={{ borderSpacing: '8px' }}
+                    aria-busy={isUploadingResume}
                   >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                      <div className="relative">
-                        {isUploadingResume ? (
-                          <Loader2 className="w-6 h-6 text-ink animate-spin" />
-                        ) : (
+                    <div
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+                      role={isUploadingResume ? "status" : undefined}
+                      aria-live={isUploadingResume ? "polite" : undefined}
+                    >
+                      {isUploadingResume ? (
+                        <>
+                          <Loader2 className="w-10 h-10 text-ink animate-spin" aria-hidden="true" />
+                          <div className="text-center px-4">
+                            <p className="text-sm font-semibold text-ink">
+                              Uploading your resume…
+                            </p>
+                            <p className="text-xs text-muted mt-1">
+                              This usually takes a few seconds.
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256" className="group-hover/upload:scale-110 transition-transform">
                             <path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z"></path>
                           </svg>
-                        )}
-                      </div>
-                      <div className="text-center px-4">
-                        <p className="text-sm font-semibold text-ink">
-                          {isUploadingResume ? 'Uploading...' : 'Click to Upload'}
-                        </p>
-                        <p className="text-xs text-muted mt-0.5">
-                          PDF • Max 10MB
-                        </p>
-                      </div>
+                          <div className="text-center px-4">
+                            <p className="text-sm font-semibold text-ink">Click to Upload</p>
+                            <p className="text-xs text-muted mt-0.5">PDF • Max 10MB</p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -713,7 +724,10 @@ export const InterviewPreCheck = ({
                     {resumes.map((resume, index) => (
                       <div
                         key={resume.id}
-                        onClick={() => handleResumeSelect(resume.id)}
+                        onClick={() => {
+                          if (isUploadingResume) return;
+                          handleResumeSelect(resume.id);
+                        }}
                         style={{
                           animationDelay: `${index * 50}ms`,
                           border: 'none',
@@ -722,7 +736,11 @@ export const InterviewPreCheck = ({
                           backgroundColor: 'var(--paper)',
                           boxShadow: 'var(--shadow-clay)'
                         }}
-                        className="p-4 rounded cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+                        className={`p-4 rounded transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 ${
+                          isUploadingResume
+                            ? 'cursor-default opacity-60 pointer-events-none'
+                            : 'cursor-pointer'
+                        }`}
                       >
                         <div className="flex items-start gap-3">
                           <svg className="w-7 h-7 shrink-0 text-danger" viewBox="0 0 24 24" fill="currentColor">

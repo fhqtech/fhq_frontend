@@ -651,9 +651,14 @@ export default function InterviewDetails() {
  const handleRegenerateBlueprint = async () => {
  if (!id || !interview || !currentWorkspace || !currentProject) return;
 
- // Confirm before regenerating
+ // B3-2: only confirm when we're replacing a completed blueprint.
+ // Retrying a failed one needs no friction — the recruiter is stuck
+ // and any click here is intentional.
+ const isFailed = blueprintStatus === 'failed';
+ if (!isFailed) {
  const confirmed = window.confirm('Regenerate blueprint? This will replace the existing blueprint.');
  if (!confirmed) return;
+ }
 
  try {
  setIsRegeneratingBlueprint(true);
@@ -661,38 +666,40 @@ export default function InterviewDetails() {
  const token = localStorage.getItem('auth_token');
  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
- const response = await fetch(`${API_BASE_URL}/api/workspaces/${currentWorkspace.id}/projects/${currentProject.id}/interviews/generate-blueprint`, {
+ // B3-2: hit the new async dispatch endpoint instead of the
+ // synchronous /generate-blueprint path. Returns immediately with
+ // blueprintStatus='generating'; the polling loop converges to
+ // 'completed' once the Cloud Task runs.
+ const response = await fetch(
+ `${API_BASE_URL}/api/workspaces/${currentWorkspace.id}/projects/${currentProject.id}/interviews/${interview.id}/regenerate-blueprint`,
+ {
  method: 'POST',
  headers: {
  'Authorization': `Bearer ${token}`,
- 'Content-Type': 'application/json'
+ 'Content-Type': 'application/json',
  },
- body: JSON.stringify({
- id: interview.id,
- title: interview.title,
- description: interview.description || '',
- type: interview.type || 'General Assessment',
- duration: interview.duration?.replace(' min', '') || '45'
- })
- });
+ },
+ );
 
  if (!response.ok) {
- const errorData = await response.json();
- throw new Error(errorData.error || 'Failed to regenerate blueprint');
+ const errorData = await response.json().catch(() => ({}));
+ throw new Error(errorData.detail || errorData.error || 'Failed to regenerate blueprint');
  }
 
- toast({
- title: "Blueprint Regenerated",
- description: "Interview blueprint has been successfully regenerated.",
- });
+ // Flip local state so the banner transitions to "generating" without
+ // waiting for the next poll tick.
+ setBlueprintStatus('generating');
+ setBlueprintError(null);
 
- // Refresh blueprint data
- await handleCheckBlueprint();
+ toast({
+ title: "Regenerating blueprint",
+ description: "We'll update this page when it's ready.",
+ });
 
  } catch (error) {
  console.error('Blueprint regeneration error:', error);
  toast({
- title: "Regeneration Failed",
+ title: "Regeneration failed",
  description: error instanceof Error ? error.message : 'Failed to regenerate blueprint',
  variant: "destructive",
  });
@@ -1123,9 +1130,13 @@ export default function InterviewDetails() {
  }
 
  if (effectiveStatus === 'failed') {
+ // B3-2: surface blueprintError when the watchdog (or upstream
+ // failure path) wrote one. Falls back to a generic message when
+ // there's no detail.
  return (
+ <div className="flex flex-col gap-1">
  <div className="flex items-center gap-2 px-3 py-2 bg-danger-soft border border-rule rounded-sm">
- <AlertTriangle className="w-3.5 h-3.5 text-danger" />
+ <AlertTriangle className="w-3.5 h-3.5 text-danger shrink-0" />
  <span className="text-xs font-medium text-ink">Blueprint failed</span>
  <Button
  onClick={handleRegenerateBlueprint}
@@ -1140,7 +1151,7 @@ export default function InterviewDetails() {
  Retrying…
  </>
  ) : (
- 'Try again'
+ 'Retry generation'
  )}
  </Button>
  <Button
@@ -1151,6 +1162,12 @@ export default function InterviewDetails() {
  >
  Edit description
  </Button>
+ </div>
+ {blueprintError && (
+ <p className="text-[10px] text-muted font-mono px-1 max-w-md">
+ {blueprintError}
+ </p>
+ )}
  </div>
  );
  }
