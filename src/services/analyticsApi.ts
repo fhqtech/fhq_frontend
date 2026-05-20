@@ -3,6 +3,7 @@ import {
   AnalyticsCandidate,
   AnalyticsList,
   CandidateListStats,
+  MatcherResponse,
   ProjectDashboardResponse,
   SkillGapsResponse,
 } from '@/types/analytics';
@@ -116,6 +117,31 @@ class AnalyticsApiService {
       return await response.json();
     } catch (error) {
       console.error('Failed to fetch skill gaps:', error);
+      return null;
+    }
+  }
+
+  // Phase C-matcher — cross-interview top-N candidates for a role
+  async getSkillMatches(
+    workspaceId: string,
+    projectId: string,
+    options: { roleInterviewId: string; topN?: number; includeSelf?: boolean },
+  ): Promise<MatcherResponse | null> {
+    try {
+      const qs = new URLSearchParams({ role_interview_id: options.roleInterviewId });
+      if (options.topN) qs.set('top_n', String(options.topN));
+      if (options.includeSelf) qs.set('include_self', 'true');
+      const response = await fetch(
+        `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/skill-matcher?${qs.toString()}`,
+        { headers: this.getAuthHeaders() },
+      );
+      if (!response.ok) {
+        console.warn(`skill-matcher endpoint returned ${response.status}`);
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch skill matches:', error);
       return null;
     }
   }

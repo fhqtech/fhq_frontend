@@ -65,6 +65,7 @@ import { computeInterviewNBA, type InterviewSnapshot, type InterviewStats as NBA
 import { InterviewKpiTiles } from "@/components/interview-details/InterviewKpiTiles";
 import { InterviewHeader } from "@/components/interview-details/InterviewHeader";
 import { InterviewSourcesPanel } from "@/components/interview-details/InterviewSourcesPanel";
+import { TopMatchesCard } from "@/components/interview-details/TopMatchesCard";
 import { StartInterviewModal } from "@/components/interview-details/StartInterviewModal";
 
 
@@ -1357,6 +1358,14 @@ export default function InterviewDetails() {
  onCheckSource={handleCheckForNewCandidates}
  onSyncSource={handleSyncNewCandidates}
  />
+
+ {/* Cross-interview matches — Phase C-matcher. Visible once blueprint is ready. */}
+ {id && (
+ <TopMatchesCard
+ interviewId={id}
+ blueprintReady={blueprintStatus === "completed" || Boolean(blueprintData)}
+ />
+ )}
 
  {/* Candidates Table - Only show if interview is started */}
  {interview?.status === 'draft' ? (

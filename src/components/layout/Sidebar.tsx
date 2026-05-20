@@ -52,6 +52,7 @@ const menuItems = [
     ]
   },
   { title: "Talent pools", url: "/lists", icon: Users },
+  { title: "Skill matcher", url: "/skill-matcher", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings }
 ];
 

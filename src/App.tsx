@@ -33,6 +33,7 @@ const ProductLanding = lazy(() => import("./pages/ProductLanding"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const PilotDashboard = lazy(() => import("./pages/PilotDashboard"));
 const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
+const SkillMatcher = lazy(() => import("./pages/SkillMatcher"));
 const CreateInterview = lazy(() => import("./pages/CreateInterview"));
 const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
@@ -210,6 +211,14 @@ const App = () => (
               <TourGuard>
                 <MainLayout>
                   <Lists />
+                </MainLayout>
+              </TourGuard>
+            } />
+
+            <Route path="/skill-matcher" element={
+              <TourGuard>
+                <MainLayout>
+                  <SkillMatcher />
                 </MainLayout>
               </TourGuard>
             } />

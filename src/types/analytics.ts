@@ -194,6 +194,49 @@ export interface ProjectDashboardResponse {
   throughput: DashboardThroughputBucket[];
 }
 
+// Phase C-matcher — cross-interview Top-N matcher
+export interface MatcherGap {
+  skill_id: string;
+  label?: string | null;
+  expected?: number | null;
+  actual: number;
+  is_core: boolean;
+}
+
+export interface MatcherTransferable {
+  skill_id: string;
+  label?: string | null;
+  score: number;
+}
+
+export interface MatcherCandidate {
+  session_id: string;
+  candidate_id?: string | null;
+  candidate_name?: string | null;
+  candidate_email?: string | null;
+  source_interview_id: string;
+  source_interview_title?: string | null;
+  completed_at?: string | null;
+  overall_score?: number | null;
+  match_score: number;
+  gaps: MatcherGap[];
+  transferable_strengths: MatcherTransferable[];
+}
+
+export interface MatcherRole {
+  interview_id: string;
+  title?: string | null;
+  skill_count: number;
+  core_skill_count: number;
+}
+
+export interface MatcherResponse {
+  success: boolean;
+  role: MatcherRole;
+  matches: MatcherCandidate[];
+  total_candidates_considered: number;
+}
+
 // Phase B — skill-gap aggregation
 export interface SkillGapRow {
   skill_id: string;
