@@ -183,12 +183,8 @@ export function BlueprintPreviewRail({
             disabled={loading}
             className="h-7 px-2 text-[10px] font-mono"
           >
-            {notes?.trim() ? (
-              <Wand2 className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-            ) : (
-              <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-            )}
-            {notes?.trim() ? "Refine" : "Refresh"}
+            <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            Refresh
           </Button>
         )}
       </div>
@@ -264,9 +260,23 @@ export function BlueprintPreviewRail({
                 rows={3}
                 className="text-xs resize-none"
               />
-              <p className="text-[10px] text-muted-2 mt-1">
-                Click Refine above to regenerate with your notes.
-              </p>
+              <div className="mt-2 flex justify-end">
+                <Button
+                  type="button"
+                  variant="gold"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={loading || !(notes?.trim())}
+                  className="h-7 px-3 text-xs"
+                >
+                  {loading ? (
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  ) : (
+                    <Wand2 className="w-3 h-3 mr-1" />
+                  )}
+                  Refine with notes
+                </Button>
+              </div>
             </div>
           )}
 
