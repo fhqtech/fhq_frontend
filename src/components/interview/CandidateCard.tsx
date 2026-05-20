@@ -64,11 +64,19 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
         });
       }
     } catch (err: any) {
-      toast({
-        title: "Resend failed",
-        description: err?.message || "Network error",
-        variant: "destructive",
-      });
+      if (err?.status === 429) {
+        toast({
+          title: "Slow down",
+          description: "Resend rate limit hit. Try again in a minute.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Resend failed",
+          description: err?.message || "Network error",
+          variant: "destructive",
+        });
+      }
     } finally {
       setResending(false);
     }
@@ -351,19 +359,21 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                   {icon}
                   {label}
                 </span>
-                {sent !== true && (
-                  <button
-                    onClick={handleResend}
-                    disabled={resending}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
-                    title="Resend invitation email"
-                  >
-                    <RefreshCw
-                      className={`h-3 w-3 ${resending ? "animate-spin" : ""}`}
-                    />
-                    {resending ? "Resending…" : "Resend"}
-                  </button>
-                )}
+                <button
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
+                  title="Resend invitation email"
+                >
+                  <RefreshCw
+                    className={`h-3 w-3 ${resending ? "animate-spin" : ""}`}
+                  />
+                  {resending
+                    ? "Resending…"
+                    : sent === true
+                    ? "Resend again"
+                    : "Resend"}
+                </button>
               </div>
             );
           })()}

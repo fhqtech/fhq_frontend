@@ -338,7 +338,11 @@ class InterviewApiService {
     );
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data?.detail || data?.error || 'Resend failed');
+      const err: Error & { status?: number } = new Error(
+        data?.detail || data?.error || 'Resend failed'
+      );
+      err.status = response.status;
+      throw err;
     }
     return data;
   }
