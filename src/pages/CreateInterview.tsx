@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import { suggestFromTitle, type InterviewSuggestion } from "@/services/suggestionsApi";
+import { FINANCE_DOMAINS, FINANCE_DOMAIN_IDS, getSubDomains, type FinanceDomainId } from "@/lib/financeTaxonomy";
 import { previewVoice } from "@/services/voicePreviewApi";
 import { BlueprintPreviewRail } from "@/components/create-interview/BlueprintPreviewRail";
 import { EditModeIndicator } from "@/components/create-interview/EditModeIndicator";
@@ -133,6 +134,8 @@ export default function CreateInterview() {
       type: "",
       description: "",
       blueprintNotes: "", // recruiter "Refine this preview" notes
+      financeDomain: "" as FinanceDomainId | "",
+      subDomain: "",
       duration: "10",
       voiceType: "professional-female",
       voiceSpeed: "normal",
@@ -716,6 +719,9 @@ export default function CreateInterview() {
           title: interviewData.title || "",
           type: interviewData.type || "",
           description: interviewData.description || "",
+          blueprintNotes: interviewData.blueprintNotes || "",
+          financeDomain: (interviewData.financeDomain || "") as FinanceDomainId | "",
+          subDomain: interviewData.subDomain || "",
           duration: interviewData.duration || "30",
           voiceType: interviewData.voiceType || "professional-female",
           voiceSpeed: interviewData.voiceSpeed || "normal",
@@ -1631,6 +1637,9 @@ export default function CreateInterview() {
       },
       selectedListIds: formData.selectedListIds, // Selected candidate lists
       duplicateAnalysis: formData.duplicateAnalysis, // Store duplicate analysis results
+      // Phase B: finance sub-domain taxonomy (both fields optional today)
+      ...(formData.financeDomain && { financeDomain: formData.financeDomain }),
+      ...(formData.subDomain && { subDomain: formData.subDomain }),
       // Template ID if using an existing template
       ...(selectedTemplate && { templateId: selectedTemplate.id })
     };
@@ -2455,6 +2464,68 @@ export default function CreateInterview() {
                       );
                     })}
                   </div>
+                </div>
+              </div>
+
+              {/* Domain row — finance sub-domain taxonomy (Phase B) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="financeDomain" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+                    Domain <span className="text-muted normal-case font-normal tracking-normal">(optional)</span>
+                  </Label>
+                  <Select
+                    value={formData.financeDomain || ""}
+                    onValueChange={(value) => {
+                      const next = value as FinanceDomainId | "";
+                      setFormData((prev) => ({
+                        ...prev,
+                        financeDomain: next,
+                        subDomain: "", // reset when domain changes
+                      }));
+                    }}
+                  >
+                    <SelectTrigger
+                      id="financeDomain"
+                      className="mt-2 rounded border-none bg-paper"
+                      style={{ boxShadow: 'var(--shadow-1)' }}
+                    >
+                      <SelectValue placeholder="Pick a domain" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FINANCE_DOMAIN_IDS.map((id) => (
+                        <SelectItem key={id} value={id}>
+                          {FINANCE_DOMAINS[id].label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="subDomain" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+                    Sub-domain <span className="text-muted normal-case font-normal tracking-normal">(optional)</span>
+                  </Label>
+                  <Select
+                    value={formData.subDomain || ""}
+                    onValueChange={(value) => {
+                      setFormData((prev) => ({ ...prev, subDomain: value }));
+                    }}
+                    disabled={!formData.financeDomain}
+                  >
+                    <SelectTrigger
+                      id="subDomain"
+                      className="mt-2 rounded border-none bg-paper"
+                      style={{ boxShadow: 'var(--shadow-1)' }}
+                    >
+                      <SelectValue placeholder={formData.financeDomain ? "Pick a sub-domain" : "Pick a domain first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getSubDomains(formData.financeDomain).map((sub) => (
+                        <SelectItem key={sub} value={sub}>
+                          {sub}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
