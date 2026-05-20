@@ -9,6 +9,7 @@ import { RoleCuratorModal } from "@/components/role-curator/RoleCuratorModal";
 import { Wand2 } from "lucide-react";
 import { previewVoice } from "@/services/voicePreviewApi";
 import { BlueprintPreviewRail } from "@/components/create-interview/BlueprintPreviewRail";
+import { DurationField } from "@/components/create-interview/DurationField";
 import { EditModeIndicator } from "@/components/create-interview/EditModeIndicator";
 import { ArrowLeft, FloppyDisk as Save, Users, Robot as Bot, SpeakerHigh as Volume2, Envelope as Mail, Phone, ChatCircle as MessageSquare, Upload, Download, FileXls as FileSpreadsheet, Gear as Settings, Calculator, Receipt, Briefcase, ArrowsOut, CheckCircle, Info, Play, Stop, CircleNotch, Trash, X, Plus, ArrowsClockwise, CloudArrowUp, ClockCounterClockwise, AddressBook, CaretLeft, CaretRight } from "phosphor-react";
 import aiAvatar from "@/assets/ai-avatar.png";
@@ -999,20 +1000,33 @@ export default function CreateInterview() {
     return duplicateAnalysis && duplicateAnalysis.totalDuplicates > 0;
   };
 
-  // Check if duplicate analysis is needed
+  // Check if duplicate analysis is needed. Considers BOTH the persisted
+  // formData.duplicateAnalysis AND the live `duplicateAnalysis` local state
+  // — the latter unblocks the Create-Interview CTA even if the modal close
+  // path didn't persist the result (e.g. user dismissed the modal early
+  // after the success animation already showed "no duplicates").
   const needsDuplicateAnalysis = () => {
     const hasMultipleLists = formData.selectedListIds.length >= 2;
     if (!hasMultipleLists) return false;
 
-    const storedAnalysis = formData.duplicateAnalysis;
-    if (!storedAnalysis) return true;
-
-    // Check if selected lists changed since last analysis
     const currentLists = [...formData.selectedListIds].sort();
-    const analyzedLists = [...storedAnalysis.analyzedListIds].sort();
-    const listsChanged = JSON.stringify(currentLists) !== JSON.stringify(analyzedLists);
 
-    return listsChanged;
+    const storedAnalysis = formData.duplicateAnalysis;
+    if (storedAnalysis) {
+      const analyzedLists = [...storedAnalysis.analyzedListIds].sort();
+      if (JSON.stringify(currentLists) === JSON.stringify(analyzedLists)) {
+        return false;
+      }
+    }
+
+    // Fallback: live state — if the modal completed in this session against
+    // the current list selection, treat the check as done even if formData
+    // didn't get the persistence write.
+    if (duplicateAnalysis && duplicateAnalysisCompleted) {
+      return false;
+    }
+
+    return true;
   };
 
   // Check if selected candidates exceed credit budget
@@ -1147,6 +1161,24 @@ export default function CreateInterview() {
 
   const handleModalClose = () => {
     setShowDuplicateModal(false);
+    // If analysis ran successfully (even with duplicates), persist the
+    // result so the wizard CTA flips from "Check for Duplicates" to
+    // "Create Interview" instead of staying stuck. Dismissing the modal
+    // is an explicit user choice; we treat the check as acknowledged.
+    if (duplicateAnalysis) {
+      setFormData((prev) => ({
+        ...prev,
+        duplicateAnalysis: {
+          totalCandidates: duplicateAnalysis.totalCandidates,
+          uniqueCandidates: duplicateAnalysis.uniqueCandidates,
+          totalDuplicates: duplicateAnalysis.totalDuplicates,
+          duplicateRate: duplicateAnalysis.duplicateRate,
+          analyzedAt: new Date().toISOString(),
+          analyzedListIds: [...formData.selectedListIds],
+        },
+      }));
+      setDuplicateAnalysisCompleted(true);
+    }
   };
 
   // Enhanced duplicate analysis function that updates parent state
@@ -2379,7 +2411,7 @@ export default function CreateInterview() {
                 {/* Interview Type */}
                 <div className="lg:col-span-2">
                   <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Interview Type <span className="text-danger">*</span></Label>
-                  <div className="flex gap-3 mt-2 flex-wrap">
+                  <div className="flex gap-2 mt-2 flex-wrap">
                     {[
                       { value: "screening", label: "Screening" },
                       { value: "fitment", label: "Fitment" },
@@ -2391,7 +2423,7 @@ export default function CreateInterview() {
                           key={type.value}
                           type="button"
                           variant={isSelected ? "default" : "outline-solid"}
-                          className={`h-10 text-xs font-medium px-6 rounded  transition-all duration-200 ${
+                          className={`h-10 text-xs font-medium px-3.5 rounded transition-all duration-200 ${
                             isSelected
                               ? 'text-paper'
                               : 'hover:text-paper'
@@ -2433,51 +2465,14 @@ export default function CreateInterview() {
                 {/* Duration */}
                 <div className="lg:col-span-1">
                   <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Duration <span className="text-danger">*</span></Label>
-                  <div className="flex gap-4 mt-2 justify-start">
-                    {[
-                      { value: "10", label: "10", recommendedFor: "screening" },
-                      { value: "20", label: "20", recommendedFor: "fitment" }
-                    ].map((duration) => {
-                      const isSelected = formData.duration === duration.value;
-                      const isRecommended = formData.type === duration.recommendedFor;
-                      return (
-                        <div key={duration.value} className="flex flex-col items-center gap-1">
-                          <Button
-                            type="button"
-                            variant={isSelected ? "default" : "outline-solid"}
-                            className={`w-10 h-10 rounded-full p-0 flex flex-col items-center justify-center gap-0 transition-all duration-200 ${
-                              isSelected
-                                ? 'text-paper'
-                                : 'hover:text-paper'
-                            }`}
-                            style={{
-                              border: 'none',
-                              position: 'relative',
-                              overflow: 'hidden',
-                              backgroundColor: isSelected ? 'hsl(var(--ink))' : 'transparent',
-                              boxShadow: 'var(--shadow-1)'
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isSelected) e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
-                            onClick={() => {
-                              clearBlueprintOnEdit();
-                              setFormData(prev => ({ ...prev, duration: duration.value }));
-                            }}
-                          >
-                            <span className="text-lg font-bold leading-tight">{duration.label}</span>
-                            <span className="text-[8px] leading-tight">min</span>
-                          </Button>
-                          {isRecommended && (
-                            <span className="text-[10px] text-gold-ink font-medium">Recommended</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <DurationField
+                    value={formData.duration}
+                    onChange={(next) => {
+                      clearBlueprintOnEdit();
+                      setFormData((prev) => ({ ...prev, duration: next }));
+                    }}
+                    recommendedFor={formData.type}
+                  />
                 </div>
               </div>
 

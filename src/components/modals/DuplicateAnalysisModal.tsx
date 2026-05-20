@@ -106,12 +106,11 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
       setAnalysisResult(result);
       setStep('results');
 
-      // If no duplicates found, auto-close after 2 seconds
-      if (result.totalDuplicates === 0) {
-        setTimeout(() => {
-          onContinue();
-        }, 2000);
-      }
+      // No auto-close — users get an explicit Continue button on both the
+      // zero-duplicate and duplicates-found paths. The auto-close was
+      // confusing recruiters: if they did anything else for 2s the modal
+      // closed without persisting the result, leaving the wizard CTA
+      // stuck on "Check for Duplicates".
 
     } catch (err) {
       setError('Failed to analyze duplicates. Please try again.');
@@ -332,10 +331,17 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                     </div>
 
                     <div className="p-4 bg-success-soft border border-success/30 rounded-lg">
-                      <p className="text-sm text-green-800">
-                        🎉 Continuing to interview details...
+                      <p className="text-sm text-ink-soft">
+                        Ready to continue.
                       </p>
                     </div>
+                    <Button
+                      onClick={onContinue}
+                      variant="gold"
+                      className="w-full mt-4"
+                    >
+                      Continue
+                    </Button>
                   </motion.div>
                 ) : (
                   // Duplicates Found
