@@ -402,7 +402,7 @@ class InterviewApiService {
   async generateBlueprint(
     workspaceId: string,
     projectId: string,
-    data: { id: string; title: string; description: string }
+    data: { id: string; title: string; description: string; notes?: string }
   ): Promise<any> {
     const response = await fetch(
       `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/interviews/generate-blueprint`,

@@ -21,6 +21,9 @@ export interface PreviewRequest {
   title: string;
   type?: "screening" | "fitment";
   description?: string;
+  /** Free-text refinement notes the recruiter typed below the preview.
+   *  Passed to the blueprint agent as `topics`. */
+  notes?: string;
 }
 
 export async function previewBlueprint(

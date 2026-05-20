@@ -10,8 +10,9 @@
  * fire when `triggerKey` actually changes. Cancellation via AbortController.
  */
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Sparkles, RefreshCw } from "lucide-react";
+import { Loader2, Sparkles, RefreshCw, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { previewBlueprint, type BlueprintPreview } from "@/services/blueprintPreviewApi";
 import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromPreview } from "@/components/tag/adapters";
@@ -27,6 +28,13 @@ interface BlueprintPreviewRailProps {
    * etc. The rail does NOT trigger on prop changes alone.
    */
   triggerKey: number;
+  /**
+   * Free-text refinement notes. Recruiter can nudge the blueprint with
+   * specifics like "include GST compliance, lean Big-4". Persisted on
+   * the parent form so it carries into the final blueprint generation.
+   */
+  notes?: string;
+  onNotesChange?: (next: string) => void;
 }
 
 function formatTimeAgo(ms: number): string {
@@ -36,7 +44,14 @@ function formatTimeAgo(ms: number): string {
   return `${Math.floor(ms / 3_600_000)}h ago`;
 }
 
-export function BlueprintPreviewRail({ title, type, description, triggerKey }: BlueprintPreviewRailProps) {
+export function BlueprintPreviewRail({
+  title,
+  type,
+  description,
+  triggerKey,
+  notes,
+  onNotesChange,
+}: BlueprintPreviewRailProps) {
   const [preview, setPreview] = useState<BlueprintPreview | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +80,7 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
     }
     if (triggerKey === lastTriggerRef.current) return;
 
-    const inputKey = `${trimmed}|${type ?? ""}|${description?.trim() ?? ""}`;
+    const inputKey = `${trimmed}|${type ?? ""}|${description?.trim() ?? ""}|${notes?.trim() ?? ""}`;
     if (inputKey === lastInputRef.current) {
       // Same input, just record the trigger so we don't re-fire.
       lastTriggerRef.current = triggerKey;
@@ -83,7 +98,7 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
         setLoading(true);
         setError(null);
         const data = await previewBlueprint(
-          { title: trimmed, type, description },
+          { title: trimmed, type, description, notes },
           controller.signal,
         );
         if (!controller.signal.aborted) {
@@ -99,7 +114,7 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
         if (!controller.signal.aborted) setLoading(false);
       }
     })();
-  }, [triggerKey, title, type, description]);
+  }, [triggerKey, title, type, description, notes]);
 
   const handleRefresh = () => {
     // Force a re-fire by invalidating the input cache; parent will need to
@@ -126,11 +141,11 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
       setLoading(true);
       setError(null);
       const data = await previewBlueprint(
-        { title: trimmed, type, description },
+        { title: trimmed, type, description, notes },
         controller.signal,
       );
       if (!controller.signal.aborted) {
-        lastInputRef.current = `${trimmed}|${type ?? ""}|${description?.trim() ?? ""}`;
+        lastInputRef.current = `${trimmed}|${type ?? ""}|${description?.trim() ?? ""}|${notes?.trim() ?? ""}`;
         setPreview(data);
         setGeneratedAt(Date.now());
       }
@@ -168,8 +183,12 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
             disabled={loading}
             className="h-7 px-2 text-[10px] font-mono"
           >
-            <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            {notes?.trim() ? (
+              <Wand2 className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            ) : (
+              <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            )}
+            {notes?.trim() ? "Refine" : "Refresh"}
           </Button>
         )}
       </div>
@@ -228,6 +247,28 @@ export function BlueprintPreviewRail({ title, type, description, triggerKey }: B
           <p className="text-[10px] text-muted-2 text-center mb-3">
             Click to explore the full preview.
           </p>
+
+          {onNotesChange && (
+            <div className="mb-3">
+              <label
+                htmlFor="blueprint-refine-notes"
+                className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1.5"
+              >
+                Refine this preview (optional)
+              </label>
+              <Textarea
+                id="blueprint-refine-notes"
+                value={notes ?? ""}
+                onChange={(e) => onNotesChange(e.target.value)}
+                placeholder="e.g. include GST compliance, lean Big-4 background, drop M&A"
+                rows={3}
+                className="text-xs resize-none"
+              />
+              <p className="text-[10px] text-muted-2 mt-1">
+                Click Refine above to regenerate with your notes.
+              </p>
+            </div>
+          )}
 
           <div className="border-t border-rule pt-3 flex items-center justify-between">
             <p className="text-[10px] text-muted italic">

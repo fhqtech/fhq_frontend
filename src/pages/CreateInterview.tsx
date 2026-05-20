@@ -132,6 +132,7 @@ export default function CreateInterview() {
       title: "",
       type: "",
       description: "",
+      blueprintNotes: "", // recruiter "Refine this preview" notes
       duration: "10",
       voiceType: "professional-female",
       voiceSpeed: "normal",
@@ -1492,7 +1493,7 @@ export default function CreateInterview() {
   };
 
   // Blueprint generation function (fire-and-forget with status tracking in backend)
-  const triggerBlueprintGeneration = async (interviewId: string, title: string, description: string) => {
+  const triggerBlueprintGeneration = async (interviewId: string, title: string, description: string, notes?: string) => {
     try {
       if (!currentWorkspace || !currentProject) {
         console.error('No workspace or project available for blueprint generation');
@@ -1509,7 +1510,8 @@ export default function CreateInterview() {
       await interviewApi.generateBlueprint(currentWorkspace.id, currentProject.id, {
         id: interviewId,
         title,
-        description
+        description,
+        notes,
       });
 
       console.log('Blueprint generation triggered successfully for interview:', interviewId);
@@ -1755,7 +1757,8 @@ export default function CreateInterview() {
             triggerBlueprintGeneration(
               interviewId,
               formData.title,
-              formData.description
+              formData.description,
+              formData.blueprintNotes
             ).then((success) => {
               console.log(`Blueprint ${actionType} ${success ? 'triggered successfully' : 'queued for retry'}`);
             }).catch((error) => {
@@ -2623,6 +2626,10 @@ export default function CreateInterview() {
               type={formData.type}
               description={formData.description}
               triggerKey={previewTrigger}
+              notes={formData.blueprintNotes}
+              onNotesChange={(next) =>
+                setFormData((prev) => ({ ...prev, blueprintNotes: next }))
+              }
             />
           )}
           </div>
@@ -3638,10 +3645,10 @@ export default function CreateInterview() {
           <div className="p-6">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-ink tracking-tight">
-                Introducing Interview Blueprints
+                Your interview blueprint
               </DialogTitle>
               <DialogDescription className="text-muted mt-2">
-                Save time by using reusable Interview Blueprints from the Control Tower. Create once, use everywhere.
+                Every interview gets an AI-generated rubric tuned to the role. Here's how it works.
               </DialogDescription>
             </DialogHeader>
 
@@ -3704,10 +3711,10 @@ export default function CreateInterview() {
                   style={{ transform: `translateX(-${blueprintGuideSlide * 100}%)` }}
                 >
                   <p className="w-full shrink-0 mt-3 text-center text-sm text-ink-soft">
-                    <strong>Create reusable Interview Blueprints</strong> from the Control Tower to standardize your interview process across teams.
+                    <strong>Generated from your role.</strong> Type the title and description; we'll produce a 10-skill rubric, expected proficiency levels, and the topics the interview should cover.
                   </p>
                   <p className="w-full shrink-0 mt-3 text-center text-sm text-ink-soft">
-                    <strong>Customize blueprints</strong> to match your specific hiring needs. Edit topics, duration, and interview structure anytime.
+                    <strong>Yours to refine.</strong> Add specifics like "include GST compliance" or "lean Big-4" to steer the blueprint. Edit topics, duration, and structure anytime.
                   </p>
                 </div>
               </div>
@@ -3733,7 +3740,7 @@ export default function CreateInterview() {
               className="w-full"
               style={{ backgroundColor: 'hsl(var(--ink))' }}
             >
-              Got it, let's create an interview!
+              Got it
             </Button>
           </DialogFooter>
         </DialogContent>
