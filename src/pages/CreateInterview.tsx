@@ -5,6 +5,8 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { interviewApi } from "@/services/interviewApi";
 import { suggestFromTitle, type InterviewSuggestion } from "@/services/suggestionsApi";
 import { FINANCE_DOMAINS, FINANCE_DOMAIN_IDS, getSubDomains, type FinanceDomainId } from "@/lib/financeTaxonomy";
+import { RoleCuratorModal } from "@/components/role-curator/RoleCuratorModal";
+import { Wand2 } from "lucide-react";
 import { previewVoice } from "@/services/voicePreviewApi";
 import { BlueprintPreviewRail } from "@/components/create-interview/BlueprintPreviewRail";
 import { EditModeIndicator } from "@/components/create-interview/EditModeIndicator";
@@ -298,6 +300,9 @@ export default function CreateInterview() {
   const [showBlueprintGuideModal, setShowBlueprintGuideModal] = useState(false);
   const [blueprintGuideSlide, setBlueprintGuideSlide] = useState(0);
   const [hasClosedBlueprintGuide, setHasClosedBlueprintGuide] = useState(false);
+
+  // Phase 4 — role curator chat modal
+  const [showRoleCurator, setShowRoleCurator] = useState(false);
 
   // Debug effect for modal state changes
   useEffect(() => {
@@ -2323,6 +2328,14 @@ export default function CreateInterview() {
                 <div className="lg:col-span-2">
                   <Label htmlFor="title" className="uppercase text-xs tracking-wider flex items-center gap-2">
                     Interview Title <span className="text-danger">*</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowRoleCurator(true)}
+                      className="ml-auto text-[10px] font-mono normal-case text-gold-ink hover:underline inline-flex items-center gap-1"
+                    >
+                      <Wand2 className="w-3 h-3" />
+                      Help me design this role
+                    </button>
                     {isSuggesting && (
                       <span className="text-[10px] font-mono normal-case text-info inline-flex items-center gap-1">
                         <CircleNotch className="w-3 h-3 animate-spin" /> Suggesting defaults…
@@ -3816,6 +3829,23 @@ export default function CreateInterview() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Phase 4 — Role curator chat */}
+      <RoleCuratorModal
+        isOpen={showRoleCurator}
+        onClose={() => setShowRoleCurator(false)}
+        onAccept={(proposal) => {
+          setFormData((prev) => ({
+            ...prev,
+            title: proposal.title || prev.title,
+            description: proposal.description || prev.description,
+            blueprintNotes: proposal.notes || prev.blueprintNotes,
+          }));
+          // Bump the preview trigger so the right rail re-runs the
+          // preview against the new title + description + notes.
+          setPreviewTrigger((n) => n + 1);
+        }}
+      />
 
     </div>
   );
