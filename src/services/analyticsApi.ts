@@ -4,6 +4,7 @@ import {
   AnalyticsList,
   CandidateListStats,
   ProjectDashboardResponse,
+  SkillGapsResponse,
 } from '@/types/analytics';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
@@ -88,6 +89,33 @@ class AnalyticsApiService {
       return await response.json();
     } catch (error) {
       console.error('Failed to fetch project dashboard:', error);
+      return null;
+    }
+  }
+
+  // Phase B — skill-gap aggregation across completed sessions in the project
+  async getSkillGaps(
+    workspaceId: string,
+    projectId: string,
+    filters: { domain?: string; sub_domain?: string; date_from?: string } = {},
+  ): Promise<SkillGapsResponse | null> {
+    try {
+      const qs = new URLSearchParams();
+      if (filters.domain) qs.set('domain', filters.domain);
+      if (filters.sub_domain) qs.set('sub_domain', filters.sub_domain);
+      if (filters.date_from) qs.set('date_from', filters.date_from);
+      const query = qs.toString();
+      const response = await fetch(
+        `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/skill-gaps${query ? `?${query}` : ''}`,
+        { headers: this.getAuthHeaders() },
+      );
+      if (!response.ok) {
+        console.warn(`skill-gaps endpoint returned ${response.status}`);
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch skill gaps:', error);
       return null;
     }
   }

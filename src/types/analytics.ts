@@ -175,6 +175,9 @@ export interface DashboardInterviewRollup {
   invited: number;
   completed: number;
   avg_score?: number | null;
+  // Phase B
+  finance_domain?: string | null;
+  sub_domain?: string | null;
 }
 
 export interface DashboardThroughputBucket {
@@ -189,4 +192,19 @@ export interface ProjectDashboardResponse {
   top_candidates: DashboardTopCandidate[];
   interviews_rollup: DashboardInterviewRollup[];
   throughput: DashboardThroughputBucket[];
+}
+
+// Phase B — skill-gap aggregation
+export interface SkillGapRow {
+  skill_id: string;
+  label: string;
+  candidates: number;
+  avg_score: number;
+  gap_rate: number; // 0..1, fraction below the gap threshold
+}
+
+export interface SkillGapsResponse {
+  success: boolean;
+  skills: SkillGapRow[];
+  candidate_count: number;
 }

@@ -24,6 +24,8 @@ import { PipelineFunnel } from "@/components/dashboard/PipelineFunnel";
 import { TopCandidatesStrip } from "@/components/dashboard/TopCandidatesStrip";
 import { InterviewRollupTable } from "@/components/dashboard/InterviewRollupTable";
 import { ThroughputChart } from "@/components/dashboard/ThroughputChart";
+import { DomainSplit } from "@/components/dashboard/DomainSplit";
+import { SkillHeatmap } from "@/components/dashboard/SkillHeatmap";
 import { analyticsApi } from "@/services/analyticsApi";
 import type { ProjectDashboardResponse } from "@/types/analytics";
 
@@ -280,6 +282,10 @@ export default function Dashboard() {
  <TopCandidatesStrip candidates={dashboardData.top_candidates} />
  </div>
  <InterviewRollupTable interviews={dashboardData.interviews_rollup} />
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+ <DomainSplit interviews={dashboardData.interviews_rollup} />
+ <SkillHeatmap refreshKey={liveRevision} />
+ </div>
  <ThroughputChart buckets={dashboardData.throughput} />
  </>
  )}
