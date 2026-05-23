@@ -217,13 +217,18 @@ class InterviewApiService {
    */
   async inviteCandidates(
     interviewId: string,
-    candidates: Array<{ name: string; email: string }>
+    candidates: Array<{ name: string; email: string }>,
+    options?: { signal?: AbortSignal }
   ): Promise<{
     success: boolean;
     invitations_created?: number;
+    successful_invitations?: number;
+    total_processed?: number;
+    failed_invitations?: number;
     emails_sent?: number;
     emails_failed?: number;
-    errors?: Array<any>;
+    invitations?: Array<{ invitationId: string; name: string; email: string; token: string; registrationUrl: string }>;
+    errors?: Array<{ index: number; error: string; data?: { name?: string; email?: string } }> | null;
   }> {
     const response = await fetch(
       `${API_BASE_URL}/api/interviews/${interviewId}/invite-candidates`,
@@ -231,6 +236,7 @@ class InterviewApiService {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ candidates }),
+        signal: options?.signal,
       }
     );
 
@@ -340,6 +346,51 @@ class InterviewApiService {
     if (!response.ok) {
       const err: Error & { status?: number } = new Error(
         data?.detail || data?.error || 'Resend failed'
+      );
+      err.status = response.status;
+      throw err;
+    }
+    return data;
+  }
+
+  /**
+   * Reset a candidate's previous attempts and resend the invitation.
+   *
+   * Soft-marks all interview_sessions + interview_results for this candidate
+   * as status="abandoned" (kept for audit), reverts the invitation to
+   * status="registered", and re-sends the invitation email. The candidate
+   * can then retake the interview from scratch.
+   *
+   * Identified by invitation_id (the invitation document id, which the
+   * frontend already has on every candidate card as `candidate.invitation_id`).
+   *
+   * Backend endpoint:
+   *   POST /api/invitations/{invitation_id}/reset-and-reinvite
+   */
+  async resetAndReinviteCandidate(
+    invitationId: string,
+  ): Promise<{
+    success: boolean;
+    interview_id: string;
+    candidate_id: string;
+    invitations_reset: string[];
+    sessions_abandoned: number;
+    results_abandoned: number;
+    email_sent: number;
+    email_error: string | null;
+    reset_at: string;
+  }> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/invitations/${invitationId}/reset-and-reinvite`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const err: Error & { status?: number } = new Error(
+        data?.detail || data?.error || 'Reset failed'
       );
       err.status = response.status;
       throw err;
@@ -510,6 +561,51 @@ class InterviewApiService {
       throw new Error(error.detail || error.error || 'Failed to resend invitations');
     }
     return await response.json();
+  }
+
+  /**
+   * S3.2: download a CSV export of all interview results for the given
+   * interview. The backend streams the CSV; we read the response as a
+   * Blob and trigger a browser download via an in-memory object URL —
+   * opening in a new tab would render the CSV inline on most browsers
+   * instead of saving it.
+   *
+   * Returns void on success; throws on non-2xx so callers can surface a
+   * toast.
+   */
+  async downloadInterviewResultsCsv(interviewId: string): Promise<void> {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(
+      `${API_BASE_URL}/api/interviews/${interviewId}/export-csv`,
+      {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      },
+    );
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || error.error || 'Failed to export results');
+    }
+
+    const blob = await response.blob();
+
+    // Try to honor the server's Content-Disposition filename; fall back
+    // to a deterministic local name so the download always lands.
+    const cd = response.headers.get('Content-Disposition') || '';
+    const match = cd.match(/filename="?([^";]+)"?/i);
+    const today = new Date().toISOString().slice(0, 10);
+    const filename = match?.[1] || `interview_${interviewId}_${today}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 }
 
