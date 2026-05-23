@@ -104,7 +104,17 @@ export default function InterviewPreCheckPage() {
       const sessionData = await sessionResponse.json();
       const finalSessionId = sessionData.session_id || sessionId;
 
-      navigate(`/interview/${interviewId}/session`, {
+      // Engine selection: ?engine=v1 in URL wins as emergency rollback;
+      // otherwise VITE_INTERVIEW_ENGINE; otherwise v2 (the supported default).
+      // Routes to /session-v2 (backend-authoritative WebSocket pipeline) or
+      // /session (legacy v1 SSE + direct-browser AssemblyAI/Cartesia — kept
+      // only as an escape hatch; the v1 page is unmaintained).
+      const urlEngine = new URLSearchParams(window.location.search).get("engine");
+      const envEngine = (import.meta.env.VITE_INTERVIEW_ENGINE as string | undefined) ?? "v2";
+      const engine = (urlEngine ?? envEngine).toLowerCase();
+      const sessionPath = engine === "v2" ? "session-v2" : "session";
+
+      navigate(`/interview/${interviewId}/${sessionPath}`, {
         state: {
           sessionId: finalSessionId,
           candidateToken: stateData?.candidateToken,
