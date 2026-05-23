@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2, UserPlus } from "lucide-react";
 import { CloudArrowDown, CaretLeft } from "phosphor-react";
 import googleLogo from "@/assets/google_logo.png";
@@ -71,6 +71,22 @@ import { StartInterviewModal } from "@/components/interview-details/StartIntervi
 
 // Data layer lives in src/queries/interviewDetailsQueries.ts (F29.1).
 // The component below consumes those hooks; no manual fetch helpers here.
+
+// S3.2: recommendation enum values + sentence-case display labels.
+// Module-scope so dependency arrays don't re-trigger memos on every render.
+const ALL_RECOMMENDATIONS = [
+ "STRONG_HIRE",
+ "ADVANCE_WITH_CONCERNS",
+ "BORDERLINE",
+ "REJECT",
+] as const;
+type Recommendation = typeof ALL_RECOMMENDATIONS[number];
+const RECOMMENDATION_LABELS: Record<Recommendation, string> = {
+ STRONG_HIRE: "Strong hire",
+ ADVANCE_WITH_CONCERNS: "Advance with concerns",
+ BORDERLINE: "Borderline",
+ REJECT: "Reject",
+};
 
 // Map backend status to frontend status (module-scope so it can be referenced
 // by hooks at the top of the component body without TDZ).
@@ -146,6 +162,58 @@ export default function InterviewDetails() {
  const [tableSearchQuery, setTableSearchQuery] = useState("");
  const [tableStatusFilter, setTableStatusFilter] = useState("");
  const [tableScoreFilter, setTableScoreFilter] = useState("");
+
+ // S3.2: URL-backed filters so recruiters can bookmark / share
+ // "show me strong hires above 75". `min_score` is the slider value
+ // (0..100; 0 disables); `rec` is a comma-joined list of the four
+ // recommendation enum values. Default = "no filter" (0 + all recs).
+ // ALL_RECOMMENDATIONS / Recommendation / RECOMMENDATION_LABELS are
+ // hoisted to module scope above.
+ const [searchParams, setSearchParams] = useSearchParams();
+
+ const minScore = (() => {
+   const raw = searchParams.get("min_score");
+   if (!raw) return 0;
+   const n = Number(raw);
+   if (!Number.isFinite(n)) return 0;
+   return Math.max(0, Math.min(100, Math.round(n)));
+ })();
+
+ const selectedRecs = (() => {
+   const raw = searchParams.get("rec");
+   if (!raw) return new Set<Recommendation>(ALL_RECOMMENDATIONS);
+   const parts = raw
+     .split(",")
+     .map((s) => s.trim().toUpperCase())
+     .filter((s): s is Recommendation =>
+       (ALL_RECOMMENDATIONS as readonly string[]).includes(s),
+     );
+   return new Set<Recommendation>(parts.length ? parts : ALL_RECOMMENDATIONS);
+ })();
+
+ const updateFilterParams = (next: { minScore?: number; recs?: Set<Recommendation> }) => {
+   const params = new URLSearchParams(searchParams);
+   if (next.minScore !== undefined) {
+     if (next.minScore > 0) params.set("min_score", String(next.minScore));
+     else params.delete("min_score");
+   }
+   if (next.recs !== undefined) {
+     // Empty selection is illegal — collapse it to "all" so we don't
+     // accidentally serialize a state that hides every candidate.
+     if (next.recs.size === 0 || next.recs.size === ALL_RECOMMENDATIONS.length) {
+       params.delete("rec");
+     } else {
+       params.set(
+         "rec",
+         ALL_RECOMMENDATIONS.filter((r) => next.recs!.has(r)).join(","),
+       );
+     }
+   }
+   setSearchParams(params, { replace: true });
+ };
+
+ // S3.2: CSV export
+ const [isExporting, setIsExporting] = useState(false);
 
  // F29.1: server state moved to TanStack Query in interviewDetailsQueries.
  // Local state below is for things only the page knows about (UI flags,
@@ -283,7 +351,21 @@ export default function InterviewDetails() {
  );
  const candidatesRaw = candidatesQuery.data?.candidates ?? [];
  const candidates = React.useMemo(() => {
- return candidatesRaw.map((candidate: any, index: number) => ({
+ return candidatesRaw.map((candidate: any, index: number) => {
+ // S3.2: surface the latest attempt's hireability_recommendation
+ // (one of STRONG_HIRE | ADVANCE_WITH_CONCERNS | BORDERLINE |
+ // REJECT) so the recommendation filter has data to bind to.
+ // Backend stores it on attempt.blueprint.hireability_recommendation;
+ // null until results are generated.
+ const attemptsArr = Array.isArray(candidate.attempts) ? candidate.attempts : [];
+ const latestAttempt = attemptsArr.length ? attemptsArr[attemptsArr.length - 1] : null;
+ const rawRec = (
+   latestAttempt?.blueprint?.hireability_recommendation
+   || candidate.recommendation
+   || null
+ );
+ const recommendation = typeof rawRec === "string" ? rawRec.toUpperCase() : null;
+ return {
  id: (currentPage - 1) * pageSize + index + 1,
  candidateId: candidate.candidateId || candidate.id,
  name: candidate.name || 'Unknown',
@@ -292,6 +374,7 @@ export default function InterviewDetails() {
  status: mapBackendStatus(candidate.status),
  score: candidate.score !== undefined && candidate.score !== null ? candidate.score : null,
  humanScore: candidate.human_score !== undefined && candidate.human_score !== null ? candidate.human_score : null,
+ recommendation,
  completedAt: candidate.assessment_completed ? candidate.created_at : null,
  duration: candidate.duration || null,
  invitation_token: candidate.invitation_token || '',
@@ -314,7 +397,8 @@ export default function InterviewDetails() {
  profilePicture: candidate.profilePicture || '',
  session_status: candidate.session_status || 'no_session',
  swipe_decision: candidate.swipe_decision || null,
- }));
+ };
+ });
  // mapBackendStatus is hoisted below; the dep array intentionally omits it
  // (stable reference within the component body).
  // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -963,7 +1047,25 @@ export default function InterviewDetails() {
  }
  })();
 
- return matchesSearch && matchesStatus && matchesScore;
+ // S3.2: min_score slider. 0 disables (every candidate qualifies);
+ // any positive value drops candidates without a numeric score and
+ // candidates below the threshold. Live filter on drag.
+ const matchesMinScore = (() => {
+ if (minScore <= 0) return true;
+ if (typeof candidate.score !== 'number') return false;
+ return candidate.score >= minScore;
+ })();
+
+ // S3.2: recommendation filter. Default = all 4 selected = pass-through.
+ // When a subset is selected, candidates without a recommendation are
+ // hidden — they don't match any chosen bucket.
+ const matchesRecommendation = (() => {
+ if (selectedRecs.size === ALL_RECOMMENDATIONS.length) return true;
+ if (!candidate.recommendation) return false;
+ return selectedRecs.has(candidate.recommendation as Recommendation);
+ })();
+
+ return matchesSearch && matchesStatus && matchesScore && matchesMinScore && matchesRecommendation;
  });
 
  // Backend handles pagination, so we use filtered candidates directly
@@ -997,6 +1099,29 @@ export default function InterviewDetails() {
  if (score >= 80) return "text-info font-semibold";
  if (score >= 70) return "text-warning font-medium";
  return "text-danger font-medium";
+ };
+
+ // S3.2: trigger the backend CSV export and surface a toast.
+ // Exports ALL results (not the active filter) — keeps the first cut
+ // simple; a future ticket can pass the filter params through.
+ const handleExportResults = async () => {
+   if (!id || isExporting) return;
+   try {
+     setIsExporting(true);
+     await interviewApi.downloadInterviewResultsCsv(id);
+     toast({
+       title: "Export started",
+       description: "Your CSV download should begin in a moment.",
+     });
+   } catch (error) {
+     toast({
+       title: "Export failed",
+       description: error instanceof Error ? error.message : "Could not export results.",
+       variant: "destructive",
+     });
+   } finally {
+     setIsExporting(false);
+   }
  };
 
  const copyInvitationLink = async (candidateId: number, invitationLink: string) => {
@@ -1468,8 +1593,9 @@ export default function InterviewDetails() {
 
  {/* Table Filters */}
  <div className="px-6 pb-4">
- <div className="flex flex-col sm:flex-row gap-3">
- <div className="relative flex-1">
+ <div className="flex flex-col gap-3">
+ <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+ <div className="relative flex-1 min-w-[180px]">
  <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-muted" />
  <Input
  placeholder="Search by name or email..."
@@ -1504,7 +1630,27 @@ export default function InterviewDetails() {
  <SelectItem value="no-score">No Score</SelectItem>
  </SelectContent>
  </Select>
- {(tableSearchQuery || tableStatusFilter || tableScoreFilter) && (
+ {/* S3.2: Export results — downloads all results as CSV. */}
+ <Button
+ variant="outline"
+ size="sm"
+ onClick={handleExportResults}
+ disabled={isExporting || totalCandidates === 0}
+ className="h-8 px-3 rounded-sm text-xs flex items-center gap-1.5"
+ >
+ {isExporting ? (
+ <>
+ <Spinner size="sm" />
+ <span>Exporting…</span>
+ </>
+ ) : (
+ <>
+ <Download className="w-3.5 h-3.5" />
+ <span>Export results</span>
+ </>
+ )}
+ </Button>
+ {(tableSearchQuery || tableStatusFilter || tableScoreFilter || minScore > 0 || selectedRecs.size !== ALL_RECOMMENDATIONS.length) && (
  <Button
  variant="outline"
  size="sm"
@@ -1512,12 +1658,74 @@ export default function InterviewDetails() {
  setTableSearchQuery("");
  setTableStatusFilter("");
  setTableScoreFilter("");
+ updateFilterParams({ minScore: 0, recs: new Set(ALL_RECOMMENDATIONS) });
  }}
  className="h-8 px-2 rounded-sm uppercase font-bold"
+ aria-label="Clear filters"
  >
  <X className="w-3.5 h-3.5" />
  </Button>
  )}
+ </div>
+
+ {/* S3.2: min score slider + recommendation multi-select.
+   Slider is a plain <input type="range"> since this repo has no
+   shadcn Slider primitive; styled to match the other inputs. */}
+ <div className="flex flex-col sm:flex-row gap-4 sm:items-center pt-1">
+ <div className="flex items-center gap-3 flex-1 max-w-md">
+ <Label
+ htmlFor="min-score-slider"
+ className="text-xs text-muted whitespace-nowrap font-mono uppercase tracking-[0.12em]"
+ >
+ Min score
+ </Label>
+ <input
+ id="min-score-slider"
+ type="range"
+ min={0}
+ max={100}
+ step={1}
+ value={minScore}
+ onChange={(e) => updateFilterParams({ minScore: Number(e.target.value) })}
+ className="flex-1 h-1.5 cursor-pointer accent-gold-ink"
+ aria-label="Minimum overall score"
+ />
+ <span className="text-xs font-mono tabular-nums text-ink w-10 text-right">
+ {minScore === 0 ? "off" : minScore}
+ </span>
+ </div>
+ <div className="flex items-center gap-2 flex-wrap">
+ <span className="text-xs text-muted font-mono uppercase tracking-[0.12em]">
+ Recommendation
+ </span>
+ {ALL_RECOMMENDATIONS.map((rec) => {
+ const checked = selectedRecs.has(rec);
+ return (
+ <button
+ key={rec}
+ type="button"
+ onClick={() => {
+ const next = new Set(selectedRecs);
+ if (next.has(rec)) {
+ next.delete(rec);
+ } else {
+ next.add(rec);
+ }
+ updateFilterParams({ recs: next });
+ }}
+ aria-pressed={checked}
+ className={cn(
+ "h-7 px-2.5 rounded-sm border text-[11px] transition-colors",
+ checked
+ ? "bg-gold-soft border-gold-ink text-gold-ink"
+ : "bg-paper border-rule text-muted hover:text-ink",
+ )}
+ >
+ {RECOMMENDATION_LABELS[rec]}
+ </button>
+ );
+ })}
+ </div>
  </div>
  </div>
  </div>
@@ -1573,6 +1781,7 @@ export default function InterviewDetails() {
  <CandidateCard
  key={candidate.id}
  candidate={candidate}
+ onRefresh={refreshCandidates}
  onClick={() => {
  // C1: navigate to InterviewResults (TAG viewer + scores)
  // instead of the deleted VideoPlayerFullPage. New
