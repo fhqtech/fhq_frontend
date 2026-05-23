@@ -1057,6 +1057,13 @@ export const InterviewPreCheck = ({
               </div>
             </Card>
 
+            {/* Language note — small, quiet, sentence case. The STT path
+                (AssemblyAI Universal-Streaming v3) is English-only; set
+                this expectation before the candidate hits Start. */}
+            <p className="text-xs text-muted mb-3">
+              Your interview will be conducted in English.
+            </p>
+
             {/* Final Confirmation */}
             <div className="flex items-center space-x-3 mb-6">
               <Checkbox
