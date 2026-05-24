@@ -129,6 +129,52 @@ export const InterviewPreCheck = ({
         }
         setPrepareCompleted(true);
         setPrepareError(null);
+
+        // Commit B (2026-05-24): kick off the personalised opener
+        // pre-generation in the background. The backend caches the
+        // result on the prelims session; gateway._run_greeting reads it
+        // and speaks it after the deterministic "Hi <name>..." line.
+        // Best-effort — no await, no error toast. If this fails or
+        // doesn't complete before the candidate clicks Start, the
+        // gateway falls back to the deterministic-only greeting.
+        const sessionIdForGreeting = result.session_id;
+        if (sessionIdForGreeting) {
+          const greetingAbort = new AbortController();
+          const greetingTimer = setTimeout(() => greetingAbort.abort(), 10_000);
+          fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare-greeting`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                session_id: sessionIdForGreeting,
+                interview_id: interviewData.id,
+                candidate_id: candidateData.id,
+              }),
+              signal: greetingAbort.signal,
+            },
+          )
+            .then(async (greetingResp) => {
+              clearTimeout(greetingTimer);
+              if (greetingResp.ok) {
+                const data = await greetingResp.json().catch(() => ({}));
+                // Mirror v1's sessionStorage key shape so the v2 page
+                // can read it as a fallback if backend cache lookup
+                // misses across workers (multi-worker safety).
+                if (data?.greeting) {
+                  try {
+                    sessionStorage.setItem(`greeting_${sessionIdForGreeting}`, data.greeting);
+                  } catch {
+                    /* sessionStorage may be full or disabled — non-fatal */
+                  }
+                }
+              }
+            })
+            .catch(() => {
+              clearTimeout(greetingTimer);
+              /* swallow — pre-generation is best-effort */
+            });
+        }
       } else {
         const msg = result?.error || result?.detail || 'Could not prepare your resume. Please retry.';
         setPrepareError(msg);
