@@ -6,7 +6,7 @@ export default function InterviewThankYouPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get all data from navigation state (passed from InterviewSessionPage)
+  // Get all data from navigation state (passed from InterviewSessionV2Page or end-early flow).
   const stateData = location.state as {
     candidateToken?: string;
     sessionData?: {

@@ -44,7 +44,6 @@ const Settings = lazy(() => import("./pages/Settings"));
 const CandidateRegistration = lazy(() => import("./pages/CandidateRegistration"));
 const CandidatePortal = lazy(() => import("./pages/CandidatePortal"));
 const InterviewPreCheckPage = lazy(() => import("./pages/interview/InterviewPreCheckPage"));
-const InterviewSessionPage = lazy(() => import("./pages/interview/InterviewSessionPage"));
 const InterviewSessionV2Page = lazy(() => import("./pages/interview/InterviewSessionV2Page"));
 const InterviewThankYouPage = lazy(() => import("./pages/interview/InterviewThankYouPage"));
 const InterviewResults = lazy(() => import("./pages/InterviewResults"));
@@ -114,7 +113,9 @@ const App = () => (
 
             {/* Interview System Routes (public, no auth required) */}
             <Route path="/interview/:interviewId/pre-check" element={<InterviewPreCheckPage />} />
-            <Route path="/interview/:interviewId/session" element={<InterviewSessionPage />} />
+            {/* v2 page only — v1 (InterviewSessionPage) deleted in C2.
+                Old /session URLs 404 by design; the only entry-point is
+                the pre-check flow, which now routes directly to /session-v2. */}
             <Route path="/interview/:interviewId/session-v2" element={<InterviewSessionV2Page />} />
             <Route path="/interview/:interviewId/complete" element={<InterviewThankYouPage />} />
 

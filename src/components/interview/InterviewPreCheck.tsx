@@ -516,44 +516,14 @@ export const InterviewPreCheck = ({
       return;
     }
 
-    // Pre-generate AI greeting in background if session is ready
-    if (preCreatedSessionId) {
-      const greetingStartTime = Date.now();
-
-      const greetingPromise = fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/interview-prelims-agent`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sessionId: preCreatedSessionId,
-            interviewId: interviewData.id,
-            newUserMessage: "hi"
-          })
-        }
-      ).then(async (greetingResponse) => {
-        if (greetingResponse.ok) {
-          const greetingElapsed = Date.now() - greetingStartTime;
-          const greetingData = await greetingResponse.json();
-          const greetingText = greetingData[0]?.output?.response || '';
-
-          // Store greeting in sessionStorage so interview page can use it
-          if (greetingText) {
-            sessionStorage.setItem(`greeting_${preCreatedSessionId}`, greetingText);
-          }
-          return greetingText;
-        } else {
-          return null;
-        }
-      }).catch(error => {
-        return null;
-      });
-
-      // Store promise globally so interview page can await it
-      (window as any)[`greetingPromise_${preCreatedSessionId}`] = greetingPromise;
-    }
+    // C2 (2026-05-24): removed the legacy v1 greeting fetch that POSTed
+    // "hi" to /api/interview-prelims-agent and stashed the result on
+    // sessionStorage[greeting_${sid}] + window.greetingPromise_${sid}.
+    // v2's _run_greeting (H1) now handles greeting generation server-side
+    // via /api/agent-sessions/prepare-greeting (called from
+    // InterviewPreCheckPage.handleStartInterview, H3) with inline-generate
+    // fallback. The sessionStorage / window stash were only consumed by
+    // the deleted v1 InterviewSession.tsx.
 
     setCurrentStep(2);
   };

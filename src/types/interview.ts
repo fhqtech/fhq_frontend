@@ -15,27 +15,6 @@ export enum ConversationState {
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error';
 
-export interface AudioDevice {
-  deviceId: string;
-  label: string;
-}
-
-export interface InterviewSessionData {
-  sessionId: string;
-  interviewId: string;
-  candidateId: string;
-  startedAt: string;
-  endedAt?: string;
-  duration: number;
-  conversationHistory: HistoryItem[];
-  audioMetrics?: {
-    averageLevel: number;
-    silenceDuration: number;
-    totalSpeechTime: number;
-  };
-  status: 'active' | 'completed' | 'cancelled' | 'error';
-}
-
 export interface InterviewConfig {
   title: string;
   description: string;
@@ -52,7 +31,6 @@ export interface CandidateData {
   registeredAt?: string;
 }
 
-export interface ApiEndpoints {
-  llmBackendUrl: string;
-  websocketUrl: string;
-}
+// C2 (2026-05-24): removed AudioDevice (only used by v1 InterviewSession
+// device-picker, deleted), InterviewSessionData (defined-but-never-imported),
+// and ApiEndpoints (v1 client-side TTS/STT URLs, no callers).
