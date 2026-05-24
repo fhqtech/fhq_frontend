@@ -26,6 +26,7 @@ import { InterviewRollupTable } from "@/components/dashboard/InterviewRollupTabl
 import { ThroughputChart } from "@/components/dashboard/ThroughputChart";
 import { DomainSplit } from "@/components/dashboard/DomainSplit";
 import { SkillHeatmap } from "@/components/dashboard/SkillHeatmap";
+import { ServiceStatusWidget } from "@/components/dashboard/ServiceStatusWidget";
 import { analyticsApi } from "@/services/analyticsApi";
 import type { ProjectDashboardResponse } from "@/types/analytics";
 
@@ -174,6 +175,11 @@ export default function Dashboard() {
  <FirstRunStepper />
 
  <NextBestActionCard nba={nba} />
+
+ {/* S3.3: upstream service status. Polls /api/ready/upstream every
+     60s — surfaces Gemini / AssemblyAI / Cartesia outages BEFORE
+     recruiters discover them via stuck "Processing" interviews. */}
+ <ServiceStatusWidget />
 
  {error && (
  <ErrorBanner
