@@ -458,7 +458,11 @@ export default function InterviewSessionV2Page() {
   }, [ended, openWs]);
 
   // E — submit typed text via the WS text_input channel. Backend treats
-  // this like a finalised audio turn (gateway.py text_input handler).
+  // this like a finalised audio turn (gateway.py text_input handler at
+  // L961-967 calls _on_finalised which echoes candidate_turn_final back
+  // over the WS at L257-260). We rely on that echo to render — DO NOT
+  // optimistically append here, or we get duplicates (T2 bug: every
+  // typed message rendered twice).
   const submitTypedInput = useCallback(() => {
     const text = typedInput.trim();
     if (!text) return;
@@ -466,9 +470,6 @@ export default function InterviewSessionV2Page() {
     if (voiceState !== "PROBING") return;
     if (agentSpeaking || agentThinking) return;
     clientRef.current.sendText(text);
-    // Optimistically render in transcript — backend will not echo this
-    // back as a candidate_turn_final because text_input bypasses STT.
-    setTranscript((prev) => [...prev, { role: "candidate", text }]);
     setTypedInput("");
   }, [typedInput, voiceState, agentSpeaking, agentThinking]);
 
