@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, User, CheckCircle2, Clock, XCircle, AlertCircle, Eye, CheckCircle, MapPin, ThumbsUp, ThumbsDown, Check, X, Copy, Mail, MailWarning, MailCheck, RefreshCw } from "lucide-react";
+import { Calendar, User, CheckCircle2, Clock, XCircle, AlertCircle, Eye, CheckCircle, MapPin, ThumbsUp, ThumbsDown, Check, X, Copy, Mail, MailWarning, MailCheck, RefreshCw, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { interviewApi } from "@/services/interviewApi";
@@ -20,11 +20,14 @@ interface CandidateCardProps {
   candidate: any;
   onClick?: () => void;
   hideViewButton?: boolean;
+  /** Called after a successful reset so the parent can refetch the candidate list. */
+  onRefresh?: () => void | Promise<void>;
 }
 
-export function CandidateCard({ candidate, onClick, hideViewButton = false }: CandidateCardProps) {
+export function CandidateCard({ candidate, onClick, hideViewButton = false, onRefresh }: CandidateCardProps) {
   const [copied, setCopied] = useState(false);
   const [resending, setResending] = useState(false);
+  const [resetting, setResetting] = useState(false);
   // Local optimistic mirror of the email_* fields so the UI flips
   // immediately after a Resend without re-fetching the whole list.
   const [emailState, setEmailState] = useState<{
@@ -79,6 +82,45 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
       }
     } finally {
       setResending(false);
+    }
+  };
+
+  const handleResetAndReinvite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!candidate.invitation_id) {
+      toast({
+        title: "Cannot reset",
+        description: "Missing invitation id — refresh the page and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const confirmed = window.confirm(
+      `Reset ${candidate.name || "this candidate"}'s attempts and send a new invitation? ` +
+      `This marks the previous session and score as abandoned (kept for audit) ` +
+      `and lets them retake the interview from scratch.`
+    );
+    if (!confirmed) return;
+    setResetting(true);
+    try {
+      const result = await interviewApi.resetAndReinviteCandidate(candidate.invitation_id);
+      toast({
+        title: "Candidate reset",
+        description: result.email_sent
+          ? `Cleared previous attempts and re-sent invitation to ${candidate.email || "candidate"}.`
+          : `Cleared previous attempts. Email send may have failed — check the candidate's row.`,
+      });
+      if (onRefresh) {
+        await onRefresh();
+      }
+    } catch (err: any) {
+      toast({
+        title: "Reset failed",
+        description: err?.message || "Network error",
+        variant: "destructive",
+      });
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -361,7 +403,7 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                 </span>
                 <button
                   onClick={handleResend}
-                  disabled={resending}
+                  disabled={resending || resetting}
                   className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
                   title="Resend invitation email"
                 >
@@ -374,6 +416,19 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false }: Ca
                     ? "Resend again"
                     : "Resend"}
                 </button>
+                {candidate.invitation_id && (
+                  <button
+                    onClick={handleResetAndReinvite}
+                    disabled={resetting || resending}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-destructive text-destructive hover:bg-destructive hover:text-paper disabled:opacity-50 transition-colors"
+                    title="Mark previous attempts as abandoned and re-send the invitation"
+                  >
+                    <RotateCcw
+                      className={`h-3 w-3 ${resetting ? "animate-spin" : ""}`}
+                    />
+                    {resetting ? "Resetting…" : "Reset & re-invite"}
+                  </button>
+                )}
               </div>
             );
           })()}
