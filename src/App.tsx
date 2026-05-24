@@ -45,6 +45,7 @@ const CandidateRegistration = lazy(() => import("./pages/CandidateRegistration")
 const CandidatePortal = lazy(() => import("./pages/CandidatePortal"));
 const InterviewPreCheckPage = lazy(() => import("./pages/interview/InterviewPreCheckPage"));
 const InterviewSessionPage = lazy(() => import("./pages/interview/InterviewSessionPage"));
+const InterviewSessionV2Page = lazy(() => import("./pages/interview/InterviewSessionV2Page"));
 const InterviewThankYouPage = lazy(() => import("./pages/interview/InterviewThankYouPage"));
 const InterviewResults = lazy(() => import("./pages/InterviewResults"));
 const DynamicBlueprintPage = lazy(() => import("./pages/DynamicBlueprintPage"));
@@ -114,6 +115,7 @@ const App = () => (
             {/* Interview System Routes (public, no auth required) */}
             <Route path="/interview/:interviewId/pre-check" element={<InterviewPreCheckPage />} />
             <Route path="/interview/:interviewId/session" element={<InterviewSessionPage />} />
+            <Route path="/interview/:interviewId/session-v2" element={<InterviewSessionV2Page />} />
             <Route path="/interview/:interviewId/complete" element={<InterviewThankYouPage />} />
 
             {/* Mobile Swipe Review (public, uses OTP verification) */}
