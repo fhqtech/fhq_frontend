@@ -13,6 +13,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, Loader2, Mic, MicOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   VoiceState,
   VoiceWebSocketClient,
@@ -23,6 +24,12 @@ import { PcmPlayer, startMicCapture, classifyMicError, type CaptureHandle, type 
 const SS_KEY_SESSION = "flowdot.v2.sessionId";
 const SS_KEY_TOKEN = "flowdot.v2.candidateToken";
 const SS_KEY_INTERVIEW = "flowdot.v2.interviewId";
+// F-2c: stamped when the 3 session keys are first written; checked on mount
+// to drop stale resume state (backend restart, 30+ min pause between
+// pre-check and start, etc.) instead of attempting a doomed WS reconnect.
+const SS_KEY_STARTED_AT = "flowdot.v2.sessionStartedAt";
+// 30 min — matches max interview budget per Sprint 0 blueprint schema.
+const STALE_SESSION_TTL_MS = 30 * 60 * 1000;
 
 // WS reconnect policy.
 const RECONNECT_MAX_ATTEMPTS = 5;
@@ -34,10 +41,34 @@ export default function InterviewSessionV2Page() {
   const { interviewId } = useParams<{ interviewId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const stateData = location.state as {
     sessionId?: string;
     candidateToken?: string;
   } | null;
+
+  // F-2c: stale-session TTL guard. Runs ONCE per real mount (useState
+  // initializer is StrictMode-double-invocation safe — it's idempotent
+  // because the second call sees the keys already cleared). If the stored
+  // timestamp is older than the TTL, drop all session sessionStorage keys
+  // synchronously so the downstream useMemo latches `undefined`, then the
+  // effect below fires the toast + navigates back to pre-check.
+  const [staleSessionDetected] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const storedStartedAt = sessionStorage.getItem(SS_KEY_STARTED_AT);
+    if (!storedStartedAt) return false;
+    const startedAt = Number(storedStartedAt);
+    if (Number.isNaN(startedAt)) return false;
+    if (Date.now() - startedAt <= STALE_SESSION_TTL_MS) return false;
+    // Stale — wipe the resume state so a doomed WS reconnect never fires.
+    try {
+      sessionStorage.removeItem(SS_KEY_SESSION);
+      sessionStorage.removeItem(SS_KEY_TOKEN);
+      sessionStorage.removeItem(SS_KEY_INTERVIEW);
+      sessionStorage.removeItem(SS_KEY_STARTED_AT);
+    } catch { /* noop — private mode etc. */ }
+    return true;
+  });
 
   // C3: resume after refresh. location.state is lost on hard refresh; fall
   // back to sessionStorage. When startInterview runs we write to
@@ -102,6 +133,24 @@ export default function InterviewSessionV2Page() {
       playerRef.current = null;
     };
   }, []);
+
+  // F-2c: if the mount-time stale check tripped, surface the toast and
+  // bounce back to pre-check. The keys were already cleared in the
+  // useState initializer above, so by this point sessionId/candidateToken
+  // are undefined and missingContext is true — navigating here just spares
+  // the candidate the confusing "couldn't pick up your session" screen.
+  useEffect(() => {
+    if (!staleSessionDetected) return;
+    toast({
+      title: "Session expired",
+      description: "Your previous session expired. Please start a new interview.",
+    });
+    if (interviewId) {
+      navigate(`/interview/${interviewId}/pre-check`);
+    } else {
+      navigate("/candidate");
+    }
+  }, [staleSessionDetected, interviewId, navigate, toast]);
 
   // --- Open a WebSocket client wired with all event handlers ---
   // Extracted so reconnect can reuse it without re-running mic capture.
@@ -197,6 +246,7 @@ export default function InterviewSessionV2Page() {
             sessionStorage.removeItem(SS_KEY_SESSION);
             sessionStorage.removeItem(SS_KEY_TOKEN);
             sessionStorage.removeItem(SS_KEY_INTERVIEW);
+            sessionStorage.removeItem(SS_KEY_STARTED_AT);
           } catch { /* noop */ }
           if (reason) console.info("[v2] interview ended:", reason);
         },
@@ -236,11 +286,13 @@ export default function InterviewSessionV2Page() {
       playerRef.current = player;
 
       // 3. Persist resume state BEFORE opening WS, so a refresh-during-
-      //    connect still recovers cleanly.
+      //    connect still recovers cleanly. F-2c: stamp the started-at so
+      //    the next mount can detect and drop a stale resume.
       try {
         sessionStorage.setItem(SS_KEY_SESSION, sessionId!);
         sessionStorage.setItem(SS_KEY_TOKEN, candidateToken!);
         if (interviewId) sessionStorage.setItem(SS_KEY_INTERVIEW, interviewId);
+        sessionStorage.setItem(SS_KEY_STARTED_AT, String(Date.now()));
       } catch { /* noop — private mode etc. */ }
 
       // 4. Open the WebSocket. The backend will send the greeting; the
@@ -273,6 +325,7 @@ export default function InterviewSessionV2Page() {
       sessionStorage.removeItem(SS_KEY_SESSION);
       sessionStorage.removeItem(SS_KEY_TOKEN);
       sessionStorage.removeItem(SS_KEY_INTERVIEW);
+      sessionStorage.removeItem(SS_KEY_STARTED_AT);
     } catch { /* noop */ }
     navigate(`/interview/${interviewId}/complete`);
   }, [interviewId, navigate]);
