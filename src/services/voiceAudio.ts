@@ -18,6 +18,13 @@ export interface CaptureHandle {
   stop: () => Promise<void>;
   /** Returns true while frames are being emitted. */
   isActive: () => boolean;
+  /**
+   * T1b: returns a 0-1 normalised peak amplitude from the most recent
+   * analyser frame. Lets the UI render a "we hear you" indicator and
+   * warn the candidate within seconds if their mic is muted/broken
+   * (instead of suffering 2 minutes of agent nudges + force-wrap).
+   */
+  getLevel: () => number;
 }
 
 export interface CaptureOptions {
@@ -69,6 +76,16 @@ export async function startMicCapture(opts: CaptureOptions): Promise<CaptureHand
 
   const audioContext = new AudioContext();
   const source = audioContext.createMediaStreamSource(stream);
+
+  // T1b: AnalyserNode in parallel with the processor so we can sample
+  // peak amplitude without interfering with the PCM frame pipeline.
+  // fftSize=256 → 128 frequency bins → cheap. Time-domain data lets us
+  // compute peak amplitude per call.
+  const analyser = audioContext.createAnalyser();
+  analyser.fftSize = 256;
+  analyser.smoothingTimeConstant = 0.4;
+  source.connect(analyser);
+  const analyserBuffer = new Uint8Array(analyser.fftSize);
 
   // We use ScriptProcessorNode (deprecated but universally available). For
   // production hardening, swap to AudioWorklet — same shape, more code.
@@ -130,11 +147,31 @@ export async function startMicCapture(opts: CaptureOptions): Promise<CaptureHand
 
   return {
     isActive: () => isActive,
+    /**
+     * T1b: returns peak amplitude in [0, 1] from the most recent
+     * analyser snapshot. Reads the time-domain buffer (Uint8, centred
+     * at 128) and returns the max deviation normalised to 0-1.
+     */
+    getLevel: () => {
+      if (!isActive) return 0;
+      try {
+        analyser.getByteTimeDomainData(analyserBuffer);
+      } catch {
+        return 0;
+      }
+      let peak = 0;
+      for (let i = 0; i < analyserBuffer.length; i++) {
+        const deviation = Math.abs(analyserBuffer[i] - 128);
+        if (deviation > peak) peak = deviation;
+      }
+      return Math.min(1, peak / 128);
+    },
     stop: async () => {
       isActive = false;
       try {
         processor.disconnect();
         source.disconnect();
+        analyser.disconnect();
         muted.disconnect();
       } catch {
         /* noop */

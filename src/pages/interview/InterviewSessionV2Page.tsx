@@ -159,6 +159,11 @@ export default function InterviewSessionV2Page() {
   // by default (so the candidate can read along) with a chevron to hide
   // it down to a header-only strip if they want a cleaner view.
   const [transcriptVisible, setTranscriptVisible] = useState(true);
+  // T1b — mic level (0-1) and "mic silent" warning (true when mic has
+  // been active for 5s+ with peak amplitude staying near 0).
+  const [micLevel, setMicLevel] = useState(0);
+  const [micSilent, setMicSilent] = useState(false);
+  const micLowSinceRef = useRef<number | null>(null);
   // G — inactivity warning state.
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
   const [inactivitySecondsLeft, setInactivitySecondsLeft] = useState(
@@ -278,6 +283,44 @@ export default function InterviewSessionV2Page() {
     holdActive,
     voiceState,
   ]);
+
+  // T1b — poll the captured mic level every 100ms while mic is active.
+  // When peak amplitude stays below 0.02 for 5+ continuous seconds AND
+  // the mic should be live (agent isn't speaking), flip the silent
+  // warning. Resets when amplitude crosses the threshold OR mic stops.
+  useEffect(() => {
+    if (!micActive) {
+      setMicLevel(0);
+      setMicSilent(false);
+      micLowSinceRef.current = null;
+      return;
+    }
+    const id = setInterval(() => {
+      const level = captureRef.current?.getLevel() ?? 0;
+      setMicLevel(level);
+      // Only consider it "silent" when the candidate is the one expected
+      // to be talking. Agent speech is local — we don't see it on the mic.
+      const candidateExpected = voiceState === "PROBING" && !agentSpeaking && !agentThinking && !holdActive;
+      if (!candidateExpected) {
+        micLowSinceRef.current = null;
+        if (micSilent) setMicSilent(false);
+        return;
+      }
+      if (level >= 0.02) {
+        // Audio detected; clear any silent state.
+        micLowSinceRef.current = null;
+        if (micSilent) setMicSilent(false);
+        return;
+      }
+      // Sub-threshold; start or continue the silent timer.
+      if (micLowSinceRef.current === null) {
+        micLowSinceRef.current = Date.now();
+      } else if (Date.now() - micLowSinceRef.current >= 5_000 && !micSilent) {
+        setMicSilent(true);
+      }
+    }, 100);
+    return () => clearInterval(id);
+  }, [micActive, voiceState, agentSpeaking, agentThinking, holdActive, micSilent]);
 
   // --- WebSocket client ---
   const openWs = useCallback(() => {
@@ -623,6 +666,22 @@ export default function InterviewSessionV2Page() {
           <span className={`inline-block w-2 h-2 rounded-full ${agentSpeaking || (voiceState === "PROBING" && listeningMs > 0 && !holdActive) ? "animate-pulse" : ""} ${stateCaption.dotClass}`} />
           <span>{stateCaption.text}</span>
         </div>
+        {/* T1b — mic silent warning. Fires after 5s of sub-threshold
+            mic level while the candidate is expected to be speaking. */}
+        {micSilent && (
+          <div className="max-w-sm rounded border border-red-500/50 bg-red-950/40 backdrop-blur px-4 py-3 text-xs text-red-200 flex items-start gap-2">
+            <MicOff className="w-4 h-4 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-red-100 mb-1">We're not hearing you</p>
+              <p>
+                Your microphone isn't picking up sound. Check the lock icon in
+                the address bar (allow microphone), unmute your system mic, or
+                try a different input. You can also type your answer below
+                while you sort it out.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mic error — overlay, blocks interaction */}
@@ -793,20 +852,34 @@ export default function InterviewSessionV2Page() {
           </Button>
         ) : (
           <>
-            <button
-              className={`relative flex items-center justify-center h-14 w-14 rounded-full border-2 transition-all ${
-                micActive ? "border-accent bg-accent/15 shadow-[0_0_24px_rgba(255,180,0,0.25)]" : "border-paper/30 bg-paper/5"
-              }`}
-              title={micActive ? "Microphone live" : "Microphone off"}
-              aria-label="Microphone status"
-              type="button"
-            >
-              {micActive ? (
-                <Mic size={22} className="text-accent" />
-              ) : (
-                <MicOff size={20} className="text-muted-2" />
-              )}
-            </button>
+            <div className="relative flex items-center justify-center h-14 w-14">
+              {/* T1b — mic-level ring around the mic button. Outer ring
+                  scales with peak amplitude so the candidate can SEE
+                  their voice being picked up. Static fallback ring
+                  when level is zero. */}
+              <span
+                aria-hidden
+                className="absolute inset-0 rounded-full border-2 border-accent/60 transition-transform duration-100"
+                style={{
+                  transform: `scale(${1 + Math.min(0.4, micLevel * 0.6)})`,
+                  opacity: 0.3 + Math.min(0.7, micLevel * 2),
+                }}
+              />
+              <button
+                className={`relative flex items-center justify-center h-14 w-14 rounded-full border-2 transition-all ${
+                  micActive ? "border-accent bg-accent/15 shadow-[0_0_24px_rgba(255,180,0,0.25)]" : "border-paper/30 bg-paper/5"
+                }`}
+                title={micActive ? "Microphone live" : "Microphone off"}
+                aria-label="Microphone status"
+                type="button"
+              >
+                {micActive ? (
+                  <Mic size={22} className="text-accent" />
+                ) : (
+                  <MicOff size={20} className="text-muted-2" />
+                )}
+              </button>
+            </div>
             <Button
               variant={holdActive ? "default" : "outline"}
               onClick={() => {
