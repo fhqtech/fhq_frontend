@@ -223,12 +223,17 @@ export const InterviewPreCheck = ({
 
   useEffect(() => {
     return () => {
-      // Cleanup audio context and stream
+      // Cleanup audio context and stream.
+      // Live-test hit InvalidStateError because StrictMode double-mounts
+      // and the unmount path called .close() on an already-closed context.
+      // Guard with state-check + swallow the rare race where state was
+      // 'running' at the check but transitioned to 'closed' mid-call
+      // (Safari auto-closes on page hide / tab discard).
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(() => { /* race: closed mid-call */ });
       }
     };
   }, []);
