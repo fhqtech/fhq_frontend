@@ -1729,6 +1729,7 @@ export default function InterviewDetails() {
  </div>
  </div>
  </div>
+ </div>
 
  <CardContent>
  {loadingCandidates ? (
