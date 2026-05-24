@@ -17,8 +17,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   AlertTriangle,
-  ChevronDown,
-  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Loader2,
   Mic,
@@ -155,9 +155,10 @@ export default function InterviewSessionV2Page() {
   const [typedInput, setTypedInput] = useState("");
   // F — typing indicator label rotation.
   const [thinkingLabel, setThinkingLabel] = useState("Thinking");
-  // U1 — transcript collapsed by default per user feedback: candidate
-  // should focus on giving the interview, not re-reading their answers.
-  const [transcriptExpanded, setTranscriptExpanded] = useState(false);
+  // U1/L1 — transcript on the right side per user explicit ask. Visible
+  // by default (so the candidate can read along) with a chevron to hide
+  // it down to a header-only strip if they want a cleaner view.
+  const [transcriptVisible, setTranscriptVisible] = useState(true);
   // G — inactivity warning state.
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
   const [inactivitySecondsLeft, setInactivitySecondsLeft] = useState(
@@ -698,40 +699,44 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* U1 — Collapsed transcript toggle. Centred mid-low; expands upward. */}
+      {/* L1 — Transcript fixed on the right side (per user ask).
+          Hidden below the lg breakpoint to keep mobile clean.
+          Header has a chevron to collapse down to just the header strip. */}
       {micActive && !ended && (
-        <div className="absolute bottom-44 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-10">
-          {transcriptExpanded ? (
-            <div className="bg-ink/95 backdrop-blur border border-paper/10 rounded-lg overflow-hidden shadow-2">
+        <div className="hidden lg:block absolute top-20 right-6 w-80 z-10">
+          {transcriptVisible ? (
+            <div className="bg-ink/95 backdrop-blur border border-paper/10 rounded-lg overflow-hidden shadow-2 flex flex-col" style={{ height: "calc(100dvh - 220px)" }}>
               <button
                 type="button"
-                onClick={() => setTranscriptExpanded(false)}
-                className="w-full flex items-center justify-between px-4 py-2 text-xs text-muted-2 hover:bg-paper/5 transition-colors"
+                onClick={() => setTranscriptVisible(false)}
+                className="w-full flex items-center justify-between px-4 py-2 border-b border-paper/10 text-xs text-muted-2 hover:bg-paper/5 transition-colors shrink-0"
+                title="Hide transcript"
               >
-                <span className="font-mono uppercase tracking-[0.18em]">Transcript ({transcript.length})</span>
-                <ChevronDown className="w-4 h-4" />
+                <span className="font-mono uppercase tracking-[0.18em]">
+                  Transcript ({transcript.length})
+                </span>
+                <ChevronRight className="w-4 h-4" />
               </button>
-              <div className="max-h-[40vh] overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <TranscriptBox
                   messages={toTranscriptMessages(transcript)}
                   currentUtterance={candidatePartial}
                   isUserSpeaking={!!candidatePartial}
-                  className="w-full max-h-[40vh] border-0 rounded-none"
+                  className="w-full h-full border-0 rounded-none"
                 />
               </div>
             </div>
           ) : (
             <button
               type="button"
-              onClick={() => setTranscriptExpanded(true)}
+              onClick={() => setTranscriptVisible(true)}
               className="w-full flex items-center justify-between px-4 py-2 rounded-lg bg-ink/80 backdrop-blur border border-paper/10 text-xs text-muted-2 hover:bg-paper/5 hover:border-paper/20 transition-colors"
+              title="Show transcript"
             >
-              <span className="flex items-center gap-2">
-                <span className="font-mono uppercase tracking-[0.18em]">Transcript</span>
-                <span className="text-paper/40">·</span>
-                <span className="font-mono tabular-nums">{transcript.length} {transcript.length === 1 ? "message" : "messages"}</span>
+              <span className="font-mono uppercase tracking-[0.18em]">
+                Transcript ({transcript.length})
               </span>
-              <ChevronUp className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
           )}
         </div>
