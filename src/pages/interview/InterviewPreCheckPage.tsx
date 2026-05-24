@@ -104,6 +104,43 @@ export default function InterviewPreCheckPage() {
       const sessionData = await sessionResponse.json();
       const finalSessionId = sessionData.session_id || sessionId;
 
+      // H3 (2026-05-24): fire prepare-greeting in the background so the
+      // gateway has the personalised opener cached by WS-open. Covers
+      // BOTH paths (fresh resume select AND session resume) because we
+      // run it here at start-interview time, not buried inside the
+      // resume-selection callPrepareAPI. Best-effort: H1 means the
+      // gateway will inline-generate if the cache is still empty.
+      // 8s timeout matches the typical prelims latency.
+      try {
+        const abort = new AbortController();
+        const timer = setTimeout(() => abort.abort(), 8_000);
+        fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare-greeting`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session_id: finalSessionId,
+              interview_id: interview.id,
+              candidate_id: candidate.id,
+            }),
+            signal: abort.signal,
+          },
+        )
+          .then((resp) => {
+            clearTimeout(timer);
+            if (!resp.ok) {
+              console.warn('[precheck] prepare-greeting non-ok:', resp.status);
+            }
+          })
+          .catch(() => {
+            clearTimeout(timer);
+            /* best-effort, gateway has its own inline fallback */
+          });
+      } catch {
+        /* noop */
+      }
+
       // Engine selection: ?engine=v1 in URL wins as emergency rollback;
       // otherwise VITE_INTERVIEW_ENGINE; otherwise v2 (the supported default).
       // Routes to /session-v2 (backend-authoritative WebSocket pipeline) or
