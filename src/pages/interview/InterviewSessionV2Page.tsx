@@ -17,6 +17,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   AlertTriangle,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Loader2,
   Mic,
@@ -153,6 +155,9 @@ export default function InterviewSessionV2Page() {
   const [typedInput, setTypedInput] = useState("");
   // F — typing indicator label rotation.
   const [thinkingLabel, setThinkingLabel] = useState("Thinking");
+  // U1 — transcript collapsed by default per user feedback: candidate
+  // should focus on giving the interview, not re-reading their answers.
+  const [transcriptExpanded, setTranscriptExpanded] = useState(false);
   // G — inactivity warning state.
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
   const [inactivitySecondsLeft, setInactivitySecondsLeft] = useState(
@@ -505,31 +510,52 @@ export default function InterviewSessionV2Page() {
     );
   }
 
+  // U1 — derive the single state caption shown directly below the avatar.
+  // One source of truth for "what's the agent doing right now".
+  const stateCaption: { text: string; dotClass: string } = useMemo(() => {
+    if (ended) return { text: "Interview ended", dotClass: "bg-zinc-500" };
+    if (agentSpeaking) return { text: "Speaking", dotClass: "bg-gold-ink" };
+    if (agentThinking) return { text: `${thinkingLabel}…`, dotClass: "bg-amber-400" };
+    if (holdActive) return { text: "Holding — click 'I'm done' when ready", dotClass: "bg-blue-400" };
+    if (voiceState === "PROBING" && listeningMs > 0) {
+      const secs = Math.ceil(listeningMs / 1000);
+      const isUrgent = listeningMs < 2000;
+      const isWarn = listeningMs >= 2000 && listeningMs < 4000;
+      return {
+        text: `Listening — agent responds in ${secs}s`,
+        dotClass: isUrgent ? "bg-red-400" : isWarn ? "bg-amber-400" : "bg-green-400",
+      };
+    }
+    if (voiceState === "PROBING") return { text: "Listening", dotClass: "bg-green-400" };
+    if (voiceState === "GREETING") return { text: "Speaking", dotClass: "bg-gold-ink" };
+    if (voiceState === "WRAPPING") return { text: "Wrapping up", dotClass: "bg-blue-400" };
+    if (!micActive) return { text: "Click Start to begin", dotClass: "bg-muted/40" };
+    return { text: "Connecting…", dotClass: "bg-amber-400" };
+  }, [ended, agentSpeaking, agentThinking, thinkingLabel, holdActive, voiceState, listeningMs, micActive]);
+
   return (
     <div className="relative w-screen h-dvh bg-ink overflow-hidden">
-      {/* C — 3D ParticleSphere background, state-aware */}
+      {/* U1 — ParticleSphere dimmed to background. State-aware but not dominant. */}
       <ParticleSphere
         conversationState={conversationStateForSphere}
         audioLevel={agentSpeaking ? 0.5 : 0}
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-40"
       />
 
-      {/* D — Logo top-left */}
-      <div className="absolute top-6 left-6 z-10">
-        <h1 className="text-xl font-bold text-paper whitespace-nowrap">FlowDot AI</h1>
-        <p className="text-xs text-muted-2 whitespace-nowrap">Applicant Portal</p>
-      </div>
-
-      {/* D — Timer + connection status top-center */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-10">
-        <h2 className="text-muted-2 text-sm font-normal mb-2">Interview</h2>
-        <div className="flex items-center gap-3">
+      {/* U1 — Top bar: logo left, single compact title+timer+status right */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-between px-6 pt-6 pointer-events-none">
+        <div className="pointer-events-auto">
+          <h1 className="text-lg font-bold text-paper whitespace-nowrap leading-tight">FlowDot AI</h1>
+          <p className="text-xs text-muted-2 whitespace-nowrap leading-tight">Applicant Portal</p>
+        </div>
+        <div className="flex items-center gap-3 text-sm pointer-events-auto">
+          <span className="text-muted-2 text-xs uppercase tracking-[0.18em] font-mono">Interview</span>
+          <span className="text-paper/30">·</span>
           <div className="flex items-center gap-1.5 text-paper/80">
-            <Clock className="w-4 h-4" />
-            <span className="text-sm font-medium font-mono tabular-nums">
-              {formatTime(elapsedSeconds)}
-            </span>
+            <Clock className="w-3.5 h-3.5" />
+            <span className="font-medium font-mono tabular-nums">{formatTime(elapsedSeconds)}</span>
           </div>
+          <span className="text-paper/30">·</span>
           <div
             className={`flex items-center gap-1.5 ${
               wsStatus === "connected"
@@ -540,13 +566,13 @@ export default function InterviewSessionV2Page() {
             }`}
           >
             {wsStatus === "connected" ? (
-              <Wifi className="w-4 h-4" />
+              <Wifi className="w-3.5 h-3.5" />
             ) : wsStatus === "error" ? (
-              <WifiOff className="w-4 h-4" />
+              <WifiOff className="w-3.5 h-3.5" />
             ) : (
-              <Wifi className="w-4 h-4 animate-pulse" />
+              <Wifi className="w-3.5 h-3.5 animate-pulse" />
             )}
-            <span className="text-sm font-medium">
+            <span className="font-medium text-xs">
               {wsStatus === "connected"
                 ? "Connected"
                 : wsStatus === "error"
@@ -563,13 +589,13 @@ export default function InterviewSessionV2Page() {
               title="Reconnect"
               className="flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
       </div>
 
-      {/* F — Reconnect overlay banner (styled badge with spinner) */}
+      {/* F — Reconnect overlay banner */}
       {reconnecting && !ended && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
           <div className="bg-amber-500/20 border border-amber-500/50 text-amber-200 px-4 py-2 rounded text-xs flex items-center gap-2 shadow-2">
@@ -581,62 +607,21 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* C — AiInterviewer avatar centred. Pulses for listening/speaking. */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-4">
-        <AiInterviewer
-          isListening={voiceState === "PROBING" && !agentSpeaking && !agentThinking}
-          isSpeaking={agentSpeaking}
-        />
-        {/* F — Typing indicator */}
-        {agentThinking && !agentSpeaking && (
-          <div className="flex items-center gap-2 text-muted-2 text-sm">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-            </span>
-            <span>{thinkingLabel}…</span>
-          </div>
-        )}
+      {/* U1 — Avatar in upper-third (not dead-centre). State caption directly below. */}
+      <div className="absolute left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-5 top-[26%]">
+        <div className="scale-[0.66]">
+          {/* AiInterviewer is 144px; scale to ~96px without re-engineering the component */}
+          <AiInterviewer
+            isListening={voiceState === "PROBING" && !agentSpeaking && !agentThinking && !holdActive}
+            isSpeaking={agentSpeaking}
+          />
+        </div>
+        {/* Single state caption — replaces the scattered hold banner + grace banner */}
+        <div className="flex items-center gap-2 text-paper/80 text-sm">
+          <span className={`inline-block w-2 h-2 rounded-full ${agentSpeaking || (voiceState === "PROBING" && listeningMs > 0 && !holdActive) ? "animate-pulse" : ""} ${stateCaption.dotClass}`} />
+          <span>{stateCaption.text}</span>
+        </div>
       </div>
-
-      {/* C — Transcript right side, chat bubbles */}
-      <div className="absolute top-32 right-6 w-80 max-w-[calc(100vw-3rem)] h-[calc(100dvh-220px)] z-10">
-        <TranscriptBox
-          messages={toTranscriptMessages(transcript)}
-          currentUtterance={candidatePartial}
-          isUserSpeaking={!!candidatePartial}
-          className="w-full h-full"
-        />
-      </div>
-
-      {/* Listening/hold grace banner — kept from v2; valuable UX */}
-      {(listeningMs > 0 || holdActive) && !agentSpeaking && (() => {
-        const secs = Math.ceil(listeningMs / 1000);
-        const isUrgent = !holdActive && listeningMs > 0 && listeningMs < 2000;
-        const isWarn = !holdActive && listeningMs >= 2000 && listeningMs < 4000;
-        const dotClass = holdActive
-          ? "bg-blue-400"
-          : isUrgent
-            ? "bg-red-400"
-            : isWarn
-              ? "bg-amber-400"
-              : "bg-green-400";
-        return (
-          <div className="absolute top-20 left-6 z-10 max-w-xs">
-            <div className="rounded border border-paper/20 bg-ink/80 backdrop-blur px-3 py-2 text-xs flex items-center gap-2 text-muted-2">
-              <span className={`inline-block w-2 h-2 rounded-full animate-pulse ${dotClass}`} />
-              <span>
-                {holdActive ? (
-                  <>Holding — click <strong>I'm done</strong> when ready.</>
-                ) : (
-                  <>Listening — agent responds in <strong>{secs}s</strong></>
-                )}
-              </span>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* Mic error — overlay, blocks interaction */}
       {micError && (
@@ -682,40 +667,76 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* G — Inactivity warning ring + "I'm here" button */}
+      {/* G — Inactivity ring positioned beneath the avatar/state caption */}
       {showInactivityWarning && !ended && !agentSpeaking && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20">
-          <div className="flex flex-col items-center gap-3 bg-ink/90 border border-amber-500/40 rounded-lg px-6 py-4 shadow-2">
-            <div className="relative w-16 h-16">
-              <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90">
-                <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="4" />
+        <div className="absolute left-1/2 -translate-x-1/2 z-20 top-[50%]">
+          <div className="flex flex-col items-center gap-3 bg-ink/90 border border-amber-500/40 rounded-lg px-5 py-3 shadow-2 backdrop-blur">
+            <div className="relative w-14 h-14">
+              <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90">
+                <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
                 <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
+                  cx="28"
+                  cy="28"
+                  r="24"
                   fill="none"
                   stroke={inactivitySecondsLeft <= 10 ? "rgb(248 113 113)" : inactivitySecondsLeft <= 20 ? "rgb(251 191 36)" : "rgb(74 222 128)"}
-                  strokeWidth="4"
-                  strokeDasharray={2 * Math.PI * 28}
+                  strokeWidth="3"
+                  strokeDasharray={2 * Math.PI * 24}
                   strokeDashoffset={
-                    2 * Math.PI * 28 * (1 - inactivitySecondsLeft / Math.round(INACTIVITY_COUNTDOWN_MS / 1000))
+                    2 * Math.PI * 24 * (1 - inactivitySecondsLeft / Math.round(INACTIVITY_COUNTDOWN_MS / 1000))
                   }
                   className="transition-all duration-1000"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-paper font-mono tabular-nums">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-paper font-mono tabular-nums">
                 {Math.max(0, inactivitySecondsLeft)}
               </span>
             </div>
-            <p className="text-xs text-muted-2 text-center max-w-[160px]">
-              Still there? The interview will continue when you respond.
-            </p>
             <Button size="sm" onClick={handleStillHere}>I'm here</Button>
           </div>
         </div>
       )}
 
-      {/* E — Text input fallback, bottom-center above the controls bar */}
+      {/* U1 — Collapsed transcript toggle. Centred mid-low; expands upward. */}
+      {micActive && !ended && (
+        <div className="absolute bottom-44 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-10">
+          {transcriptExpanded ? (
+            <div className="bg-ink/95 backdrop-blur border border-paper/10 rounded-lg overflow-hidden shadow-2">
+              <button
+                type="button"
+                onClick={() => setTranscriptExpanded(false)}
+                className="w-full flex items-center justify-between px-4 py-2 text-xs text-muted-2 hover:bg-paper/5 transition-colors"
+              >
+                <span className="font-mono uppercase tracking-[0.18em]">Transcript ({transcript.length})</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <div className="max-h-[40vh] overflow-hidden">
+                <TranscriptBox
+                  messages={toTranscriptMessages(transcript)}
+                  currentUtterance={candidatePartial}
+                  isUserSpeaking={!!candidatePartial}
+                  className="w-full max-h-[40vh] border-0 rounded-none"
+                />
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setTranscriptExpanded(true)}
+              className="w-full flex items-center justify-between px-4 py-2 rounded-lg bg-ink/80 backdrop-blur border border-paper/10 text-xs text-muted-2 hover:bg-paper/5 hover:border-paper/20 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <span className="font-mono uppercase tracking-[0.18em]">Transcript</span>
+                <span className="text-paper/40">·</span>
+                <span className="font-mono tabular-nums">{transcript.length} {transcript.length === 1 ? "message" : "messages"}</span>
+              </span>
+              <ChevronUp className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* E — Text input fallback, sits just above the controls bar */}
       {micActive && !ended && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-10">
           <form
@@ -736,7 +757,7 @@ export default function InterviewSessionV2Page() {
               }}
               placeholder={
                 voiceState === "PROBING" && !agentSpeaking && !agentThinking
-                  ? "Type your answer (or just speak) — Enter to send, Shift+Enter for newline"
+                  ? "Type if you prefer — or just speak. Enter to send."
                   : agentSpeaking
                     ? "Interviewer is speaking…"
                     : agentThinking
@@ -745,12 +766,12 @@ export default function InterviewSessionV2Page() {
               }
               disabled={voiceState !== "PROBING" || agentSpeaking || agentThinking}
               rows={1}
-              className="flex-1 resize-none bg-ink/80 border border-paper/20 rounded-lg px-3 py-2 text-sm text-paper placeholder-muted-2 disabled:opacity-50 focus:outline-hidden focus:border-accent"
+              className="flex-1 resize-none bg-ink/80 backdrop-blur border border-paper/15 rounded-lg px-3 py-2 text-sm text-paper placeholder-muted-2 disabled:opacity-40 focus:outline-hidden focus:border-accent"
             />
             <button
               type="submit"
               disabled={!typedInput.trim() || voiceState !== "PROBING" || agentSpeaking || agentThinking}
-              className="h-10 px-4 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-paper text-sm font-medium transition-colors flex items-center gap-1.5"
+              className="h-10 px-4 bg-accent hover:bg-accent/90 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-paper text-sm font-medium transition-colors flex items-center gap-1.5"
             >
               <Send className="w-4 h-4" /> Send
             </button>
@@ -758,24 +779,24 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* Audio controls bar — bottom centre. Start/Hold/End */}
+      {/* U1 — Bottom controls: mic stays primary (gold), hold/end ghost flanking */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
         {!micActive ? (
-          <Button onClick={startInterview} className="gap-2" size="lg">
+          <Button onClick={startInterview} className="gap-2" size="lg" variant="gold">
             <Mic className="w-4 h-4" /> Start interview
           </Button>
         ) : (
           <>
             <button
-              className={`relative flex items-center justify-center h-12 w-12 rounded-full border-2 transition-all ${
-                micActive ? "border-accent bg-accent/10" : "border-paper/30 bg-paper/5"
+              className={`relative flex items-center justify-center h-14 w-14 rounded-full border-2 transition-all ${
+                micActive ? "border-accent bg-accent/15 shadow-[0_0_24px_rgba(255,180,0,0.25)]" : "border-paper/30 bg-paper/5"
               }`}
               title={micActive ? "Microphone live" : "Microphone off"}
               aria-label="Microphone status"
               type="button"
             >
               {micActive ? (
-                <Mic size={20} className="text-accent" />
+                <Mic size={22} className="text-accent" />
               ) : (
                 <MicOff size={20} className="text-muted-2" />
               )}
