@@ -250,8 +250,20 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
 
   return (
     <Card
-      className={`group shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 cursor-pointer relative overflow-hidden rounded-sm ${getCardStyle()}`}
+      className={`group shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden rounded-sm ${onClick ? "cursor-pointer" : ""} ${getCardStyle()}`}
       onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       <div className="absolute inset-0 bg-paper-2 from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -312,33 +324,47 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
           )}
         </div>
 
-        {/* Status Badge - Full Width Card */}
+        {/* Status Badge - Full Width Card.
+            R1 (2026-05-25): three-state logic.
+              A. session_status !== "completed" → "NOT INTERVIEWED" (grey)
+              B. completed + blueprint.hireability_recommendation → coloured banner
+              C. completed but no recommendation → "RESULTS PENDING" (amber)
+            Previously the badge read only blueprint.hireability_recommendation,
+            so any completed session without a reviewer-produced recommendation
+            displayed "NOT INTERVIEWED" — visibly wrong for candidates with
+            scores like 77/0/66. */}
         <div className="mb-4">
-          {blueprint?.hireability_recommendation ? (
-            <div
-              className={`
-                w-full px-4 py-3 text-center font-bold text-[11px]   shadow-2
-                ${blueprint.hireability_recommendation === 'Strongly Recommend' || blueprint.hireability_recommendation === 'Strong Recommend'
-                  ? 'bg-success/10 text-success border border-rule/30'
-                  : blueprint.hireability_recommendation === 'Recommend'
-                    ? 'bg-success/10 text-success border border-rule/30'
-                    : blueprint.hireability_recommendation === 'Recommend with Reservations'
-                      ? 'bg-warning/10 text-warning border border-rule/30'
-                      : blueprint.hireability_recommendation === 'Do Not Recommend'
-                        ? 'bg-danger/10 text-danger border border-rule/30'
-                        : 'bg-muted/50 text-muted-foreground border border-border'
-                }
-              `}
-            >
-              {blueprint.hireability_recommendation.toUpperCase()}
-            </div>
-          ) : (
-            <>
-              <div className="w-full px-4 py-3 text-center font-bold text-[11px] bg-muted/50 text-muted-foreground border border-border shadow-2">
-                NOT INTERVIEWED
+          {(() => {
+            const isCompletedSession = candidate.session_status === "completed";
+            const rec = blueprint?.hireability_recommendation as string | undefined;
+            if (!isCompletedSession) {
+              return (
+                <div className="w-full px-4 py-3 text-center font-bold text-[11px] bg-muted/50 text-muted-foreground border border-border shadow-2">
+                  NOT INTERVIEWED
+                </div>
+              );
+            }
+            if (rec) {
+              const colorClass =
+                rec === "Strongly Recommend" || rec === "Strong Recommend" || rec === "Recommend"
+                  ? "bg-success/10 text-success border border-rule/30"
+                  : rec === "Recommend with Reservations"
+                    ? "bg-warning/10 text-warning border border-rule/30"
+                    : rec === "Do Not Recommend"
+                      ? "bg-danger/10 text-danger border border-rule/30"
+                      : "bg-muted/50 text-muted-foreground border border-border";
+              return (
+                <div className={`w-full px-4 py-3 text-center font-bold text-[11px] shadow-2 ${colorClass}`}>
+                  {rec.toUpperCase()}
+                </div>
+              );
+            }
+            return (
+              <div className="w-full px-4 py-3 text-center font-bold text-[11px] bg-amber-50 text-amber-900 border border-amber-200 shadow-2">
+                RESULTS PENDING
               </div>
-            </>
-          )}
+            );
+          })()}
           {/* Copy candidate link (A2 2026-05-12).
               Pre-registration → /register/{token}
               Post-registration → /candidate-portal/{token}

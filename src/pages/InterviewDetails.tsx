@@ -1776,21 +1776,28 @@ export default function InterviewDetails() {
  {/* Card Grid */}
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
  {paginatedCandidates.map((candidate) => {
- const hasSingleAttempt = candidate.attempts && candidate.attempts.length === 1;
-
+ // R1 (2026-05-25): navigate when the candidate has any completed
+ // session, not just a single-attempt one. The previous gate
+ // `hasSingleAttempt && candidate.attempts[0].session_id` silently
+ // no-op'd every candidate who had retried (any 2+ attempt). The
+ // backend orders attempts chronologically; the latest one
+ // (attempts[length-1]) is the most recent.
+ const attempts = candidate.attempts || [];
+ const latestSessionId =
+ candidate.session_id ||
+ (attempts.length > 0 ? attempts[attempts.length - 1].session_id : null);
+ const canViewResults =
+ candidate.session_status === "completed" && Boolean(latestSessionId);
  return (
  <CandidateCard
  key={candidate.id}
  candidate={candidate}
  onRefresh={refreshCandidates}
- onClick={() => {
- // C1: navigate to InterviewResults (TAG viewer + scores)
- // instead of the deleted VideoPlayerFullPage. New
- // interviews are audio-only; review = TAG, not video.
- if (hasSingleAttempt && candidate.attempts[0].session_id) {
- navigate(`/interview/${id}/results/${candidate.attempts[0].session_id}`);
+ onClick={
+ canViewResults
+ ? () => navigate(`/interview/${id}/results/${latestSessionId}`)
+ : undefined
  }
- }}
  />
  );
  })}
