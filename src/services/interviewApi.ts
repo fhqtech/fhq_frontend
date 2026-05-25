@@ -92,8 +92,27 @@ class InterviewApiService {
     );
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create interview');
+      const error = await response.json().catch(() => ({}));
+      // FastAPI HTTPException returns { detail: ... } where detail can
+      // be a string or an object. The Phase A.2 admission gate returns
+      // a structured object: { code, message, non_finance_signals, finance_signals }.
+      // Attach the structured detail to the thrown error so the caller
+      // can render a specific rejection modal.
+      const detail = (error as any)?.detail;
+      const message =
+        (typeof detail === 'object' && detail?.message) ||
+        (typeof detail === 'string' && detail) ||
+        (error as any)?.error ||
+        'Failed to create interview';
+      const err = new Error(message) as Error & {
+        code?: string;
+        detail?: unknown;
+      };
+      if (typeof detail === 'object' && detail !== null) {
+        err.code = (detail as any).code;
+        err.detail = detail;
+      }
+      throw err;
     }
 
     // F8: Backend currently returns {message, interview, interviewId}.

@@ -66,6 +66,7 @@ const CandidateDashboard = lazy(() => import("./pages/candidate/CandidateDashboa
 const CandidateInterviewDetail = lazy(() => import("./pages/candidate/CandidateInterviewDetail"));
 const CandidateResults = lazy(() => import("./pages/candidate/CandidateResults"));
 const CandidateProfile = lazy(() => import("./pages/candidate/CandidateProfile"));
+const CandidateProfileTag = lazy(() => import("./pages/candidate/CandidateProfileTag"));
 const CandidateSettings = lazy(() => import("./pages/candidate/CandidateSettings"));
 
 const LegacyFitmentRedirect = () => {
@@ -303,6 +304,26 @@ const App = () => (
                 <CandidateProtectedRoute>
                   <CandidateProfile />
                 </CandidateProtectedRoute>
+              }
+            />
+            {/* Phase 1.8: Profile TAG page — narrative + journey + skill graph.
+                Two entry points:
+                  /candidate/profile-tag                       (candidate viewing self)
+                  /candidates/:candidateId/profile-tag         (recruiter view) */}
+            <Route
+              path="/candidate/profile-tag"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateProfileTag />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidates/:candidateId/profile-tag"
+              element={
+                <ProtectedRoute>
+                  <CandidateProfileTag />
+                </ProtectedRoute>
               }
             />
             <Route

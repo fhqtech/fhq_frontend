@@ -789,6 +789,15 @@ export default function CandidateRegistration() {
             <p className="text-base text-muted max-w-2xl">
               We're excited to learn more about you. This will only take few minutes.
             </p>
+            {/* C3 (2026-05-25): show the invited email so a misdelivered
+                link is obvious. The backend also binds the token to this
+                email server-side; UX cue + security gate together. */}
+            {invitationDetails?.invitation.email && (
+              <p className="text-xs text-muted-2 mt-2">
+                This invitation was sent to <span className="font-mono">{invitationDetails.invitation.email}</span>.
+                If this isn't your email, please don't proceed — ask the recruiter to resend with the correct address.
+              </p>
+            )}
           </div>
         </div>
 
