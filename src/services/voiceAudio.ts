@@ -25,6 +25,20 @@ export interface CaptureHandle {
    * (instead of suffering 2 minutes of agent nudges + force-wrap).
    */
   getLevel: () => number;
+  /**
+   * F1 (2026-05-25): client-side mute. When muted, the capture pipeline
+   * keeps running (so getLevel() still animates and the candidate can
+   * SEE the mic is on) but PCM frames are NOT piped to onFrame. The
+   * gateway sees silence and the existing idle watchdog applies
+   * normally — that's intentional, so a forgotten mute eventually
+   * surfaces via the "are you still with us?" nudge.
+   *
+   * Distinct from `clientRef.sendHold()` which signals the BACKEND to
+   * stop processing audio. Hold = pause the conversation politely.
+   * Mute = candidate doesn't want to be heard right now.
+   */
+  setMuted: (muted: boolean) => void;
+  isMuted: () => boolean;
 }
 
 export interface CaptureOptions {
@@ -96,6 +110,11 @@ export async function startMicCapture(opts: CaptureOptions): Promise<CaptureHand
   const downsampleRatio = sourceRate / TARGET_SAMPLE_RATE;
 
   let isActive = true;
+  // F1 (2026-05-25): client-side mute flag. Closed-over by onaudioprocess
+  // so the capture pipeline keeps running (level analyser updates) but
+  // PCM frames stop reaching the WS when set. Toggled via the returned
+  // setMuted() / isMuted() handle methods.
+  let isMuted = false;
   let pending: Float32Array = new Float32Array(0);
 
   processor.onaudioprocess = (ev: AudioProcessingEvent) => {
@@ -122,6 +141,13 @@ export async function startMicCapture(opts: CaptureOptions): Promise<CaptureHand
     const consumed = Math.floor(downsampledLen * downsampleRatio);
     pending = combined.slice(consumed);
 
+    // F1: drop PCM when muted. Capture pipeline keeps running so the
+    // level analyser stays accurate (UI ring keeps animating, candidate
+    // sees the mic is on), we just don't ship samples upstream.
+    if (isMuted) {
+      return;
+    }
+
     // Slice into FRAME_SAMPLES chunks. Smaller frames help AssemblyAI lock
     // partials faster; larger frames waste fewer WS messages.
     let offset = 0;
@@ -147,6 +173,10 @@ export async function startMicCapture(opts: CaptureOptions): Promise<CaptureHand
 
   return {
     isActive: () => isActive,
+    setMuted: (next: boolean) => {
+      isMuted = next;
+    },
+    isMuted: () => isMuted,
     /**
      * T1b: returns peak amplitude in [0, 1] from the most recent
      * analyser snapshot. Reads the time-domain buffer (Uint8, centred

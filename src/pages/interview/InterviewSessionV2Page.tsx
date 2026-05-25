@@ -141,6 +141,10 @@ export default function InterviewSessionV2Page() {
   const [agentThinking, setAgentThinking] = useState(false);
   const [listeningMs, setListeningMs] = useState(0);
   const [holdActive, setHoldActive] = useState(false);
+  // F1 (2026-05-25): client-side mic mute. Distinct from hold (server-side
+  // pause). When muted, the capture pipeline keeps running but no PCM is
+  // sent — the gateway sees silence and the idle watchdog applies normally.
+  const [micMuted, setMicMuted] = useState(false);
   const [ended, setEnded] = useState(false);
   // C2: reconnect status, surfaced as an overlay banner.
   const [reconnecting, setReconnecting] = useState<{ attempt: number; nextMs: number } | null>(null);
@@ -866,17 +870,34 @@ export default function InterviewSessionV2Page() {
                 }}
               />
               <button
+                onClick={() => {
+                  if (!micActive || ended) return;
+                  const next = !micMuted;
+                  setMicMuted(next);
+                  captureRef.current?.setMuted(next);
+                }}
+                disabled={!micActive || ended}
                 className={`relative flex items-center justify-center h-14 w-14 rounded-full border-2 transition-all ${
-                  micActive ? "border-accent bg-accent/15 shadow-[0_0_24px_rgba(255,180,0,0.25)]" : "border-paper/30 bg-paper/5"
+                  !micActive
+                    ? "border-paper/30 bg-paper/5 cursor-not-allowed"
+                    : micMuted
+                      ? "border-danger/60 bg-danger/10"
+                      : "border-accent bg-accent/15 shadow-[0_0_24px_rgba(255,180,0,0.25)]"
                 }`}
-                title={micActive ? "Microphone live" : "Microphone off"}
-                aria-label="Microphone status"
+                title={
+                  !micActive
+                    ? "Microphone off"
+                    : micMuted
+                      ? "Microphone muted — click to unmute"
+                      : "Microphone live — click to mute"
+                }
+                aria-label={micMuted ? "Unmute microphone" : "Mute microphone"}
                 type="button"
               >
-                {micActive ? (
-                  <Mic size={22} className="text-accent" />
-                ) : (
+                {!micActive || micMuted ? (
                   <MicOff size={20} className="text-muted-2" />
+                ) : (
+                  <Mic size={22} className="text-accent" />
                 )}
               </button>
             </div>
