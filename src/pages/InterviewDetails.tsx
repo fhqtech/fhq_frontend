@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2, UserPlus } from "lucide-react";
+import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2, UserPlus } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CloudArrowDown, CaretLeft } from "phosphor-react";
 import googleLogo from "@/assets/google_logo.png";
 import aiAvatar from "@/assets/ai-avatar.png";
@@ -162,6 +163,10 @@ export default function InterviewDetails() {
  const [tableSearchQuery, setTableSearchQuery] = useState("");
  const [tableStatusFilter, setTableStatusFilter] = useState("");
  const [tableScoreFilter, setTableScoreFilter] = useState("");
+ // R3 (2026-05-25): filter bar collapsibility. Collapsed by default
+ // to free vertical space; auto-expands when any filter becomes active
+ // so the recruiter can see what they've applied.
+ const [filtersOpen, setFiltersOpen] = useState(false);
 
  // S3.2: URL-backed filters so recruiters can bookmark / share
  // "show me strong hires above 75". `min_score` is the slider value
@@ -211,6 +216,25 @@ export default function InterviewDetails() {
    }
    setSearchParams(params, { replace: true });
  };
+
+ // R3 (2026-05-25): derived "are any filters active right now" used by
+ // the Clear-filters button (existing) AND the filter-bar auto-expand
+ // effect below. Centralised so both stay in sync.
+ const hasActiveFilters =
+   Boolean(tableSearchQuery) ||
+   Boolean(tableStatusFilter) ||
+   Boolean(tableScoreFilter) ||
+   minScore > 0 ||
+   selectedRecs.size !== ALL_RECOMMENDATIONS.length;
+
+ // R3: smart auto-expand — the filter bar pops open whenever any
+ // filter is active, so the recruiter sees what they've applied. The
+ // user can manually re-collapse afterwards; we don't re-open until
+ // hasActiveFilters transitions false→true again.
+ useEffect(() => {
+   if (hasActiveFilters && !filtersOpen) setFiltersOpen(true);
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [hasActiveFilters]);
 
  // S3.2: CSV export
  const [isExporting, setIsExporting] = useState(false);
@@ -1537,33 +1561,39 @@ export default function InterviewDetails() {
  <Card className="shadow-2 rounded-sm">
  {/* Sticky Header */}
  <div className="sticky top-[120px] z-40 bg-paper border-b shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
- <CardHeader className="pb-3">
- <div className="flex items-center justify-between mb-2">
- <div className="flex items-center gap-6">
- <CardTitle className="text-lg text-ink">
- Applicant results
- </CardTitle>
- {/* Legend */}
- <div className="flex items-center gap-3 text-xs">
- <div className="flex items-center gap-1.5">
- <div className="w-3 h-3 bg-success"></div>
- <span className="text-muted">Immediate</span>
+ <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+ {/* R3: collapsed-state trigger — compact summary + chevron. */}
+ <CollapsibleTrigger asChild>
+ <button
+ type="button"
+ className="w-full flex items-center justify-between px-6 py-3 hover:bg-paper-2/40 transition-colors"
+ aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+ >
+ <div className="flex items-center gap-3">
+ <span className="text-lg font-semibold text-ink">Applicant results</span>
+ <span className="text-xs text-muted">
+ · {totalCandidates} applicant{totalCandidates === 1 ? "" : "s"}
+ {hasActiveFilters ? " · filtered" : ""}
+ </span>
  </div>
- <div className="flex items-center gap-1.5">
- <div className="w-3 h-3 bg-gold"></div>
- <span className="text-muted">&lt; 2 weeks</span>
+ <div className="flex items-center gap-3">
+ {/* At-a-glance legend, hidden on narrow viewports */}
+ <span className="hidden md:flex items-center gap-3 text-xs text-muted">
+ <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 bg-success rounded-sm" />Immediate</span>
+ <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 bg-gold rounded-sm" />&lt; 2 weeks</span>
+ <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 bg-orange rounded-sm" />&gt; 1 month</span>
+ <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 bg-rule-strong rounded-sm" />Not specified</span>
+ </span>
+ {filtersOpen ? <ChevronUp className="w-4 h-4 text-muted" /> : <ChevronDown className="w-4 h-4 text-muted" />}
  </div>
- <div className="flex items-center gap-1.5">
- <div className="w-3 h-3 bg-orange"></div>
- <span className="text-muted">&gt; 1 month</span>
- </div>
- <div className="flex items-center gap-1.5">
- <div className="w-3 h-3 bg-rule-strong"></div>
- <span className="text-muted">Not specified</span>
- </div>
- </div>
- </div>
- <div className="flex items-center gap-2">
+ </button>
+ </CollapsibleTrigger>
+ <CollapsibleContent>
+ <CardHeader className="pb-3 pt-0">
+ {/* R3: title + legend moved up to CollapsibleTrigger. Header now
+     just hosts the action buttons (Add candidates, Refresh) + the
+     description text. */}
+ <div className="flex items-center justify-end gap-2 mb-2">
  {interview?.status !== 'stopped' && interview?.status !== 'completed' && (
  <Button
  size="sm"
@@ -1584,7 +1614,6 @@ export default function InterviewDetails() {
  <RefreshCw className={`w-3 h-3 ${loadingCandidates ? 'animate-spin' : ''}`} />
  Refresh
  </Button>
- </div>
  </div>
  <CardDescription className="text-sm text-muted">
  Detailed view of all applicants and their interview performance.
@@ -1729,6 +1758,8 @@ export default function InterviewDetails() {
  </div>
  </div>
  </div>
+ </CollapsibleContent>
+ </Collapsible>
  </div>
 
  <CardContent>
