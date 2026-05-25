@@ -606,13 +606,14 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="mb-4 h-[180px] flex items-center justify-center bg-transparent rounded-lg border border-border/30">
-            <div className="text-center">
-              <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {hasSession ? 'Results Pending' : 'No Interview Yet'}
-              </p>
-            </div>
+          /* R2 (2026-05-25): the 180px clock placeholder dominated
+              NOT_INTERVIEWED cards without adding information. Replace
+              with a compact single-line indicator; ~160px shorter. */
+          <div className="mb-3 py-1.5 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3.5 w-3.5" />
+            <span>
+              {hasSession ? 'Results pending — open card for details' : 'Awaiting interview'}
+            </span>
           </div>
         )}
 
