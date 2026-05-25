@@ -40,7 +40,19 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
     error: candidate.email_error ?? null,
   });
   const { toast } = useToast();
-  const hasSession = candidate.session_id && candidate.session_status === "completed";
+  // D4 (2026-05-25): multi-attempt candidates carry session ids only inside
+  // attempts[]; the top-level `session_id` field is empty. The old check
+  // `candidate.session_id && session_status === "completed"` reported
+  // hasSession=false for any retried candidate, which made the card show
+  // "Awaiting interview" + a disabled Details button despite a real
+  // score and badge. Mirror the R1 derivation already used in
+  // InterviewDetails.tsx:1817 (canViewResults).
+  const attempts = candidate.attempts ?? [];
+  const latestSessionId =
+    candidate.session_id ||
+    (attempts.length > 0 ? attempts[attempts.length - 1].session_id : null);
+  const hasSession =
+    candidate.session_status === "completed" && Boolean(latestSessionId);
   const hasScore = candidate.score !== null && candidate.score !== undefined;
 
   const handleResend = async (e: React.MouseEvent) => {
