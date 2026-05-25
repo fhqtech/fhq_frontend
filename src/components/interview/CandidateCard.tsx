@@ -325,18 +325,24 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
         </div>
 
         {/* Status Badge - Full Width Card.
-            R1 (2026-05-25): three-state logic.
-              A. session_status !== "completed" → "NOT INTERVIEWED" (grey)
-              B. completed + blueprint.hireability_recommendation → coloured banner
-              C. completed but no recommendation → "RESULTS PENDING" (amber)
-            Previously the badge read only blueprint.hireability_recommendation,
-            so any completed session without a reviewer-produced recommendation
-            displayed "NOT INTERVIEWED" — visibly wrong for candidates with
-            scores like 77/0/66. */}
+            R4 (2026-05-25): badge derived from the reviewer's actual
+            output shape. Backend reviewers can emit recommendation in
+            one of three places — v1 LangGraph synthesises
+            `blueprint.hireability_recommendation`, v2 supervisor saves
+            it at the top level of interview_results as `recommendation`,
+            and legacy strings sometimes leak through as literal
+            "Pending" or empty. We probe each location, then map the
+            real values (STRONG_HIRE / ADVANCE_WITH_CONCERNS / BORDERLINE /
+            REJECT / INCOMPLETE_INTERVIEW / REVIEW_ERROR + legacy
+            "Strongly Recommend" et al.) to coloured banners.
+
+            Fallback when no recommendation is found but a real score
+            exists: derive a banner from the score (≥80 STRONG,
+            60-79 BORDERLINE, <60 NEEDS REVIEW). Only show "RESULTS
+            PENDING" when reviewer hasn't run yet (score is null). */}
         <div className="mb-4">
           {(() => {
             const isCompletedSession = candidate.session_status === "completed";
-            const rec = blueprint?.hireability_recommendation as string | undefined;
             if (!isCompletedSession) {
               return (
                 <div className="w-full px-4 py-3 text-center font-bold text-[11px] bg-muted/50 text-muted-foreground border border-border shadow-2">
@@ -344,21 +350,78 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
                 </div>
               );
             }
-            if (rec) {
-              const colorClass =
-                rec === "Strongly Recommend" || rec === "Strong Recommend" || rec === "Recommend"
-                  ? "bg-success/10 text-success border border-rule/30"
-                  : rec === "Recommend with Reservations"
-                    ? "bg-warning/10 text-warning border border-rule/30"
-                    : rec === "Do Not Recommend"
-                      ? "bg-danger/10 text-danger border border-rule/30"
-                      : "bg-muted/50 text-muted-foreground border border-border";
+            // Recommendation can live in any of these spots depending on
+            // which reviewer engine produced the doc. Filter out the
+            // legacy "Pending" placeholder which means "no real value".
+            const latestAttempt =
+              candidate.attempts && candidate.attempts.length > 0
+                ? candidate.attempts[candidate.attempts.length - 1]
+                : null;
+            const rawRec = (
+              blueprint?.hireability_recommendation ||
+              candidate.recommendation ||
+              latestAttempt?.recommendation ||
+              latestAttempt?.results_status ||
+              ""
+            ) as string;
+            const rec = rawRec && rawRec.toLowerCase() !== "pending" ? rawRec : "";
+
+            // Map both v2 enum values and v1 string values to color buckets.
+            const recUpper = rec.toUpperCase();
+            const bandFromRec = (() => {
+              if (!rec) return null;
+              if (
+                recUpper === "STRONG_HIRE" ||
+                recUpper === "STRONGLY RECOMMEND" ||
+                recUpper === "STRONG RECOMMEND" ||
+                recUpper === "RECOMMEND"
+              ) return { label: "STRONG HIRE", color: "bg-success/10 text-success border border-rule/30" };
+              if (
+                recUpper === "ADVANCE_WITH_CONCERNS" ||
+                recUpper === "RECOMMEND WITH RESERVATIONS"
+              ) return { label: "ADVANCE WITH CONCERNS", color: "bg-warning/10 text-warning border border-rule/30" };
+              if (recUpper === "BORDERLINE") {
+                return { label: "BORDERLINE", color: "bg-warning/10 text-warning border border-rule/30" };
+              }
+              if (recUpper === "REJECT" || recUpper === "DO NOT RECOMMEND") {
+                return { label: "DO NOT RECOMMEND", color: "bg-danger/10 text-danger border border-rule/30" };
+              }
+              if (recUpper === "INCOMPLETE_INTERVIEW") {
+                return { label: "INCOMPLETE", color: "bg-muted/50 text-muted-foreground border border-border" };
+              }
+              if (recUpper === "REVIEW_ERROR") {
+                return { label: "REVIEW ERROR — RETRY", color: "bg-danger/10 text-danger border border-rule/30" };
+              }
+              return { label: recUpper, color: "bg-muted/50 text-muted-foreground border border-border" };
+            })();
+
+            if (bandFromRec) {
               return (
-                <div className={`w-full px-4 py-3 text-center font-bold text-[11px] shadow-2 ${colorClass}`}>
-                  {rec.toUpperCase()}
+                <div className={`w-full px-4 py-3 text-center font-bold text-[11px] shadow-2 ${bandFromRec.color}`}>
+                  {bandFromRec.label}
                 </div>
               );
             }
+
+            // No recommendation, but we have a score → derive a band from the
+            // score so the recruiter sees a categorical hint instead of an
+            // ambiguous "RESULTS PENDING" alongside a real number.
+            const score = candidate.score;
+            if (typeof score === "number" && score > 0) {
+              const band =
+                score >= 80
+                  ? { label: "STRONG HIRE", color: "bg-success/10 text-success border border-rule/30" }
+                  : score >= 60
+                    ? { label: "BORDERLINE", color: "bg-warning/10 text-warning border border-rule/30" }
+                    : { label: "NEEDS REVIEW", color: "bg-danger/10 text-danger border border-rule/30" };
+              return (
+                <div className={`w-full px-4 py-3 text-center font-bold text-[11px] shadow-2 ${band.color}`}>
+                  {band.label}
+                </div>
+              );
+            }
+
+            // Truly no result (reviewer hasn't run yet OR session ended at 0 substantive turns).
             return (
               <div className="w-full px-4 py-3 text-center font-bold text-[11px] bg-amber-50 text-amber-900 border border-amber-200 shadow-2">
                 RESULTS PENDING
