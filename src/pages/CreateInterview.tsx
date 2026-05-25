@@ -196,6 +196,15 @@ export default function CreateInterview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
+  // Phase A.4: out-of-scope rejection modal state. Set when the backend's
+  // admission gate (services/domain_fit/) classifies the candidate's
+  // resume as non-finance. Renders a clear modal explaining the scope.
+  const [outOfScopeDetail, setOutOfScopeDetail] = useState<{
+    message: string;
+    nonFinanceSignals: string[];
+    financeSignals: string[];
+  } | null>(null);
+
   // AI suggestion state — populated by debounced fetch on title typing.
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [lastSuggestedTitle, setLastSuggestedTitle] = useState<string>('');
@@ -1884,18 +1893,36 @@ export default function CreateInterview() {
         }, 2000); // Wait 2 seconds to let user see the success message
     } catch (error) {
       console.error(`Failed to ${isEditMode ? 'update' : 'create'} interview:`, error);
-      
+
+      // Phase A.4: detect the admission-gate rejection (HTTP 400 with
+      // structured detail). Render a dedicated modal instead of a
+      // generic destructive toast — the recruiter needs to understand
+      // it's a scope issue, not a transient failure to retry.
+      const errAny = error as Error & {
+        code?: string;
+        detail?: { non_finance_signals?: string[]; finance_signals?: string[]; message?: string };
+      };
+      if (errAny?.code === 'out_of_scope') {
+        setProgressModalOpen(false);
+        setOutOfScopeDetail({
+          message: errAny.detail?.message || errAny.message || 'This platform is for India finance hiring only.',
+          nonFinanceSignals: errAny.detail?.non_finance_signals || [],
+          financeSignals: errAny.detail?.finance_signals || [],
+        });
+        return; // skip the generic toast; the modal will surface the explanation
+      }
+
       // Update current step to show error
       if (progressSteps.length > 0) {
         const currentStep = progressSteps.find(step => step.status === 'active');
         if (currentStep) {
           updateProgressStep(currentStep.id, 'error', `Error: ${error.message || 'Something went wrong'}`);
         }
-        
+
         // Show error state briefly before closing
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
-      
+
       setProgressModalOpen(false);
       toast({
         title: `Failed to ${isEditMode ? 'Update' : 'Create'} Interview`,
@@ -3842,6 +3869,62 @@ export default function CreateInterview() {
           setPreviewTrigger((n) => n + 1);
         }}
       />
+
+      {/* Phase A.4 — Out-of-scope rejection modal. Surfaces when the
+         backend admission gate (services/domain_fit/) classifies the
+         candidate's resume as non-finance. */}
+      <Dialog
+        open={outOfScopeDetail !== null}
+        onOpenChange={(open) => { if (!open) setOutOfScopeDetail(null); }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>This candidate's profile is outside our scope</DialogTitle>
+            <DialogDescription>
+              {outOfScopeDetail?.message ||
+                'FunnelHQ supports India finance hiring only — accounting, taxation, and management consulting.'}
+            </DialogDescription>
+          </DialogHeader>
+          {outOfScopeDetail && outOfScopeDetail.nonFinanceSignals.length > 0 && (
+            <div className="border-t pt-3">
+              <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-muted-foreground mb-2">
+                Signals we read as non-finance
+              </div>
+              <ul className="text-sm space-y-1">
+                {outOfScopeDetail.nonFinanceSignals.map((s) => (
+                  <li key={s} className="font-mono text-foreground">{s}</li>
+                ))}
+              </ul>
+              {outOfScopeDetail.financeSignals.length > 0 && (
+                <>
+                  <div className="font-mono uppercase tracking-[0.18em] text-[11px] text-muted-foreground mt-3 mb-2">
+                    Finance signals also present
+                  </div>
+                  <ul className="text-sm space-y-1">
+                    {outOfScopeDetail.financeSignals.slice(0, 5).map((s) => (
+                      <li key={s} className="font-mono text-muted-foreground">{s}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          )}
+          <div className="text-sm text-muted-foreground">
+            If this is a mistake — say the resume was misclassified or the candidate
+            has finance experience our keywords missed — open the candidate record
+            and update the resume, then create the interview again.
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setOutOfScopeDetail(null)}
+              className="w-full"
+              style={{ backgroundColor: 'hsl(var(--ink))' }}
+            >
+              Got it
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
