@@ -355,7 +355,11 @@ export function ParticleSphere({ conversationState, audioLevel = 0, className = 
           powerPreference: 'high-performance'
         }}
       >
-        <color attach="background" args={['#000000']} />
+        {/* R11.2a: was '#000000'. Read --ink at runtime via computed style so
+            the Three.js scene matches the design-system ink token rather than
+            hard-coding pure black. Fallback to a near-black if the var is
+            missing (SSR / very old browser). */}
+        <color attach="background" args={[(typeof window !== 'undefined' && getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()) || '#0a0a0a']} />
         <ParticleSphereInner count={12000} radius={2.2} mode={mode} audioLevel={audioLevel} />
       </Canvas>
     </div>

@@ -53,7 +53,7 @@ export function DeleteConfirmationModal({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2 text-danger">
               <Warning className="w-5 h-5" weight="fill" />
-              <span>Delete Interview</span>
+              <span>Delete interview</span>
             </CardTitle>
             <button
               onClick={handleClose}
@@ -100,7 +100,7 @@ export function DeleteConfirmationModal({
                   <span>Deleting...</span>
                 </div>
               ) : (
-                'Delete Interview'
+                'Delete interview'
               )}
             </Button>
           </div>

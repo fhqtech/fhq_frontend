@@ -82,7 +82,12 @@ export const InterviewThankYou = ({
     });
   };
 
-  const firstName = candidateData.name.split(' ')[0];
+  // R11.2g: fall back to full name when the first token is too short
+  // (e.g. "M. Sharma" → first split = "M.", awkward greeting).
+  const firstName = (() => {
+    const head = (candidateData.name || "").split(" ")[0] || "";
+    return head.replace(/\.$/, "").length >= 2 ? head : (candidateData.name || "").trim();
+  })();
 
   // Format interview type for display
   const getInterviewTypeLabel = (type: string) => {
@@ -152,7 +157,7 @@ export const InterviewThankYou = ({
                   </div>
                   <div className="flex-1">
                     <h1 className="text-2xl font-bold text-[hsl(var(--ink))] mb-1">
-                      Great job, {firstName}!
+                      Interview complete, {firstName}.
                     </h1>
                     <p className="text-muted text-sm mb-3">
                       Your interview has been successfully completed
