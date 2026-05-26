@@ -709,8 +709,11 @@ export default function InterviewSessionV2Page() {
         {/* T1b — mic silent warning. Fires after 5s of sub-threshold
             mic level while the candidate is expected to be speaking. */}
         {micSilent && (
-          <div className="max-w-sm rounded border border-red-500/50 bg-red-950/40 backdrop-blur px-4 py-3 text-xs text-red-200 flex items-start gap-2">
-            <MicOff className="w-4 h-4 shrink-0 mt-0.5" />
+          // R11.3e: role="alert" so screen readers announce the mic-silent
+          // warning when it appears. Previously a plain <div> was invisible
+          // to assistive tech.
+          <div role="alert" aria-live="assertive" className="max-w-sm rounded border border-red-500/50 bg-red-950/40 backdrop-blur px-4 py-3 text-xs text-red-200 flex items-start gap-2">
+            <MicOff className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
             <div>
               <p className="font-medium text-red-100 mb-1">We're not hearing you</p>
               <p>
@@ -836,12 +839,19 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* G — Inactivity ring positioned beneath the avatar/state caption */}
+      {/* G — Inactivity ring positioned beneath the avatar/state caption.
+          R11.3e: role="timer" + aria-live polite + sr-only text countdown
+          so screen readers announce the inactivity warning. */}
       {showInactivityWarning && !ended && !agentSpeaking && (
-        <div className="absolute left-1/2 -translate-x-1/2 z-20 top-[50%]">
+        <div
+          role="timer"
+          aria-live="polite"
+          aria-label={`Inactivity countdown: ${Math.max(0, inactivitySecondsLeft)} seconds remaining. Press "I'm here" to dismiss.`}
+          className="absolute left-1/2 -translate-x-1/2 z-20 top-[50%]"
+        >
           <div className="flex flex-col items-center gap-3 bg-ink/90 border border-amber-500/40 rounded-lg px-5 py-3 shadow-2 backdrop-blur">
             <div className="relative w-14 h-14">
-              <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90">
+              <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90" aria-hidden>
                 <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
                 <circle
                   cx="28"
@@ -857,7 +867,7 @@ export default function InterviewSessionV2Page() {
                   className="transition-all duration-1000"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-paper font-mono tabular-nums">
+              <span aria-hidden className="absolute inset-0 flex items-center justify-center text-xs font-medium text-paper font-mono tabular-nums">
                 {Math.max(0, inactivitySecondsLeft)}
               </span>
             </div>
