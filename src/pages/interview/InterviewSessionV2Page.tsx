@@ -146,11 +146,20 @@ export default function InterviewSessionV2Page() {
   // sent — the gateway sees silence and the idle watchdog applies normally.
   const [micMuted, setMicMuted] = useState(false);
   const [ended, setEnded] = useState(false);
+  // R11.1f: capture the end reason so the overlay can explain *why* the
+  // interview ended. Backend sends e.g. "recruiter_stop", "force_wrap",
+  // "idle_120s", "stt_dead: ...". UI maps the common ones to candidate-
+  // friendly copy.
+  const [endReason, setEndReason] = useState<string | null>(null);
   // C2: reconnect status, surfaced as an overlay banner.
   const [reconnecting, setReconnecting] = useState<{ attempt: number; nextMs: number } | null>(null);
   // D — elapsed time (started at first agent_turn_start).
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const elapsedStartRef = useRef<number | null>(null);
+  // R11.1e: 25-minute stale-session pre-warning. The session is hard-cleared
+  // after STALE_SESSION_TTL_MS (30 min) on refresh; warn the candidate at
+  // 25 min so they have a 5-minute window to wrap up or actively interact.
+  const [showStaleWarning, setShowStaleWarning] = useState(false);
   // D — WS connection status, decoupled from voiceState.
   // 'idle' before first connect, 'connecting' during handshake, 'connected'
   // after onOpen, 'error' on close/error.
@@ -288,6 +297,29 @@ export default function InterviewSessionV2Page() {
     voiceState,
   ]);
 
+  // R11.1e: 25-minute stale-session pre-warning. STALE_SESSION_TTL_MS=30min
+  // hard-clears the session on refresh; warn at 25min so the candidate has
+  // a 5-minute window to wrap up before a refresh would lose state. Reads
+  // SS_KEY_STARTED_AT (set in startInterview at line 461) and polls every
+  // 30s to flip the warning state. No-op once warned or ended.
+  useEffect(() => {
+    if (ended || showStaleWarning) return;
+    if (typeof window === "undefined") return;
+    const tick = () => {
+      const startedAtStr = sessionStorage.getItem(SS_KEY_STARTED_AT);
+      if (!startedAtStr) return;
+      const startedAt = Number(startedAtStr);
+      if (Number.isNaN(startedAt)) return;
+      const elapsedMs = Date.now() - startedAt;
+      if (elapsedMs >= STALE_SESSION_TTL_MS - 5 * 60 * 1000) {
+        setShowStaleWarning(true);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 30_000);
+    return () => clearInterval(id);
+  }, [ended, showStaleWarning]);
+
   // T1b — poll the captured mic level every 100ms while mic is active.
   // When peak amplitude stays below 0.02 for 5+ continuous seconds AND
   // the mic should be live (agent isn't speaking), flip the silent
@@ -416,6 +448,7 @@ export default function InterviewSessionV2Page() {
         onInterviewEnded: (reason) => {
           intentionalCloseRef.current = true;
           setEnded(true);
+          setEndReason(reason ?? null);
           setVoiceState("ENDED");
           captureRef.current?.stop();
           captureRef.current = null;
@@ -727,10 +760,78 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
+      {/* R11.1e: stale-session pre-warning at 25 min. Sits below the top bar,
+          unobtrusive amber strip. The session itself keeps running — this is
+          just a heads-up that refreshing would lose state past 30 min. */}
+      {showStaleWarning && !ended && !connectionError && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 max-w-md w-[92%]">
+          <div className="rounded border border-amber-500/40 bg-amber-950/40 backdrop-blur px-3 py-2 text-xs text-amber-100 flex items-start gap-2">
+            <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5" />
+            <span>
+              Your interview is approaching the 30-minute mark. Keep talking
+              to stay active — refreshing now could end the session.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* R11.1d: lost-connection recovery panel. Replaces the prior thin
+          red banner ("Reload the page to try again — backend still has
+          your session for a few minutes") which left candidates without
+          clear actions. Now: explicit Try-again + End-interview buttons,
+          plus reassurance that progress is saved. */}
       {connectionError && !reconnecting && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 max-w-md">
-          <div className="rounded border border-red-500/50 bg-red-950/40 p-3 text-sm text-red-200">
-            {connectionError}
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 max-w-md w-[92%]">
+          <div className="rounded-md border border-paper/15 bg-ink/90 backdrop-blur p-5 text-sm text-paper shadow-2xl">
+            <h3 className="text-base font-semibold mb-2">
+              We couldn't reconnect
+            </h3>
+            <p className="text-paper/80 mb-1">
+              Your progress so far is saved.
+            </p>
+            <p className="text-paper/60 text-xs mb-4">
+              You can resume this interview within the next 5 minutes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="gold"
+                className="flex-1"
+                onClick={() => {
+                  setConnectionError(null);
+                  reconnectAttemptsRef.current = 0;
+                  const next = openWs();
+                  if (next) {
+                    clientRef.current = next;
+                    next.connect();
+                  }
+                }}
+              >
+                Try again
+              </Button>
+              <Button
+                variant="ghost"
+                className="flex-1 text-muted-2 hover:text-paper"
+                onClick={() => {
+                  intentionalCloseRef.current = true;
+                  if (reconnectTimerRef.current) {
+                    clearTimeout(reconnectTimerRef.current);
+                    reconnectTimerRef.current = null;
+                  }
+                  captureRef.current?.stop();
+                  captureRef.current = null;
+                  clientRef.current?.close();
+                  try {
+                    sessionStorage.removeItem(SS_KEY_SESSION);
+                    sessionStorage.removeItem(SS_KEY_TOKEN);
+                    sessionStorage.removeItem(SS_KEY_INTERVIEW);
+                    sessionStorage.removeItem(SS_KEY_STARTED_AT);
+                  } catch { /* noop */ }
+                  navigate(`/interview/${interviewId}/complete`);
+                }}
+              >
+                End interview
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -927,20 +1028,45 @@ export default function InterviewSessionV2Page() {
         )}
       </div>
 
-      {/* Ended state — full overlay */}
-      {ended && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center p-6 bg-ink/95 backdrop-blur-sm">
-          <div className="max-w-md text-center space-y-4">
-            <h2 className="text-2xl font-bold text-paper">Thanks for taking the time</h2>
-            <p className="text-sm text-muted-2">
-              Interview ended. Your recruiter will be in touch about specific opportunities.
-            </p>
-            <Button onClick={() => navigate(`/interview/${interviewId}/complete`)}>
-              Continue
-            </Button>
+      {/* Ended state — full overlay.
+          R11.1f: reason-aware copy. If the recruiter stopped the interview
+          remotely (reason starts with "recruiter_") or the system force-wrapped
+          due to idle/silence, the candidate sees a context-appropriate message
+          instead of the generic "thanks for taking the time" copy. */}
+      {ended && (() => {
+        const reason = (endReason || "").toLowerCase();
+        const stoppedByRecruiter =
+          reason.startsWith("recruiter_") || reason.includes("recruiter_stop");
+        const timedOut =
+          reason.includes("idle_") ||
+          reason.includes("silent_") ||
+          reason.includes("hold_timeout") ||
+          reason === "force_wrap";
+
+        const heading = stoppedByRecruiter
+          ? "Interview ended by the hiring team"
+          : timedOut
+          ? "Interview timed out"
+          : "Thanks for taking the time";
+
+        const description = stoppedByRecruiter
+          ? "Your responses up to this point have been saved. The hiring team will reach out with next steps."
+          : timedOut
+          ? "We ended the session due to inactivity. Your responses so far are saved — the hiring team will be in touch."
+          : "Interview ended. Your recruiter will be in touch about specific opportunities.";
+
+        return (
+          <div className="absolute inset-0 z-30 flex items-center justify-center p-6 bg-ink/95 backdrop-blur-sm">
+            <div className="max-w-md text-center space-y-4">
+              <h2 className="text-2xl font-bold text-paper">{heading}</h2>
+              <p className="text-sm text-muted-2">{description}</p>
+              <Button onClick={() => navigate(`/interview/${interviewId}/complete`)}>
+                Continue
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
