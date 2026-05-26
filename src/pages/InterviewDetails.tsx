@@ -51,6 +51,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Shimmer, ShimmerCard, ShimmerTable, ShimmerInterviewConfig } from "@/components/ui/shimmer";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ArrowsOut, CircleNotch, ClockCounterClockwise, ArrowsClockwise } from "phosphor-react";
 import { pauseInterview, stopInterview, resumeInterview } from "@/services/interviewControlService";
 import { listsApi } from "@/services/listsApi";
@@ -428,7 +430,17 @@ export default function InterviewDetails() {
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [candidatesRaw, currentPage, pageSize]);
  const totalCandidates = candidatesQuery.data?.totalCandidates ?? 0;
- const loadingCandidates = candidatesQuery.isPending && Boolean(interview && interview.status !== 'draft');
+ // R10.2: TanStack Query's `isPending` is true whenever the query has
+ // no `data` yet — including the window between enabling a previously-
+ // disabled query and its first response landing. Without the `!data`
+ // guard, hard-refreshing on a non-draft interview shows skeleton bars
+ // alongside the already-correct "0 applicants" header (which reads
+ // from data.totalCandidates). Hide skeleton the moment data exists.
+ const loadingCandidates = (
+ candidatesQuery.isPending
+ && !candidatesQuery.data
+ && Boolean(interview && interview.status !== 'draft')
+ );
 
  // Auto-expand rows that have multiple attempts (mirrors the old behavior).
  useEffect(() => {
@@ -1271,7 +1283,7 @@ export default function InterviewDetails() {
  </div>
  {isFresh && (
  <p className="text-[10px] text-muted font-mono px-1">
- Preview locked in. Building proficiency anchors and rubric (~30s).
+ We're tailoring the interview questions to your role description (~30s).
  </p>
  )}
  </div>
@@ -1411,12 +1423,46 @@ export default function InterviewDetails() {
  {/* Interview Control Buttons */}
  {!loadingInterview && interview && (
  <div className="flex gap-2">
- {interview.status === 'draft' && (
- <Button onClick={handleStartInterview} variant="gold" className="rounded-sm text-sm h-9 px-4">
+ {interview.status === 'draft' && (() => {
+ // R10.1: don't let the recruiter click Start while the blueprint
+ // is still generating or has failed. The backend rejects either
+ // way (checkBlueprintExists in handleStartInterview), but a
+ // clickable gold CTA wired to a failure path is confusing UX.
+ const blueprintBusy = blueprintStatus === 'generating';
+ const blueprintBroken = blueprintStatus === 'failed';
+ const cantStart = blueprintBusy || blueprintBroken;
+ const hint =
+ blueprintBusy
+ ? 'Blueprint is still generating. The button unlocks once it’s ready.'
+ : blueprintBroken
+ ? 'Blueprint generation failed. Retry it from the status chip above.'
+ : null;
+
+ const btn = (
+ <Button
+ onClick={handleStartInterview}
+ variant="gold"
+ className="rounded-sm text-sm h-9 px-4"
+ disabled={cantStart}
+ >
  <Play className="w-4 h-4 mr-1.5" />
  Start interview
  </Button>
- )}
+ );
+
+ if (!hint) return btn;
+ return (
+ <TooltipProvider>
+ <Tooltip>
+ <TooltipTrigger asChild>
+ {/* wrapper span so the tooltip works on a disabled button */}
+ <span tabIndex={0} className="inline-flex">{btn}</span>
+ </TooltipTrigger>
+ <TooltipContent side="bottom">{hint}</TooltipContent>
+ </Tooltip>
+ </TooltipProvider>
+ );
+ })()}
  {interview.status === 'active' && (
  <>
  <Button onClick={handlePauseInterview} variant="outline" disabled={isUpdatingStatus} className="rounded-sm text-xs h-7 px-3">
@@ -1765,6 +1811,20 @@ export default function InterviewDetails() {
  <CardContent>
  {loadingCandidates ? (
  <ShimmerTable />
+ ) : paginatedCandidates.length === 0 ? (
+ // R10.2: clear empty state once the query has resolved with zero
+ // results. Without this branch the table rendered a bare grid which,
+ // combined with the still-pending skeleton on cold Cloud Run starts,
+ // looked broken to recruiters.
+ <EmptyState
+ icon={Users}
+ title="No applicants yet"
+ description={
+ interview.status === 'completed' || interview.status === 'stopped'
+ ? "This interview ended without any applicants completing it."
+ : "Share the interview link or add candidates to get started."
+ }
+ />
  ) : (
  <>
  {/* Re-invite stuck candidates */}
