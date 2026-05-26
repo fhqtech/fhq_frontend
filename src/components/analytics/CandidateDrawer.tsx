@@ -941,24 +941,9 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
                       </Card>
                     )}
 
-                    {/* Legacy Vibe from fullProfileData (remove after migration) */}
-                    {!psychData.assessment.vibeChoice && fullProfileData?.psychAssessment?.vibe && (
-                      <Card className="p-4">
-                        <h4 className="font-semibold mb-3">Vibe</h4>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="text-4xl">
-                            {fullProfileData.psychAssessment.vibe === 'Energetic' ? '⚡' :
-                             fullProfileData.psychAssessment.vibe === 'Calm' ? '🧘' :
-                             fullProfileData.psychAssessment.vibe === 'Focused' ? '🎯' :
-                             fullProfileData.psychAssessment.vibe === 'Creative' ? '🎨' : '✨'}
-                          </div>
-                          <div>
-                            <p className="text-lg font-medium">{fullProfileData.psychAssessment.vibe}</p>
-                            <p className="text-xs text-muted-foreground">Work vibe</p>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
+                    {/* R11.1a: legacy Vibe display removed — emoji icons +
+                        psych-quiz framing don't fit a finance hiring tool. Data
+                        still flows from older candidate records but isn't rendered. */}
                   </>
                 ) : (
                   <Card className="p-4">

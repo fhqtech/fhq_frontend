@@ -46,6 +46,7 @@ const CandidatePortal = lazy(() => import("./pages/CandidatePortal"));
 const InterviewPreCheckPage = lazy(() => import("./pages/interview/InterviewPreCheckPage"));
 const InterviewSessionV2Page = lazy(() => import("./pages/interview/InterviewSessionV2Page"));
 const InterviewThankYouPage = lazy(() => import("./pages/interview/InterviewThankYouPage"));
+const InterviewExpiredPage = lazy(() => import("./pages/interview/InterviewExpiredPage"));
 const InterviewResults = lazy(() => import("./pages/InterviewResults"));
 const DynamicBlueprintPage = lazy(() => import("./pages/DynamicBlueprintPage"));
 const EmailTemplatePreview = lazy(() => import("./pages/EmailTemplatePreview"));
@@ -108,6 +109,9 @@ const App = () => (
 
             {/* Candidate registration page (public, no auth required) */}
             <Route path="/register/:token" element={<CandidateRegistration />} />
+
+            {/* R11.1c: expired-invitation candidate-facing error page */}
+            <Route path="/interview/:token/expired" element={<InterviewExpiredPage />} />
 
             {/* Candidate portal page (public, no auth required) */}
             <Route path="/candidate-portal/:token" element={<CandidatePortal />} />

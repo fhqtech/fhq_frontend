@@ -656,8 +656,11 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* U1 — Avatar in upper-third (not dead-centre). State caption directly below. */}
-      <div className="absolute left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-5 top-[26%]">
+      {/* U1 — Avatar in upper-third (not dead-centre). State caption directly below.
+          R11.1b: tighter top offset on phones so the avatar + caption +
+          inactivity ring stack don't consume >60% of the small viewport,
+          leaving room for the mic + text input controls. */}
+      <div className="absolute left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-5 top-[12%] md:top-[26%]">
         <div className="scale-[0.66]">
           {/* AiInterviewer is 144px; scale to ~96px without re-engineering the component */}
           <AiInterviewer
@@ -805,9 +808,12 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* E — Text input fallback, sits just above the controls bar */}
+      {/* E — Text input fallback, sits just above the controls bar.
+          R11.1b: extra clearance on small viewports so when the on-screen
+          keyboard pops on mobile, the input doesn't collide with the mic
+          button at bottom-6. */}
       {micActive && !ended && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-10">
+        <div className="absolute bottom-32 md:bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-10">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -848,8 +854,10 @@ export default function InterviewSessionV2Page() {
         </div>
       )}
 
-      {/* U1 — Bottom controls: mic stays primary (gold), hold/end ghost flanking */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+      {/* U1 — Bottom controls: mic stays primary (gold), hold/end ghost flanking.
+          R11.1b: pb-[env(safe-area-inset-bottom)] keeps the controls clear of
+          the iOS home indicator. */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10 pb-[env(safe-area-inset-bottom)]">
         {!micActive ? (
           <Button onClick={startInterview} className="gap-2" size="lg" variant="gold">
             <Mic className="w-4 h-4" /> Start interview

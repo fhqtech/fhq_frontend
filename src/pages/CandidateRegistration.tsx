@@ -53,48 +53,12 @@ interface InvitationDetails {
   redirect_to_portal?: boolean;
 }
 
-const PSYCH_QUESTIONS = {
-  animal: {
-    question: "Which animal represents you best?",
-    subtitle: "Choose the one that resonates with your work style",
-    options: [
-      { value: "lion", emoji: "🦁", label: "Lion", trait: "Leader" },
-      { value: "eagle", emoji: "🦅", label: "Eagle", trait: "Visionary" },
-      { value: "dolphin", emoji: "🐬", label: "Dolphin", trait: "Team Player" },
-      { value: "owl", emoji: "🦉", label: "Owl", trait: "Analytical" }
-    ]
-  },
-  color: {
-    question: "Which color resonates with you?",
-    subtitle: "Pick the color that reflects your energy",
-    options: [
-      { value: "red", emoji: "🔴", label: "Red", trait: "Passionate" },
-      { value: "blue", emoji: "🔵", label: "Blue", trait: "Calm" },
-      { value: "green", emoji: "🟢", label: "Green", trait: "Balanced" },
-      { value: "yellow", emoji: "🟡", label: "Yellow", trait: "Optimistic" }
-    ]
-  },
-  environment: {
-    question: "Where do you thrive best?",
-    subtitle: "Your ideal working environment",
-    options: [
-      { value: "mountain", emoji: "🏔️", label: "Mountain", trait: "Challenge-seeker" },
-      { value: "ocean", emoji: "🌊", label: "Ocean", trait: "Go with flow" },
-      { value: "forest", emoji: "🌲", label: "Forest", trait: "Grounded" },
-      { value: "city", emoji: "🏙️", label: "City", trait: "Fast-paced" }
-    ]
-  },
-  symbol: {
-    question: "Which symbol speaks to you?",
-    subtitle: "Choose what drives you forward",
-    options: [
-      { value: "star", emoji: "⭐", label: "Star", trait: "Achiever" },
-      { value: "moon", emoji: "🌙", label: "Moon", trait: "Reflective" },
-      { value: "sun", emoji: "☀️", label: "Sun", trait: "Energizer" },
-      { value: "lightning", emoji: "⚡", label: "Lightning", trait: "Innovator" }
-    ]
-  }
-};
+// R11.1a: PSYCH_QUESTIONS removed. The constant defined a set of personality
+// quiz options ("Which animal represents you?") with emoji + superlative trait
+// labels. The form data structure still carries psychAssessment fields for
+// backend compatibility but no UI surface renders them — a finance hiring
+// platform shouldn't ask senior CAs / FP&A managers to pick between Lion and
+// Eagle. Per CLAUDE.md: no emoji in product UI, no filler superlatives.
 
 export default function CandidateRegistration() {
   const { token } = useParams<{ token: string }>();
@@ -247,8 +211,9 @@ export default function CandidateRegistration() {
         if (data.redirect_to_portal && data.existing_profile && token) {
           setRedirectingToPortal(true);
           toast({
-            title: "Welcome back! 👋",
-            description: `Hi ${data.invitation.name}, redirecting you to your portal...`
+            // R11.1a: drop the waving-hand emoji per CLAUDE.md "no emoji in product UI"
+            title: "Welcome back",
+            description: `Hi ${data.invitation.name}, redirecting you to your portal…`
           });
 
           // Redirect to candidate portal after a brief delay
@@ -257,6 +222,14 @@ export default function CandidateRegistration() {
           }, 2500);
         }
       } else {
+        // R11.1c: detect expired-token specifically and route to a dedicated
+        // page. Backend returns "Invitation token has expired" — string match
+        // is brittle but stable enough until we add a structured error code.
+        const errMsg = String(data.error || "");
+        if (errMsg.toLowerCase().includes("expire")) {
+          navigate(`/interview/${invitationToken}/expired`, { replace: true });
+          return;
+        }
         setError(data.error || "Invalid or expired invitation token");
       }
     } catch (err) {

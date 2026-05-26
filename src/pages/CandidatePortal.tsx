@@ -356,10 +356,17 @@ export default function CandidatePortal() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.missing_field) {
+        // R11.1a: suppress psychAssessment.* prompts in the candidate portal.
+        // The platform's audience is senior finance candidates; quiz-style
+        // emoji questions ("Which animal represents you?") don't fit the
+        // product surface. Backend still returns them for legacy candidates
+        // but the UI skips them as if profile is complete.
+        const field = data?.missing_field?.field as string | undefined;
+        const isPsychField = typeof field === "string" && field.startsWith("psychAssessment.");
+        if (data.success && data.missing_field && !isPsychField) {
           setMissingField(data.missing_field);
         } else {
-          setMissingField(null); // Profile is complete
+          setMissingField(null); // Profile is complete (or psych question — suppress)
         }
       }
     } catch (error) {
@@ -1518,41 +1525,10 @@ export default function CandidatePortal() {
                   </Button>
                 </div>
 
-                {/* Vibes Section - Enhanced with Color Display */}
-                {portalData.candidate.psychAssessment && (
-                  portalData.candidate.psychAssessment.animal ||
-                  portalData.candidate.psychAssessment.color ||
-                  portalData.candidate.psychAssessment.environment ||
-                  portalData.candidate.psychAssessment.symbol
-                ) && (
-                  <div className="flex items-center gap-3 mb-3 transition-all duration-500">
-                    <span className="text-xs text-muted-2 whitespace-nowrap">Vibes:</span>
-                    <div className="flex gap-4 items-center">
-                      {portalData.candidate.psychAssessment.animal && (
-                        <span className="text-2xl" title={portalData.candidate.psychAssessment.animal}>
-                          {animalEmojiMap[portalData.candidate.psychAssessment.animal] || '🦁'}
-                        </span>
-                      )}
-                      {portalData.candidate.psychAssessment.color && (
-                        <div
-                          className="w-8 h-8 rounded-full shadow-2 border-2 border-white transition-all duration-500 animate-in fade-in zoom-in"
-                          style={{ backgroundColor: colorMap[portalData.candidate.psychAssessment.color] || '#94a3b8' }}
-                          title={portalData.candidate.psychAssessment.color}
-                        />
-                      )}
-                      {portalData.candidate.psychAssessment.environment && (
-                        <span className="text-2xl" title={portalData.candidate.psychAssessment.environment}>
-                          {environmentEmojiMap[portalData.candidate.psychAssessment.environment] || '🌍'}
-                        </span>
-                      )}
-                      {portalData.candidate.psychAssessment.symbol && (
-                        <span className="text-2xl" title={portalData.candidate.psychAssessment.symbol}>
-                          {symbolEmojiMap[portalData.candidate.psychAssessment.symbol] || '⭐'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* R11.1a: Vibes section removed — psych-quiz emoji icons
+                    don't fit the finance hiring product surface. Legacy
+                    candidate records may still carry psychAssessment data but
+                    it's no longer rendered. */}
 
                 {/* Quick Contact Info */}
                 <div className="space-y-2 mb-4">
