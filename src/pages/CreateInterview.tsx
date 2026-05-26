@@ -1088,7 +1088,7 @@ export default function CreateInterview() {
     const isLastStep = stepper.currentStep === steps.length - 1;
     const proceedAction = isLastStep ? "submit" : "next";
     const proceedText = isLastStep
-      ? (isEditMode ? "Update Interview" : (selectedTemplate ? "Create & Start Interview" : "Create Interview"))
+      ? (isEditMode ? "Update interview" : (selectedTemplate ? "Create & start interview" : "Create interview"))
       : "Next";
 
     if (!hasSelectedLists) {
@@ -1172,7 +1172,7 @@ export default function CreateInterview() {
     setShowDuplicateModal(false);
     // If analysis ran successfully (even with duplicates), persist the
     // result so the wizard CTA flips from "Check for Duplicates" to
-    // "Create Interview" instead of staying stuck. Dismissing the modal
+    // "Create interview" instead of staying stuck. Dismissing the modal
     // is an explicit user choice; we treat the check as acknowledged.
     if (duplicateAnalysis) {
       setFormData((prev) => ({
@@ -2095,7 +2095,7 @@ export default function CreateInterview() {
       <div className="h-full flex flex-col items-center justify-center bg-background px-4">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-foreground mb-3">
-            Create Interview
+            Create interview
           </h1>
           <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
             Choose the type of interview you want to create
@@ -2141,7 +2141,7 @@ export default function CreateInterview() {
             </div>
           </button>
 
-          {/* Fitment Card */}
+          {/* Deep role fit Card (internal template_type = 'fitment') */}
           <button
             onClick={() => {
               setFormData(prev => ({ ...prev, type: 'fitment' }));
@@ -2171,7 +2171,7 @@ export default function CreateInterview() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-3">
-                Fitment
+                Deep role fit
               </h2>
               <p className="text-muted text-sm leading-relaxed">
                 In-depth role-specific evaluation with detailed analysis
@@ -2385,8 +2385,10 @@ export default function CreateInterview() {
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Title */}
                 <div className="lg:col-span-2">
-                  <Label htmlFor="title" className="uppercase text-xs tracking-wider flex items-center gap-2">
-                    Interview Title <span className="text-danger">*</span>
+                  {/* R11.2b: was ALL CAPS via `uppercase` class. Switched to
+                      sentence case per CLAUDE.md form-label rule. */}
+                  <Label htmlFor="title" className="text-sm flex items-center gap-2">
+                    Interview title <span className="text-danger">*</span>
                     <button
                       type="button"
                       onClick={() => setShowRoleCurator(true)}
@@ -2441,7 +2443,7 @@ export default function CreateInterview() {
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {[
                       { value: "screening", label: "Screening" },
-                      { value: "fitment", label: "Fitment" },
+                      { value: "fitment", label: "Deep role fit" },
                       { value: "skill_analysis", label: "Skill analysis" }
                     ].map((type) => {
                       const isSelected = formData.type === type.value;
@@ -2709,9 +2711,9 @@ export default function CreateInterview() {
 
                       if (isOnLastStep) {
                         if (isEditMode) {
-                          return "Update Interview";
+                          return "Update interview";
                         }
-                        return selectedTemplate ? "Create & Start Interview" : "Create Interview";
+                        return selectedTemplate ? "Create & start interview" : "Create interview";
                       }
                       return "Next";
                     })()}
@@ -3633,9 +3635,9 @@ export default function CreateInterview() {
 
                       if (isOnLastStep) {
                         if (isEditMode) {
-                          return "Update Interview";
+                          return "Update interview";
                         }
-                        return selectedTemplate ? "Create & Start Interview" : "Create Interview";
+                        return selectedTemplate ? "Create & start interview" : "Create interview";
                       }
                       return "Next";
                     })()}
@@ -3773,7 +3775,7 @@ export default function CreateInterview() {
                       <div className="bg-paper-2 rounded-lg p-4">
                         <img
                           src={blueprintGuideImg1}
-                          alt="Create Interview Blueprint"
+                          alt="Create interview blueprint"
                           className="w-full h-[420px] object-contain rounded-lg shadow-2"
                         />
                       </div>

@@ -107,7 +107,7 @@ export function SwipeQRSection({ interviewId }: SwipeQRSectionProps) {
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-paper-2 border border-rule">
               <Heart className="h-3.5 w-3.5 text-danger" />
-              <span className="text-xs text-ink-soft font-medium">Swipe interface</span>
+              <span className="text-xs text-ink-soft font-medium">Mobile review</span>
             </div>
           </div>
         </div>
@@ -142,7 +142,7 @@ export function SwipeQRSection({ interviewId }: SwipeQRSectionProps) {
               </div>
             </div>
             <p className="text-[10px] font-mono text-muted text-center mt-2">
-              {isRefreshing ? "Updating…" : "Scan to review"}
+              {isRefreshing ? "Updating…" : "Scan to review applicants on mobile"}
             </p>
 
             {/* OTP */}
@@ -169,11 +169,12 @@ export function SwipeQRSection({ interviewId }: SwipeQRSectionProps) {
         </div>
       </div>
 
-      {/* Pro tip */}
+      {/* R11.2h: dropped the "Pro tip:" prefix — patronizing register for a
+          finance hiring tool. State the fact directly. */}
       <div className="mt-5 pt-4 border-t border-rule">
         <p className="text-xs text-muted">
-          <span className="font-semibold text-ink-soft">Pro tip:</span>{" "}
-          Review applicants during commute, lunch breaks, or wherever you are.
+          Open this on your phone to review applicants anywhere — during a
+          commute, between meetings, or on the go.
         </p>
       </div>
     </Card>

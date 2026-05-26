@@ -58,7 +58,7 @@ export function NextBestActionCard({
         variant={nba.variant}
         onClick={handleClick}
         disabled={nba.pending}
-        className="rounded-sm uppercase font-bold shrink-0"
+        className="rounded-sm font-bold shrink-0"
         size="default"
       >
         {nba.pending ? (

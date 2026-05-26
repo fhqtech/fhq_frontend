@@ -165,7 +165,7 @@ export function StepperNavigation({
   isLoading = false,
   nextLabel = "Next",
   previousLabel = "Previous",
-  submitLabel = "Create Interview",
+  submitLabel = "Create interview",
   className
 }: StepperNavigationProps) {
   const isFirstStep = currentStep === 0;

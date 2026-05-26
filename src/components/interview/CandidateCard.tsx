@@ -672,8 +672,8 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
                 <Radar
                   name="Proficiency"
                   dataKey="value"
-                  stroke="#000000"
-                  fill="#000000"
+                  stroke="currentColor"
+                  fill="currentColor"
                   fillOpacity={0.3}
                   strokeWidth={2}
                 />

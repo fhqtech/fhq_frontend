@@ -538,7 +538,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
         </DialogContent>
       </Dialog>
 
-      {/* Create Project Dialog */}
+      {/* Create project dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-md rounded!">
           <DialogHeader>
@@ -585,7 +585,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ compact = fals
                     Creating...
                   </>
                 ) : (
-                  'Create Project'
+                  'Create project'
                 )}
               </Button>
             </div>

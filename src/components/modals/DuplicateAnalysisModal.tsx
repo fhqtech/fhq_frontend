@@ -25,26 +25,26 @@ interface AnalysisStage {
 const analysisStages: AnalysisStage[] = [
   {
     id: 'initializing',
-    title: 'Initializing Analysis',
-    description: 'Preparing to scan candidate lists...',
+    title: 'Initializing analysis',
+    description: 'Preparing to scan candidate lists…',
     duration: 500
   },
   {
     id: 'scanning',
-    title: 'Scanning Email Addresses',
-    description: 'Reading candidate data from selected lists...',
+    title: 'Scanning email addresses',
+    description: 'Reading candidate data from selected lists…',
     duration: 1500
   },
   {
     id: 'detecting',
-    title: 'Detecting Duplicates',
-    description: 'Analyzing email addresses for duplicates...',
+    title: 'Detecting duplicates',
+    description: 'Analyzing email addresses for duplicates…',
     duration: 1200
   },
   {
     id: 'generating',
-    title: 'Generating Report',
-    description: 'Compiling analysis results...',
+    title: 'Generating report',
+    description: 'Compiling analysis results…',
     duration: 300
   }
 ];
@@ -207,7 +207,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
           <div className="px-6 py-4 border-b border-rule">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-ink">
-                {step === 'analyzing' ? 'Analyzing Candidate Lists' : 'Duplicate Analysis Results'}
+                {step === 'analyzing' ? 'Analyzing candidate lists' : 'Duplicate analysis results'}
               </h2>
               {step === 'results' && (
                 <button
@@ -410,10 +410,16 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
 
                           <AnimatePresence>
                             {showDetails && (
+                              // R11.2d: was animating height: 0 → 'auto'.
+                              // CLAUDE.md bans width/height/top/left animation.
+                              // Now: fade + scaleY transform (GPU-friendly).
+                              // overflow-hidden on the container keeps the
+                              // pre-animation height contained.
                               <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
+                                initial={{ opacity: 0, scaleY: 0 }}
+                                animate={{ opacity: 1, scaleY: 1 }}
+                                exit={{ opacity: 0, scaleY: 0 }}
+                                style={{ transformOrigin: "top" }}
                                 className="mt-2 p-3 bg-paper-2 rounded-lg text-xs space-y-2 max-h-32 overflow-y-auto"
                               >
                                 {analysisResult.duplicateGroups.slice(0, 5).map((group, index) => (

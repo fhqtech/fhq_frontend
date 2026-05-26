@@ -73,7 +73,7 @@ export default function CandidateLogin() {
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-ink mb-2">
             Welcome back
           </h1>
-          <p className="text-sm text-muted">Sign in to take your assessment</p>
+          <p className="text-sm text-muted">Sign in to start your interview</p>
         </div>
 
         {/* Sign-in card */}
