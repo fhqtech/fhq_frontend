@@ -26,6 +26,17 @@ export interface PreviewRequest {
   notes?: string;
 }
 
+/** R8.2: structured error from a domain-gate rejection.
+ *  Surfaced when the backend's title classifier returns verdict='other'
+ *  and the route raises HTTPException(400, detail={code, message}). */
+export class PreviewOutOfScopeError extends Error {
+  code = "out_of_scope";
+  constructor(message: string) {
+    super(message);
+    this.name = "PreviewOutOfScopeError";
+  }
+}
+
 export async function previewBlueprint(
   body: PreviewRequest,
   signal?: AbortSignal,
@@ -41,6 +52,24 @@ export async function previewBlueprint(
     signal,
   });
   if (!response.ok) {
+    // R8.2: detect the finance-only domain rejection. The 400 carries
+    // { detail: { code: "out_of_scope", message: "..." } } — surface the
+    // message to the rail's error UI so the recruiter sees actionable
+    // copy instead of "Couldn't generate preview."
+    if (response.status === 400) {
+      try {
+        const body = await response.json();
+        const detail = body?.detail;
+        if (detail && typeof detail === "object" && detail.code === "out_of_scope") {
+          throw new PreviewOutOfScopeError(
+            detail.message || "This platform supports finance roles only.",
+          );
+        }
+      } catch (e) {
+        if (e instanceof PreviewOutOfScopeError) throw e;
+        // fall through to the generic error
+      }
+    }
     throw new Error(`preview-blueprint failed: ${response.status}`);
   }
   return response.json();

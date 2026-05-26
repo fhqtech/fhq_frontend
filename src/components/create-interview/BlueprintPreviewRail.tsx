@@ -13,7 +13,11 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, RefreshCw, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { previewBlueprint, type BlueprintPreview } from "@/services/blueprintPreviewApi";
+import {
+  previewBlueprint,
+  PreviewOutOfScopeError,
+  type BlueprintPreview,
+} from "@/services/blueprintPreviewApi";
 import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromPreview } from "@/components/tag/adapters";
 import { PreviewBlueprintModal } from "@/components/create-interview/PreviewBlueprintModal";
@@ -108,7 +112,13 @@ export function BlueprintPreviewRail({
         }
       } catch (err: any) {
         if (err?.name !== "AbortError") {
-          setError("Couldn't generate preview. Click Refresh to try again.");
+          // R8.2: surface the finance-only rejection copy verbatim
+          // instead of the generic "couldn't generate" message.
+          if (err instanceof PreviewOutOfScopeError) {
+            setError(err.message);
+          } else {
+            setError("Couldn't generate preview. Click refresh to try again.");
+          }
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -151,7 +161,11 @@ export function BlueprintPreviewRail({
       }
     } catch (err: any) {
       if (err?.name !== "AbortError") {
-        setError("Couldn't generate preview. Click Refresh to try again.");
+        if (err instanceof PreviewOutOfScopeError) {
+          setError(err.message);
+        } else {
+          setError("Couldn't generate preview. Click refresh to try again.");
+        }
       }
     } finally {
       if (!controller.signal.aborted) setLoading(false);

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { previewBlueprint } from "./blueprintPreviewApi";
+import { previewBlueprint, PreviewOutOfScopeError } from "./blueprintPreviewApi";
 
 const ORIGINAL_FETCH = globalThis.fetch;
 
@@ -43,5 +43,39 @@ describe("previewBlueprint", () => {
       .fn()
       .mockResolvedValue(new Response("err", { status: 500 })) as any;
     await expect(previewBlueprint({ title: "X" })).rejects.toThrow(/500/);
+  });
+
+  it("throws PreviewOutOfScopeError on 400 with code='out_of_scope'", async () => {
+    const detail = {
+      code: "out_of_scope",
+      message:
+        "This platform supports finance roles only (Accounting, Taxation, Management Consulting). Generic intern role with no finance signal.",
+    };
+    // mockResolvedValue (not Once) so the response is reusable across calls;
+    // each fetch() returns a fresh Response built from the same JSON.
+    globalThis.fetch = vi.fn(
+      () =>
+        Promise.resolve(
+          new Response(JSON.stringify({ detail }), {
+            status: 400,
+            headers: { "content-type": "application/json" },
+          }),
+        ),
+    ) as any;
+
+    await expect(previewBlueprint({ title: "Interns 2026" })).rejects.toBeInstanceOf(
+      PreviewOutOfScopeError,
+    );
+    await expect(previewBlueprint({ title: "Interns 2026" })).rejects.toThrow(/finance/i);
+  });
+
+  it("falls back to generic 400 error when detail.code is absent", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ detail: "validation error" }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      }),
+    ) as any;
+    await expect(previewBlueprint({ title: "X" })).rejects.toThrow(/400/);
   });
 });
