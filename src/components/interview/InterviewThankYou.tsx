@@ -2,29 +2,62 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
-// Lottie Animation Component for success checkmark
+// R11.3d: replaced external Lottie CDN dependency (unpkg + lottie.host) with
+// a self-contained SVG + CSS animation. The original load could fail
+// silently on flaky connections / CDN outages, leaving a blank 120×120 box.
+// Now the checkmark is shipped with the bundle (~1KB) and animates with
+// stroke-dashoffset which is GPU-friendly and respects the
+// "transform + opacity only" motion rule.
 function LottieSuccessAnimation() {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js';
-    script.type = 'module';
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
-
   return (
-    <div style={{ width: '120px', height: '120px' }}>
-      <dotlottie-wc
-        src="https://lottie.host/db5b5b60-3c23-4be9-b4d0-14cf5f7aec52/BSWIQQvqZx.lottie"
-        style={{ width: '120px', height: '120px' } as any}
-        autoplay="true"
-        loop="false"
-      />
+    <div
+      style={{ width: '120px', height: '120px' }}
+      className="flex items-center justify-center"
+      aria-label="Interview complete"
+      role="img"
+    >
+      <svg
+        viewBox="0 0 120 120"
+        width="120"
+        height="120"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <style>{`
+          @keyframes flowdot-ring-draw {
+            from { stroke-dashoffset: 326; }
+            to   { stroke-dashoffset: 0; }
+          }
+          @keyframes flowdot-check-draw {
+            0%, 30%  { stroke-dashoffset: 50; }
+            100%     { stroke-dashoffset: 0; }
+          }
+          .fd-ring  { animation: flowdot-ring-draw 0.7s ease-out forwards; }
+          .fd-check { animation: flowdot-check-draw 1.0s ease-out forwards; }
+        `}</style>
+        <circle
+          cx="60"
+          cy="60"
+          r="52"
+          fill="none"
+          stroke="hsl(var(--success))"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray="326"
+          strokeDashoffset="326"
+          className="fd-ring"
+        />
+        <path
+          d="M40 62 L55 76 L82 48"
+          fill="none"
+          stroke="hsl(var(--success))"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="50"
+          strokeDashoffset="50"
+          className="fd-check"
+        />
+      </svg>
     </div>
   );
 }

@@ -131,8 +131,8 @@ export function AddToQualifiedListModal({
   const handleCreateList = async () => {
     if (!listName.trim()) {
       toast({
-        title: "Validation Error",
-        description: "List name is required",
+        title: "List name required",
+        description: "Please enter a name for the list before continuing.",
         variant: "destructive"
       });
       return;

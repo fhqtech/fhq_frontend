@@ -57,7 +57,6 @@ import { SourceManager } from "@/components/sources/SourceManager";
 import { useStepper } from "@/hooks/useStepper";
 import { GoogleSheetsPreview } from "@/components/ui/google-sheets-preview";
 import { FilePreview } from "@/components/ui/file-preview";
-import { SourceDeleteConfirmationModal } from "@/components/ui/source-delete-confirmation-modal";
 import { templateApi, InterviewTemplate } from "@/services/templateApi";
 import { creditApi, CreditInfo } from "@/services/creditApi";
 import { track, Events } from "@/lib/analytics";
