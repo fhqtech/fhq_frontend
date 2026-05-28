@@ -19,6 +19,12 @@ import {
   PreviewValidationError,
   type BlueprintPreview,
 } from "@/services/blueprintPreviewApi";
+
+// Mirror of the backend Pydantic cap on PreviewRequest.description /
+// notes (funnelhq_api/routers/blueprint_preview.py). Pre-flight guard
+// avoids burning a network round-trip on a guaranteed 422.
+const DESCRIPTION_MAX_CHARS = 1000;
+const NOTES_MAX_CHARS = 1000;
 import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromPreview } from "@/components/tag/adapters";
 import { PreviewBlueprintModal } from "@/components/create-interview/PreviewBlueprintModal";
@@ -92,6 +98,21 @@ export function BlueprintPreviewRail({
       return;
     }
 
+    // Pre-flight length guard — the backend caps both at 1000. Without
+    // this we'd fire a guaranteed 422 every time the recruiter blurs.
+    if ((description ?? "").length > DESCRIPTION_MAX_CHARS) {
+      setError(`Description is too long — keep it under ${DESCRIPTION_MAX_CHARS} characters.`);
+      setLoading(false);
+      lastTriggerRef.current = triggerKey;
+      return;
+    }
+    if ((notes ?? "").length > NOTES_MAX_CHARS) {
+      setError(`Notes are too long — keep them under ${NOTES_MAX_CHARS} characters.`);
+      setLoading(false);
+      lastTriggerRef.current = triggerKey;
+      return;
+    }
+
     // Cancel any in-flight call.
     inFlightControllerRef.current?.abort();
     const controller = new AbortController();
@@ -150,6 +171,14 @@ export function BlueprintPreviewRail({
   const runPreview = async () => {
     const trimmed = title?.trim() ?? "";
     if (trimmed.length < 4) return;
+    if ((description ?? "").length > DESCRIPTION_MAX_CHARS) {
+      setError(`Description is too long — keep it under ${DESCRIPTION_MAX_CHARS} characters.`);
+      return;
+    }
+    if ((notes ?? "").length > NOTES_MAX_CHARS) {
+      setError(`Notes are too long — keep them under ${NOTES_MAX_CHARS} characters.`);
+      return;
+    }
     inFlightControllerRef.current?.abort();
     const controller = new AbortController();
     inFlightControllerRef.current = controller;

@@ -64,6 +64,39 @@ import { creditApi, CreditInfo } from "@/services/creditApi";
 import { track, Events } from "@/lib/analytics";
 import { extractFromJDFile, extractFromJDText, type ExtractedJD } from "@/services/jdExtractApi";
 
+// Cap matches the preview-blueprint Pydantic schema's max_length=1000
+// (funnelhq_api/routers/blueprint_preview.py:PreviewRequest.description).
+// Keep these in sync — the backend cap exists to bound Gemini prompt size.
+const DESCRIPTION_MAX_CHARS = 1000;
+const DESCRIPTION_WARN_CHARS = 950;
+
+/**
+ * Compose a description from a JD extraction, respecting `cap`. Summary
+ * is the floor (always kept, truncated alone if needed); responsibilities,
+ * skills, and experience are appended only if they fit whole. Skipping
+ * a section is cleaner than mid-section truncation — the recruiter
+ * sees a coherent block they can refine via the "Refine with notes"
+ * textarea in BlueprintPreviewRail.
+ */
+function composeJdDescription(jd: ExtractedJD, cap: number = DESCRIPTION_MAX_CHARS): string {
+  let out = (jd.summary || "").trim().slice(0, cap);
+  const tryAppend = (section: string) => {
+    if (!section) return;
+    const candidate = (out ? out + "\n" : "") + section;
+    if (candidate.length <= cap) out = candidate;
+  };
+  if (jd.responsibilities.length) {
+    tryAppend(`Responsibilities:\n- ${jd.responsibilities.join("\n- ")}`);
+  }
+  if (jd.requiredSkills.length) {
+    tryAppend(`Required skills: ${jd.requiredSkills.join(", ")}`);
+  }
+  if (jd.experienceYears > 0) {
+    tryAppend(`Minimum experience: ${jd.experienceYears} years`);
+  }
+  return out.trim();
+}
+
 export default function CreateInterview() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
@@ -239,12 +272,9 @@ export default function CreateInterview() {
   };
 
   const applyJdExtraction = (jd: ExtractedJD) => {
-    const composedDescription = [
-      jd.summary,
-      jd.responsibilities.length ? `\nResponsibilities:\n- ${jd.responsibilities.join("\n- ")}` : "",
-      jd.requiredSkills.length ? `\nRequired skills: ${jd.requiredSkills.join(", ")}` : "",
-      jd.experienceYears > 0 ? `\nMinimum experience: ${jd.experienceYears} years` : "",
-    ].filter(Boolean).join("\n").trim();
+    // Compose within DESCRIPTION_MAX_CHARS so the downstream
+    // preview-blueprint POST (Pydantic-capped at 1000) doesn't 422.
+    const composedDescription = composeJdDescription(jd);
 
     setFormData((prev) => ({
       ...prev,
@@ -2749,6 +2779,7 @@ export default function CreateInterview() {
                     id="description"
                     placeholder="Describe the finance role: vertical (accounting / taxation / advisory), seniority, must-have technical depth, regulatory frameworks involved..."
                     value={formData.description}
+                    maxLength={DESCRIPTION_MAX_CHARS}
                     onChange={(e) => {
                       clearBlueprintOnEdit();
                       setFormData(prev => ({ ...prev, description: e.target.value }));
@@ -2762,6 +2793,19 @@ export default function CreateInterview() {
                     }}
                     required
                   />
+                  <div className="mt-1 flex justify-end text-[10px] font-mono tabular-nums">
+                    <span
+                      className={
+                        formData.description.length >= DESCRIPTION_MAX_CHARS
+                          ? "text-danger"
+                          : formData.description.length >= DESCRIPTION_WARN_CHARS
+                            ? "text-warning"
+                            : "text-muted"
+                      }
+                    >
+                      {formData.description.length} / {DESCRIPTION_MAX_CHARS}
+                    </span>
+                  </div>
                   <Dialog open={isDescriptionModalOpen} onOpenChange={setIsDescriptionModalOpen}>
                     <DialogTrigger asChild>
                       <Button
@@ -2783,6 +2827,7 @@ export default function CreateInterview() {
                       <Textarea
                         placeholder="Describe the interview objectives and what candidates can expect..."
                         value={formData.description}
+                        maxLength={DESCRIPTION_MAX_CHARS}
                         onChange={(e) => {
                           clearBlueprintOnEdit();
                           setFormData(prev => ({ ...prev, description: e.target.value }));
@@ -2792,6 +2837,19 @@ export default function CreateInterview() {
                         }}
                         className="min-h-[300px] resize-none"
                       />
+                      <div className="mt-1 flex justify-end text-[10px] font-mono tabular-nums">
+                        <span
+                          className={
+                            formData.description.length >= DESCRIPTION_MAX_CHARS
+                              ? "text-danger"
+                              : formData.description.length >= DESCRIPTION_WARN_CHARS
+                                ? "text-warning"
+                                : "text-muted"
+                          }
+                        >
+                          {formData.description.length} / {DESCRIPTION_MAX_CHARS}
+                        </span>
+                      </div>
                       <DialogFooter>
                         <Button onClick={() => setIsDescriptionModalOpen(false)}>
                           Done
