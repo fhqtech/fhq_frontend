@@ -639,22 +639,14 @@ export default function CreateInterview() {
 
   // Load interview data for editing
   useEffect(() => {
-    console.log('Edit useEffect triggered:', { isEditMode, editId });
     if (isEditMode && editId) {
-      console.log('Setting loading to true and fetching data for:', editId);
       setIsLoadingInterview(true);
       fetchInterviewData(editId);
     }
   }, [isEditMode, editId]);
 
-  // Debug: Log form data changes
-  useEffect(() => {
-    console.log('📋 FormData updated:', formData);
-  }, [formData]);
-
   // Reset list creation states ONLY on initial component mount
   useEffect(() => {
-    console.log('🔄 Component initial mount, resetting list creation states');
     setShowCreateListForm(false);
     setIsCreatingList(false);
   }, []); // Empty dependency array = only runs once on mount
@@ -730,7 +722,6 @@ export default function CreateInterview() {
   }, [formData, needsStepValidation, isEditMode, sourceParam]);
   
   const fetchInterviewData = async (interviewId: string) => {
-    console.log('🔄 Starting fetchInterviewData for:', interviewId);
     try {
       const userToken = localStorage.getItem('auth_token');
 
@@ -739,7 +730,6 @@ export default function CreateInterview() {
       // gracefully if context isn't ready yet (the parent useEffect
       // will retrigger once it loads).
       if (!currentWorkspace?.id || !currentProject?.id) {
-        console.log('⏸ fetchInterviewData waiting for workspace/project context');
         return;
       }
 
@@ -754,11 +744,9 @@ export default function CreateInterview() {
         }
       );
 
-      console.log('📥 Interview response status:', interviewResponse.status);
       
       if (interviewResponse.ok) {
         const interviewResult = await interviewResponse.json();
-        console.log('📦 Raw interview result:', interviewResult);
         
         // Extract interview data - handle different possible structures
         let interviewData = interviewResult.interview || interviewResult.data || interviewResult;
@@ -770,12 +758,10 @@ export default function CreateInterview() {
           interviewData = restData;
         }
         
-        console.log('📋 Interview data:', interviewData);
         
         // Using lists-based approach - no need to load candidate sources
         
         // Map backend data to form structure
-        console.log('🔍 Loading interview data for editing:', interviewData);
         const newFormData = {
           title: interviewData.title || "",
           type: interviewData.type || "",
@@ -814,9 +800,7 @@ export default function CreateInterview() {
           }
         };
         
-        console.log('🔄 About to set form data:', newFormData);
         setFormData(newFormData);
-        console.log('✅ Form data has been set');
 
         // Store original values for blueprint regeneration detection
         setOriginalInterviewData({
@@ -825,7 +809,6 @@ export default function CreateInterview() {
           type: interviewData.type || "",
           duration: interviewData.duration || "30"
         });
-        console.log('📝 Original interview data stored for blueprint change detection');
 
         toast({
           title: "Interview Loaded",
@@ -920,7 +903,6 @@ export default function CreateInterview() {
     }
 
     try {
-      console.log('📋 Setting loading to true...');
       setIsLoadingLists(true);
       console.log(`📋 Fetching ${viewType} lists from API...`);
 
@@ -931,12 +913,9 @@ export default function CreateInterview() {
           qualifiedListsApi.getProjectQualifiedLists(currentWorkspace.id, currentProject.id)
         ]);
 
-        console.log('📋 Regular lists received:', regularLists);
-        console.log('📋 Qualified lists received:', qualifiedLists);
 
         // Combine both lists - qualified lists are also CandidateList compatible
         const allLists = [...regularLists, ...qualifiedLists];
-        console.log('📋 Total lists:', allLists.length);
 
         setAvailableLists(allLists);
       } else {
@@ -947,7 +926,6 @@ export default function CreateInterview() {
         ]);
 
         const allSharedLists = [...regularSharedLists, ...qualifiedSharedLists];
-        console.log('📋 Shared lists received:', allSharedLists.length, '(regular:', regularSharedLists.length, 'qualified:', qualifiedSharedLists.length, ')');
         setAvailableLists(allSharedLists);
       }
     } catch (error) {
@@ -958,7 +936,6 @@ export default function CreateInterview() {
         variant: "destructive"
       });
     } finally {
-      console.log('📋 Setting loading to false...');
       setIsLoadingLists(false);
     }
   };
@@ -1174,19 +1151,9 @@ export default function CreateInterview() {
 
   // Modal handlers
   const handleModalContinue = () => {
-    console.log('🔥 handleModalContinue called');
-    console.log('🔥 duplicateAnalysis state:', duplicateAnalysis);
 
     // Store duplicate analysis in formData if available
     if (duplicateAnalysis) {
-      console.log('🔥 Storing analysis in formData:', {
-        totalCandidates: duplicateAnalysis.totalCandidates,
-        uniqueCandidates: duplicateAnalysis.uniqueCandidates,
-        totalDuplicates: duplicateAnalysis.totalDuplicates,
-        duplicateRate: duplicateAnalysis.duplicateRate,
-        analyzedAt: new Date().toISOString(),
-        analyzedListIds: [...formData.selectedListIds]
-      });
 
       setFormData(prev => ({
         ...prev,
@@ -1200,7 +1167,6 @@ export default function CreateInterview() {
         }
       }));
     } else {
-      console.log('🔥 No duplicateAnalysis found to store');
     }
 
     setShowDuplicateModal(false);
@@ -1245,16 +1211,13 @@ export default function CreateInterview() {
   };
 
   const handleCreateList = async () => {
-    console.log('🚀 handleCreateList called!', { createListFormData, currentlyCreating: isCreatingList });
 
     // Prevent multiple simultaneous calls
     if (isCreatingList) {
-      console.log('⚠️ Already creating list, ignoring duplicate call');
       return;
     }
 
     if (!createListFormData.name.trim()) {
-      console.log('❌ No list name provided');
       toast({
         title: "Name Required",
         description: "Please enter a list name.",
@@ -1263,11 +1226,9 @@ export default function CreateInterview() {
       return;
     }
 
-    console.log('✅ Starting list creation...');
 
     // Set up a timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
-      console.log('⏰ List creation timeout reached, force resetting state');
       setIsCreatingList(false);
       setShowCreateListForm(false);
       toast({
@@ -1289,19 +1250,15 @@ export default function CreateInterview() {
 
     try {
       setIsCreatingList(true);
-      console.log('🔄 Set isCreatingList to true');
 
       // Create the list (project-scoped)
-      console.log('📝 Creating list with data:', { name: createListFormData.name, description: createListFormData.description });
       const listId = await listsApi.createList(currentProject.id, {
         name: createListFormData.name,
         description: createListFormData.description
       });
-      console.log('✅ List created with ID:', listId);
 
       // Add sources if any
       if (createListFormData.sources.length > 0) {
-        console.log('📎 Adding sources to list:', createListFormData.sources);
         for (const source of createListFormData.sources) {
           const apiPayload = {
             type: source.type,
@@ -1309,16 +1266,12 @@ export default function CreateInterview() {
             name: source.name
             // Removed candidateCount to match Lists.tsx exactly
           };
-          console.log('🔍 Debug - API payload for source:', apiPayload);
-          console.log('🔍 Debug - metadata structure:', JSON.stringify(apiPayload.metadata, null, 2));
           await listsApi.addSourceToList(currentWorkspace.id, listId, apiPayload);
         }
-        console.log('✅ All sources added successfully');
 
         // Check for email duplicates within the new list if it has multiple sources
         if (createListFormData.sources.length > 1) {
           try {
-            console.log('🔍 Checking for email duplicates within new list...');
             const analysis = await duplicateDetectionApi.analyzeSingleListDuplicates(listId);
             if (analysis.totalDuplicates > 0) {
               toast({
@@ -1334,7 +1287,6 @@ export default function CreateInterview() {
       }
 
       // Reload lists to get updated data
-      console.log('🔄 Reloading available lists...');
       await loadAvailableLists();
 
       // Auto-select the new list
@@ -1354,14 +1306,12 @@ export default function CreateInterview() {
       // Force a re-render by ensuring state is truly cleared
       setTimeout(() => {
         setCreateListFormData({ name: '', description: '', sources: [] });
-        console.log('🔄 Force cleared form data after successful creation');
       }, 100);
 
       const sourcesText = sourcesCount > 0
         ? ` with ${sourcesCount} source${sourcesCount !== 1 ? 's' : ''}`
         : '';
 
-      console.log('🎉 List creation completed successfully');
       toast({
         title: "List Created",
         description: `"${listName}" has been created${sourcesText} and selected.`
@@ -1374,14 +1324,12 @@ export default function CreateInterview() {
         variant: "destructive"
       });
     } finally {
-      console.log('🔄 Finally block: clearing timeout and resetting isCreatingList to false');
       clearTimeout(timeoutId);
       setIsCreatingList(false);
 
       // Extra safety: ensure state is reset after a small delay
       setTimeout(() => {
         setIsCreatingList(false);
-        console.log('🛡️ Safety reset: ensured isCreatingList is false');
       }, 100);
     }
   };
@@ -1420,7 +1368,6 @@ export default function CreateInterview() {
   // Load lists when workspace and project are available
   useEffect(() => {
     if (currentWorkspace && currentProject) {
-      console.log('🔄 Workspace and project ready, loading lists...');
       loadAvailableLists();
     }
   }, [currentWorkspace, currentProject]);
@@ -1599,12 +1546,6 @@ export default function CreateInterview() {
         return false;
       }
 
-      console.log('🔧 Blueprint Generation Started:', {
-        workspaceId: currentWorkspace.id,
-        projectId: currentProject.id,
-        interviewId,
-        title: title.substring(0, 50)
-      });
 
       await interviewApi.generateBlueprint(currentWorkspace.id, currentProject.id, {
         id: interviewId,
@@ -1641,11 +1582,6 @@ export default function CreateInterview() {
       currentData.duration !== originalInterviewData.duration
     );
 
-    console.log('🔍 Blueprint fields change detection:', {
-      hasChanged,
-      original: originalInterviewData,
-      current: currentData
-    });
 
     return hasChanged;
   };
@@ -2566,7 +2502,37 @@ export default function CreateInterview() {
                         </p>
                       </div>
                       {jdError && (
-                        <p className="text-xs text-danger" role="alert">{jdError}</p>
+                        <div
+                          role="alert"
+                          className="rounded-sm border border-danger/30 bg-danger/[0.04] p-3 space-y-2"
+                        >
+                          <div className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+                            <div className="flex-1 space-y-1">
+                              <p className="text-xs font-medium text-danger">Couldn't use this job description</p>
+                              <p className="text-xs text-ink-soft">{jdError}</p>
+                            </div>
+                          </div>
+                          <div className="pl-6">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setJdError(null);
+                                // Focus the paste textarea so the recruiter
+                                // has an obvious next step. Same panel,
+                                // no tab switching needed.
+                                const ta = document.querySelector<HTMLTextAreaElement>(
+                                  'textarea[placeholder^="Paste the job description"]'
+                                );
+                                ta?.focus();
+                                ta?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              }}
+                              className="text-[11px] font-medium text-gold-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink rounded-sm"
+                            >
+                              Paste the text instead →
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}
@@ -3026,7 +2992,6 @@ export default function CreateInterview() {
                 {/* Create Candidate Pool Modal */}
                 <Dialog open={showCreateListForm} onOpenChange={(open) => {
                   if (!open) {
-                    console.log('🔄 Modal closed - resetting form');
                     setShowCreateListForm(false);
                     setIsCreatingList(false);
                     setCreateListFormData({ name: '', description: '', sources: [] });
@@ -3347,7 +3312,6 @@ export default function CreateInterview() {
                       <Button
                         variant="outline"
                         onClick={() => {
-                          console.log('🔄 Cancel clicked: closing modal and resetting state');
                           setShowCreateListForm(false);
                           setIsCreatingList(false);
                           setCreateListFormData({ name: '', description: '', sources: [] });
@@ -3403,11 +3367,9 @@ export default function CreateInterview() {
                             }
                           }
 
-                          console.log('🖱️ Create Candidate Pool clicked!', { isCreatingList, sourceEntryType, sources: validSources });
 
                           // Call handleCreateList with sources directly inline
                           if (isCreatingList) {
-                            console.log('⚠️ Already creating, ignoring');
                             return;
                           }
 
@@ -3447,11 +3409,9 @@ export default function CreateInterview() {
                               name: createListFormData.name,
                               description: autoDescription
                             });
-                            console.log('✅ Pool created with ID:', listId);
 
                             // Add sources if any
                             if (validSources.length > 0) {
-                              console.log('📎 Adding sources to pool:', validSources);
                               for (const source of validSources) {
                                 const apiPayload = {
                                   type: source.type,
@@ -3460,7 +3420,6 @@ export default function CreateInterview() {
                                 };
                                 await listsApi.addSourceToList(currentWorkspace.id, listId, apiPayload);
                               }
-                              console.log('✅ All sources added successfully');
                             }
 
                             // Reload lists
@@ -3702,7 +3661,6 @@ export default function CreateInterview() {
                           </div>
                           <Button
                             onClick={() => {
-                              console.log('🆕 Create New Candidate Pool clicked - opening form');
                               setShowCreateListForm(true);
                             }}
                             variant="outline"
@@ -3726,7 +3684,6 @@ export default function CreateInterview() {
                           <>
                             <Button
                               onClick={() => {
-                                console.log('🆕 Create New Candidate Pool clicked - opening form');
                                 setShowCreateListForm(true);
                               }}
                               variant="outline"
@@ -3826,7 +3783,6 @@ export default function CreateInterview() {
                       // Special handling for candidates step (step 1)
                       if (stepper.currentStep === 1) {
                         const buttonText = getCandidatesStepButtonConfig().text;
-                        console.log('🎯 Button text being rendered:', buttonText);
                         return buttonText;
                       }
 

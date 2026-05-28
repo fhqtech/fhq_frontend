@@ -241,22 +241,29 @@ export function BlueprintPreviewRail({
 
           {/* Radial TAG preview — same component used on the result page,
               fed by tagFromPreview() with no scores / no annotations.
-              Click opens PreviewBlueprintModal for a full-size view. */}
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="block w-full -mx-2 mb-2 cursor-pointer hover:opacity-90 transition-opacity rounded-sm"
-            aria-label="Open full preview"
-          >
+              The graph owns its own interactions (zoom buttons, drag-to-pan,
+              click-node-for-evidence). Previously this whole block was
+              wrapped in an <button> "Open full preview", which (a) nested
+              the graph's zoom <button>s inside an outer <button> — invalid
+              HTML + hydration warning — and (b) swallowed every node click
+              into the modal-open handler. The "explore full preview" link
+              below now owns the open-modal action. */}
+          <div className="-mx-2 mb-2 rounded-sm">
             <TalentAnalysisGraph
               data={tagFromPreview(title, preview.skills)}
               mode="blueprint"
             />
-          </button>
+          </div>
 
-          <p className="text-[10px] text-muted-2 text-center mb-3">
-            Click to explore the full preview.
-          </p>
+          <div className="text-center mb-3">
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="text-[10px] text-muted-2 hover:text-gold-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink rounded-sm"
+            >
+              Open full preview
+            </button>
+          </div>
 
           {onNotesChange && (
             <div className="mb-3">
