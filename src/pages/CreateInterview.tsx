@@ -904,7 +904,6 @@ export default function CreateInterview() {
 
     try {
       setIsLoadingLists(true);
-      console.log(`📋 Fetching ${viewType} lists from API...`);
 
       if (viewType === 'existing') {
         // Fetch both regular lists and qualified lists in parallel (project-scoped)
@@ -1711,7 +1710,6 @@ export default function CreateInterview() {
       updateProgressStep(3, 'active');
 
         // Lists are already processed via the API payload, no separate API calls needed
-        console.log(`✅ Selected lists (${formData.selectedListIds.length}) processed with interview`);
         updateProgressStep(3, 'completed', `${formData.selectedListIds.length} lists linked successfully`);
 
         // Step 4: Blueprint or Start Interview (conditional based on template)

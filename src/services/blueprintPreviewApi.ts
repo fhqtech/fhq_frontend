@@ -37,6 +37,37 @@ export class PreviewOutOfScopeError extends Error {
   }
 }
 
+/** Pydantic 422 — request body failed validation. Backend schema:
+ *  title min 2 / max 200, description max 1000, notes max 1000. The
+ *  rail uses this to show a precise "shorten the description" message
+ *  instead of "Couldn't generate preview." */
+export class PreviewValidationError extends Error {
+  code = "validation_error";
+  constructor(message: string) {
+    super(message);
+    this.name = "PreviewValidationError";
+  }
+}
+
+function pydanticDetailToMessage(detail: unknown): string | null {
+  // FastAPI 422 shape: { detail: [{ loc: ["body", "description"],
+  // msg: "...", type: "value_error.any_str.max_length", ctx: {...} }] }
+  if (!Array.isArray(detail) || detail.length === 0) return null;
+  const first = detail[0] as { loc?: unknown[]; msg?: string; type?: string };
+  const field = Array.isArray(first.loc)
+    ? first.loc.filter((part) => part !== "body").join(".")
+    : "field";
+  const baseMsg = first.msg || "Invalid value";
+  // Friendlier copy for the two limits the rail actually hits in practice.
+  if (typeof first.type === "string" && first.type.includes("max_length")) {
+    return `${field} is too long — shorten it and try again.`;
+  }
+  if (typeof first.type === "string" && first.type.includes("min_length")) {
+    return `${field} is too short — add more detail and try again.`;
+  }
+  return `${field}: ${baseMsg}`;
+}
+
 export async function previewBlueprint(
   body: PreviewRequest,
   signal?: AbortSignal,
@@ -68,6 +99,19 @@ export async function previewBlueprint(
       } catch (e) {
         if (e instanceof PreviewOutOfScopeError) throw e;
         // fall through to the generic error
+      }
+    }
+    // 2026-05-28: surface Pydantic 422 with a useful message instead of
+    // "Couldn't generate preview." — the most common cause is
+    // description > 1000 chars when the recruiter pastes a long JD.
+    if (response.status === 422) {
+      try {
+        const body = await response.json();
+        const msg = pydanticDetailToMessage(body?.detail);
+        if (msg) throw new PreviewValidationError(msg);
+      } catch (e) {
+        if (e instanceof PreviewValidationError) throw e;
+        // fall through
       }
     }
     throw new Error(`preview-blueprint failed: ${response.status}`);

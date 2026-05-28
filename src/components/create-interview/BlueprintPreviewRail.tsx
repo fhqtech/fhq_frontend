@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   previewBlueprint,
   PreviewOutOfScopeError,
+  PreviewValidationError,
   type BlueprintPreview,
 } from "@/services/blueprintPreviewApi";
 import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
@@ -116,6 +117,11 @@ export function BlueprintPreviewRail({
           // instead of the generic "couldn't generate" message.
           if (err instanceof PreviewOutOfScopeError) {
             setError(err.message);
+          } else if (err instanceof PreviewValidationError) {
+            // 2026-05-28: most often "description is too long" when the
+            // recruiter pastes a JD into the description field. Show the
+            // precise validation message so they can trim it.
+            setError(err.message);
           } else {
             setError("Couldn't generate preview. Click refresh to try again.");
           }
@@ -162,6 +168,8 @@ export function BlueprintPreviewRail({
     } catch (err: any) {
       if (err?.name !== "AbortError") {
         if (err instanceof PreviewOutOfScopeError) {
+          setError(err.message);
+        } else if (err instanceof PreviewValidationError) {
           setError(err.message);
         } else {
           setError("Couldn't generate preview. Click refresh to try again.");
