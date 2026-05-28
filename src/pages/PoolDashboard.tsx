@@ -18,6 +18,9 @@ import { ErrorBanner } from "@/components/ui/error-banner";
 import { ArrowLeft, Users, Filter, Download } from "lucide-react";
 import { downloadCsv } from "@/lib/csv";
 import { usePoolDashboardQuery, type PoolCandidate } from "@/queries/poolQueries";
+import { CandidateDrawer } from "@/components/analytics/CandidateDrawer";
+import type { AnalyticsCandidate } from "@/types/analytics";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 const QUALITY_COLORS: Record<string, string> = {
   gap: "bg-danger-soft text-danger",
@@ -36,7 +39,8 @@ const QUALITY_LABELS: Record<string, string> = {
 export default function PoolDashboard() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
-  const workspaceId = typeof window !== "undefined" ? localStorage.getItem("currentWorkspaceId") : null;
+  const { currentWorkspace } = useWorkspace();
+  const workspaceId = currentWorkspace?.id ?? null;
 
   const poolQuery = usePoolDashboardQuery(workspaceId, listId);
   const stats = poolQuery.data?.stats ?? null;
@@ -53,6 +57,24 @@ export default function PoolDashboard() {
   const [mustHaveSkill, setMustHaveSkill] = useState<string>("");
   const [shortlist, setShortlist] = useState<Set<string>>(new Set());
   const [sortKey, setSortKey] = useState<"score-desc" | "score-asc" | "experience">("score-desc");
+
+  // Drawer state — open candidate details inline (consistent with ListDetail).
+  const [selectedCandidate, setSelectedCandidate] = useState<AnalyticsCandidate | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const openCandidateDrawer = (c: PoolCandidate) => {
+    const score = (c.overallScore ?? c.overall_score ?? 0) as number;
+    const candidate: AnalyticsCandidate = {
+      id: c.id,
+      name: c.name || c.id,
+      email: c.email || '',
+      stage: ((c.status as AnalyticsCandidate['stage']) || 'screening'),
+      scores: { overall: score, ...(c.scores || {}) },
+      experience: c.yearsExperience ?? 0,
+    };
+    setSelectedCandidate(candidate);
+    setIsDrawerOpen(true);
+  };
 
   const filtered = useMemo(() => {
     let list = candidates.filter((c) => {
@@ -272,9 +294,18 @@ export default function PoolDashboard() {
             return (
               <div
                 key={c.id}
-                className={`flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-paper-2 ${
+                className={`flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-paper-2 cursor-pointer ${
                   isShortlisted ? "bg-info-soft/40" : ""
                 }`}
+                onClick={() => openCandidateDrawer(c)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openCandidateDrawer(c);
+                  }
+                }}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -293,7 +324,10 @@ export default function PoolDashboard() {
                   <Button
                     size="sm"
                     variant={isShortlisted ? "default" : "outline-solid"}
-                    onClick={() => toggleShortlist(c.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleShortlist(c.id);
+                    }}
                   >
                     {isShortlisted ? "Shortlisted" : "Shortlist"}
                   </Button>
@@ -303,6 +337,12 @@ export default function PoolDashboard() {
           })}
         </div>
       </Card>
+
+      <CandidateDrawer
+        candidate={selectedCandidate}
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+      />
     </div>
   );
 }

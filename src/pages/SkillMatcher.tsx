@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowRight, Sparkles, AlertCircle } from "lucide-react";
+import { ArrowRight, Sparkles, AlertCircle, RefreshCw } from "lucide-react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useInterviewsQuery } from "@/queries/interviewsQueries";
 import { analyticsApi } from "@/services/analyticsApi";
@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { RowSkeleton } from "@/components/ui/shimmer";
 import { cn } from "@/lib/utils";
 import type { MatcherResponse } from "@/types/analytics";
 import { SkillChipStrip } from "@/components/skill-matcher/SkillChipStrip";
@@ -75,15 +77,19 @@ export default function SkillMatcher() {
 
   const [data, setData] = useState<MatcherResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentWorkspace?.id || !currentProject?.id || !selectedInterviewId) {
       setData(null);
+      setError(null);
       return;
     }
     let cancelled = false;
     setLoading(true);
+    setError(null);
     analyticsApi
       .getSkillMatches(currentWorkspace.id, currentProject.id, {
         roleInterviewId: selectedInterviewId,
@@ -92,13 +98,18 @@ export default function SkillMatcher() {
       .then((d) => {
         if (!cancelled) setData(d);
       })
+      .catch((err) => {
+        if (cancelled) return;
+        setData(null);
+        setError(err?.message || "Could not score candidates. Try again.");
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [currentWorkspace?.id, currentProject?.id, selectedInterviewId]);
+  }, [currentWorkspace?.id, currentProject?.id, selectedInterviewId, retryNonce]);
 
   const sortedInterviews = useMemo(
     () =>
@@ -176,7 +187,26 @@ export default function SkillMatcher() {
         </CardHeader>
         <CardContent className="pt-0">
           {loading ? (
-            <p className="text-xs text-muted py-8 text-center">Scoring candidates…</p>
+            <div className="space-y-2 py-2" aria-live="polite" aria-busy="true">
+              <p className="sr-only">Scoring candidates</p>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <RowSkeleton key={i} lines={2} />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="py-8 flex flex-col items-center gap-3 text-center" role="alert">
+              <AlertCircle className="h-5 w-5 text-warning" />
+              <p className="text-sm text-ink">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setRetryNonce((n) => n + 1)}
+                className="rounded"
+              >
+                <RefreshCw className="h-3.5 w-3.5 mr-2" />
+                Try again
+              </Button>
+            </div>
           ) : !data ? (
             <p className="text-xs text-muted py-8 text-center">Pick a role above.</p>
           ) : data.matches.length === 0 ? (

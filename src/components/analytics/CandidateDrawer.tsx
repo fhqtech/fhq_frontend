@@ -195,6 +195,15 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
 
   const candidateEmail = candidate?.email;
 
+  // 404 from these endpoints means "candidate has no data for this tab yet"
+  // (no interview run, no profile parsed, etc.) — not a real error. We render
+  // a friendly empty state instead of "Failed to load".
+  const isEmptyState = (data: any): boolean =>
+    !data?.success && (
+      typeof data?.error === 'string'
+      && /not.?found|no.?data|no.?such|missing|empty/i.test(data.error)
+    );
+
   // Fetch overview data
   const fetchOverview = async () => {
     if (!candidateEmail) return;
@@ -210,9 +219,15 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           },
         }
       );
+      if (response.status === 404) {
+        setOverviewData({ success: true, empty: true } as any);
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setOverviewData(data);
+      } else if (isEmptyState(data)) {
+        setOverviewData({ success: true, empty: true } as any);
       } else {
         setErrorOverview(data.error || 'Failed to load overview');
       }
@@ -239,9 +254,15 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           },
         }
       );
+      if (response.status === 404) {
+        setAIInsightsData({ success: true, empty: true } as any);
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setAIInsightsData(data);
+      } else if (isEmptyState(data)) {
+        setAIInsightsData({ success: true, empty: true } as any);
       } else {
         setErrorInsights(data.error || 'Failed to load AI insights');
       }
@@ -253,7 +274,10 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
     }
   };
 
-  // Fetch psych assessment
+  // Fetch psych assessment.
+  // The backend always returns 200 here, with `{success:true, hasAssessment:false}`
+  // when there's no data. Any other failure (404, 500, network) we treat as
+  // "no data yet" rather than a hard error — psych is optional content.
   const fetchPsych = async () => {
     if (!candidateEmail) return;
     setLoadingPsych(true);
@@ -268,21 +292,26 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           },
         }
       );
+      if (!response.ok) {
+        setPsychData({ success: true, empty: true } as any);
+        return;
+      }
       const data = await response.json();
-      if (data.success) {
-        setPsychData(data);
+      if (data.success || isEmptyState(data)) {
+        setPsychData(data.success ? data : ({ success: true, empty: true } as any));
       } else {
-        setErrorPsych(data.error || 'Failed to load psych data');
+        setPsychData({ success: true, empty: true } as any);
       }
     } catch (error) {
       console.error('Error fetching psych data:', error);
-      setErrorPsych('Failed to load psych assessment');
+      setPsychData({ success: true, empty: true } as any);
     } finally {
       setLoadingPsych(false);
     }
   };
 
-  // Fetch interviews
+  // Fetch interviews. Same posture as psych — backend returns
+  // `{success:true, totalInterviews:0, interviews:[]}` when none exist.
   const fetchInterviews = async () => {
     if (!candidateEmail) return;
     setLoadingInterviews(true);
@@ -297,15 +326,19 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           },
         }
       );
+      if (!response.ok) {
+        setInterviewData({ success: true, empty: true } as any);
+        return;
+      }
       const data = await response.json();
-      if (data.success) {
-        setInterviewData(data);
+      if (data.success || isEmptyState(data)) {
+        setInterviewData(data.success ? data : ({ success: true, empty: true } as any));
       } else {
-        setErrorInterviews(data.error || 'Failed to load interviews');
+        setInterviewData({ success: true, empty: true } as any);
       }
     } catch (error) {
       console.error('Error fetching interviews:', error);
-      setErrorInterviews('Failed to load interviews');
+      setInterviewData({ success: true, empty: true } as any);
     } finally {
       setLoadingInterviews(false);
     }
@@ -326,9 +359,15 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
           },
         }
       );
+      if (response.status === 404) {
+        setSkillsData({ success: true, empty: true } as any);
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setSkillsData(data);
+      } else if (isEmptyState(data)) {
+        setSkillsData({ success: true, empty: true } as any);
       } else {
         setErrorSkills(data.error || 'Failed to load skills');
       }
@@ -513,6 +552,12 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
               <Card className="p-4 bg-destructive/10 border-destructive/20">
                 <p className="text-sm text-destructive">{errorOverview}</p>
               </Card>
+            ) : overviewData && (overviewData as any).empty ? (
+              <Card className="p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No profile details yet. The overview fills in once this candidate completes an interview or their resume is parsed.
+                </p>
+              </Card>
             ) : overviewData ? (
               <>
                 {/* Contact Information */}
@@ -686,6 +731,12 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
               <Card className="p-4 bg-destructive/10 border-destructive/20">
                 <p className="text-sm text-destructive">{errorInsights}</p>
               </Card>
+            ) : aiInsightsData && (aiInsightsData as any).empty ? (
+              <Card className="p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  AI insights generate after this candidate completes their first interview.
+                </p>
+              </Card>
             ) : aiInsightsData ? (
               <>
                 {/* Personality Traits */}
@@ -790,6 +841,12 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
             ) : errorPsych ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">
                 <p className="text-sm text-destructive">{errorPsych}</p>
+              </Card>
+            ) : psychData && ((psychData as any).empty || (psychData as any).hasAssessment === false) ? (
+              <Card className="p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No psych assessment on file. This appears once the candidate completes one.
+                </p>
               </Card>
             ) : psychData ? (
               <>
@@ -966,6 +1023,12 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
               <Card className="p-4 bg-destructive/10 border-destructive/20">
                 <p className="text-sm text-destructive">{errorInterviews}</p>
               </Card>
+            ) : interviewData && ((interviewData as any).empty || ((interviewData as any).totalInterviews === 0)) ? (
+              <Card className="p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No interviews yet. Sessions show up here as soon as the candidate completes one.
+                </p>
+              </Card>
             ) : interviewData ? (
               <>
                 <Card className="p-4">
@@ -1012,6 +1075,12 @@ export function CandidateDrawer({ candidate, open, onOpenChange }: CandidateDraw
             ) : errorSkills ? (
               <Card className="p-4 bg-destructive/10 border-destructive/20">
                 <p className="text-sm text-destructive">{errorSkills}</p>
+              </Card>
+            ) : skillsData && (skillsData as any).empty ? (
+              <Card className="p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Skill scores appear here after the candidate's first scored interview.
+                </p>
               </Card>
             ) : skillsData ? (
               <>

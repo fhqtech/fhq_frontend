@@ -12,6 +12,7 @@ export interface PoolStats {
 export interface PoolCandidate {
   id: string;
   name?: string;
+  email?: string;
   overallScore?: number;
   overall_score?: number;
   yearsExperience?: number;

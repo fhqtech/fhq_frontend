@@ -62,6 +62,7 @@ import { FilePreview } from "@/components/ui/file-preview";
 import { templateApi, InterviewTemplate } from "@/services/templateApi";
 import { creditApi, CreditInfo } from "@/services/creditApi";
 import { track, Events } from "@/lib/analytics";
+import { extractFromJDFile, extractFromJDText, type ExtractedJD } from "@/services/jdExtractApi";
 
 export default function CreateInterview() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -217,6 +218,48 @@ export default function CreateInterview() {
   const [totalSteps, setTotalSteps] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
   const [wasInterviewStarted, setWasInterviewStarted] = useState(false); // Track if interview was auto-started (template flow)
+
+  // JD intake (screening + fitment only). 'design' = use the existing
+  // "Help me design the role" flow; 'jd' = paste or upload a JD which
+  // seeds title/description/domain.
+  const [jdMode, setJdMode] = useState<'design' | 'jd'>('design');
+  const [jdText, setJdText] = useState("");
+  const [jdLoading, setJdLoading] = useState(false);
+  const [jdError, setJdError] = useState<string | null>(null);
+
+  // Backend returns domain in the LangGraph form (management_consulting);
+  // the frontend dropdown uses the shorter "consulting" key. Map across.
+  const jdDomainToFinanceDomain = (d: ExtractedJD['domain']): FinanceDomainId | "" => {
+    switch (d) {
+      case 'accounting': return 'accounting';
+      case 'taxation': return 'taxation';
+      case 'management_consulting': return 'consulting';
+      default: return '';
+    }
+  };
+
+  const applyJdExtraction = (jd: ExtractedJD) => {
+    const composedDescription = [
+      jd.summary,
+      jd.responsibilities.length ? `\nResponsibilities:\n- ${jd.responsibilities.join("\n- ")}` : "",
+      jd.requiredSkills.length ? `\nRequired skills: ${jd.requiredSkills.join(", ")}` : "",
+      jd.experienceYears > 0 ? `\nMinimum experience: ${jd.experienceYears} years` : "",
+    ].filter(Boolean).join("\n").trim();
+
+    setFormData((prev) => ({
+      ...prev,
+      title: jd.title || prev.title,
+      description: composedDescription || prev.description,
+      financeDomain: jdDomainToFinanceDomain(jd.domain) || prev.financeDomain,
+    }));
+    setJdError(null);
+    toast({
+      title: "JD applied",
+      description: jd.title
+        ? `Pre-filled the role as "${jd.title}". You can edit anything before continuing.`
+        : "Pre-filled the form from the JD. You can edit anything before continuing.",
+    });
+  };
 
   // Lists-related states
   const [availableLists, setAvailableLists] = useState<CandidateList[]>([]);
@@ -1439,7 +1482,8 @@ export default function CreateInterview() {
         const requiredFields = [];
         if (!data.title?.trim()) requiredFields.push('Interview Title');
         if (!data.type?.trim()) requiredFields.push('Interview Type');
-        if (!data.description?.trim()) requiredFields.push('Description');
+        // Skill analysis is profile-driven — no role description required.
+        if (data.type !== 'skill_analysis' && !data.description?.trim()) requiredFields.push('Description');
         if (!data.duration || (typeof data.duration === 'string' && !data.duration.trim()) || (typeof data.duration === 'number' && data.duration <= 0)) requiredFields.push('Duration');
         
         if (requiredFields.length > 0) {
@@ -2393,6 +2437,142 @@ export default function CreateInterview() {
                 </div>
               )}
 
+              {/* JD intake — screening + fitment only, create mode only.
+                  Recruiter chooses between "design the role" (existing flow)
+                  and "I have a JD" (paste/upload → backend extract → seed
+                  title/description/domain). Skill analysis is profile-driven
+                  and skips this entirely. */}
+              {!isEditMode && formData.type !== 'skill_analysis' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+                      Start with
+                    </Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={jdMode === 'design' ? 'default' : 'outline-solid'}
+                        className={`h-8 text-xs font-medium px-3 rounded ${
+                          jdMode === 'design' ? 'text-paper' : 'hover:text-paper'
+                        }`}
+                        style={{
+                          border: 'none',
+                          backgroundColor: jdMode === 'design' ? 'hsl(var(--ink))' : 'transparent',
+                          boxShadow: 'var(--shadow-1)',
+                        }}
+                        onClick={() => {
+                          setJdMode('design');
+                          setJdError(null);
+                        }}
+                      >
+                        Design with AI
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={jdMode === 'jd' ? 'default' : 'outline-solid'}
+                        className={`h-8 text-xs font-medium px-3 rounded ${
+                          jdMode === 'jd' ? 'text-paper' : 'hover:text-paper'
+                        }`}
+                        style={{
+                          border: 'none',
+                          backgroundColor: jdMode === 'jd' ? 'hsl(var(--ink))' : 'transparent',
+                          boxShadow: 'var(--shadow-1)',
+                        }}
+                        onClick={() => setJdMode('jd')}
+                      >
+                        I have a JD
+                      </Button>
+                    </div>
+                  </div>
+
+                  {jdMode === 'jd' && (
+                    <div
+                      className="p-4 rounded-sm bg-paper-2 space-y-3"
+                      style={{ boxShadow: 'var(--shadow-1)' }}
+                    >
+                      <Textarea
+                        placeholder="Paste the job description here (or upload a PDF/DOCX below)…"
+                        value={jdText}
+                        onChange={(e) => setJdText(e.target.value)}
+                        className="min-h-[140px] resize-none rounded border-none bg-paper"
+                        style={{ boxShadow: 'var(--shadow-1)' }}
+                      />
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            if (!jdText.trim()) {
+                              setJdError("Paste a job description first, or upload a file.");
+                              return;
+                            }
+                            setJdLoading(true);
+                            setJdError(null);
+                            try {
+                              const result = await extractFromJDText(jdText);
+                              applyJdExtraction(result);
+                            } catch (err: any) {
+                              setJdError(err?.message || "Could not read this JD. Try again or paste it instead.");
+                            } finally {
+                              setJdLoading(false);
+                            }
+                          }}
+                          disabled={jdLoading || !jdText.trim()}
+                          className="h-9 text-xs font-medium px-4 rounded text-paper"
+                          style={{
+                            border: 'none',
+                            backgroundColor: 'hsl(var(--ink))',
+                            boxShadow: 'var(--shadow-1)',
+                          }}
+                        >
+                          {jdLoading ? (
+                            <><CircleNotch className="w-3.5 h-3.5 mr-2 animate-spin" />Reading…</>
+                          ) : (
+                            <>Use this JD</>
+                          )}
+                        </Button>
+                        <Label
+                          htmlFor="jdFileUpload"
+                          className="inline-flex items-center gap-2 px-3 h-9 text-xs font-medium rounded cursor-pointer hover:bg-paper-3"
+                          style={{ boxShadow: 'var(--shadow-1)' }}
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          Upload PDF / DOCX
+                        </Label>
+                        <input
+                          id="jdFileUpload"
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          className="hidden"
+                          disabled={jdLoading}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setJdLoading(true);
+                            setJdError(null);
+                            try {
+                              const result = await extractFromJDFile(file);
+                              applyJdExtraction(result);
+                            } catch (err: any) {
+                              setJdError(err?.message || "Could not read this file. Try pasting the text instead.");
+                            } finally {
+                              setJdLoading(false);
+                              // Reset so re-selecting the same file fires onChange again
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                        <p className="text-[11px] text-muted">
+                          We read the JD and pre-fill title, domain, and description. You can edit anything before continuing.
+                        </p>
+                      </div>
+                      {jdError && (
+                        <p className="text-xs text-danger" role="alert">{jdError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Top row: Title, Interview Type, and Duration */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Title */}
@@ -2401,14 +2581,16 @@ export default function CreateInterview() {
                       sentence case per CLAUDE.md form-label rule. */}
                   <Label htmlFor="title" className="text-sm flex items-center gap-2">
                     Interview title <span className="text-danger">*</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowRoleCurator(true)}
-                      className="ml-auto text-[10px] font-mono normal-case text-gold-ink hover:underline inline-flex items-center gap-1"
-                    >
-                      <Wand2 className="w-3 h-3" />
-                      Help me design this role
-                    </button>
+                    {formData.type !== 'skill_analysis' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowRoleCurator(true)}
+                        className="ml-auto text-[10px] font-mono normal-case text-gold-ink hover:underline inline-flex items-center gap-1"
+                      >
+                        <Wand2 className="w-3 h-3" />
+                        Help me design this role
+                      </button>
+                    )}
                     {isSuggesting && (
                       <span className="text-[10px] font-mono normal-case text-info inline-flex items-center gap-1">
                         <CircleNotch className="w-3 h-3 animate-spin" /> Suggesting defaults…
@@ -2517,7 +2699,21 @@ export default function CreateInterview() {
                 </div>
               </div>
 
+              {/* Skill analysis: no role anchor — interview is driven by each
+                  candidate's resume/profile at runtime. Hide domain, sub-domain,
+                  description, and the blueprint rail; show a one-line hint instead. */}
+              {formData.type === 'skill_analysis' && (
+                <div className="p-4 bg-info-soft/40 border border-rule rounded-sm">
+                  <p className="text-sm text-ink-soft">
+                    Skill analysis interviews are driven by each candidate's
+                    profile. No role description needed — just name the
+                    interview, pick a duration, and attach candidates.
+                  </p>
+                </div>
+              )}
+
               {/* Domain row — finance sub-domain taxonomy (Phase B) */}
+              {formData.type !== 'skill_analysis' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <Label htmlFor="financeDomain" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
@@ -2578,8 +2774,10 @@ export default function CreateInterview() {
                   </Select>
                 </div>
               </div>
+              )}
 
-              {/* Description */}
+              {/* Description — role-anchored, skipped for skill analysis. */}
+              {formData.type !== 'skill_analysis' && (
               <div>
                 <Label htmlFor="description" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Description <span className="text-danger">*</span></Label>
                 <div className="relative">
@@ -2639,6 +2837,7 @@ export default function CreateInterview() {
                   </Dialog>
                 </div>
               </div>
+              )}
 
               {/* Preview the AI interviewer's greeting — uses formData.title for personalization. */}
               {formData.title?.trim().length >= 4 && (
@@ -2741,7 +2940,7 @@ export default function CreateInterview() {
               </div>
             </CardContent>
           </Card>
-          {!isEditMode && (
+          {!isEditMode && formData.type !== 'skill_analysis' && (
             <BlueprintPreviewRail
               title={formData.title}
               type={formData.type}
@@ -3896,7 +4095,7 @@ export default function CreateInterview() {
             <DialogTitle>This candidate's profile is outside our scope</DialogTitle>
             <DialogDescription>
               {outOfScopeDetail?.message ||
-                'FunnelHQ supports India finance hiring only — accounting, taxation, and management consulting.'}
+                'FlowDot AI supports India finance hiring only — accounting, taxation, and management consulting.'}
             </DialogDescription>
           </DialogHeader>
           {outOfScopeDetail && outOfScopeDetail.nonFinanceSignals.length > 0 && (

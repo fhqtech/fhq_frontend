@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FloppyDisk as Save, User, Envelope as Mail, Phone, ChatCircle as MessageSquare, SpeakerHigh as Volume2, Shield, Bell, Palette, CheckCircle, Play, Stop, FolderOpen as Folder, MagnifyingGlass as Search, Star, Pencil, Trash } from "phosphor-react";
+import { User, Envelope as Mail, SpeakerHigh as Volume2, CheckCircle, Play, Stop, FolderOpen as Folder, MagnifyingGlass as Search, Star } from "phosphor-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -274,13 +274,11 @@ export default function Settings() {
 
       {/* Settings Tabs */}
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="communications">Communications</TabsTrigger>
           <TabsTrigger value="voice">Voice & AI</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -339,7 +337,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Folder className="w-5 h-5 text-ink" />
-                Your Projects
+                Your projects
               </CardTitle>
               <CardDescription>
                 View and manage projects you have access to across all workspaces
@@ -449,7 +447,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="w-5 h-5 text-ink" />
-                Communication Channels
+                Communication channels
               </CardTitle>
               <CardDescription>
                 Configure how candidates can be reached for interviews
@@ -469,42 +467,6 @@ export default function Settings() {
                   onCheckedChange={(checked) => updateSetting('communications', 'email', checked)}
                 />
               </div>
-              <Separator />
-              <div className="flex items-center justify-between opacity-60">
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-muted-2" />
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <p className="font-medium text-muted">Phone calls</p>
-                      <p className="text-sm text-muted-2">Enable phone-based interviews</p>
-                    </div>
-                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
-                  </div>
-                </div>
-                <Switch
-                  checked={false}
-                  disabled={true}
-                  onCheckedChange={() => {}}
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between opacity-60">
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="w-5 h-5 text-muted-2" />
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <p className="font-medium text-muted">SMS Messages</p>
-                      <p className="text-sm text-muted-2">Send reminders and updates via SMS</p>
-                    </div>
-                    <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
-                  </div>
-                </div>
-                <Switch
-                  checked={false}
-                  disabled={true}
-                  onCheckedChange={() => {}}
-                />
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -514,7 +476,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Volume2 className="w-5 h-5 text-ink" />
-                Voice Calibration
+                Voice calibration
               </CardTitle>
               <CardDescription>
                 Customize the AI interviewer's voice characteristics
@@ -694,98 +656,6 @@ export default function Settings() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications" className="space-y-6">
-          <Card className="opacity-60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-muted-2" />
-                <span className="text-muted">Notification preferences</span>
-                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
-              </CardTitle>
-              <CardDescription className="text-muted-2">
-                Choose when and how you want to be notified
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between opacity-50 pointer-events-none">
-                <div>
-                  <p className="font-medium text-muted-2">Interview completed</p>
-                  <p className="text-sm text-muted-2">Get notified when interviews are finished</p>
-                </div>
-                <Switch
-                  checked={false}
-                  disabled
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between opacity-50 pointer-events-none">
-                <div>
-                  <p className="font-medium text-muted-2">Applicant shortlisted</p>
-                  <p className="text-sm text-muted-2">Get notified when candidates are shortlisted</p>
-                </div>
-                <Switch
-                  checked={false}
-                  disabled
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between opacity-50 pointer-events-none">
-                <div>
-                  <p className="font-medium text-muted-2">Low Score Alerts</p>
-                  <p className="text-sm text-muted-2">Get alerted for interviews with low scores</p>
-                </div>
-                <Switch
-                  checked={false}
-                  disabled
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between opacity-50 pointer-events-none">
-                <div>
-                  <p className="font-medium text-muted-2">Daily digest</p>
-                  <p className="text-sm text-muted-2">Receive daily summary of activities</p>
-                </div>
-                <Switch
-                  checked={false}
-                  disabled
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="appearance" className="space-y-6">
-          <Card className="opacity-60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5 text-muted-2" />
-                <span className="text-muted">Appearance settings</span>
-                <span className="px-2 py-0.5 text-xs bg-paper-3 text-muted rounded-full">Coming soon</span>
-              </CardTitle>
-              <CardDescription className="text-muted-2">
-                Customize the look and feel of your dashboard
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="opacity-50 pointer-events-none">
-                <Label className="text-muted-2">Theme</Label>
-                <Select disabled value="light">
-                  <SelectTrigger className="mt-2 bg-paper-2 border-rule">
-                    <SelectValue />
-                  </SelectTrigger>
-                </Select>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between opacity-50 pointer-events-none">
-                <div>
-                  <p className="font-medium text-muted-2">Compact mode</p>
-                  <p className="text-sm text-muted-2">Use a more compact layout to fit more content</p>
-                </div>
-                <Switch checked={false} disabled />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

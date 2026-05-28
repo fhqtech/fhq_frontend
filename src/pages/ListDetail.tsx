@@ -113,7 +113,6 @@ export default function ListDetail() {
         console.log("Candidates:", candidatesList);
         console.log("Sources:", sourcesList);
         setLoading(false);
-        setTimeout(() => setIsAnalyticsPanelOpen(true), 300);
         return;
       }
 
@@ -169,8 +168,6 @@ export default function ListDetail() {
       });
     } finally {
       setLoading(false);
-      // Open analytics panel after loading completes
-      setTimeout(() => setIsAnalyticsPanelOpen(true), 300);
     }
   };
 
@@ -536,7 +533,21 @@ export default function ListDetail() {
                   </div>
                 )}
 
-                {filteredCandidates.length === 0 && (
+                {filteredCandidates.length === 0 && candidates.length === 0 && !loading && (
+                  <div className="text-center py-16 px-6">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-paper-3 flex items-center justify-center mb-4">
+                      <Users className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground mb-1">
+                      No candidates in this pool yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      Add candidates from a Google Sheet, CSV upload, or another pool to start reviewing.
+                    </p>
+                  </div>
+                )}
+
+                {filteredCandidates.length === 0 && candidates.length > 0 && (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">No candidates match your search</p>
                   </div>
