@@ -41,6 +41,8 @@ const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
 const QuickTour = lazy(() => import("./pages/QuickTour"));
 const Settings = lazy(() => import("./pages/Settings"));
+const SettingsPlan = lazy(() => import("./pages/Settings/Plan"));
+const AdminWorkspaces = lazy(() => import("./pages/admin/Workspaces"));
 const CandidateRegistration = lazy(() => import("./pages/CandidateRegistration"));
 const CandidatePortal = lazy(() => import("./pages/CandidatePortal"));
 const InterviewPreCheckPage = lazy(() => import("./pages/interview/InterviewPreCheckPage"));
@@ -259,6 +261,23 @@ const App = () => (
               <ProtectedRoute>
                 <MainLayout>
                   <Settings />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/settings/plan" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <SettingsPlan />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* Superadmin — workspace plan + credit assignment */}
+            <Route path="/admin/workspaces" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <AdminWorkspaces />
                 </MainLayout>
               </ProtectedRoute>
             } />

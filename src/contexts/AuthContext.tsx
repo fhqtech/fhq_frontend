@@ -1,6 +1,24 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { identify, reset as analyticsReset, track, Events } from '@/lib/analytics';
 
+export type PlanId = 'free' | 'pro' | 'enterprise';
+export type PlanStatus = 'active' | 'past_due' | 'canceled';
+export type FeatureLevel = 'NONE' | 'VIEW' | 'EDIT' | 'PARTIAL' | 'FULL';
+
+export interface ActiveWorkspacePlan {
+  workspaceId: string;
+  plan: PlanId;
+  status: PlanStatus;
+  expiresAt: string | null;
+  features: Record<string, FeatureLevel>;
+  limits: Record<string, number | null>;
+  credits: {
+    remaining: number;
+    granted: number;
+    consumed: number;
+  };
+}
+
 interface User {
   id: string;
   email: string;
@@ -13,6 +31,9 @@ interface User {
   ownedWorkspaceId?: string;
   activeWorkspaceId?: string;
   activeProjectId?: string;
+  // Plan + access (P-Plans)
+  is_superadmin?: boolean;
+  activeWorkspacePlan?: ActiveWorkspacePlan | null;
 }
 
 interface AuthContextType {
@@ -25,6 +46,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   checkAuthStatus: () => Promise<void>;
   updateTourStatus: (status: 'not_started' | 'in_progress' | 'completed' | 'skipped') => Promise<boolean>;
+  refreshWorkspacePlan: (workspaceId?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,7 +84,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Map tour_status to tourStatus for frontend consistency
           const user = {
             ...userData.user,
-            tourStatus: userData.user.tour_status || userData.user.tourStatus || 'not_started'
+            tourStatus: userData.user.tour_status || userData.user.tourStatus || 'not_started',
+            // /me already returns activeWorkspacePlan + is_superadmin (P-Plans).
+            // Pass through verbatim — typing matches ActiveWorkspacePlan.
           };
           setUser(user);
         } else {
@@ -255,6 +279,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshWorkspacePlan = useCallback(async (workspaceId?: string) => {
+    // Re-fetch the plan + credit block for a given workspace (default: the
+    // currently active one). Called on workspace switch so gating updates
+    // without a full page reload.
+    const targetWs = workspaceId || user?.activeWorkspaceId || user?.ownedWorkspaceId;
+    if (!targetWs) return;
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
+      const response = await fetch(
+        `${API_BASE_URL}/api/workspaces/${targetWs}/plan`,
+        { headers: { 'Authorization': `Bearer ${token}` } },
+      );
+      if (!response.ok) return;
+      const plan = await response.json();
+      setUser((prev) => prev ? { ...prev, activeWorkspacePlan: plan as ActiveWorkspacePlan } : prev);
+    } catch (err) {
+      console.error('refreshWorkspacePlan failed:', err);
+    }
+  }, [user?.activeWorkspaceId, user?.ownedWorkspaceId]);
+
   const value: AuthContextType = {
     user,
     isLoading,
@@ -265,6 +311,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     checkAuthStatus,
     updateTourStatus,
+    refreshWorkspacePlan,
   };
 
   return (

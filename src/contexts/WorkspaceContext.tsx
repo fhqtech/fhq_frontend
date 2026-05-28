@@ -31,7 +31,7 @@ interface WorkspaceContextType {
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshWorkspacePlan } = useAuth();
 
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
@@ -169,6 +169,14 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
         setCurrentWorkspace(workspace);
         setCurrentProject(null); // Reset project when switching workspace
         await loadProjects(workspaceId);
+        // P-Plans F5: refresh the active workspace plan + credit block in
+        // AuthContext so the top-nav credit badge and gating hooks pick up
+        // the new workspace's data without a page reload.
+        try {
+          await refreshWorkspacePlan(workspaceId);
+        } catch (planErr) {
+          console.warn('Failed to refresh workspace plan after switch:', planErr);
+        }
       }
     } catch (error) {
       console.error('Failed to switch workspace:', error);

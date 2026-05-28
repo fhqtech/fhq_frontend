@@ -31,6 +31,7 @@ import {
  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { toastPlanError } from "@/lib/planErrorToast";
 import { checkBlueprintExists } from "@/services/blueprintService";
 import { X } from "lucide-react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
@@ -960,11 +961,13 @@ export default function InterviewDetails() {
  description: `${result.emails_sent} sent, ${result.emails_failed} failed${result.errors?.length ? ` (${result.errors.length} lookup issues)` : ''}`,
  });
  } catch (err: any) {
+ if (!toastPlanError(toast, err)) {
  toast({
  title: 'Resend failed',
  description: err?.message || 'Could not resend invitations.',
  variant: 'destructive',
  });
+ }
  } finally {
  setIsResendingInvites(false);
  }
@@ -1199,6 +1202,7 @@ export default function InterviewDetails() {
  candidateCount: stats?.totalCandidates ?? candidates.length,
  blueprintStatus: blueprintStatus ?? interview.blueprintStatus,
  startedAt: interview.startedAt,
+ type: (interview as any).type,
  } as InterviewSnapshot,
  {
  totalCandidates: stats?.totalCandidates ?? candidates.length,
@@ -1493,7 +1497,7 @@ export default function InterviewDetails() {
  </div>
  </div>
  <div className="p-6">
- {loadingInterview ? (
+ {loadingInterview || !interview ? (
  <ShimmerInterviewConfig />
  ) : (
  <div className="space-y-3">
@@ -1820,7 +1824,7 @@ export default function InterviewDetails() {
  icon={Users}
  title="No applicants yet"
  description={
- interview.status === 'completed' || interview.status === 'stopped'
+ interview?.status === 'completed' || interview?.status === 'stopped'
  ? "This interview ended without any applicants completing it."
  : "Share the interview link or add candidates to get started."
  }

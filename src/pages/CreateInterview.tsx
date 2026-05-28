@@ -50,6 +50,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { toastPlanError } from "@/lib/planErrorToast";
+import { useCredits, useRefreshCredits } from "@/hooks/usePlan";
 import { listsApi, CandidateList } from "@/services/listsApi";
 import { qualifiedListsApi, QualifiedList } from "@/services/qualifiedListsApi";
 import { duplicateDetectionApi, DuplicateAnalysis } from "@/services/duplicateDetectionApi";
@@ -391,6 +393,8 @@ export default function CreateInterview() {
   }, [currentProject?.id, currentWorkspace?.id, formData.duration]);
 
   const { toast } = useToast();
+  const credits = useCredits();
+  const refreshCredits = useRefreshCredits();
 
   // Helper to clear blueprint when user edits form fields
   const clearBlueprintOnEdit = () => {
@@ -1923,11 +1927,20 @@ export default function CreateInterview() {
       }
 
       setProgressModalOpen(false);
-      toast({
-        title: `Failed to ${isEditMode ? 'Update' : 'Create'} Interview`,
-        description: error.message || "Please try again later.",
-        variant: "destructive"
-      });
+      // P-Plans F2: surface credit/plan denials with specific copy
+      // (createInterview itself doesn't charge today — invite-candidates
+      // does — but if the policy changes, this is ready).
+      if (toastPlanError(toast, error)) {
+        // W-FE-P1: plan/credit denial — backend's `remaining` is the source
+        // of truth; refresh so the Header badge + downstream checks update.
+        void refreshCredits();
+      } else {
+        toast({
+          title: `Failed to ${isEditMode ? 'Update' : 'Create'} Interview`,
+          description: error.message || "Please try again later.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

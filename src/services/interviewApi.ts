@@ -363,10 +363,21 @@ class InterviewApiService {
     );
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const err: Error & { status?: number } = new Error(
-        data?.detail || data?.error || 'Resend failed'
-      );
+      // Preserve structured `detail` (e.g. P-Plans 403
+      // `{error: "credits_required", required, remaining, reason}`)
+      // so callers can render a specific toast / upgrade CTA.
+      const detail = (data as any)?.detail;
+      const message =
+        (typeof detail === 'object' && (detail.message || detail.error)) ||
+        (typeof detail === 'string' && detail) ||
+        (data as any)?.error ||
+        'Resend failed';
+      const err: Error & { status?: number; detail?: unknown; code?: string } = new Error(message);
       err.status = response.status;
+      if (typeof detail === 'object' && detail !== null) {
+        err.detail = detail;
+        err.code = (detail as any).error;
+      }
       throw err;
     }
     return data;
@@ -408,10 +419,18 @@ class InterviewApiService {
     );
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const err: Error & { status?: number } = new Error(
-        data?.detail || data?.error || 'Reset failed'
-      );
+      const detail = (data as any)?.detail;
+      const message =
+        (typeof detail === 'object' && (detail.message || detail.error)) ||
+        (typeof detail === 'string' && detail) ||
+        (data as any)?.error ||
+        'Reset failed';
+      const err: Error & { status?: number; detail?: unknown; code?: string } = new Error(message);
       err.status = response.status;
+      if (typeof detail === 'object' && detail !== null) {
+        err.detail = detail;
+        err.code = (detail as any).error;
+      }
       throw err;
     }
     return data;
@@ -576,8 +595,20 @@ class InterviewApiService {
       },
     );
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || error.error || 'Failed to resend invitations');
+      const data = await response.json().catch(() => ({}));
+      const detail = (data as any)?.detail;
+      const message =
+        (typeof detail === 'object' && (detail.message || detail.error)) ||
+        (typeof detail === 'string' && detail) ||
+        (data as any)?.error ||
+        'Failed to resend invitations';
+      const err: Error & { status?: number; detail?: unknown; code?: string } = new Error(message);
+      err.status = response.status;
+      if (typeof detail === 'object' && detail !== null) {
+        err.detail = detail;
+        err.code = (detail as any).error;
+      }
+      throw err;
     }
     return await response.json();
   }

@@ -5,6 +5,7 @@ import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { listsApi, CandidateList } from '@/services/listsApi';
 import { ListCard } from '@/components/analytics/ListCard';
 import { AnalyticsList } from '@/types/analytics';
+import { PlanGate } from '@/components/auth/PlanGate';
 import rollerSkatingSvg from '@/assets/empty-state-lists-page/roller-skating.svg';
 
 export function GlobalListsTab() {
@@ -133,6 +134,7 @@ export function GlobalListsTab() {
   }
 
   return (
+    <PlanGate feature="ct_talent_pool" level="VIEW">
     <div className="pt-2 pl-1 pr-4 pb-4">
       {globalLists.length === 0 ? (
         <div className="text-center py-8">
@@ -167,5 +169,6 @@ export function GlobalListsTab() {
         </div>
       )}
     </div>
+    </PlanGate>
   );
 }

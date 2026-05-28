@@ -6,6 +6,8 @@ import { Calendar, User, CheckCircle2, Clock, XCircle, AlertCircle, Eye, CheckCi
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { interviewApi } from "@/services/interviewApi";
+import { toastPlanError } from "@/lib/planErrorToast";
+import { useCredits, useRefreshCredits } from "@/hooks/usePlan";
 import {
   Radar,
   RadarChart,
@@ -28,6 +30,17 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
   const [copied, setCopied] = useState(false);
   const [resending, setResending] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const credits = useCredits();
+  const refreshCredits = useRefreshCredits();
+  // P-Plans F4: if this candidate has a completed session, a Resend
+  // becomes a retake (charges 1 credit). Reset always re-launches the
+  // interview so it charges regardless. Disable the buttons proactively
+  // when balance is empty to spare the user a 403.
+  const candidateCompleted =
+    candidate.session_status === "completed" || candidate.score != null;
+  const resendWouldCharge = candidateCompleted;
+  const blockResend = credits.empty && resendWouldCharge;
+  const blockReset = credits.empty;
   // Local optimistic mirror of the email_* fields so the UI flips
   // immediately after a Resend without re-fetching the whole list.
   const [emailState, setEmailState] = useState<{
@@ -78,8 +91,14 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
           variant: "destructive",
         });
       }
+      // W-FE-P1: resend may have charged a retake credit; refresh balance.
+      void refreshCredits();
     } catch (err: any) {
-      if (err?.status === 429) {
+      // P-Plans: surface credit / plan denials with a specific toast.
+      if (toastPlanError(toast, err)) {
+        // Plan/credit denial — backend's `remaining` is authoritative.
+        void refreshCredits();
+      } else if (err?.status === 429) {
         toast({
           title: "Slow down",
           description: "Resend rate limit hit. Try again in a minute.",
@@ -125,12 +144,19 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
       if (onRefresh) {
         await onRefresh();
       }
+      // W-FE-P1: reset always consumes a credit (retake); refresh balance.
+      void refreshCredits();
     } catch (err: any) {
-      toast({
-        title: "Reset failed",
-        description: err?.message || "Network error",
-        variant: "destructive",
-      });
+      if (toastPlanError(toast, err)) {
+        // Plan/credit denial — backend's `remaining` is authoritative.
+        void refreshCredits();
+      } else {
+        toast({
+          title: "Reset failed",
+          description: err?.message || "Network error",
+          variant: "destructive",
+        });
+      }
     } finally {
       setResetting(false);
     }
@@ -504,9 +530,13 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
                 </span>
                 <button
                   onClick={handleResend}
-                  disabled={resending || resetting}
+                  disabled={resending || resetting || blockResend}
                   className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-primary text-primary hover:bg-primary hover:text-paper disabled:opacity-50 transition-colors"
-                  title="Resend invitation email"
+                  title={
+                    blockResend
+                      ? "Out of credits — retake costs 1 credit, balance is 0. Contact us to top up."
+                      : "Resend invitation email"
+                  }
                 >
                   <RefreshCw
                     className={`h-3 w-3 ${resending ? "animate-spin" : ""}`}
@@ -520,9 +550,13 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
                 {candidate.invitation_id && (
                   <button
                     onClick={handleResetAndReinvite}
-                    disabled={resetting || resending}
+                    disabled={resetting || resending || blockReset}
                     className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded border border-destructive text-destructive hover:bg-destructive hover:text-paper disabled:opacity-50 transition-colors"
-                    title="Mark previous attempts as abandoned and re-send the invitation"
+                    title={
+                      blockReset
+                        ? "Out of credits — reset costs 1 credit, balance is 0. Contact us to top up."
+                        : "Mark previous attempts as abandoned and re-send the invitation"
+                    }
                   >
                     <RotateCcw
                       className={`h-3 w-3 ${resetting ? "animate-spin" : ""}`}
