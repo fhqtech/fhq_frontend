@@ -13,6 +13,9 @@ export default function InterviewPreCheckPage() {
   // Show a retry screen instead of pushing the candidate into a half-prepared
   // interview where the agent would improvise an apology.
   const [contextNotReady, setContextNotReady] = useState<string | null>(null);
+  // 403 credits_required = recruiter's workspace didn't pay for this seat.
+  // Non-retryable from the candidate's side; show a blocking message.
+  const [interviewBlocked, setInterviewBlocked] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
 
   // Get data from navigation state (passed from CandidatePortal)
@@ -68,11 +71,17 @@ export default function InterviewPreCheckPage() {
       console.log(`🚀 Starting interview with session: ${sessionId}`,
         activeSession?.session_id ? '(resuming)' : preCreatedSessionId ? '(pre-created)' : '(new)');
 
+      // P7: candidate session JWT — required by the gated /candidate-sessions/start.
+      const candidateJwt = localStorage.getItem('candidate_auth_token');
+      const sessionHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (candidateJwt) sessionHeaders['Authorization'] = `Bearer ${candidateJwt}`;
       const sessionResponse = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/candidate-sessions/start`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: sessionHeaders,
           body: JSON.stringify({
             candidate_token: stateData?.candidateToken,
             session_id: sessionId,
@@ -97,6 +106,20 @@ export default function InterviewPreCheckPage() {
         return;
       }
 
+      if (sessionResponse.status === 403) {
+        // Recruiter workspace lacks credits for this seat. Non-retryable
+        // from candidate side — they need to reach the recruiter.
+        const body = await sessionResponse.json().catch(() => ({}));
+        const detail = body?.detail;
+        if (detail && typeof detail === 'object' && detail.error === 'credits_required') {
+          setInterviewBlocked(
+            detail.message ||
+              'This interview is not active. Please contact the recruiter.'
+          );
+          return;
+        }
+      }
+
       if (!sessionResponse.ok) {
         throw new Error('Failed to create interview session');
       }
@@ -114,19 +137,29 @@ export default function InterviewPreCheckPage() {
       try {
         const abort = new AbortController();
         const timer = setTimeout(() => abort.abort(), 8_000);
-        fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare-greeting`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              session_id: finalSessionId,
-              interview_id: interview.id,
-              candidate_id: candidate.id,
-            }),
-            signal: abort.signal,
-          },
-        )
+        (() => {
+          // P7: include candidate session JWT.
+          const candidateJwt = localStorage.getItem('candidate_auth_token');
+          const greetingHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+          if (candidateJwt)
+            greetingHeaders['Authorization'] = `Bearer ${candidateJwt}`;
+          return fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare-greeting`,
+            {
+              method: 'POST',
+              headers: greetingHeaders,
+              body: JSON.stringify({
+                candidate_token: stateData?.candidateToken,
+                session_id: finalSessionId,
+                interview_id: interview.id,
+                candidate_id: candidate.id,
+              }),
+              signal: abort.signal,
+            },
+          );
+        })()
           .then((resp) => {
             clearTimeout(timer);
             if (!resp.ok) {
@@ -185,6 +218,27 @@ export default function InterviewPreCheckPage() {
 
   // Removed: Pre-create agent session moved to resume selection
   // The /prepare API should only run AFTER a resume is selected, not on page load
+
+  if (interviewBlocked) {
+    return (
+      <div className="min-h-dvh bg-paper flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-16 h-16 rounded-full bg-gold-soft flex items-center justify-center">
+            <AlertTriangle className="w-8 h-8 text-gold-ink" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold text-ink">Interview not active</h1>
+            <p className="text-sm text-muted">{interviewBlocked}</p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" onClick={handleCancel}>
+              Back
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (contextNotReady) {
     return (

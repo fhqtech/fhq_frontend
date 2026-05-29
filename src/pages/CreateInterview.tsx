@@ -50,6 +50,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { toastPlanError } from "@/lib/planErrorToast";
+import { useCredits, useRefreshCredits } from "@/hooks/usePlan";
 import { listsApi, CandidateList } from "@/services/listsApi";
 import { qualifiedListsApi, QualifiedList } from "@/services/qualifiedListsApi";
 import { duplicateDetectionApi, DuplicateAnalysis } from "@/services/duplicateDetectionApi";
@@ -60,6 +62,40 @@ import { FilePreview } from "@/components/ui/file-preview";
 import { templateApi, InterviewTemplate } from "@/services/templateApi";
 import { creditApi, CreditInfo } from "@/services/creditApi";
 import { track, Events } from "@/lib/analytics";
+import { extractFromJDFile, extractFromJDText, type ExtractedJD } from "@/services/jdExtractApi";
+
+// Cap matches the preview-blueprint Pydantic schema's max_length=1000
+// (funnelhq_api/routers/blueprint_preview.py:PreviewRequest.description).
+// Keep these in sync — the backend cap exists to bound Gemini prompt size.
+const DESCRIPTION_MAX_CHARS = 1000;
+const DESCRIPTION_WARN_CHARS = 950;
+
+/**
+ * Compose a description from a JD extraction, respecting `cap`. Summary
+ * is the floor (always kept, truncated alone if needed); responsibilities,
+ * skills, and experience are appended only if they fit whole. Skipping
+ * a section is cleaner than mid-section truncation — the recruiter
+ * sees a coherent block they can refine via the "Refine with notes"
+ * textarea in BlueprintPreviewRail.
+ */
+function composeJdDescription(jd: ExtractedJD, cap: number = DESCRIPTION_MAX_CHARS): string {
+  let out = (jd.summary || "").trim().slice(0, cap);
+  const tryAppend = (section: string) => {
+    if (!section) return;
+    const candidate = (out ? out + "\n" : "") + section;
+    if (candidate.length <= cap) out = candidate;
+  };
+  if (jd.responsibilities.length) {
+    tryAppend(`Responsibilities:\n- ${jd.responsibilities.join("\n- ")}`);
+  }
+  if (jd.requiredSkills.length) {
+    tryAppend(`Required skills: ${jd.requiredSkills.join(", ")}`);
+  }
+  if (jd.experienceYears > 0) {
+    tryAppend(`Minimum experience: ${jd.experienceYears} years`);
+  }
+  return out.trim();
+}
 
 export default function CreateInterview() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -215,6 +251,45 @@ export default function CreateInterview() {
   const [totalSteps, setTotalSteps] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
   const [wasInterviewStarted, setWasInterviewStarted] = useState(false); // Track if interview was auto-started (template flow)
+
+  // JD intake (screening + fitment only). 'design' = use the existing
+  // "Help me design the role" flow; 'jd' = paste or upload a JD which
+  // seeds title/description/domain.
+  const [jdMode, setJdMode] = useState<'design' | 'jd'>('design');
+  const [jdText, setJdText] = useState("");
+  const [jdLoading, setJdLoading] = useState(false);
+  const [jdError, setJdError] = useState<string | null>(null);
+
+  // Backend returns domain in the LangGraph form (management_consulting);
+  // the frontend dropdown uses the shorter "consulting" key. Map across.
+  const jdDomainToFinanceDomain = (d: ExtractedJD['domain']): FinanceDomainId | "" => {
+    switch (d) {
+      case 'accounting': return 'accounting';
+      case 'taxation': return 'taxation';
+      case 'management_consulting': return 'consulting';
+      default: return '';
+    }
+  };
+
+  const applyJdExtraction = (jd: ExtractedJD) => {
+    // Compose within DESCRIPTION_MAX_CHARS so the downstream
+    // preview-blueprint POST (Pydantic-capped at 1000) doesn't 422.
+    const composedDescription = composeJdDescription(jd);
+
+    setFormData((prev) => ({
+      ...prev,
+      title: jd.title || prev.title,
+      description: composedDescription || prev.description,
+      financeDomain: jdDomainToFinanceDomain(jd.domain) || prev.financeDomain,
+    }));
+    setJdError(null);
+    toast({
+      title: "JD applied",
+      description: jd.title
+        ? `Pre-filled the role as "${jd.title}". You can edit anything before continuing.`
+        : "Pre-filled the form from the JD. You can edit anything before continuing.",
+    });
+  };
 
   // Lists-related states
   const [availableLists, setAvailableLists] = useState<CandidateList[]>([]);
@@ -391,6 +466,8 @@ export default function CreateInterview() {
   }, [currentProject?.id, currentWorkspace?.id, formData.duration]);
 
   const { toast } = useToast();
+  const credits = useCredits();
+  const refreshCredits = useRefreshCredits();
 
   // Helper to clear blueprint when user edits form fields
   const clearBlueprintOnEdit = () => {
@@ -592,22 +669,14 @@ export default function CreateInterview() {
 
   // Load interview data for editing
   useEffect(() => {
-    console.log('Edit useEffect triggered:', { isEditMode, editId });
     if (isEditMode && editId) {
-      console.log('Setting loading to true and fetching data for:', editId);
       setIsLoadingInterview(true);
       fetchInterviewData(editId);
     }
   }, [isEditMode, editId]);
 
-  // Debug: Log form data changes
-  useEffect(() => {
-    console.log('📋 FormData updated:', formData);
-  }, [formData]);
-
   // Reset list creation states ONLY on initial component mount
   useEffect(() => {
-    console.log('🔄 Component initial mount, resetting list creation states');
     setShowCreateListForm(false);
     setIsCreatingList(false);
   }, []); // Empty dependency array = only runs once on mount
@@ -683,7 +752,6 @@ export default function CreateInterview() {
   }, [formData, needsStepValidation, isEditMode, sourceParam]);
   
   const fetchInterviewData = async (interviewId: string) => {
-    console.log('🔄 Starting fetchInterviewData for:', interviewId);
     try {
       const userToken = localStorage.getItem('auth_token');
 
@@ -692,7 +760,6 @@ export default function CreateInterview() {
       // gracefully if context isn't ready yet (the parent useEffect
       // will retrigger once it loads).
       if (!currentWorkspace?.id || !currentProject?.id) {
-        console.log('⏸ fetchInterviewData waiting for workspace/project context');
         return;
       }
 
@@ -707,11 +774,9 @@ export default function CreateInterview() {
         }
       );
 
-      console.log('📥 Interview response status:', interviewResponse.status);
       
       if (interviewResponse.ok) {
         const interviewResult = await interviewResponse.json();
-        console.log('📦 Raw interview result:', interviewResult);
         
         // Extract interview data - handle different possible structures
         let interviewData = interviewResult.interview || interviewResult.data || interviewResult;
@@ -723,12 +788,10 @@ export default function CreateInterview() {
           interviewData = restData;
         }
         
-        console.log('📋 Interview data:', interviewData);
         
         // Using lists-based approach - no need to load candidate sources
         
         // Map backend data to form structure
-        console.log('🔍 Loading interview data for editing:', interviewData);
         const newFormData = {
           title: interviewData.title || "",
           type: interviewData.type || "",
@@ -767,9 +830,7 @@ export default function CreateInterview() {
           }
         };
         
-        console.log('🔄 About to set form data:', newFormData);
         setFormData(newFormData);
-        console.log('✅ Form data has been set');
 
         // Store original values for blueprint regeneration detection
         setOriginalInterviewData({
@@ -778,7 +839,6 @@ export default function CreateInterview() {
           type: interviewData.type || "",
           duration: interviewData.duration || "30"
         });
-        console.log('📝 Original interview data stored for blueprint change detection');
 
         toast({
           title: "Interview Loaded",
@@ -873,9 +933,7 @@ export default function CreateInterview() {
     }
 
     try {
-      console.log('📋 Setting loading to true...');
       setIsLoadingLists(true);
-      console.log(`📋 Fetching ${viewType} lists from API...`);
 
       if (viewType === 'existing') {
         // Fetch both regular lists and qualified lists in parallel (project-scoped)
@@ -884,12 +942,9 @@ export default function CreateInterview() {
           qualifiedListsApi.getProjectQualifiedLists(currentWorkspace.id, currentProject.id)
         ]);
 
-        console.log('📋 Regular lists received:', regularLists);
-        console.log('📋 Qualified lists received:', qualifiedLists);
 
         // Combine both lists - qualified lists are also CandidateList compatible
         const allLists = [...regularLists, ...qualifiedLists];
-        console.log('📋 Total lists:', allLists.length);
 
         setAvailableLists(allLists);
       } else {
@@ -900,7 +955,6 @@ export default function CreateInterview() {
         ]);
 
         const allSharedLists = [...regularSharedLists, ...qualifiedSharedLists];
-        console.log('📋 Shared lists received:', allSharedLists.length, '(regular:', regularSharedLists.length, 'qualified:', qualifiedSharedLists.length, ')');
         setAvailableLists(allSharedLists);
       }
     } catch (error) {
@@ -911,7 +965,6 @@ export default function CreateInterview() {
         variant: "destructive"
       });
     } finally {
-      console.log('📋 Setting loading to false...');
       setIsLoadingLists(false);
     }
   };
@@ -1127,19 +1180,9 @@ export default function CreateInterview() {
 
   // Modal handlers
   const handleModalContinue = () => {
-    console.log('🔥 handleModalContinue called');
-    console.log('🔥 duplicateAnalysis state:', duplicateAnalysis);
 
     // Store duplicate analysis in formData if available
     if (duplicateAnalysis) {
-      console.log('🔥 Storing analysis in formData:', {
-        totalCandidates: duplicateAnalysis.totalCandidates,
-        uniqueCandidates: duplicateAnalysis.uniqueCandidates,
-        totalDuplicates: duplicateAnalysis.totalDuplicates,
-        duplicateRate: duplicateAnalysis.duplicateRate,
-        analyzedAt: new Date().toISOString(),
-        analyzedListIds: [...formData.selectedListIds]
-      });
 
       setFormData(prev => ({
         ...prev,
@@ -1153,7 +1196,6 @@ export default function CreateInterview() {
         }
       }));
     } else {
-      console.log('🔥 No duplicateAnalysis found to store');
     }
 
     setShowDuplicateModal(false);
@@ -1198,16 +1240,13 @@ export default function CreateInterview() {
   };
 
   const handleCreateList = async () => {
-    console.log('🚀 handleCreateList called!', { createListFormData, currentlyCreating: isCreatingList });
 
     // Prevent multiple simultaneous calls
     if (isCreatingList) {
-      console.log('⚠️ Already creating list, ignoring duplicate call');
       return;
     }
 
     if (!createListFormData.name.trim()) {
-      console.log('❌ No list name provided');
       toast({
         title: "Name Required",
         description: "Please enter a list name.",
@@ -1216,11 +1255,9 @@ export default function CreateInterview() {
       return;
     }
 
-    console.log('✅ Starting list creation...');
 
     // Set up a timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
-      console.log('⏰ List creation timeout reached, force resetting state');
       setIsCreatingList(false);
       setShowCreateListForm(false);
       toast({
@@ -1242,19 +1279,15 @@ export default function CreateInterview() {
 
     try {
       setIsCreatingList(true);
-      console.log('🔄 Set isCreatingList to true');
 
       // Create the list (project-scoped)
-      console.log('📝 Creating list with data:', { name: createListFormData.name, description: createListFormData.description });
       const listId = await listsApi.createList(currentProject.id, {
         name: createListFormData.name,
         description: createListFormData.description
       });
-      console.log('✅ List created with ID:', listId);
 
       // Add sources if any
       if (createListFormData.sources.length > 0) {
-        console.log('📎 Adding sources to list:', createListFormData.sources);
         for (const source of createListFormData.sources) {
           const apiPayload = {
             type: source.type,
@@ -1262,16 +1295,12 @@ export default function CreateInterview() {
             name: source.name
             // Removed candidateCount to match Lists.tsx exactly
           };
-          console.log('🔍 Debug - API payload for source:', apiPayload);
-          console.log('🔍 Debug - metadata structure:', JSON.stringify(apiPayload.metadata, null, 2));
           await listsApi.addSourceToList(currentWorkspace.id, listId, apiPayload);
         }
-        console.log('✅ All sources added successfully');
 
         // Check for email duplicates within the new list if it has multiple sources
         if (createListFormData.sources.length > 1) {
           try {
-            console.log('🔍 Checking for email duplicates within new list...');
             const analysis = await duplicateDetectionApi.analyzeSingleListDuplicates(listId);
             if (analysis.totalDuplicates > 0) {
               toast({
@@ -1287,7 +1316,6 @@ export default function CreateInterview() {
       }
 
       // Reload lists to get updated data
-      console.log('🔄 Reloading available lists...');
       await loadAvailableLists();
 
       // Auto-select the new list
@@ -1307,14 +1335,12 @@ export default function CreateInterview() {
       // Force a re-render by ensuring state is truly cleared
       setTimeout(() => {
         setCreateListFormData({ name: '', description: '', sources: [] });
-        console.log('🔄 Force cleared form data after successful creation');
       }, 100);
 
       const sourcesText = sourcesCount > 0
         ? ` with ${sourcesCount} source${sourcesCount !== 1 ? 's' : ''}`
         : '';
 
-      console.log('🎉 List creation completed successfully');
       toast({
         title: "List Created",
         description: `"${listName}" has been created${sourcesText} and selected.`
@@ -1327,14 +1353,12 @@ export default function CreateInterview() {
         variant: "destructive"
       });
     } finally {
-      console.log('🔄 Finally block: clearing timeout and resetting isCreatingList to false');
       clearTimeout(timeoutId);
       setIsCreatingList(false);
 
       // Extra safety: ensure state is reset after a small delay
       setTimeout(() => {
         setIsCreatingList(false);
-        console.log('🛡️ Safety reset: ensured isCreatingList is false');
       }, 100);
     }
   };
@@ -1373,7 +1397,6 @@ export default function CreateInterview() {
   // Load lists when workspace and project are available
   useEffect(() => {
     if (currentWorkspace && currentProject) {
-      console.log('🔄 Workspace and project ready, loading lists...');
       loadAvailableLists();
     }
   }, [currentWorkspace, currentProject]);
@@ -1435,7 +1458,8 @@ export default function CreateInterview() {
         const requiredFields = [];
         if (!data.title?.trim()) requiredFields.push('Interview Title');
         if (!data.type?.trim()) requiredFields.push('Interview Type');
-        if (!data.description?.trim()) requiredFields.push('Description');
+        // Skill analysis is profile-driven — no role description required.
+        if (data.type !== 'skill_analysis' && !data.description?.trim()) requiredFields.push('Description');
         if (!data.duration || (typeof data.duration === 'string' && !data.duration.trim()) || (typeof data.duration === 'number' && data.duration <= 0)) requiredFields.push('Duration');
         
         if (requiredFields.length > 0) {
@@ -1551,12 +1575,6 @@ export default function CreateInterview() {
         return false;
       }
 
-      console.log('🔧 Blueprint Generation Started:', {
-        workspaceId: currentWorkspace.id,
-        projectId: currentProject.id,
-        interviewId,
-        title: title.substring(0, 50)
-      });
 
       await interviewApi.generateBlueprint(currentWorkspace.id, currentProject.id, {
         id: interviewId,
@@ -1593,11 +1611,6 @@ export default function CreateInterview() {
       currentData.duration !== originalInterviewData.duration
     );
 
-    console.log('🔍 Blueprint fields change detection:', {
-      hasChanged,
-      original: originalInterviewData,
-      current: currentData
-    });
 
     return hasChanged;
   };
@@ -1727,7 +1740,6 @@ export default function CreateInterview() {
       updateProgressStep(3, 'active');
 
         // Lists are already processed via the API payload, no separate API calls needed
-        console.log(`✅ Selected lists (${formData.selectedListIds.length}) processed with interview`);
         updateProgressStep(3, 'completed', `${formData.selectedListIds.length} lists linked successfully`);
 
         // Step 4: Blueprint or Start Interview (conditional based on template)
@@ -1923,11 +1935,20 @@ export default function CreateInterview() {
       }
 
       setProgressModalOpen(false);
-      toast({
-        title: `Failed to ${isEditMode ? 'Update' : 'Create'} Interview`,
-        description: error.message || "Please try again later.",
-        variant: "destructive"
-      });
+      // P-Plans F2: surface credit/plan denials with specific copy
+      // (createInterview itself doesn't charge today — invite-candidates
+      // does — but if the policy changes, this is ready).
+      if (toastPlanError(toast, error)) {
+        // W-FE-P1: plan/credit denial — backend's `remaining` is the source
+        // of truth; refresh so the Header badge + downstream checks update.
+        void refreshCredits();
+      } else {
+        toast({
+          title: `Failed to ${isEditMode ? 'Update' : 'Create'} Interview`,
+          description: error.message || "Please try again later.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -2380,6 +2401,172 @@ export default function CreateInterview() {
                 </div>
               )}
 
+              {/* JD intake — screening + fitment only, create mode only.
+                  Recruiter chooses between "design the role" (existing flow)
+                  and "I have a JD" (paste/upload → backend extract → seed
+                  title/description/domain). Skill analysis is profile-driven
+                  and skips this entirely. */}
+              {!isEditMode && formData.type !== 'skill_analysis' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+                      Start with
+                    </Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={jdMode === 'design' ? 'default' : 'outline-solid'}
+                        className={`h-8 text-xs font-medium px-3 rounded ${
+                          jdMode === 'design' ? 'text-paper' : 'hover:text-paper'
+                        }`}
+                        style={{
+                          border: 'none',
+                          backgroundColor: jdMode === 'design' ? 'hsl(var(--ink))' : 'transparent',
+                          boxShadow: 'var(--shadow-1)',
+                        }}
+                        onClick={() => {
+                          setJdMode('design');
+                          setJdError(null);
+                        }}
+                      >
+                        Design with AI
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={jdMode === 'jd' ? 'default' : 'outline-solid'}
+                        className={`h-8 text-xs font-medium px-3 rounded ${
+                          jdMode === 'jd' ? 'text-paper' : 'hover:text-paper'
+                        }`}
+                        style={{
+                          border: 'none',
+                          backgroundColor: jdMode === 'jd' ? 'hsl(var(--ink))' : 'transparent',
+                          boxShadow: 'var(--shadow-1)',
+                        }}
+                        onClick={() => setJdMode('jd')}
+                      >
+                        I have a JD
+                      </Button>
+                    </div>
+                  </div>
+
+                  {jdMode === 'jd' && (
+                    <div
+                      className="p-4 rounded-sm bg-paper-2 space-y-3"
+                      style={{ boxShadow: 'var(--shadow-1)' }}
+                    >
+                      <Textarea
+                        placeholder="Paste the job description here (or upload a PDF/DOCX below)…"
+                        value={jdText}
+                        onChange={(e) => setJdText(e.target.value)}
+                        className="min-h-[140px] resize-none rounded border-none bg-paper"
+                        style={{ boxShadow: 'var(--shadow-1)' }}
+                      />
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            if (!jdText.trim()) {
+                              setJdError("Paste a job description first, or upload a file.");
+                              return;
+                            }
+                            setJdLoading(true);
+                            setJdError(null);
+                            try {
+                              const result = await extractFromJDText(jdText);
+                              applyJdExtraction(result);
+                            } catch (err: any) {
+                              setJdError(err?.message || "Could not read this JD. Try again or paste it instead.");
+                            } finally {
+                              setJdLoading(false);
+                            }
+                          }}
+                          disabled={jdLoading || !jdText.trim()}
+                          className="h-9 text-xs font-medium px-4 rounded text-paper"
+                          style={{
+                            border: 'none',
+                            backgroundColor: 'hsl(var(--ink))',
+                            boxShadow: 'var(--shadow-1)',
+                          }}
+                        >
+                          {jdLoading ? (
+                            <><CircleNotch className="w-3.5 h-3.5 mr-2 animate-spin" />Reading…</>
+                          ) : (
+                            <>Use this JD</>
+                          )}
+                        </Button>
+                        <Label
+                          htmlFor="jdFileUpload"
+                          className="inline-flex items-center gap-2 px-3 h-9 text-xs font-medium rounded cursor-pointer hover:bg-paper-3"
+                          style={{ boxShadow: 'var(--shadow-1)' }}
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          Upload PDF / DOCX
+                        </Label>
+                        <input
+                          id="jdFileUpload"
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          className="hidden"
+                          disabled={jdLoading}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setJdLoading(true);
+                            setJdError(null);
+                            try {
+                              const result = await extractFromJDFile(file);
+                              applyJdExtraction(result);
+                            } catch (err: any) {
+                              setJdError(err?.message || "Could not read this file. Try pasting the text instead.");
+                            } finally {
+                              setJdLoading(false);
+                              // Reset so re-selecting the same file fires onChange again
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                        <p className="text-[11px] text-muted">
+                          We read the JD and pre-fill title, domain, and description. You can edit anything before continuing.
+                        </p>
+                      </div>
+                      {jdError && (
+                        <div
+                          role="alert"
+                          className="rounded-sm border border-danger/30 bg-danger/[0.04] p-3 space-y-2"
+                        >
+                          <div className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+                            <div className="flex-1 space-y-1">
+                              <p className="text-xs font-medium text-danger">Couldn't use this job description</p>
+                              <p className="text-xs text-ink-soft">{jdError}</p>
+                            </div>
+                          </div>
+                          <div className="pl-6">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setJdError(null);
+                                // Focus the paste textarea so the recruiter
+                                // has an obvious next step. Same panel,
+                                // no tab switching needed.
+                                const ta = document.querySelector<HTMLTextAreaElement>(
+                                  'textarea[placeholder^="Paste the job description"]'
+                                );
+                                ta?.focus();
+                                ta?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              }}
+                              className="text-[11px] font-medium text-gold-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink rounded-sm"
+                            >
+                              Paste the text instead →
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Top row: Title, Interview Type, and Duration */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Title */}
@@ -2388,14 +2575,16 @@ export default function CreateInterview() {
                       sentence case per CLAUDE.md form-label rule. */}
                   <Label htmlFor="title" className="text-sm flex items-center gap-2">
                     Interview title <span className="text-danger">*</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowRoleCurator(true)}
-                      className="ml-auto text-[10px] font-mono normal-case text-gold-ink hover:underline inline-flex items-center gap-1"
-                    >
-                      <Wand2 className="w-3 h-3" />
-                      Help me design this role
-                    </button>
+                    {formData.type !== 'skill_analysis' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowRoleCurator(true)}
+                        className="ml-auto text-[10px] font-mono normal-case text-gold-ink hover:underline inline-flex items-center gap-1"
+                      >
+                        <Wand2 className="w-3 h-3" />
+                        Help me design this role
+                      </button>
+                    )}
                     {isSuggesting && (
                       <span className="text-[10px] font-mono normal-case text-info inline-flex items-center gap-1">
                         <CircleNotch className="w-3 h-3 animate-spin" /> Suggesting defaults…
@@ -2504,7 +2693,21 @@ export default function CreateInterview() {
                 </div>
               </div>
 
+              {/* Skill analysis: no role anchor — interview is driven by each
+                  candidate's resume/profile at runtime. Hide domain, sub-domain,
+                  description, and the blueprint rail; show a one-line hint instead. */}
+              {formData.type === 'skill_analysis' && (
+                <div className="p-4 bg-info-soft/40 border border-rule rounded-sm">
+                  <p className="text-sm text-ink-soft">
+                    Skill analysis interviews are driven by each candidate's
+                    profile. No role description needed — just name the
+                    interview, pick a duration, and attach candidates.
+                  </p>
+                </div>
+              )}
+
               {/* Domain row — finance sub-domain taxonomy (Phase B) */}
+              {formData.type !== 'skill_analysis' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <Label htmlFor="financeDomain" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
@@ -2565,8 +2768,10 @@ export default function CreateInterview() {
                   </Select>
                 </div>
               </div>
+              )}
 
-              {/* Description */}
+              {/* Description — role-anchored, skipped for skill analysis. */}
+              {formData.type !== 'skill_analysis' && (
               <div>
                 <Label htmlFor="description" className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Description <span className="text-danger">*</span></Label>
                 <div className="relative">
@@ -2574,6 +2779,7 @@ export default function CreateInterview() {
                     id="description"
                     placeholder="Describe the finance role: vertical (accounting / taxation / advisory), seniority, must-have technical depth, regulatory frameworks involved..."
                     value={formData.description}
+                    maxLength={DESCRIPTION_MAX_CHARS}
                     onChange={(e) => {
                       clearBlueprintOnEdit();
                       setFormData(prev => ({ ...prev, description: e.target.value }));
@@ -2587,6 +2793,19 @@ export default function CreateInterview() {
                     }}
                     required
                   />
+                  <div className="mt-1 flex justify-end text-[10px] font-mono tabular-nums">
+                    <span
+                      className={
+                        formData.description.length >= DESCRIPTION_MAX_CHARS
+                          ? "text-danger"
+                          : formData.description.length >= DESCRIPTION_WARN_CHARS
+                            ? "text-warning"
+                            : "text-muted"
+                      }
+                    >
+                      {formData.description.length} / {DESCRIPTION_MAX_CHARS}
+                    </span>
+                  </div>
                   <Dialog open={isDescriptionModalOpen} onOpenChange={setIsDescriptionModalOpen}>
                     <DialogTrigger asChild>
                       <Button
@@ -2608,6 +2827,7 @@ export default function CreateInterview() {
                       <Textarea
                         placeholder="Describe the interview objectives and what candidates can expect..."
                         value={formData.description}
+                        maxLength={DESCRIPTION_MAX_CHARS}
                         onChange={(e) => {
                           clearBlueprintOnEdit();
                           setFormData(prev => ({ ...prev, description: e.target.value }));
@@ -2617,6 +2837,19 @@ export default function CreateInterview() {
                         }}
                         className="min-h-[300px] resize-none"
                       />
+                      <div className="mt-1 flex justify-end text-[10px] font-mono tabular-nums">
+                        <span
+                          className={
+                            formData.description.length >= DESCRIPTION_MAX_CHARS
+                              ? "text-danger"
+                              : formData.description.length >= DESCRIPTION_WARN_CHARS
+                                ? "text-warning"
+                                : "text-muted"
+                          }
+                        >
+                          {formData.description.length} / {DESCRIPTION_MAX_CHARS}
+                        </span>
+                      </div>
                       <DialogFooter>
                         <Button onClick={() => setIsDescriptionModalOpen(false)}>
                           Done
@@ -2626,6 +2859,7 @@ export default function CreateInterview() {
                   </Dialog>
                 </div>
               </div>
+              )}
 
               {/* Preview the AI interviewer's greeting — uses formData.title for personalization. */}
               {formData.title?.trim().length >= 4 && (
@@ -2728,7 +2962,7 @@ export default function CreateInterview() {
               </div>
             </CardContent>
           </Card>
-          {!isEditMode && (
+          {!isEditMode && formData.type !== 'skill_analysis' && (
             <BlueprintPreviewRail
               title={formData.title}
               type={formData.type}
@@ -2814,7 +3048,6 @@ export default function CreateInterview() {
                 {/* Create Candidate Pool Modal */}
                 <Dialog open={showCreateListForm} onOpenChange={(open) => {
                   if (!open) {
-                    console.log('🔄 Modal closed - resetting form');
                     setShowCreateListForm(false);
                     setIsCreatingList(false);
                     setCreateListFormData({ name: '', description: '', sources: [] });
@@ -3135,7 +3368,6 @@ export default function CreateInterview() {
                       <Button
                         variant="outline"
                         onClick={() => {
-                          console.log('🔄 Cancel clicked: closing modal and resetting state');
                           setShowCreateListForm(false);
                           setIsCreatingList(false);
                           setCreateListFormData({ name: '', description: '', sources: [] });
@@ -3191,11 +3423,9 @@ export default function CreateInterview() {
                             }
                           }
 
-                          console.log('🖱️ Create Candidate Pool clicked!', { isCreatingList, sourceEntryType, sources: validSources });
 
                           // Call handleCreateList with sources directly inline
                           if (isCreatingList) {
-                            console.log('⚠️ Already creating, ignoring');
                             return;
                           }
 
@@ -3235,11 +3465,9 @@ export default function CreateInterview() {
                               name: createListFormData.name,
                               description: autoDescription
                             });
-                            console.log('✅ Pool created with ID:', listId);
 
                             // Add sources if any
                             if (validSources.length > 0) {
-                              console.log('📎 Adding sources to pool:', validSources);
                               for (const source of validSources) {
                                 const apiPayload = {
                                   type: source.type,
@@ -3248,7 +3476,6 @@ export default function CreateInterview() {
                                 };
                                 await listsApi.addSourceToList(currentWorkspace.id, listId, apiPayload);
                               }
-                              console.log('✅ All sources added successfully');
                             }
 
                             // Reload lists
@@ -3490,7 +3717,6 @@ export default function CreateInterview() {
                           </div>
                           <Button
                             onClick={() => {
-                              console.log('🆕 Create New Candidate Pool clicked - opening form');
                               setShowCreateListForm(true);
                             }}
                             variant="outline"
@@ -3514,7 +3740,6 @@ export default function CreateInterview() {
                           <>
                             <Button
                               onClick={() => {
-                                console.log('🆕 Create New Candidate Pool clicked - opening form');
                                 setShowCreateListForm(true);
                               }}
                               variant="outline"
@@ -3614,7 +3839,6 @@ export default function CreateInterview() {
                       // Special handling for candidates step (step 1)
                       if (stepper.currentStep === 1) {
                         const buttonText = getCandidatesStepButtonConfig().text;
-                        console.log('🎯 Button text being rendered:', buttonText);
                         return buttonText;
                       }
 
@@ -3883,7 +4107,7 @@ export default function CreateInterview() {
             <DialogTitle>This candidate's profile is outside our scope</DialogTitle>
             <DialogDescription>
               {outOfScopeDetail?.message ||
-                'FunnelHQ supports India finance hiring only — accounting, taxation, and management consulting.'}
+                'FlowDot AI supports India finance hiring only — accounting, taxation, and management consulting.'}
             </DialogDescription>
           </DialogHeader>
           {outOfScopeDetail && outOfScopeDetail.nonFinanceSignals.length > 0 && (

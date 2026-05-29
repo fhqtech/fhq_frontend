@@ -359,9 +359,9 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           </div>
           <div className="text-left flex-1 pt-8 space-y-4">
             <div>
-              <h3 className="text-2xl font-bold mb-1">YOU'RE ALL SET!</h3>
+              <h3 className="text-2xl font-bold mb-1">You're all set</h3>
               <p className="text-sm text-muted-foreground">
-                NOW YOU UNDERSTAND HOW TO LEVERAGE FUNNELHQ FOR EFFICIENT, SCALABLE HIRING.
+                Now you know how to use FlowDot AI for efficient, scalable hiring.
               </p>
             </div>
 

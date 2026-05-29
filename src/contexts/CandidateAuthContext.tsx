@@ -8,6 +8,10 @@ interface CandidateAccount {
   provider: 'email' | 'google';
   email_verified: boolean;
   profile_ids: string[];
+  // Phase 8: ISO timestamp of account creation. Used by OAuthSuccess to
+  // detect first-time Google signup and prompt the "Confirm your name"
+  // interstitial. Null on legacy accounts where the field never landed.
+  created_at: string | null;
 }
 
 interface CandidateAuthContextType {
@@ -17,7 +21,8 @@ interface CandidateAuthContextType {
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => void;
   logout: () => Promise<void>;
-  claimPassword: (claimToken: string, password: string) => Promise<void>;
+  claimPassword: (claimToken: string, password: string, name?: string) => Promise<void>;
+  updateName: (name: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   checkAuthStatus: () => Promise<void>;
   setSessionFromToken: (token: string) => Promise<void>;
@@ -79,7 +84,11 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
     const candidateRoute =
       path.startsWith('/candidate/') ||
       path.startsWith('/claim-password/') ||
-      path === '/forgot-password';
+      path === '/forgot-password' ||
+      // P7: invitation-link landing pages require candidate auth too.
+      path.startsWith('/register/') ||
+      path.startsWith('/candidate-portal/');
+    // /candidate/ catches /candidate/confirm-name (P8) automatically.
     if (!candidateRoute) {
       setIsLoading(false);
       return;
@@ -113,16 +122,35 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
   };
 
   const loginWithGoogle = () => {
+    // P8: stash where the user came from so OAuthSuccess can route them
+    // back to (e.g.) the invitation page after the optional name-
+    // confirmation interstitial. Survives the OAuth round-trip via
+    // sessionStorage (same-origin, no cookie clutter).
+    try {
+      const current = window.location.pathname + window.location.search;
+      if (current && !current.startsWith('/candidate/oauth-success')) {
+        sessionStorage.setItem('candidate_oauth_next', current);
+      }
+    } catch {
+      /* sessionStorage unavailable in private mode — fine, defaults apply */
+    }
     window.location.href = `${API_BASE()}/api/candidate-auth/google`;
   };
 
-  const claimPassword = async (claimToken: string, password: string) => {
+  const claimPassword = async (
+    claimToken: string,
+    password: string,
+    name?: string,
+  ) => {
     setIsLoading(true);
     try {
+      const body: Record<string, unknown> = { claim_token: claimToken, password };
+      const trimmedName = (name || '').trim();
+      if (trimmedName) body.name = trimmedName;
       const resp = await fetch(`${API_BASE()}/api/candidate-auth/claim-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claim_token: claimToken, password }),
+        body: JSON.stringify(body),
       });
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
@@ -134,6 +162,27 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateName = async (name: string) => {
+    const trimmed = (name || '').trim();
+    if (!trimmed) throw new Error('Name cannot be empty');
+    const token = localStorage.getItem(STORAGE_KEY);
+    if (!token) throw new Error('Not signed in');
+    const resp = await fetch(`${API_BASE()}/api/candidate-auth/me`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name: trimmed }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || 'Could not update name');
+    }
+    const data = await resp.json();
+    setAccount(data.account as CandidateAccount);
   };
 
   const forgotPassword = async (email: string) => {
@@ -188,6 +237,7 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
     loginWithGoogle,
     logout,
     claimPassword,
+    updateName,
     forgotPassword,
     checkAuthStatus,
     setSessionFromToken,

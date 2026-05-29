@@ -529,7 +529,10 @@ export default function CandidatePortal() {
       setError(null);
 
       const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
-      const headers = { 'Content-Type': 'application/json' };
+      // P7: include candidate JWT so the gated endpoints can verify identity.
+      const candidateJwt = localStorage.getItem('candidate_auth_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (candidateJwt) headers['Authorization'] = `Bearer ${candidateJwt}`;
 
       const response = await fetch(`${apiBase}/api/candidate-portal/${portalToken}`, {
         method: 'GET',

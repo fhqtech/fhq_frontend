@@ -24,8 +24,10 @@ export interface InterviewSnapshot {
   id: string;
   status?: "draft" | "active" | "running" | "paused" | "stopped" | "completed" | string;
   candidateCount?: number;
-  blueprintStatus?: "pending" | "generating" | "ready" | "completed" | "failed" | "error" | string;
+  blueprintStatus?: "pending" | "generating" | "ready" | "completed" | "failed" | "error" | "not_applicable" | string;
   startedAt?: string | null;
+  /** Interview template type — skill_analysis is profile-driven, no blueprint required. */
+  type?: "screening" | "fitment" | "skill_analysis" | string;
 }
 
 export interface InterviewStats {
@@ -43,10 +45,16 @@ export function computeInterviewNBA(
   const candidateCount = interview.candidateCount ?? stats?.totalCandidates ?? 0;
   const completed = stats?.completedCandidates ?? 0;
   const participation = stats?.participationRate ?? 0;
+  // Skill analysis is profile-driven — no blueprint to wait for. Treat as ready.
+  const isSkillAnalysis = interview.type === "skill_analysis";
   const blueprintReady =
-    interview.blueprintStatus === "ready" || interview.blueprintStatus === "completed";
+    isSkillAnalysis ||
+    interview.blueprintStatus === "ready" ||
+    interview.blueprintStatus === "completed" ||
+    interview.blueprintStatus === "not_applicable";
   const blueprintPending =
-    interview.blueprintStatus === "pending" || interview.blueprintStatus === "generating";
+    !isSkillAnalysis &&
+    (interview.blueprintStatus === "pending" || interview.blueprintStatus === "generating");
 
   // Draft, no candidates: must add candidates first.
   if (interview.status === "draft" && candidateCount === 0) {

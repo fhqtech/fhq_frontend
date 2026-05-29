@@ -16,8 +16,15 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   previewBlueprint,
   PreviewOutOfScopeError,
+  PreviewValidationError,
   type BlueprintPreview,
 } from "@/services/blueprintPreviewApi";
+
+// Mirror of the backend Pydantic cap on PreviewRequest.description /
+// notes (funnelhq_api/routers/blueprint_preview.py). Pre-flight guard
+// avoids burning a network round-trip on a guaranteed 422.
+const DESCRIPTION_MAX_CHARS = 1000;
+const NOTES_MAX_CHARS = 1000;
 import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
 import { tagFromPreview } from "@/components/tag/adapters";
 import { PreviewBlueprintModal } from "@/components/create-interview/PreviewBlueprintModal";
@@ -91,6 +98,21 @@ export function BlueprintPreviewRail({
       return;
     }
 
+    // Pre-flight length guard — the backend caps both at 1000. Without
+    // this we'd fire a guaranteed 422 every time the recruiter blurs.
+    if ((description ?? "").length > DESCRIPTION_MAX_CHARS) {
+      setError(`Description is too long — keep it under ${DESCRIPTION_MAX_CHARS} characters.`);
+      setLoading(false);
+      lastTriggerRef.current = triggerKey;
+      return;
+    }
+    if ((notes ?? "").length > NOTES_MAX_CHARS) {
+      setError(`Notes are too long — keep them under ${NOTES_MAX_CHARS} characters.`);
+      setLoading(false);
+      lastTriggerRef.current = triggerKey;
+      return;
+    }
+
     // Cancel any in-flight call.
     inFlightControllerRef.current?.abort();
     const controller = new AbortController();
@@ -115,6 +137,11 @@ export function BlueprintPreviewRail({
           // R8.2: surface the finance-only rejection copy verbatim
           // instead of the generic "couldn't generate" message.
           if (err instanceof PreviewOutOfScopeError) {
+            setError(err.message);
+          } else if (err instanceof PreviewValidationError) {
+            // 2026-05-28: most often "description is too long" when the
+            // recruiter pastes a JD into the description field. Show the
+            // precise validation message so they can trim it.
             setError(err.message);
           } else {
             setError("Couldn't generate preview. Click refresh to try again.");
@@ -144,6 +171,14 @@ export function BlueprintPreviewRail({
   const runPreview = async () => {
     const trimmed = title?.trim() ?? "";
     if (trimmed.length < 4) return;
+    if ((description ?? "").length > DESCRIPTION_MAX_CHARS) {
+      setError(`Description is too long — keep it under ${DESCRIPTION_MAX_CHARS} characters.`);
+      return;
+    }
+    if ((notes ?? "").length > NOTES_MAX_CHARS) {
+      setError(`Notes are too long — keep them under ${NOTES_MAX_CHARS} characters.`);
+      return;
+    }
     inFlightControllerRef.current?.abort();
     const controller = new AbortController();
     inFlightControllerRef.current = controller;
@@ -162,6 +197,8 @@ export function BlueprintPreviewRail({
     } catch (err: any) {
       if (err?.name !== "AbortError") {
         if (err instanceof PreviewOutOfScopeError) {
+          setError(err.message);
+        } else if (err instanceof PreviewValidationError) {
           setError(err.message);
         } else {
           setError("Couldn't generate preview. Click refresh to try again.");
@@ -241,22 +278,29 @@ export function BlueprintPreviewRail({
 
           {/* Radial TAG preview — same component used on the result page,
               fed by tagFromPreview() with no scores / no annotations.
-              Click opens PreviewBlueprintModal for a full-size view. */}
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="block w-full -mx-2 mb-2 cursor-pointer hover:opacity-90 transition-opacity rounded-sm"
-            aria-label="Open full preview"
-          >
+              The graph owns its own interactions (zoom buttons, drag-to-pan,
+              click-node-for-evidence). Previously this whole block was
+              wrapped in an <button> "Open full preview", which (a) nested
+              the graph's zoom <button>s inside an outer <button> — invalid
+              HTML + hydration warning — and (b) swallowed every node click
+              into the modal-open handler. The "explore full preview" link
+              below now owns the open-modal action. */}
+          <div className="-mx-2 mb-2 rounded-sm">
             <TalentAnalysisGraph
               data={tagFromPreview(title, preview.skills)}
               mode="blueprint"
             />
-          </button>
+          </div>
 
-          <p className="text-[10px] text-muted-2 text-center mb-3">
-            Click to explore the full preview.
-          </p>
+          <div className="text-center mb-3">
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="text-[10px] text-muted-2 hover:text-gold-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink rounded-sm"
+            >
+              Open full preview
+            </button>
+          </div>
 
           {onNotesChange && (
             <div className="mb-3">

@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/ui/logo-mark";
 import { ProjectSelector } from "@/components/workspace/ProjectSelector";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCredits } from "@/hooks/usePlan";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +29,17 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
+  const credits = useCredits();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // P-Plans F8: credit badge tone — red at 0, amber under 3, neutral otherwise.
+  const creditTone =
+    credits.remaining === 0
+      ? "border-danger text-danger bg-danger-soft"
+      : credits.remaining < 3
+        ? "border-warning text-warning bg-warning-soft"
+        : "border-rule text-muted hover:text-ink";
 
   const handleLogout = async () => {
     try {
@@ -91,6 +102,18 @@ export function Header({ onMenuClick }: HeaderProps) {
 
       {/* Right Section: Notifications + User Avatar */}
       <div className="flex items-center gap-3">
+        {/* P-Plans F8: credit balance — visible everywhere, links to /settings/plan */}
+        {user && (
+          <Link
+            to="/settings/plan"
+            title={`${credits.remaining} interview credit${credits.remaining === 1 ? '' : 's'} remaining`}
+            className={`hidden sm:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-sm border font-mono tabular-nums text-xs transition-colors ${creditTone}`}
+          >
+            <span className="font-semibold">{credits.remaining}</span>
+            <span className="font-normal opacity-70">cr</span>
+          </Link>
+        )}
+
         {/* Notification Bell */}
         <NotificationBell />
 

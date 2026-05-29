@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { interviewApi } from "@/services/interviewApi";
+import { toastPlanError } from "@/lib/planErrorToast";
+import { useCredits, useRefreshCredits } from "@/hooks/usePlan";
 
 interface AddCandidatesModalProps {
   isOpen: boolean;
@@ -184,6 +186,8 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
   const abortRef = useRef<AbortController | null>(null);
 
   const { toast } = useToast();
+  const credits = useCredits();
+  const refreshCredits = useRefreshCredits();
 
   const parsed = useMemo(() => parseCsv(pasteText), [pasteText]);
   const validBulkRows = useMemo(
@@ -243,7 +247,10 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
   const candidatesToSend: Row[] =
     tab === "individual" ? validIndividualRows : validBulkRows;
 
-  const canSubmit = candidatesToSend.length > 0 && !submitting;
+  // P-Plans F3: also gate on credit balance. 1 credit per candidate.
+  const requiredCredits = candidatesToSend.length;
+  const hasEnoughCredits = credits.remaining >= requiredCredits;
+  const canSubmit = candidatesToSend.length > 0 && !submitting && hasEnoughCredits;
 
   const handleClose = () => {
     if (submitting) return;
@@ -308,6 +315,10 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
           description: "Invitation email sent.",
         });
         onInvited?.();
+        // W-FE-P1: refresh credit balance so the Header badge + any
+        // <useCredits/> consumers reflect the post-invite balance
+        // without waiting for a manual page refresh.
+        void refreshCredits();
         // Close on full success — keep open on partial so the recruiter
         // can read per-row errors before dismissing.
         handleClose();
@@ -324,18 +335,24 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
         variant: "destructive",
       });
       onInvited?.();
+      // Partial success still consumed credits — refresh.
+      void refreshCredits();
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         toast({
           title: "Send cancelled",
           description: "No invitations were created.",
         });
-      } else {
+      } else if (!toastPlanError(toast, err)) {
+        // Not a credit/plan denial — generic error.
         toast({
           title: "Couldn't add candidates",
           description: err instanceof Error ? err.message : "Try again in a moment.",
           variant: "destructive",
         });
+      } else {
+        // Plan/credit denial — backend's `remaining` is authoritative.
+        void refreshCredits();
       }
     } finally {
       setSubmitting(false);
@@ -561,11 +578,20 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
         </div>
 
         <footer className="px-6 py-4 border-t-2 border-rule bg-paper-2 flex items-center justify-between gap-3">
-          <p className="text-xs text-muted">
-            {submitting
-              ? `Sending ${candidatesToSend.length} invitation${candidatesToSend.length === 1 ? "" : "s"}…`
-              : "They'll receive an email invitation right away."}
-          </p>
+          <div className="text-xs">
+            <p className="text-muted">
+              {submitting
+                ? `Sending ${candidatesToSend.length} invitation${candidatesToSend.length === 1 ? "" : "s"}…`
+                : "They'll receive an email invitation right away."}
+            </p>
+            {/* P-Plans F3: surface cost + balance. Red when short, muted otherwise. */}
+            {!submitting && candidatesToSend.length > 0 && (
+              <p className={`mt-0.5 font-mono tabular-nums ${hasEnoughCredits ? 'text-muted' : 'text-danger'}`}>
+                Uses {requiredCredits} credit{requiredCredits === 1 ? '' : 's'} · {credits.remaining} remaining
+                {!hasEnoughCredits && ' — out of credits, contact us to add more.'}
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {submitting ? (
               <Button variant="outline" size="sm" onClick={handleCancelInFlight}>

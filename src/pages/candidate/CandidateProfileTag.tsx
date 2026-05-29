@@ -267,7 +267,7 @@ export default function CandidateProfileTag() {
           <EmptyState
             icon={AlertCircle}
             title="Candidate outside our scope"
-            description="This candidate's profile reads as non-finance. FunnelHQ supports India finance hiring only — accounting, taxation, and management consulting."
+            description="This candidate's profile reads as non-finance. FlowDot AI supports India finance hiring only — accounting, taxation, and management consulting."
           />
         </div>
       );

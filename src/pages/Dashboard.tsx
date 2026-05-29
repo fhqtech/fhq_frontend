@@ -117,6 +117,7 @@ export default function Dashboard() {
  candidateCount: i.candidates ?? i.candidateCount ?? 0,
  blueprintStatus: i.blueprintStatus,
  startedAt: i.startedAt,
+ type: (i as any).type,
  })),
  [interviews]
  );

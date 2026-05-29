@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronLeft, ChevronRight, FolderOpen, Users, Zap, Star } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, FolderOpen, Users, Zap, Star, BarChart3 } from 'lucide-react';
 import { YourListsTab } from './YourListsTab';
 import { SharedListsTab } from './SharedListsTab';
 import { GlobalListsTab } from './GlobalListsTab';
@@ -10,7 +10,7 @@ import { AnalyticsCandidate } from '@/types/analytics';
 export default function ListsPage() {
   const [activeTab, setActiveTab] = useState<'yours' | 'shared' | 'global'>('yours');
   const yourListsRef = useRef<any>(null);
-  const [isAnalyticsPanelOpen, setIsAnalyticsPanelOpen] = useState(true);
+  const [isAnalyticsPanelOpen, setIsAnalyticsPanelOpen] = useState(false);
   const [allCandidates, setAllCandidates] = useState<AnalyticsCandidate[]>([]);
 
   const handleCreateList = () => {
@@ -35,7 +35,7 @@ export default function ListsPage() {
   }, []);
 
   return (
-    <div className="h-full bg-paper-2 flex flex-col overflow-hidden pt-6">
+    <div className={`h-full bg-paper-2 flex flex-col overflow-hidden pt-6 transition-[margin] duration-300 ${isAnalyticsPanelOpen ? 'lg:mr-[30%]' : ''}`}>
       <div className="shrink-0 bg-paper-2 pr-8 pb-4">
         <style>{`
           .wrap {
@@ -187,15 +187,27 @@ export default function ListsPage() {
             <div className="slidebar"></div>
           </div>
 
-          {activeTab === 'yours' && (
+          <div className="flex items-center gap-2">
             <Button
-              onClick={handleCreateList}
-              className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
+              variant="outline"
+              onClick={() => setIsAnalyticsPanelOpen((v) => !v)}
+              className="rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-semibold"
+              aria-pressed={isAnalyticsPanelOpen}
+              aria-label={isAnalyticsPanelOpen ? "Hide analytics panel" : "Show analytics panel"}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Candidate Pool
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
             </Button>
-          )}
+            {activeTab === 'yours' && (
+              <Button
+                onClick={handleCreateList}
+                className="bg-ink hover:bg-ink text-paper rounded shadow-[0_2px_8px_rgba(0,0,0,0.08)] font-bold"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Candidate Pool
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

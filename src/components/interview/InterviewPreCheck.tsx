@@ -108,11 +108,18 @@ export const InterviewPreCheck = ({
     setPrepareError(null);
 
     try {
+      // P7: pass candidate session JWT so the backend can match logged-in
+      // email to the invitation email.
+      const candidateJwt = localStorage.getItem('candidate_auth_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (candidateJwt) headers['Authorization'] = `Bearer ${candidateJwt}`;
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             candidate_token: candidateToken,
             interview_id: interviewData.id,
@@ -141,19 +148,29 @@ export const InterviewPreCheck = ({
         if (sessionIdForGreeting) {
           const greetingAbort = new AbortController();
           const greetingTimer = setTimeout(() => greetingAbort.abort(), 10_000);
-          fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare-greeting`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                session_id: sessionIdForGreeting,
-                interview_id: interviewData.id,
-                candidate_id: candidateData.id,
-              }),
-              signal: greetingAbort.signal,
-            },
-          )
+          (() => {
+            // P7: include candidate session JWT.
+            const candidateJwt = localStorage.getItem('candidate_auth_token');
+            const greetingHeaders: Record<string, string> = {
+              'Content-Type': 'application/json',
+            };
+            if (candidateJwt)
+              greetingHeaders['Authorization'] = `Bearer ${candidateJwt}`;
+            return fetch(
+              `${import.meta.env.VITE_API_BASE_URL}/api/agent-sessions/prepare-greeting`,
+              {
+                method: 'POST',
+                headers: greetingHeaders,
+                body: JSON.stringify({
+                  candidate_token: candidateToken,
+                  session_id: sessionIdForGreeting,
+                  interview_id: interviewData.id,
+                  candidate_id: candidateData.id,
+                }),
+                signal: greetingAbort.signal,
+              },
+            );
+          })()
             .then(async (greetingResp) => {
               clearTimeout(greetingTimer);
               if (greetingResp.ok) {
