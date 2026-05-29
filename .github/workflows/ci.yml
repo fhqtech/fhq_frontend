@@ -1,7 +1,10 @@
 name: ci
 
+# Fires only on push to main. Feature-branch pushes don't run CI; that's
+# the intentional shape — pre-merge verification happens locally and via
+# reviewer judgement on the PR diff. Production deploys still happen via
+# Vercel's GitHub integration on push to main.
 on:
-  pull_request:
   push:
     branches: [main]
 
