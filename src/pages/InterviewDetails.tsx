@@ -893,11 +893,14 @@ export default function InterviewDetails() {
  } catch (err) {
  const message = err instanceof Error ? err.message : "Failed to start interview";
  setStartingProgress(`Error: ${message}`);
+ // Try plan/credit-aware toast first; fall back to generic on no match.
+ if (!toastPlanError(toast, err)) {
  toast({
  title: "Error starting interview",
  description: message,
  variant: "destructive"
  });
+ }
  return;
  }
 

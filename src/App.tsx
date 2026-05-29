@@ -15,6 +15,7 @@ import { ConsentBanner } from "@/components/ConsentBanner";
 import { CommandPalette } from "@/components/CommandPalette";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
+import { InvitationAuthGate } from "@/components/auth/InvitationAuthGate";
 import TourGuard from "@/components/tour/TourGuard";
 import { PageSkeleton } from "@/components/ui/shimmer";
 // Eager: landing-path bundle (marketing → login → OAuth → 404). Keep these
@@ -65,6 +66,7 @@ const CandidateLogin = lazy(() => import("./pages/candidate/CandidateLogin"));
 const CandidateClaimPassword = lazy(() => import("./pages/candidate/ClaimPassword"));
 const CandidateForgotPassword = lazy(() => import("./pages/candidate/ForgotPassword"));
 const CandidateOAuthSuccess = lazy(() => import("./pages/candidate/OAuthSuccess"));
+const CandidateConfirmName = lazy(() => import("./pages/candidate/ConfirmName"));
 const CandidateDashboard = lazy(() => import("./pages/candidate/CandidateDashboard"));
 const CandidateInterviewDetail = lazy(() => import("./pages/candidate/CandidateInterviewDetail"));
 const CandidateResults = lazy(() => import("./pages/candidate/CandidateResults"));
@@ -114,14 +116,28 @@ const App = () => (
             <Route path="/auth/callback" element={<OAuth2Handler />} />
             <Route path="/oauth/callback" element={<OAuth2Handler />} />
 
-            {/* Candidate registration page (public, no auth required) */}
-            <Route path="/register/:token" element={<CandidateRegistration />} />
+            {/* P7: candidate registration page — now gated by candidate login + identity match */}
+            <Route
+              path="/register/:token"
+              element={
+                <InvitationAuthGate endpoint="register">
+                  {() => <CandidateRegistration />}
+                </InvitationAuthGate>
+              }
+            />
 
             {/* R11.1c: expired-invitation candidate-facing error page */}
             <Route path="/interview/:token/expired" element={<InterviewExpiredPage />} />
 
-            {/* Candidate portal page (public, no auth required) */}
-            <Route path="/candidate-portal/:token" element={<CandidatePortal />} />
+            {/* P7: candidate portal page — same gating as /register */}
+            <Route
+              path="/candidate-portal/:token"
+              element={
+                <InvitationAuthGate endpoint="candidate-portal">
+                  {() => <CandidatePortal />}
+                </InvitationAuthGate>
+              }
+            />
 
             {/* Interview System Routes (public, no auth required) */}
             <Route path="/interview/:interviewId/pre-check" element={<InterviewPreCheckPage />} />
@@ -300,6 +316,7 @@ const App = () => (
             {/* Phase 4-6: Candidate dashboard suite (persistent accounts) */}
             <Route path="/candidate/login" element={<CandidateLogin />} />
             <Route path="/candidate/oauth-success" element={<CandidateOAuthSuccess />} />
+            <Route path="/candidate/confirm-name" element={<CandidateConfirmName />} />
             <Route path="/claim-password/:token" element={<CandidateClaimPassword />} />
             <Route path="/forgot-password" element={<CandidateForgotPassword />} />
             <Route

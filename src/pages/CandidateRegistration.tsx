@@ -195,11 +195,15 @@ export default function CandidateRegistration() {
       setLoading(true);
       setError(null);
 
+      // P7: include candidate JWT so the backend can match identity.
+      const candidateJwt = localStorage.getItem('candidate_auth_token');
+      const fetchHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (candidateJwt) fetchHeaders['Authorization'] = `Bearer ${candidateJwt}`;
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/register/${invitationToken}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: fetchHeaders,
       });
 
       const data = await response.json();
@@ -608,8 +612,15 @@ export default function CandidateRegistration() {
         submitData.append('turnstileToken', turnstileToken);
       }
 
+      // P7: include candidate JWT — the gated POST /register/{token}
+      // requires it to match logged-in identity to invitation.
+      const candidateJwtForSubmit = localStorage.getItem('candidate_auth_token');
+      const submitHeaders: Record<string, string> = {};
+      if (candidateJwtForSubmit)
+        submitHeaders['Authorization'] = `Bearer ${candidateJwtForSubmit}`;
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'}/api/register/${token}`, {
         method: 'POST',
+        headers: submitHeaders,
         body: submitData
       });
 

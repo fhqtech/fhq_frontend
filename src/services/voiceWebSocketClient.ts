@@ -77,6 +77,9 @@ export interface VoiceClientConfig {
   sessionId: string;
   /** Candidate invitation token (same one used in v1 token-auth flow). */
   candidateToken: string;
+  /** P7: candidate session JWT — backend voice WS now requires this and
+   * verifies its email equals the invitation email. */
+  candidateJwt?: string;
   events: VoiceClientEvents;
 }
 
@@ -86,7 +89,12 @@ export interface VoiceClientConfig {
  * - https://host/api/voice/ws      -> wss://host/api/voice/ws
  * - /api/voice/ws (relative)       -> ws[s]://window.location.host/api/voice/ws
  */
-function buildWebSocketUrl(base: string, sessionId: string, token: string): string {
+function buildWebSocketUrl(
+  base: string,
+  sessionId: string,
+  token: string,
+  candidateJwt?: string,
+): string {
   let absolute = base;
   if (base.startsWith("/")) {
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -97,9 +105,13 @@ function buildWebSocketUrl(base: string, sessionId: string, token: string): stri
       .replace(/^https:\/\//, "wss://");
   }
   const sep = absolute.endsWith("/") ? "" : "/";
-  return `${absolute}${sep}${encodeURIComponent(sessionId)}?token=${encodeURIComponent(
+  let url = `${absolute}${sep}${encodeURIComponent(sessionId)}?token=${encodeURIComponent(
     token,
   )}`;
+  if (candidateJwt) {
+    url += `&candidate_jwt=${encodeURIComponent(candidateJwt)}`;
+  }
+  return url;
 }
 
 export class VoiceWebSocketClient {
@@ -114,7 +126,13 @@ export class VoiceWebSocketClient {
     const env = (import.meta as any).env ?? {};
     const apiBase = env.VITE_VOICE_WS_BASE ?? env.VITE_API_BASE_URL ?? env.VITE_API_URL ?? "";
     const base = config.apiBase ?? `${apiBase}/api/voice/ws`;
-    this.url = buildWebSocketUrl(base, config.sessionId, config.candidateToken);
+    // P7: fall back to localStorage if the caller didn't pass a JWT explicitly.
+    const jwt =
+      config.candidateJwt ??
+      (typeof localStorage !== "undefined"
+        ? localStorage.getItem("candidate_auth_token") ?? undefined
+        : undefined);
+    this.url = buildWebSocketUrl(base, config.sessionId, config.candidateToken, jwt);
     this.events = config.events;
   }
 

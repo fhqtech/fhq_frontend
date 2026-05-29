@@ -164,7 +164,23 @@ export function useStartInterviewMutation(
       );
       const data = await r.json().catch(() => ({}));
       if (!r.ok || !data?.success) {
-        throw new Error(data?.error || "Failed to start interview");
+        const detail = data?.detail;
+        const message =
+          (detail && typeof detail === "object" && (detail as any).message) ||
+          data?.error ||
+          "Failed to start interview";
+        const err = new Error(message) as Error & {
+          status?: number;
+          detail?: unknown;
+          code?: string;
+        };
+        err.status = r.status;
+        err.detail = detail;
+        err.code =
+          detail && typeof detail === "object"
+            ? (detail as any).error
+            : undefined;
+        throw err;
       }
       return data;
     },
