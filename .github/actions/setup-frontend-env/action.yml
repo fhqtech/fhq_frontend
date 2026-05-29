@@ -1,0 +1,25 @@
+name: Set up frontend environment
+description: |
+  Checkout, Node 22, and a cached `npm ci`. Shared by every job in
+  ci.yml so node_modules isn't re-installed per job.
+
+inputs:
+  node-version:
+    description: Node version to set up.
+    required: false
+    default: '22'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Install
+      shell: bash
+      # --legacy-peer-deps preserved from the original workflow.
+      run: npm ci --legacy-peer-deps
