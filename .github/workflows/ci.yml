@@ -5,38 +5,48 @@ on:
   push:
     branches: [main]
 
+# Production deploys happen via Vercel's GitHub integration on push to
+# main — there is no deploy job here. This workflow exists to keep PRs
+# honest (typecheck, tests, lint, build) so we ship a known-green tree.
+
 jobs:
-  build-and-test:
+  typecheck-and-test:
+    # Fast gate. Surface typecheck + unit-test failures in under a minute
+    # so flaky-FE PRs fail loudly before the heavier build runs.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install
-        run: npm ci --legacy-peer-deps
-
+      - uses: ./.github/actions/setup-frontend-env
       - name: Type check
         run: npx tsc --noEmit
+      - name: Unit tests
+        run: npm test -- --run
 
-      # The Vite production build aborts when required env vars are
-      # missing (see vite.config.ts). Provide dummies so the build
-      # succeeds in CI — they're never used at runtime.
+  build:
+    # Production Vite build + bundle-budget warning. Needs the fast gate
+    # to pass first (no point building if types are broken).
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: typecheck-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-frontend-env
+
       - name: Production build
-        run: npx vite build --mode production
+        # The Vite production build aborts when required env vars are
+        # missing (see vite.config.ts). Provide dummies so the build
+        # succeeds in CI — they're never used at runtime.
         env:
           VITE_API_BASE_URL: https://example.com
           VITE_FRONTEND_BASE_URL: https://example.com
+        run: npx vite build --mode production
 
-      # Bundle budget — warn if total JS gzipped exceeds 1.2 MB. Refresh
-      # the threshold when we drop one of Framer Motion / GSAP /
-      # react-spring (currently we ship all three; anim-vendor alone is
-      # ~240 kB gzipped).
       - name: Bundle budget
+        # Warn if total JS gzipped exceeds 1.2 MB. Refresh the threshold
+        # when we drop one of Framer Motion / GSAP / react-spring
+        # (currently we ship all three; anim-vendor alone is ~240 kB
+        # gzipped).
         run: |
           total=$(find dist/assets -name "*.js" -exec gzip -c {} \; | wc -c)
           mb=$(awk "BEGIN{printf \"%.2f\", $total/1024/1024}")
@@ -45,11 +55,15 @@ jobs:
             echo "::warning::Total JS gzipped (${mb} MB) exceeds 1.2 MB budget"
           fi
 
-      - name: Unit tests
-        run: npm test -- --run
-
-      # Lint last — failures here are noisier and we want build/test
-      # signal first.
+  lint:
+    # Advisory until we clean the existing baseline. Runs in parallel
+    # with typecheck-and-test so lint noise doesn't slow down the
+    # critical-path signal.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-frontend-env
       - name: Lint
         run: npm run lint
-        continue-on-error: true  # advisory until we clean the existing baseline

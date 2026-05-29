@@ -1,0 +1,28 @@
+name: Set up frontend environment
+description: |
+  Node 22 + cached `npm ci`. Shared by every job in ci.yml so the
+  install step is defined once.
+
+  IMPORTANT: callers must run `actions/checkout@v4` BEFORE this
+  composite. Composite actions can't check out the repo themselves
+  reliably — without an existing workspace, GitHub can't load this
+  file from disk.
+
+inputs:
+  node-version:
+    description: Node version to set up.
+    required: false
+    default: '22'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Install
+      shell: bash
+      # --legacy-peer-deps preserved from the original workflow.
+      run: npm ci --legacy-peer-deps

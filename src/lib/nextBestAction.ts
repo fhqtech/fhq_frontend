@@ -134,7 +134,7 @@ export function computeInterviewNBA(
   return {
     label: "Open interview",
     href: `/interviews/${interview.id}`,
-    variant: "outline",
+    variant: "outline-solid",
   };
 }
 
