@@ -1,7 +1,12 @@
 name: Set up frontend environment
 description: |
-  Checkout, Node 22, and a cached `npm ci`. Shared by every job in
-  ci.yml so node_modules isn't re-installed per job.
+  Node 22 + cached `npm ci`. Shared by every job in ci.yml so the
+  install step is defined once.
+
+  IMPORTANT: callers must run `actions/checkout@v4` BEFORE this
+  composite. Composite actions can't check out the repo themselves
+  reliably — without an existing workspace, GitHub can't load this
+  file from disk.
 
 inputs:
   node-version:
@@ -12,8 +17,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
-
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
