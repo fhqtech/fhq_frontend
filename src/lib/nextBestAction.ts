@@ -169,5 +169,12 @@ export function computeDashboardNBA(
     return rank(b.status) - rank(a.status);
   });
 
-  return computeInterviewNBA(sorted[0]);
+  const chosen = sorted[0];
+  const nba = computeInterviewNBA(chosen);
+  // Dashboard is a launcher: action-type NBAs have no inline handler here,
+  // so route Go to the interview detail page where those actions live.
+  if (nba.action && !nba.href) {
+    return { ...nba, href: `/interviews/${chosen.id}` };
+  }
+  return nba;
 }
