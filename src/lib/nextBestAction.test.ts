@@ -164,4 +164,25 @@ describe("computeDashboardNBA", () => {
     // share/start/etc NBA for that interview. Just assert it's not "create".
     expect(nba.label).not.toMatch(/create your first/i);
   });
+
+  it("action-type NBA gets href to the chosen interview so dashboard Go navigates", () => {
+    // Active, no completions → per-interview NBA is action:"share" with no href.
+    // Dashboard must attach href to the picked interview's detail page.
+    const nba = computeDashboardNBA(
+      [{ id: "running-1", status: "active", candidateCount: 5 }],
+      false,
+    );
+    expect(nba.action).toBe("share");
+    expect(nba.href).toBe("/interviews/running-1");
+  });
+
+  it("href-based NBA is returned unchanged (not overwritten)", () => {
+    // Completed status → review responses with its own href; no action.
+    const nba = computeDashboardNBA(
+      [{ id: "done-1", status: "completed", candidateCount: 5 }],
+      false,
+    );
+    expect(nba.action).toBeUndefined();
+    expect(nba.href).toBe("/interviews/done-1#candidates");
+  });
 });
