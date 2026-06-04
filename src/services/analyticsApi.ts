@@ -3,6 +3,7 @@ import {
   AnalyticsCandidate,
   AnalyticsList,
   CandidateListStats,
+  FitDetailResponse,
   MatcherResponse,
   ProjectDashboardResponse,
   SkillGapsResponse,
@@ -142,6 +143,32 @@ class AnalyticsApiService {
       return await response.json();
     } catch (error) {
       console.error('Failed to fetch skill matches:', error);
+      return null;
+    }
+  }
+
+  // FR-MA-02: explainable per-candidate fit detail (powers FitDetailModal).
+  async getFitDetail(
+    workspaceId: string,
+    projectId: string,
+    options: { roleInterviewId: string; sessionId: string },
+  ): Promise<FitDetailResponse | null> {
+    try {
+      const qs = new URLSearchParams({
+        role_interview_id: options.roleInterviewId,
+        session_id: options.sessionId,
+      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/workspaces/${workspaceId}/projects/${projectId}/skill-matcher/fit-detail?${qs.toString()}`,
+        { headers: this.getAuthHeaders() },
+      );
+      if (!response.ok) {
+        console.warn(`fit-detail endpoint returned ${response.status}`);
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch fit detail:', error);
       return null;
     }
   }

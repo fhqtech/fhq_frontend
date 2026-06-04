@@ -237,6 +237,32 @@ export interface MatcherResponse {
   total_candidates_considered: number;
 }
 
+// FR-MA-02: explainable per-candidate fit detail.
+export interface FitContribution {
+  role_skill_id: string;
+  label?: string | null;
+  canonical_id?: string | null;
+  expected_score: number;
+  demonstrated_score: number;
+  is_core: boolean;
+  weight: number;
+  met: boolean;
+  matched_via: 'canonical' | 'skill_id' | 'label' | 'none';
+  evidence: string[];
+  confidence?: number | null;
+}
+
+export interface FitDetailResponse {
+  success: boolean;
+  role: MatcherRole;
+  session_id: string;
+  candidate_id?: string | null;
+  candidate_name?: string | null;
+  candidate_email?: string | null;
+  match_score: number;
+  contributions: FitContribution[];
+}
+
 // Phase B — skill-gap aggregation
 export interface SkillGapRow {
   skill_id: string;
