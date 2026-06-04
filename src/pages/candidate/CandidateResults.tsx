@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { TalentAnalysisGraph, TagGraphNode } from '@/components/tag/TalentAnalysisGraph';
 import { tagFromResult } from '@/components/tag/adapters';
+import { Info } from 'lucide-react';
 
 const API_BASE = () => import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
@@ -23,14 +24,23 @@ interface ResultsPayload {
   };
 }
 
-function recommendationClasses(rec?: string): string {
-  if (!rec) return 'bg-paper-3 text-ink-soft border-rule';
-  const norm = rec.toLowerCase();
-  if (norm.includes('strong') && norm.includes('recommend')) return 'bg-success-soft text-success border-rule';
-  if (norm.startsWith('recommend')) return 'bg-success-soft text-success border-rule';
-  if (norm.includes('reservation')) return 'bg-gold-soft text-gold-ink border-rule';
-  if (norm.includes('not recommend')) return 'bg-danger-soft text-danger border-rule';
-  return 'bg-paper-3 text-ink-soft border-rule';
+// A0.10 / CR-04: never show raw recruiter enums (STRONG_HIRE / REJECT) to a
+// candidate. Map each to candidate-appropriate, non-leaky language; anything
+// unknown falls back to "Under review" rather than leaking the raw token.
+const RECOMMENDATION_DISPLAY: Record<string, { label: string; cls: string }> = {
+  STRONG_HIRE: { label: 'Strong performance', cls: 'bg-success-soft text-success border-rule' },
+  ADVANCE_WITH_CONCERNS: { label: 'Solid — some areas to develop', cls: 'bg-success-soft text-success border-rule' },
+  BORDERLINE: { label: 'Mixed signal', cls: 'bg-gold-soft text-gold-ink border-rule' },
+  REJECT: { label: 'Room to develop', cls: 'bg-paper-3 text-ink-soft border-rule' },
+  INCOMPLETE_INTERVIEW: { label: 'Interview incomplete', cls: 'bg-paper-3 text-ink-soft border-rule' },
+  REVIEW_ERROR: { label: 'Under review', cls: 'bg-paper-3 text-ink-soft border-rule' },
+};
+
+function recommendationDisplay(rec?: string): { label: string; cls: string } {
+  const fallback = { label: 'Under review', cls: 'bg-paper-3 text-ink-soft border-rule' };
+  if (!rec) return fallback;
+  const key = rec.trim().toUpperCase().replace(/[\s-]+/g, '_');
+  return RECOMMENDATION_DISPLAY[key] || fallback;
 }
 
 export default function CandidateResults() {
@@ -144,13 +154,23 @@ export default function CandidateResults() {
               <span className="text-base text-muted">/100</span>
             </div>
             <span
-              className={`mt-3 inline-flex items-center px-3 py-1 text-[10px]   font-semibold rounded-full border ${recommendationClasses(
-                r.recommendation
-              )}`}
+              className={`mt-3 inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border ${recommendationDisplay(r.recommendation).cls}`}
             >
-              {r.recommendation || 'Pending review'}
+              {recommendationDisplay(r.recommendation).label}
             </span>
           </div>
+        </div>
+
+        {/* A0.10 / CR-04: human-in-the-loop disclaimer — prominent, not buried.
+            The candidate must understand this is one input, not an automated
+            decision (EU AI Act Art. 13 transparency / DPDP). */}
+        <div className="bg-paper rounded-xl border border-border p-4 flex items-start gap-3">
+          <Info className="h-4 w-4 text-muted shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-sm text-foreground/80">
+            This is an AI-assisted assessment — one input among several. A member of the
+            hiring team reviews these results and makes the final decision. You can request an
+            explanation or correction of your data from your account settings.
+          </p>
         </div>
 
         {/* TAG */}

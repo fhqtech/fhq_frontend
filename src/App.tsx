@@ -231,10 +231,16 @@ const App = () => (
             {/* C1: video review routes removed; recruiters now click into
                 /interview/:interviewId/results/:sessionId for the TAG view. */}
 
-            <Route path="/email-templates/prelims" element={<EmailTemplatePreview />} />
-
-            {/* Test Assets page for 3D model viewing */}
-            <Route path="/test-assets" element={<TestAssets />} />
+            {/* A0.3 (Sprint 0): dev/test-only tools. Mounted ONLY in dev
+                builds so they aren't reachable unauthenticated in prod
+                (import.meta.env.DEV is false in production bundles). */}
+            {import.meta.env.DEV && (
+              <>
+                <Route path="/email-templates/prelims" element={<EmailTemplatePreview />} />
+                {/* Test Assets page for 3D model viewing */}
+                <Route path="/test-assets" element={<TestAssets />} />
+              </>
+            )}
 
             <Route path="/interview-blueprint/:interviewId" element={
               <ProtectedRoute>
