@@ -15,14 +15,19 @@ import {
   TAG_TYPE,
   type TagStatus,
 } from "./constants";
+import { useState } from "react";
 import type { TagMode, TagNode } from "./types";
 import { nodeStatus } from "./adapters";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { ScoreOverrideModal } from "./ScoreOverrideModal";
 
 interface TagSidePanelProps {
   node: TagNode | null;
   mode: TagMode;
   onClose?: () => void;
+  /** A4: when present (recruiter result view), enables per-skill override. */
+  sessionId?: string;
+  onOverridden?: () => void;
 }
 
 const tierName = (level: number | undefined | null) => {
@@ -30,7 +35,8 @@ const tierName = (level: number | undefined | null) => {
   return ["Foundational", "Working", "Solid", "Advanced", "Expert"][level - 1];
 };
 
-export function TagSidePanel({ node, mode }: TagSidePanelProps) {
+export function TagSidePanel({ node, mode, sessionId, onOverridden }: TagSidePanelProps) {
+  const [overrideOpen, setOverrideOpen] = useState(false);
   if (!node) {
     return (
       <div className="tag-panel-empty">
@@ -260,7 +266,33 @@ export function TagSidePanel({ node, mode }: TagSidePanelProps) {
             </p>
           </section>
         )}
+
+        {/* A4: recruiter human-in-the-loop override (result view only) */}
+        {mode === "result" && sessionId && node.type !== "role_center" &&
+          node.type !== "transferable" && typeof node.score === "number" && (
+          <section className="tag-panel-section">
+            <button
+              type="button"
+              onClick={() => setOverrideOpen(true)}
+              className="text-[11px] text-gold-ink hover:underline"
+            >
+              Override score
+            </button>
+          </section>
+        )}
       </div>
+
+      {mode === "result" && sessionId && typeof node.score === "number" && (
+        <ScoreOverrideModal
+          open={overrideOpen}
+          onOpenChange={setOverrideOpen}
+          sessionId={sessionId}
+          skillId={node.id}
+          skillLabel={node.label}
+          currentScore={node.score}
+          onOverridden={onOverridden}
+        />
+      )}
     </div>
   );
 }

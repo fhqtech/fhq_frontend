@@ -57,6 +57,10 @@ export interface TalentAnalysisGraphProps {
   nodes?: TagGraphNode[];
 
   className?: string;
+
+  /** A4: recruiter result view — enables per-skill score override in the panel. */
+  sessionId?: string;
+  onOverridden?: () => void;
 }
 
 const LEGEND_ROWS: { status: Exclude<TagStatus, "role_center">; dashed?: boolean }[] = [
@@ -103,6 +107,8 @@ export function TalentAnalysisGraph({
   roleTitle,
   nodes,
   className = "",
+  sessionId,
+  onOverridden,
 }: TalentAnalysisGraphProps) {
   const tagData: TagData = useMemo(() => {
     if (data) return data;
@@ -243,7 +249,7 @@ export function TalentAnalysisGraph({
           className="max-w-2xl max-h-[85vh] overflow-hidden p-0 border-0"
           style={{ background: TAG_PALETTE.paper2 }}
         >
-          <TagSidePanel node={selected} mode={mode} onClose={() => setSelected(null)} />
+          <TagSidePanel node={selected} mode={mode} onClose={() => setSelected(null)} sessionId={sessionId} onOverridden={onOverridden} />
         </DialogContent>
       </Dialog>
 
