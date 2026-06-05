@@ -11,6 +11,12 @@ DB_COMMAND_RE = re.compile(
 PROD_HINTS = [
     r"funnelhq-prod\b",
     r"recruiter-assist-prod\b",
+    # flowdot-ai is the renamed production GCP project; `asia` is its named
+    # Firestore database. Either appearing in a DB command means prod.
+    # (negative lookahead lets a hypothetical flowdot-ai-dev/-staging through)
+    r"flowdot-ai\b(?!-(?:dev|staging))",
+    r"--database[=\s]+['\"]?asia\b",
+    r"databases/asia\b",
     r"-prod[.-]",
     r"\.prod\.",
     r"prod\.funnelhq",
