@@ -123,13 +123,15 @@ export default function PrivacyPolicy() {
 
         <Section title="Where it lives">
           <p>
-            All applicant personal data is stored in Google Cloud's{' '}
+            Applicant personal data is stored in Google Cloud's{' '}
             <strong>asia-south1 (Mumbai)</strong> region. Audio chunks transit
             through AssemblyAI (United States) for speech-to-text and Cartesia
-            (United States) for text-to-speech during the live interview, then are
-            discarded. Gemini model calls are routed to Google Cloud's nearest
-            available region; prompts and completions are not retained by Google
-            beyond logging windows required for abuse detection.
+            (United States) for text-to-speech during the live interview. Interview
+            audio recordings are stored in Google Cloud Storage and deleted when you
+            request erasure or at the end of the retention window. Gemini model calls
+            are routed to Google Cloud's nearest available region; prompts and
+            completions are not retained by Google beyond logging windows required
+            for abuse detection.
           </p>
         </Section>
 

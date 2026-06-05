@@ -24,8 +24,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { RowSkeleton } from "@/components/ui/shimmer";
 import { cn } from "@/lib/utils";
-import type { MatcherResponse } from "@/types/analytics";
+import type { MatcherResponse, MatcherCandidate } from "@/types/analytics";
 import { SkillChipStrip } from "@/components/skill-matcher/SkillChipStrip";
+import { FitDetailModal } from "@/components/skill-matcher/FitDetailModal";
 
 const initials = (name?: string | null): string => {
   if (!name) return "?";
@@ -80,6 +81,7 @@ export default function SkillMatcher() {
   const [error, setError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [fitDetailFor, setFitDetailFor] = useState<MatcherCandidate | null>(null);
 
   useEffect(() => {
     if (!currentWorkspace?.id || !currentProject?.id || !selectedInterviewId) {
@@ -254,6 +256,16 @@ export default function SkillMatcher() {
                     >
                       {Math.round(m.match_score)}%
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFitDetailFor(m);
+                      }}
+                      className="text-[11px] text-gold-ink hover:underline shrink-0"
+                    >
+                      Why this fit
+                    </button>
                     <ArrowRight className="h-4 w-4 text-muted shrink-0" />
                   </div>
                   <SkillChipStrip
@@ -270,6 +282,18 @@ export default function SkillMatcher() {
           )}
         </CardContent>
       </Card>
+
+      {fitDetailFor && currentWorkspace?.id && currentProject?.id && (
+        <FitDetailModal
+          open={!!fitDetailFor}
+          onOpenChange={(o) => !o && setFitDetailFor(null)}
+          workspaceId={currentWorkspace.id}
+          projectId={currentProject.id}
+          roleInterviewId={selectedInterviewId}
+          sessionId={fitDetailFor.session_id}
+          candidateName={fitDetailFor.candidate_name}
+        />
+      )}
     </div>
   );
 }
