@@ -497,6 +497,8 @@ export default function InterviewResults() {
                 <TalentAnalysisGraph
                   data={tagFromResult(rawResults as any, (rawResults as any).role || "Role")}
                   mode="result"
+                  sessionId={sessionId}
+                  onOverridden={() => resultsQuery.refetch()}
                 />
               </Card>
             ) : (

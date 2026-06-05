@@ -101,5 +101,38 @@ export const resultsApi = {
       sessionId: data.session_id,
       generatedAt: data.generated_at
     };
+  },
+
+  /**
+   * Override one AI per-skill score (A4 / IR-03 / CMP-2). Supersedes the
+   * displayed score; the AI value is preserved server-side + audit-logged.
+   */
+  async overrideSkillScore(input: {
+    sessionId: string;
+    skillId: string;
+    newScore: number;
+    reason: string;
+    newProficiencyLabel?: string;
+  }) {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(
+      `${API_BASE_URL}/api/results/session/${encodeURIComponent(input.sessionId)}/skill-override`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skill_id: input.skillId,
+          new_score: input.newScore,
+          reason: input.reason,
+          new_proficiency_label: input.newProficiencyLabel,
+        }),
+      },
+    );
+    if (!response.ok) {
+      let detail = `Override failed (${response.status})`;
+      try { detail = (await response.json())?.detail || detail; } catch { /* ignore */ }
+      throw new Error(detail);
+    }
+    return response.json();
   }
 };
