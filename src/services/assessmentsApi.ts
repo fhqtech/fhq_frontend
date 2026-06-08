@@ -34,6 +34,21 @@ export interface ScenarioScoreBody {
   response?: string;
 }
 
+export interface RubricCriterionView {
+  id: string;
+  label: string;
+  weight: number;
+  canonical_ids: string[];
+}
+
+export interface ArtifactItemView {
+  id: string;
+  mode: "case" | "work_sample";
+  difficulty: string;
+  task_brief: string;
+  criteria: RubricCriterionView[];
+}
+
 export const assessmentsApi = {
   async getScenario(scenarioId: string, domain = "finance"): Promise<ScenarioView> {
     const r = await fetch(
@@ -50,6 +65,68 @@ export const assessmentsApi = {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify(body),
+    });
+    if (!r.ok) {
+      let detail = `Submission failed (${r.status})`;
+      try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+      throw new Error(detail);
+    }
+    return { success: true };
+  },
+
+  /** Fetch a case / work-sample item (answer key + anchors stripped server-side). */
+  async getArtifactItem(itemId: string, domain = "finance"): Promise<ArtifactItemView> {
+    const r = await fetch(
+      `${API_BASE_URL}/api/assessments/artifact/${encodeURIComponent(itemId)}?domain=${encodeURIComponent(domain)}`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(r.status === 404 ? "Item not found" : `Could not load item (${r.status})`);
+    return r.json();
+  },
+
+  /** Upload a deliverable; returns the GCS artifact_ref to pass to submitArtifact. */
+  async uploadArtifact(candidateId: string, itemId: string, file: File): Promise<{ artifact_ref: string }> {
+    const token = localStorage.getItem("candidate_auth_token");
+    const form = new FormData();
+    form.append("candidate_id", candidateId);
+    form.append("item_id", itemId);
+    form.append("file", file);
+    // NB: no Content-Type header — the browser sets the multipart boundary.
+    const r = await fetch(`${API_BASE_URL}/api/assessments/artifact/upload`, {
+      method: "POST",
+      headers: { Authorization: token ? `Bearer ${token}` : "" },
+      body: form,
+    });
+    if (!r.ok) {
+      let detail = `Upload failed (${r.status})`;
+      try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+      throw new Error(detail);
+    }
+    return r.json();
+  },
+
+  /** Submit a deliverable for scoring (PROVISIONAL — a defense round follows). */
+  async submitArtifact(body: {
+    candidate_id: string; item_id: string; artifact_ref: string; session_id?: string; domain?: string;
+  }): Promise<{ success: boolean; defense_required: boolean }> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/artifact/submit`, {
+      method: "POST", headers: authHeaders(), body: JSON.stringify(body),
+    });
+    if (!r.ok) {
+      let detail = `Submission failed (${r.status})`;
+      try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+      throw new Error(detail);
+    }
+    const j = await r.json();
+    return { success: true, defense_required: j?.defense_required ?? true };
+  },
+
+  /** Submit the defense round; finalizes the artifact into a defense-gated score. */
+  async submitDefense(body: {
+    candidate_id: string; item_id: string; defense_transcript: string; session_id?: string; domain?: string;
+  }): Promise<{ success: boolean }> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/defense/submit`, {
+      method: "POST", headers: authHeaders(), body: JSON.stringify(body),
     });
     if (!r.ok) {
       let detail = `Submission failed (${r.status})`;

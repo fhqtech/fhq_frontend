@@ -74,6 +74,8 @@ const CandidateProfile = lazy(() => import("./pages/candidate/CandidateProfile")
 const CandidateProfileTag = lazy(() => import("./pages/candidate/CandidateProfileTag"));
 const CandidateSettings = lazy(() => import("./pages/candidate/CandidateSettings"));
 const CandidateScenario = lazy(() => import("./pages/candidate/CandidateScenario"));
+const CandidateArtifact = lazy(() => import("./pages/candidate/CandidateArtifact"));
+const CandidateDefense = lazy(() => import("./pages/candidate/CandidateDefense"));
 
 const LegacyFitmentRedirect = () => {
   const { id } = useParams();
@@ -331,6 +333,22 @@ const App = () => (
               element={
                 <CandidateProtectedRoute>
                   <CandidateDashboard />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/assessment/artifact/:itemId"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateArtifact />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/assessment/defense/:itemId"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateDefense />
                 </CandidateProtectedRoute>
               }
             />
