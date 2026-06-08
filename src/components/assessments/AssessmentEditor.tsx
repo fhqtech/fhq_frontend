@@ -58,7 +58,7 @@ export function AssessmentEditor({ kind, item, onChange, onSave, onPublish, onDe
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">{kind.replace("_", " ")}</span>
-          <span className="text-[10px] px-2 py-0.5 rounded border border-rule text-muted">{item.status || "draft"}</span>
+          <span className="text-[10px] px-2 py-0.5 rounded border border-rule text-muted">{({ curated: "Live", draft: "Draft", fixture: "Test" } as Record<string, string>)[item.status || "draft"] || item.status}</span>
         </div>
         <div className="flex items-center gap-2">
           {onDelete && !isNew && <Button variant="ghost" size="sm" onClick={onDelete} className="text-danger">Delete</Button>}
