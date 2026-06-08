@@ -120,7 +120,7 @@ export default function CandidateSkillJourney() {
               <p className="text-sm text-muted mt-0.5 mb-1">
                 Close these to keep pace as the field moves. Start with the biggest opportunity.
               </p>
-              <ImprovementPlan items={journey.improvement_plan} />
+              <ImprovementPlan items={journey.improvement_plan} candidateId={journey.practice_candidate_id} />
             </section>
           </div>
         ) : null}

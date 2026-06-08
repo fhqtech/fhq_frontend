@@ -64,6 +64,12 @@ export interface ImprovementStep {
   detail: string;
 }
 
+export interface PracticeRef {
+  item_id: string;
+  mode: string;
+  domain: string;
+}
+
 export interface ImprovementItem {
   skill_canonical_id?: string;
   skill_name: string;
@@ -72,6 +78,7 @@ export interface ImprovementItem {
   status: string;
   rationale: string;
   steps: ImprovementStep[];
+  practice?: PracticeRef | null;
 }
 
 export interface SkillJourney {
@@ -82,6 +89,7 @@ export interface SkillJourney {
   skill_count: number;
   sources_count: { interview: number; assessment: number };
   evidence_count: number;
+  practice_candidate_id?: string | null;
 }
 
 export const assessmentsApi = {
