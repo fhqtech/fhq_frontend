@@ -24,6 +24,8 @@ export default function CandidateArtifact() {
   const candidateId = params.get("candidateId") || "";
   const sessionId = params.get("sessionId") || undefined;
   const domain = params.get("domain") || "finance";
+  const battery = params.get("battery") || "";
+  const batteryItem = params.get("batteryItem") || "";
 
   const [item, setItem] = useState<ArtifactItemView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,11 @@ export default function CandidateArtifact() {
         candidate_id: candidateId, item_id: item.id, artifact_ref, session_id: sessionId, domain,
       });
       // The artifact score is provisional — send the candidate into the defense round.
-      const qs = new URLSearchParams({ candidateId, domain, ...(sessionId ? { sessionId } : {}) });
+      const qs = new URLSearchParams({
+        candidateId, domain,
+        ...(sessionId ? { sessionId } : {}),
+        ...(battery && batteryItem ? { battery, batteryItem } : {}),
+      });
       navigate(`/candidate/assessment/defense/${encodeURIComponent(item.id)}?${qs.toString()}`);
     } catch (e: any) {
       setError(e?.message || "Submission failed. Please try again.");

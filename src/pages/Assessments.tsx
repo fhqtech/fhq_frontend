@@ -4,7 +4,7 @@
  * publish to live, and assign. Master-detail: left = library, right = editor.
  */
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, Plus, Sparkles, FileText, Send } from "lucide-react";
+import { AlertCircle, CheckCircle2, Plus, Sparkles, FileText, Send, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,8 @@ type Pane =
   | { mode: "edit"; kind: string; item: AssessmentItem; isNew: boolean }
   | { mode: "ai" }
   | { mode: "jd" }
-  | { mode: "assign"; item: CatalogItem };
+  | { mode: "assign"; item: CatalogItem }
+  | { mode: "battery" };
 
 export default function Assessments() {
   const { currentWorkspace, currentProject } = useWorkspace();
@@ -139,6 +140,7 @@ export default function Assessments() {
           <Button variant="outline" size="sm" onClick={() => newItem("case")}><Plus className="h-3.5 w-3.5 mr-1" /> Case</Button>
           <Button variant="outline" size="sm" onClick={() => setPane({ mode: "ai" })}><Sparkles className="h-3.5 w-3.5 mr-1" /> Draft with AI</Button>
           <Button variant="outline" size="sm" onClick={() => setPane({ mode: "jd" })}><FileText className="h-3.5 w-3.5 mr-1" /> From JD</Button>
+          <Button variant="outline" size="sm" onClick={() => setPane({ mode: "battery" })}><Layers className="h-3.5 w-3.5 mr-1" /> Battery</Button>
         </div>
       </div>
 
@@ -201,6 +203,7 @@ export default function Assessments() {
           {pane.mode === "ai" && <AIDraftPane onDrafted={(kind, item) => setPane({ mode: "edit", kind, item, isNew: true })} />}
           {pane.mode === "jd" && <FromJdPane wsId={wsId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); refresh(); }} />}
           {pane.mode === "assign" && <AssignPane item={pane.item} wsId={wsId} projectId={projectId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); }} />}
+          {pane.mode === "battery" && <BatteryComposer catalog={catalog} wsId={wsId} projectId={projectId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); }} />}
         </div>
       </div>
     </div>
@@ -341,6 +344,73 @@ function AssignPane({ item, wsId, projectId, onDone }: { item: CatalogItem; wsId
           <Button onClick={assignEmails} disabled={busy || !candidates.length}><Send className="h-4 w-4 mr-1.5" />{busy ? "Assigning…" : "Assign"}</Button>
         </div>
       )}
+    </div>
+  );
+}
+
+function BatteryComposer({ catalog, wsId, projectId, onDone }: { catalog: CatalogItem[]; wsId?: string; projectId?: string; onDone: (msg: string) => void }) {
+  const [name, setName] = useState("");
+  const [dueAt, setDueAt] = useState("");
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [emails, setEmails] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const items = useMemo(
+    () => catalog.filter((c) => picked[c.id]).map((c) => ({ item_id: c.id, mode: c.mode, title: c.title.slice(0, 60) })),
+    [catalog, picked],
+  );
+  const candidates = useMemo(() => parseCandidates(emails), [emails]);
+  const ready = name.trim() && items.length >= 1 && candidates.length >= 1 && !busy;
+
+  async function go() {
+    if (!ready) return;
+    setBusy(true); setErr(null);
+    try {
+      const res = await api.assignBattery({
+        name: name.trim(), items, due_at: dueAt || undefined, candidates,
+        workspace_id: wsId, project_id: projectId,
+      });
+      onDone(`Battery "${name.trim()}" (${items.length} items) assigned to ${res.assigned ?? candidates.length} candidate(s).`);
+    } catch (e: any) { setErr(e?.message || "Battery assign failed"); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <h3 className="text-base font-semibold text-ink">Assign a battery</h3>
+      <p className="text-sm text-muted">A set of items the candidate completes as one assessment, with a due date and progress.</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Battery name</Label>
+          <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Tax Manager screen" />
+        </div>
+        <div>
+          <Label className="text-xs">Due date (optional)</Label>
+          <Input className="mt-1" type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <Label className="text-xs">Items ({items.length} selected)</Label>
+        <ul className="mt-1 divide-y divide-rule max-h-[260px] overflow-auto rounded border border-rule">
+          {catalog.map((c) => (
+            <li key={c.id}>
+              <label className="flex items-start gap-2 px-3 py-2 cursor-pointer hover:bg-paper-2">
+                <input type="checkbox" className="mt-1" checked={!!picked[c.id]} onChange={(e) => setPicked((p) => ({ ...p, [c.id]: e.target.checked }))} />
+                <span>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-gold-ink">{c.mode}</span>
+                  <span className="block text-sm text-ink line-clamp-1">{c.title}</span>
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <Label className="text-xs">Candidate emails (one per line)</Label>
+        <Textarea className="mt-1 font-mono text-xs" rows={4} value={emails} onChange={(e) => setEmails(e.target.value)} placeholder={"priya@example.com\nArjun Mehta <arjun@example.com>"} />
+      </div>
+      {err && <p className="text-xs text-danger">{err}</p>}
+      <Button onClick={go} disabled={!ready}><Layers className="h-4 w-4 mr-1.5" />{busy ? "Assigning…" : "Assign battery"}</Button>
     </div>
   );
 }

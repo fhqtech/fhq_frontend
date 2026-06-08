@@ -177,4 +177,13 @@ export const assessmentsApi = {
     }
     return { success: true };
   },
+
+  /** Mark one battery item complete (after a submit) so the dashboard shows N of M done. */
+  async markBatteryItem(invitationId: string, itemId: string): Promise<{ done: number; total: number }> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/battery/${encodeURIComponent(invitationId)}/mark`, {
+      method: "POST", headers: authHeaders(), body: JSON.stringify({ item_id: itemId }),
+    });
+    if (!r.ok) throw new Error(`Could not update progress (${r.status})`);
+    return r.json();
+  },
 };
