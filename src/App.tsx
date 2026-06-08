@@ -73,6 +73,7 @@ const CandidateInterviewDetail = lazy(() => import("./pages/candidate/CandidateI
 const CandidateResults = lazy(() => import("./pages/candidate/CandidateResults"));
 const CandidateProfile = lazy(() => import("./pages/candidate/CandidateProfile"));
 const CandidateProfileTag = lazy(() => import("./pages/candidate/CandidateProfileTag"));
+const CandidateAssessments = lazy(() => import("./pages/CandidateAssessments"));
 const CandidateSettings = lazy(() => import("./pages/candidate/CandidateSettings"));
 const CandidateScenario = lazy(() => import("./pages/candidate/CandidateScenario"));
 const CandidateArtifact = lazy(() => import("./pages/candidate/CandidateArtifact"));
@@ -419,6 +420,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CandidateProfileTag />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidates/:candidateId/assessments"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <CandidateAssessments />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
