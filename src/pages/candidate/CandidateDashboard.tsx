@@ -23,6 +23,30 @@ interface Invitation {
   registered_at?: string;
   completed_at?: string;
   expires_at?: string;
+  // P2: assessment assignments ride the same feed (item_kind discriminator).
+  item_kind?: 'interview' | 'assessment';
+  assessment_mode?: 'scenario' | 'case' | 'work_sample' | 'defense';
+  assessment_item_id?: string;
+  assessment_domain?: string;
+}
+
+const ASSESSMENT_MODE_LABEL: Record<string, string> = {
+  scenario: 'Scenario assessment',
+  case: 'Case study',
+  work_sample: 'Work sample',
+  defense: 'Defense round',
+};
+
+/** Candidate-facing route for an assessment assignment, by mode. */
+function assessmentRoute(inv: Invitation, candidateId: string): string {
+  const item = encodeURIComponent(inv.assessment_item_id || '');
+  const qs = new URLSearchParams({
+    candidateId,
+    domain: inv.assessment_domain || 'finance',
+  }).toString();
+  if (inv.assessment_mode === 'scenario') return `/candidate/assessment/${item}?${qs}`;
+  if (inv.assessment_mode === 'defense') return `/candidate/assessment/defense/${item}?${qs}`;
+  return `/candidate/assessment/artifact/${item}?${qs}`; // case | work_sample
 }
 
 const API_BASE = () => import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
@@ -75,16 +99,31 @@ function isAnalyzing(inv: Invitation): boolean {
 
 function InvitationCard({ inv }: { inv: Invitation }) {
   const navigate = useNavigate();
+  const { account } = useCandidateAuth();
   const group = groupOf(inv.status);
   const analyzing = isAnalyzing(inv);
-  const cta =
-    group === 'completed'
+  const isAssessment = inv.item_kind === 'assessment';
+  const candidateId = (account as any)?.profile_ids?.[0] || '';
+
+  // Assessments: no score is ever shown to the candidate (CR-04) — a completed
+  // assignment reads "submitted" and isn't a results link.
+  const eyebrow = isAssessment
+    ? ASSESSMENT_MODE_LABEL[inv.assessment_mode || ''] || 'Assessment'
+    : inv.interview_type === 'fitment' ? 'Fitment interview' : 'Screening interview';
+  const cta = isAssessment
+    ? (group === 'completed' ? 'Submitted' : group === 'closed' ? 'Closed' : 'Start')
+    : group === 'completed'
       ? analyzing ? 'Results coming soon' : 'View results'
       : inv.status === 'started' || inv.status === 'paused'
       ? 'Resume interview'
       : 'Start interview';
+  const disabled = isAssessment
+    ? (group === 'completed' || group === 'closed')
+    : analyzing;
   const onClick = () => {
-    if (group === 'completed') {
+    if (isAssessment) {
+      navigate(assessmentRoute(inv, candidateId));
+    } else if (group === 'completed') {
       navigate(`/candidate/interviews/${inv.interview_id}/results`);
     } else {
       navigate(`/candidate/interviews/${inv.interview_id}`);
@@ -97,11 +136,9 @@ function InvitationCard({ inv }: { inv: Invitation }) {
     <div className="bg-paper rounded-xl border border-border shadow-1 p-5 flex flex-col gap-3 hover:border-accent transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] text-muted font-semibold">
-            {inv.interview_type === 'fitment' ? 'Fitment interview' : 'Screening interview'}
-          </p>
+          <p className="text-[10px] text-muted font-semibold">{eyebrow}</p>
           <h3 className="text-lg font-semibold text-foreground leading-tight mt-1">
-            {inv.interview_title || 'Interview'}
+            {inv.interview_title || (isAssessment ? 'Assessment' : 'Interview')}
           </h3>
         </div>
         <StatusBadge status={inv.status} />
@@ -114,14 +151,14 @@ function InvitationCard({ inv }: { inv: Invitation }) {
       <div className="flex items-center gap-3 text-xs text-muted">
         {duration && <span>{duration}</span>}
         {inv.completed_at && (
-          <span>Completed {new Date(inv.completed_at).toLocaleDateString()}</span>
+          <span>{isAssessment ? 'Submitted' : 'Completed'} {new Date(inv.completed_at).toLocaleDateString()}</span>
         )}
-        {analyzing && <StatusDot variant="pending" pulse label="Analyzing" />}
+        {!isAssessment && analyzing && <StatusDot variant="pending" pulse label="Analyzing" />}
       </div>
 
       <button
         onClick={onClick}
-        disabled={analyzing}
+        disabled={disabled}
         className="mt-auto h-9 bg-primary hover:bg-primary/90 text-paper text-sm font-medium rounded-md transition-colors disabled:bg-paper-3 disabled:text-muted disabled:cursor-not-allowed"
       >
         {cta}
