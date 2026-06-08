@@ -212,6 +212,12 @@ export default function CandidateDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <Link
+              to="/candidate/skill-journey"
+              className="text-sm text-muted hover:text-primary"
+            >
+              Skill journey
+            </Link>
+            <Link
               to="/candidate/profile"
               className="text-sm text-muted hover:text-primary"
             >
