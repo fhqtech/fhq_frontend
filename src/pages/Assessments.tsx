@@ -11,7 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { listsApi } from "@/services/listsApi";
 import { AssessmentEditor } from "@/components/assessments/AssessmentEditor";
+
+type CandidateListLite = { id: string; name: string; totalCandidates?: number };
 import {
   recruiterAssessmentsApi as api,
   type AssessmentItem,
@@ -43,8 +46,9 @@ type Pane =
   | { mode: "assign"; item: CatalogItem };
 
 export default function Assessments() {
-  const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace, currentProject } = useWorkspace();
   const wsId = currentWorkspace?.id;
+  const projectId = currentProject?.id;
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -193,7 +197,7 @@ export default function Assessments() {
           )}
           {pane.mode === "ai" && <AIDraftPane onDrafted={(kind, item) => setPane({ mode: "edit", kind, item, isNew: true })} />}
           {pane.mode === "jd" && <FromJdPane wsId={wsId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); refresh(); }} />}
-          {pane.mode === "assign" && <AssignPane item={pane.item} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); }} />}
+          {pane.mode === "assign" && <AssignPane item={pane.item} wsId={wsId} projectId={projectId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); }} />}
         </div>
       </div>
     </div>
@@ -258,12 +262,27 @@ function FromJdPane({ wsId, onDone }: { wsId?: string; onDone: (msg: string) => 
   );
 }
 
-function AssignPane({ item, onDone }: { item: CatalogItem; onDone: (msg: string) => void }) {
+function AssignPane({ item, wsId, projectId, onDone }: { item: CatalogItem; wsId?: string; projectId?: string; onDone: (msg: string) => void }) {
+  const poolReady = !!(wsId && projectId);
+  const [tab, setTab] = useState<"pool" | "emails">(poolReady ? "pool" : "emails");
   const [emails, setEmails] = useState("");
+  const [lists, setLists] = useState<CandidateListLite[]>([]);
+  const [listId, setListId] = useState("");
+  const [loadingLists, setLoadingLists] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const candidates = useMemo(() => parseCandidates(emails), [emails]);
-  async function go() {
+
+  useEffect(() => {
+    if (tab !== "pool" || !wsId) return;
+    setLoadingLists(true);
+    listsApi.getLists(wsId)
+      .then((ls: any[]) => setLists(ls || []))
+      .catch(() => setLists([]))
+      .finally(() => setLoadingLists(false));
+  }, [tab, wsId]);
+
+  async function assignEmails() {
     if (!candidates.length) return;
     setBusy(true); setErr(null);
     try {
@@ -272,14 +291,53 @@ function AssignPane({ item, onDone }: { item: CatalogItem; onDone: (msg: string)
     } catch (e: any) { setErr(e?.message || "Assignment failed"); }
     finally { setBusy(false); }
   }
+  async function assignPool() {
+    if (!listId || !wsId || !projectId) return;
+    setBusy(true); setErr(null);
+    try {
+      const res = await api.assign({ item_id: item.id, mode: item.mode, list_id: listId, workspace_id: wsId, project_id: projectId, title: item.title });
+      onDone(`Assigned the pool to ${res.assigned ?? 0} candidate(s).`);
+    } catch (e: any) { setErr(e?.message || "Assignment failed"); }
+    finally { setBusy(false); }
+  }
+
   return (
     <div className="space-y-3 max-w-xl">
       <h3 className="text-base font-semibold text-ink">Assign “{item.title}”</h3>
-      <p className="text-sm text-muted">{item.status !== "curated" && "Heads up: this item isn't published yet, so candidates can only open it in test mode. "}One recipient per line — email, or "Name &lt;email&gt;".</p>
-      <Textarea rows={6} value={emails} onChange={(e) => setEmails(e.target.value)} placeholder={"priya@example.com\nArjun Mehta <arjun@example.com>"} className="font-mono text-xs" />
-      <p className="text-xs text-muted">{candidates.length} valid recipient{candidates.length === 1 ? "" : "s"}</p>
-      {err && <p className="text-xs text-danger">{err}</p>}
-      <Button onClick={go} disabled={busy || !candidates.length}><Send className="h-4 w-4 mr-1.5" />{busy ? "Assigning…" : "Assign"}</Button>
+      {item.status !== "curated" && (
+        <p className="text-xs text-muted">Heads up: this item isn't published yet — candidates can only open it in test mode.</p>
+      )}
+      <div className="flex gap-1 border-b border-rule">
+        {poolReady && (
+          <button onClick={() => setTab("pool")} className={`px-3 py-1.5 text-sm ${tab === "pool" ? "border-b-2 border-gold text-ink" : "text-muted"}`}>From talent pool</button>
+        )}
+        <button onClick={() => setTab("emails")} className={`px-3 py-1.5 text-sm ${tab === "emails" ? "border-b-2 border-gold text-ink" : "text-muted"}`}>Paste emails</button>
+      </div>
+
+      {tab === "pool" ? (
+        <div className="space-y-2">
+          {loadingLists ? (
+            <p className="text-sm text-muted">Loading pools…</p>
+          ) : lists.length === 0 ? (
+            <p className="text-sm text-muted">No talent pools in this project. Use “Paste emails”.</p>
+          ) : (
+            <select value={listId} onChange={(e) => setListId(e.target.value)} className="w-full h-9 rounded border border-rule bg-paper px-2 text-sm">
+              <option value="">Select a talent pool…</option>
+              {lists.map((l) => <option key={l.id} value={l.id}>{l.name} ({l.totalCandidates ?? 0})</option>)}
+            </select>
+          )}
+          {err && <p className="text-xs text-danger">{err}</p>}
+          <Button onClick={assignPool} disabled={busy || !listId}><Send className="h-4 w-4 mr-1.5" />{busy ? "Assigning…" : "Assign pool"}</Button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-sm text-muted">One recipient per line — email, or "Name &lt;email&gt;".</p>
+          <Textarea rows={6} value={emails} onChange={(e) => setEmails(e.target.value)} placeholder={"priya@example.com\nArjun Mehta <arjun@example.com>"} className="font-mono text-xs" />
+          <p className="text-xs text-muted">{candidates.length} valid recipient{candidates.length === 1 ? "" : "s"}</p>
+          {err && <p className="text-xs text-danger">{err}</p>}
+          <Button onClick={assignEmails} disabled={busy || !candidates.length}><Send className="h-4 w-4 mr-1.5" />{busy ? "Assigning…" : "Assign"}</Button>
+        </div>
+      )}
     </div>
   );
 }

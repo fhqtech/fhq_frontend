@@ -101,7 +101,10 @@ export const recruiterAssessmentsApi = {
   async assign(input: {
     item_id: string;
     mode: string;
-    candidates: AssignCandidate[];
+    candidates?: AssignCandidate[];
+    list_id?: string;
+    workspace_id?: string;
+    project_id?: string;
     domain?: string;
     title?: string;
   }): Promise<{ assigned: number }> {
