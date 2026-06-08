@@ -28,7 +28,7 @@ export default function OAuthSuccess() {
     setSessionFromToken(token)
       .then(async () => {
         // Read the next URL the user came from (set by loginWithGoogle).
-        let nextUrl = '/candidate/dashboard';
+        let nextUrl = '/candidate/skill-journey';
         try {
           const stashed = sessionStorage.getItem('candidate_oauth_next');
           if (stashed) nextUrl = stashed;

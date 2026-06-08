@@ -49,6 +49,41 @@ export interface ArtifactItemView {
   criteria: RubricCriterionView[];
 }
 
+export interface SkillEntry {
+  canonical_id?: string;
+  skill_name: string;
+  value: number;
+  confidence: number;
+  modes: string[];
+  status: "strong" | "developing" | "gap" | "unproven" | "conflicting";
+}
+
+export interface ImprovementStep {
+  title: string;
+  type: string;
+  detail: string;
+}
+
+export interface ImprovementItem {
+  skill_canonical_id?: string;
+  skill_name: string;
+  current_value: number;
+  target_value: number;
+  status: string;
+  rationale: string;
+  steps: ImprovementStep[];
+}
+
+export interface SkillJourney {
+  fused_tag: { nodes: any[] };
+  strengths: SkillEntry[];
+  gaps: SkillEntry[];
+  improvement_plan: ImprovementItem[];
+  skill_count: number;
+  sources_count: { interview: number; assessment: number };
+  evidence_count: number;
+}
+
 export const assessmentsApi = {
   async getScenario(scenarioId: string, domain = "finance"): Promise<ScenarioView> {
     const r = await fetch(
@@ -72,6 +107,13 @@ export const assessmentsApi = {
       throw new Error(detail);
     }
     return { success: true };
+  },
+
+  /** The candidate's unified skill journey: fused TAG + strengths/gaps + improvement plan. */
+  async getSkillJourney(): Promise<SkillJourney> {
+    const r = await fetch(`${API_BASE_URL}/api/candidate-me/skill-journey`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`Could not load your skill journey (${r.status})`);
+    return r.json();
   },
 
   /** Fetch a case / work-sample item (answer key + anchors stripped server-side). */
