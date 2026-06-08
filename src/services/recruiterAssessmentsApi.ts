@@ -43,7 +43,30 @@ async function jpost(path: string, body: any): Promise<any> {
   return r.json();
 }
 
+export interface SubmissionClaim {
+  canonical_id?: string; skill_name: string; value: number; confidence?: number;
+  evidence?: string[]; extension?: number;
+}
+export interface AssessmentSubmission {
+  evidence_id: string;
+  mode: string;
+  session?: string;
+  artifact_ref?: string;
+  provisional?: boolean;
+  final?: boolean;
+  raw_response?: string;
+  integrity_flags: any[];
+  created_at?: string;
+  claims: SubmissionClaim[];
+}
+
 export const recruiterAssessmentsApi = {
+  async getSubmissions(candidateId: string): Promise<{ submissions: AssessmentSubmission[]; count: number }> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/submissions/${encodeURIComponent(candidateId)}`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`Could not load submissions (${r.status})`);
+    return r.json();
+  },
+
   async getCatalog(domain = "finance", workspaceId?: string): Promise<CatalogItem[]> {
     const qs = new URLSearchParams({ domain });
     if (workspaceId) qs.set("workspace_id", workspaceId);

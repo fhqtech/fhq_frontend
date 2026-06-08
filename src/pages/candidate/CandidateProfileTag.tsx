@@ -300,6 +300,11 @@ export default function CandidateProfileTag() {
         <h1 className="mt-1 text-3xl font-semibold text-ink">
           Talent profile snapshot
         </h1>
+        {paramCandidateId && (
+          <Link to={`/candidates/${paramCandidateId}/assessments`} className="mt-1 inline-block text-sm text-gold-ink hover:underline">
+            View assessment submissions →
+          </Link>
+        )}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-soft">
           {profileTag.generated_at && (
             <span className="flex items-center gap-1.5">
