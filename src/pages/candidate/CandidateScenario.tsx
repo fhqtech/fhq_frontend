@@ -32,6 +32,11 @@ export default function CandidateScenario() {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [restored, setRestored] = useState(false);
+
+  // Save-and-resume: open-text answers autosave to localStorage so a refresh /
+  // accidental close doesn't lose work. Keyed choices are one tap — not saved.
+  const draftKey = `assess_draft:${candidateId}:${scenarioId}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -39,11 +44,24 @@ export default function CandidateScenario() {
     setError(null);
     assessmentsApi
       .getScenario(scenarioId, domain)
-      .then((s) => !cancelled && setScenario(s))
+      .then((s) => {
+        if (cancelled) return;
+        setScenario(s);
+        if (s.response_type === "open") {
+          const saved = localStorage.getItem(draftKey);
+          if (saved) { setText(saved); setRestored(true); }
+        }
+      })
       .catch((e) => !cancelled && setError(e?.message || "Could not load this assessment."))
       .finally(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
   }, [scenarioId, domain]);
+
+  function onText(v: string) {
+    setText(v);
+    setRestored(false);
+    try { v.trim() ? localStorage.setItem(draftKey, v) : localStorage.removeItem(draftKey); } catch { /* quota / private mode */ }
+  }
 
   const answered = scenario?.response_type === "keyed" ? !!choice : text.trim().length > 0;
 
@@ -63,6 +81,7 @@ export default function CandidateScenario() {
       if (battery && batteryItem) {
         try { await assessmentsApi.markBatteryItem(battery, batteryItem); } catch { /* progress is best-effort */ }
       }
+      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
       setSubmitted(true);
     } catch (e: any) {
       setError(e?.message || "Submission failed. Please try again.");
@@ -111,12 +130,21 @@ export default function CandidateScenario() {
                 ))}
               </RadioGroup>
             ) : (
-              <Textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Explain your approach and the judgment behind it…"
-                rows={8}
-              />
+              <div className="space-y-1.5">
+                <Textarea
+                  value={text}
+                  onChange={(e) => onText(e.target.value)}
+                  placeholder="Explain your approach and the judgment behind it…"
+                  rows={8}
+                />
+                <p className="text-xs text-muted">
+                  {restored
+                    ? "Restored your saved draft — pick up where you left off."
+                    : text.trim()
+                    ? "Saved on this device. You can close and come back."
+                    : "Your answer saves automatically as you type."}
+                </p>
+              </div>
             )}
 
             {error && (
