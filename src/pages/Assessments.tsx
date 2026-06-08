@@ -27,6 +27,9 @@ const MODE_LABEL: Record<string, string> = {
 const STATUS_CLS: Record<string, string> = {
   curated: "bg-success-soft text-success", draft: "bg-accent/10 text-primary", fixture: "bg-paper-3 text-muted",
 };
+// Plain recruiter-facing labels for the internal status vocabulary.
+export const STATUS_LABEL: Record<string, string> = { curated: "Live", draft: "Draft", fixture: "Test" };
+const statusLabel = (s?: string) => STATUS_LABEL[s || "draft"] || s || "draft";
 
 function parseCandidates(raw: string): { name: string; email: string }[] {
   const out: { name: string; email: string }[] = [];
@@ -160,7 +163,7 @@ export default function Assessments() {
                     <button onClick={() => openItem(c)} className="flex-1 text-left px-4 py-3 hover:bg-paper-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] font-mono uppercase tracking-wider text-gold-ink">{MODE_LABEL[c.mode] || c.mode}</span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${STATUS_CLS[c.status] || ""}`}>{c.status}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${STATUS_CLS[c.status] || ""}`}>{statusLabel(c.status)}</span>
                       </div>
                       <p className="text-sm text-ink mt-0.5 line-clamp-2">{c.title}</p>
                     </button>
