@@ -21,6 +21,8 @@ export default function CandidateScenario() {
   const [params] = useSearchParams();
   const candidateId = params.get("candidateId") || "";
   const sessionId = params.get("sessionId") || undefined;
+  const battery = params.get("battery") || "";
+  const batteryItem = params.get("batteryItem") || "";
   const domain = params.get("domain") || "finance";
 
   const [scenario, setScenario] = useState<ScenarioView | null>(null);
@@ -58,6 +60,9 @@ export default function CandidateScenario() {
         chosen_option_id: scenario.response_type === "keyed" ? choice : undefined,
         response: scenario.response_type === "open" ? text : undefined,
       });
+      if (battery && batteryItem) {
+        try { await assessmentsApi.markBatteryItem(battery, batteryItem); } catch { /* progress is best-effort */ }
+      }
       setSubmitted(true);
     } catch (e: any) {
       setError(e?.message || "Submission failed. Please try again.");

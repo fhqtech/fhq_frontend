@@ -121,6 +121,19 @@ export const recruiterAssessmentsApi = {
     return jpost("/api/assessments/ai/from-jd", { jd_text: jdText, count });
   },
 
+  // Assign a battery (a set of items + due date) to candidates / a pool.
+  async assignBattery(input: {
+    name: string;
+    items: { item_id: string; mode: string; title?: string }[];
+    due_at?: string;
+    candidates?: AssignCandidate[];
+    list_id?: string;
+    workspace_id?: string;
+    project_id?: string;
+  }): Promise<{ assigned: number }> {
+    return jpost("/api/assessments/assign-battery", { domain: "finance", ...input });
+  },
+
   async assign(input: {
     item_id: string;
     mode: string;

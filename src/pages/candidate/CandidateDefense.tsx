@@ -21,6 +21,8 @@ export default function CandidateDefense() {
   const candidateId = params.get("candidateId") || "";
   const sessionId = params.get("sessionId") || undefined;
   const domain = params.get("domain") || "finance";
+  const battery = params.get("battery") || "";
+  const batteryItem = params.get("batteryItem") || "";
 
   const [item, setItem] = useState<ArtifactItemView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,9 @@ export default function CandidateDefense() {
         candidate_id: candidateId, item_id: itemId, defense_transcript: text.trim(),
         session_id: sessionId, domain,
       });
+      if (battery && batteryItem) {
+        try { await assessmentsApi.markBatteryItem(battery, batteryItem); } catch { /* best-effort */ }
+      }
       setSubmitted(true);
     } catch (e: any) {
       setError(e?.message || "Submission failed. Please try again.");

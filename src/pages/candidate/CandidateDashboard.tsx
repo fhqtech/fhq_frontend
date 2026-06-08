@@ -24,10 +24,17 @@ interface Invitation {
   completed_at?: string;
   expires_at?: string;
   // P2: assessment assignments ride the same feed (item_kind discriminator).
-  item_kind?: 'interview' | 'assessment';
+  item_kind?: 'interview' | 'assessment' | 'assessment_battery';
   assessment_mode?: 'scenario' | 'case' | 'work_sample' | 'defense';
   assessment_item_id?: string;
   assessment_domain?: string;
+  battery?: {
+    name?: string;
+    due_at?: string;
+    items: { item_id: string; mode: string; title?: string; done?: boolean }[];
+    done_count: number;
+    total: number;
+  };
 }
 
 const ASSESSMENT_MODE_LABEL: Record<string, string> = {
@@ -37,16 +44,27 @@ const ASSESSMENT_MODE_LABEL: Record<string, string> = {
   defense: 'Defense round',
 };
 
-/** Candidate-facing route for an assessment assignment, by mode. */
+const routeForItem = (mode: string, itemId: string, qs: string) =>
+  mode === 'scenario' ? `/candidate/assessment/${encodeURIComponent(itemId)}?${qs}`
+  : mode === 'defense' ? `/candidate/assessment/defense/${encodeURIComponent(itemId)}?${qs}`
+  : `/candidate/assessment/artifact/${encodeURIComponent(itemId)}?${qs}`;
+
+/** Candidate-facing route for a single assessment assignment, by mode. */
 function assessmentRoute(inv: Invitation, candidateId: string): string {
-  const item = encodeURIComponent(inv.assessment_item_id || '');
+  const qs = new URLSearchParams({ candidateId, domain: inv.assessment_domain || 'finance' }).toString();
+  return routeForItem(inv.assessment_mode || 'case', inv.assessment_item_id || '', qs);
+}
+
+/** Route to the next unfinished item of a battery, carrying battery context so
+ *  the take screen marks progress on submit. */
+function batteryRoute(inv: Invitation, candidateId: string): string | null {
+  const next = inv.battery?.items.find((it) => !it.done);
+  if (!next) return null;
   const qs = new URLSearchParams({
-    candidateId,
-    domain: inv.assessment_domain || 'finance',
+    candidateId, domain: inv.assessment_domain || 'finance',
+    battery: inv.id, batteryItem: next.item_id,
   }).toString();
-  if (inv.assessment_mode === 'scenario') return `/candidate/assessment/${item}?${qs}`;
-  if (inv.assessment_mode === 'defense') return `/candidate/assessment/defense/${item}?${qs}`;
-  return `/candidate/assessment/artifact/${item}?${qs}`; // case | work_sample
+  return routeForItem(next.mode, next.item_id, qs);
 }
 
 const API_BASE = () => import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
@@ -102,26 +120,37 @@ function InvitationCard({ inv }: { inv: Invitation }) {
   const { account } = useCandidateAuth();
   const group = groupOf(inv.status);
   const analyzing = isAnalyzing(inv);
-  const isAssessment = inv.item_kind === 'assessment';
+  const isBattery = inv.item_kind === 'assessment_battery';
+  const isAssessment = inv.item_kind === 'assessment' || isBattery;
   const candidateId = (account as any)?.profile_ids?.[0] || '';
+  const batteryDone = isBattery && (inv.battery?.done_count ?? 0) >= (inv.battery?.total ?? 0);
 
   // Assessments: no score is ever shown to the candidate (CR-04) — a completed
   // assignment reads "submitted" and isn't a results link.
-  const eyebrow = isAssessment
+  const eyebrow = isBattery
+    ? 'Assessment battery'
+    : inv.item_kind === 'assessment'
     ? ASSESSMENT_MODE_LABEL[inv.assessment_mode || ''] || 'Assessment'
     : inv.interview_type === 'fitment' ? 'Fitment interview' : 'Screening interview';
-  const cta = isAssessment
+  const cta = isBattery
+    ? (batteryDone ? 'Submitted' : (inv.battery?.done_count ?? 0) > 0 ? 'Continue' : 'Start')
+    : inv.item_kind === 'assessment'
     ? (group === 'completed' ? 'Submitted' : group === 'closed' ? 'Closed' : 'Start')
     : group === 'completed'
       ? analyzing ? 'Results coming soon' : 'View results'
       : inv.status === 'started' || inv.status === 'paused'
       ? 'Resume interview'
       : 'Start interview';
-  const disabled = isAssessment
+  const disabled = isBattery
+    ? batteryDone || group === 'closed'
+    : isAssessment
     ? (group === 'completed' || group === 'closed')
     : analyzing;
   const onClick = () => {
-    if (isAssessment) {
+    if (isBattery) {
+      const r = batteryRoute(inv, candidateId);
+      if (r) navigate(r);
+    } else if (inv.item_kind === 'assessment') {
       navigate(assessmentRoute(inv, candidateId));
     } else if (group === 'completed') {
       navigate(`/candidate/interviews/${inv.interview_id}/results`);
@@ -131,6 +160,7 @@ function InvitationCard({ inv }: { inv: Invitation }) {
   };
 
   const duration = inv.interview_duration != null ? `${inv.interview_duration} min` : null;
+  const dueDate = isBattery && inv.battery?.due_at ? new Date(inv.battery.due_at) : null;
 
   return (
     <div className="bg-paper rounded-xl border border-border shadow-1 p-5 flex flex-col gap-3 hover:border-accent transition-colors">
@@ -149,8 +179,10 @@ function InvitationCard({ inv }: { inv: Invitation }) {
       )}
 
       <div className="flex items-center gap-3 text-xs text-muted">
+        {isBattery && inv.battery && <span>{inv.battery.done_count} of {inv.battery.total} done</span>}
+        {dueDate && <span>Due {dueDate.toLocaleDateString()}</span>}
         {duration && <span>{duration}</span>}
-        {inv.completed_at && (
+        {!isBattery && inv.completed_at && (
           <span>{isAssessment ? 'Submitted' : 'Completed'} {new Date(inv.completed_at).toLocaleDateString()}</span>
         )}
         {!isAssessment && analyzing && <StatusDot variant="pending" pulse label="Analyzing" />}
