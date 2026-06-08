@@ -37,6 +37,7 @@ const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
 const SkillMatcher = lazy(() => import("./pages/SkillMatcher"));
 const CreateInterview = lazy(() => import("./pages/CreateInterview"));
 const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
+const Assessments = lazy(() => import("./pages/Assessments"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
 const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
@@ -188,6 +189,14 @@ const App = () => (
               <TourGuard>
                 <MainLayout>
                   <CreateInterview />
+                </MainLayout>
+              </TourGuard>
+            } />
+
+            <Route path="/assessments" element={
+              <TourGuard>
+                <MainLayout>
+                  <Assessments />
                 </MainLayout>
               </TourGuard>
             } />

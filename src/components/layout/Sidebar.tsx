@@ -7,6 +7,7 @@ import {
   Gear as Settings,
   ChartBar as BarChart3,
   Briefcase,
+  ClipboardText as ClipboardList,
   CaretDown as ChevronDown,
   Robot as Bot,
   List as Menu,
@@ -52,6 +53,7 @@ const menuItems = [
       { title: "Skill analysis", url: "/interviews/skill-analysis" }
     ]
   },
+  { title: "Assessments", url: "/assessments", icon: ClipboardList },
   { title: "Talent pools", url: "/lists", icon: Users },
   { title: "Skill matcher", url: "/skill-matcher", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings }
