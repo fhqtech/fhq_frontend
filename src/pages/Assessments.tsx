@@ -73,11 +73,11 @@ export default function Assessments() {
   async function openItem(c: CatalogItem) {
     setError(null);
     try {
+      // Backend unions Firestore + JSON seed, so this opens any catalog item.
       const item = await api.getItem(c.id);
       setPane({ mode: "edit", kind: item.kind || c.mode, item, isNew: false });
-    } catch {
-      // Seed-only item (not yet in Firestore) → can still be assigned.
-      setPane({ mode: "assign", item: c });
+    } catch (e: any) {
+      setError(e?.message || "Could not open this item.");
     }
   }
 
