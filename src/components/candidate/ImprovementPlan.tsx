@@ -4,8 +4,9 @@
  * Dense divided rows (no card grid), sentence case, no superlatives.
  */
 import { useState } from "react";
-import { ChevronDown, ChevronRight, BookOpen, Dumbbell, ClipboardCheck } from "lucide-react";
-import type { ImprovementItem } from "@/services/assessmentsApi";
+import { Link } from "react-router-dom";
+import { ChevronDown, ChevronRight, BookOpen, Dumbbell, ClipboardCheck, ArrowRight } from "lucide-react";
+import type { ImprovementItem, PracticeRef } from "@/services/assessmentsApi";
 
 const STEP_ICON: Record<string, typeof BookOpen> = {
   reading: BookOpen,
@@ -13,7 +14,21 @@ const STEP_ICON: Record<string, typeof BookOpen> = {
   assessment: ClipboardCheck,
 };
 
-function GapRow({ item }: { item: ImprovementItem }) {
+const PRACTICE_CTA: Record<string, string> = {
+  scenario: "Take a scenario to prove this",
+  case: "Take a case study to prove this",
+  work_sample: "Take a work sample to prove this",
+  defense: "Defend this skill",
+};
+
+function practiceRoute(p: PracticeRef, candidateId: string): string {
+  const qs = new URLSearchParams({ candidateId, domain: p.domain, practice: "1" }).toString();
+  if (p.mode === "scenario") return `/candidate/assessment/${encodeURIComponent(p.item_id)}?${qs}`;
+  if (p.mode === "defense") return `/candidate/assessment/defense/${encodeURIComponent(p.item_id)}?${qs}`;
+  return `/candidate/assessment/artifact/${encodeURIComponent(p.item_id)}?${qs}`;
+}
+
+function GapRow({ item, candidateId }: { item: ImprovementItem; candidateId?: string | null }) {
   const [open, setOpen] = useState(false);
   const pct = Math.max(0, Math.min(100, item.current_value));
   const targetPct = Math.max(0, Math.min(100, item.target_value));
@@ -62,13 +77,27 @@ function GapRow({ item }: { item: ImprovementItem }) {
               );
             })}
           </ul>
+
+          {item.practice && candidateId ? (
+            <Link
+              to={practiceRoute(item.practice, candidateId)}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-primary text-paper text-sm font-medium hover:bg-primary/90 transition-colors active:translate-y-px"
+            >
+              {PRACTICE_CTA[item.practice.mode] || "Take a targeted assessment"}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <p className="text-xs text-muted2 italic">
+              No live assessment for this skill yet — check back as the library grows.
+            </p>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-export function ImprovementPlan({ items }: { items: ImprovementItem[] }) {
+export function ImprovementPlan({ items, candidateId }: { items: ImprovementItem[]; candidateId?: string | null }) {
   if (!items.length) {
     return (
       <p className="text-sm text-muted py-4 border-t border-rule">
@@ -79,7 +108,7 @@ export function ImprovementPlan({ items }: { items: ImprovementItem[] }) {
   return (
     <div>
       {items.map((it) => (
-        <GapRow key={it.skill_canonical_id || it.skill_name} item={it} />
+        <GapRow key={it.skill_canonical_id || it.skill_name} item={it} candidateId={candidateId} />
       ))}
     </div>
   );
