@@ -27,15 +27,75 @@ export interface AssignCandidate {
   email: string;
 }
 
+// The full editable payload (scenario or case/work-sample). Loose by design —
+// the editor manipulates nested options/rubric arrays.
+export type AssessmentItem = Record<string, any>;
+
+async function jpost(path: string, body: any): Promise<any> {
+  const r = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST", headers: authHeaders(), body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    let detail = `Request failed (${r.status})`;
+    try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+  return r.json();
+}
+
 export const recruiterAssessmentsApi = {
-  async getCatalog(domain = "finance"): Promise<CatalogItem[]> {
-    const r = await fetch(
-      `${API_BASE_URL}/api/assessments/catalog?domain=${encodeURIComponent(domain)}`,
-      { headers: authHeaders() },
-    );
+  async getCatalog(domain = "finance", workspaceId?: string): Promise<CatalogItem[]> {
+    const qs = new URLSearchParams({ domain });
+    if (workspaceId) qs.set("workspace_id", workspaceId);
+    const r = await fetch(`${API_BASE_URL}/api/assessments/catalog?${qs.toString()}`, { headers: authHeaders() });
     if (!r.ok) throw new Error(`Could not load the assessment catalog (${r.status})`);
     const data = await r.json();
     return data.items || [];
+  },
+
+  // --- CRUD ---
+  async getItem(itemId: string): Promise<AssessmentItem> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/items/${encodeURIComponent(itemId)}`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(r.status === 404 ? "Item not found" : `Could not load item (${r.status})`);
+    return (await r.json()).item;
+  },
+  async createItem(kind: string, item: AssessmentItem, workspaceId?: string): Promise<{ id: string }> {
+    return jpost("/api/assessments/items", { kind, item, workspace_id: workspaceId, domain: "finance" });
+  },
+  async updateItem(itemId: string, kind: string, item: AssessmentItem): Promise<any> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/items/${encodeURIComponent(itemId)}`, {
+      method: "PUT", headers: authHeaders(), body: JSON.stringify({ kind, item }),
+    });
+    if (!r.ok) {
+      let detail = `Save failed (${r.status})`;
+      try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+      throw new Error(detail);
+    }
+    return r.json();
+  },
+  async publishItem(itemId: string): Promise<any> {
+    return jpost(`/api/assessments/items/${encodeURIComponent(itemId)}/publish`, {});
+  },
+  async deleteItem(itemId: string): Promise<any> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/items/${encodeURIComponent(itemId)}`, {
+      method: "DELETE", headers: authHeaders(),
+    });
+    if (!r.ok) throw new Error(`Delete failed (${r.status})`);
+    return r.json();
+  },
+
+  // --- AI authoring (returns drafts; recruiter reviews + saves) ---
+  async aiDraft(brief: string, mode: string, difficulty = "mid"): Promise<{ kind: string; item: AssessmentItem }> {
+    return jpost("/api/assessments/ai/draft", { brief, mode, difficulty });
+  },
+  async aiImprove(item: AssessmentItem, notes: string): Promise<{ item: AssessmentItem }> {
+    return jpost("/api/assessments/ai/improve", { item, notes });
+  },
+  async aiSuggestScoring(item: AssessmentItem): Promise<{ options?: any[]; criteria?: any[] }> {
+    return jpost("/api/assessments/ai/suggest-scoring", { item });
+  },
+  async aiFromJd(jdText: string, count = 5): Promise<{ items: AssessmentItem[] }> {
+    return jpost("/api/assessments/ai/from-jd", { jd_text: jdText, count });
   },
 
   async assign(input: {
