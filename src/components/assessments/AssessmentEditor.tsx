@@ -49,9 +49,36 @@ export function AssessmentEditor({ kind, item, onChange, onSave, onPublish, onDe
         s.options.forEach((o: any) => { byId[o.id] = o.score; });
         set({ options: item.options.map((o: any) => ({ ...o, score: byId[o.id] ?? o.score })) });
       }
+      if (s.criteria?.length && item.rubric?.criteria) {
+        const byId: Record<string, any[]> = {};
+        s.criteria.forEach((c: any) => { byId[c.id] = c.anchors; });
+        set({ rubric: { ...item.rubric, criteria: item.rubric.criteria.map((c: any) => byId[c.id] ? { ...c, anchors: byId[c.id] } : c) } });
+      }
     } catch (e: any) { setErr(e?.message || "AI suggest failed"); }
     finally { setBusy(null); }
   }
+
+  // --- rubric criteria helpers ---
+  const rubric = item.rubric || { rubric_id: `r-${item.id || "new"}`, mode: kind, criteria: [] };
+  const setCriteria = (criteria: any[]) => set({ rubric: { ...rubric, criteria } });
+  const setCriterion = (i: number, patch: any) =>
+    setCriteria((rubric.criteria || []).map((c: any, j: number) => (j === i ? { ...c, ...patch } : c)));
+  const removeCriterion = (i: number) => setCriteria((rubric.criteria || []).filter((_: any, j: number) => j !== i));
+  const addCriterion = () =>
+    setCriteria([...(rubric.criteria || []), {
+      id: `c${(rubric.criteria?.length || 0) + 1}`, label: "", canonical_ids: [], weight: 1.0,
+      anchors: [{ level: "strong", descriptor: "" }, { level: "weak", descriptor: "" }],
+    }]);
+  const anchor = (cr: any, level: string) =>
+    (cr.anchors || []).find((a: any) => a.level === level)?.descriptor || "";
+  const setAnchor = (i: number, level: string, descriptor: string) => {
+    const cr = (rubric.criteria || [])[i] || {};
+    const anchors = [...(cr.anchors || [])];
+    const idx = anchors.findIndex((a: any) => a.level === level);
+    if (idx >= 0) anchors[idx] = { ...anchors[idx], descriptor };
+    else anchors.push({ level, descriptor });
+    setCriterion(i, { anchors });
+  };
 
   return (
     <div className="space-y-5">
@@ -134,6 +161,34 @@ export function AssessmentEditor({ kind, item, onChange, onSave, onPublish, onDe
         <div>
           <Label className="text-xs">Answer key (planted defect / model solution — never shown to candidate)</Label>
           <Textarea className="mt-1" rows={3} value={item.answer_key || ""} onChange={(e) => set({ answer_key: e.target.value })} />
+        </div>
+      )}
+
+      {/* rubric editor — open scenario + case + work-sample */}
+      {!isKeyed && (
+        <div>
+          <Label className="text-xs">Rubric criteria (each scores one or more skills, with strong / weak anchors)</Label>
+          <div className="mt-1 space-y-3">
+            {(item.rubric?.criteria || []).map((cr: any, i: number) => (
+              <div key={cr.id || i} className="rounded border border-rule p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Input className="flex-1" placeholder="Criterion (e.g. Profitability analysis)"
+                    value={cr.label || ""} onChange={(e) => setCriterion(i, { label: e.target.value })} />
+                  <Input type="number" step="0.5" min={0} className="w-20" title="weight"
+                    value={cr.weight ?? 1} onChange={(e) => setCriterion(i, { weight: Number(e.target.value) })} />
+                  <Button variant="ghost" size="icon" onClick={() => removeCriterion(i)}><Trash2 className="h-4 w-4 text-muted" /></Button>
+                </div>
+                <Input className="text-xs" placeholder="skill canonical ids (comma-separated)"
+                  value={(cr.canonical_ids || []).join(", ")}
+                  onChange={(e) => setCriterion(i, { canonical_ids: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
+                <Textarea rows={2} placeholder="Strong answer looks like…" value={anchor(cr, "strong")}
+                  onChange={(e) => setAnchor(i, "strong", e.target.value)} />
+                <Textarea rows={2} placeholder="Weak answer looks like…" value={anchor(cr, "weak")}
+                  onChange={(e) => setAnchor(i, "weak", e.target.value)} />
+              </div>
+            ))}
+            <Button variant="outline" size="sm" onClick={addCriterion}><Plus className="h-3.5 w-3.5 mr-1" /> Add criterion</Button>
+          </div>
         </div>
       )}
 
