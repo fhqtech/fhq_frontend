@@ -60,7 +60,53 @@ export interface AssessmentSubmission {
   claims: SubmissionClaim[];
 }
 
+export interface CoverageSkill {
+  canonical_id: string;
+  display_name: string;
+  subdomain: string;
+  curated: number;
+  draft: number;
+  fixture: number;
+  total: number;
+  modes: Record<string, number>;
+  state: "live" | "draft" | "gap";
+}
+export interface CoverageReport {
+  domain: string;
+  totals: { skills: number; with_curated: number; with_any: number };
+  skills: CoverageSkill[];
+}
+
+export interface ItemAnalyticsRow {
+  id: string;
+  title?: string;
+  mode?: string;
+  status?: string;
+  assigned: number;
+  completed: number;
+  completion_rate: number | null;
+}
+export interface ItemAnalytics {
+  items: ItemAnalyticsRow[];
+  assigned_total: number;
+}
+
 export const recruiterAssessmentsApi = {
+  async getCoverage(domain = "finance", workspaceId?: string): Promise<CoverageReport> {
+    const qs = new URLSearchParams({ domain });
+    if (workspaceId) qs.set("workspace_id", workspaceId);
+    const r = await fetch(`${API_BASE_URL}/api/assessments/coverage?${qs.toString()}`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`Could not load coverage (${r.status})`);
+    return r.json();
+  },
+
+  async getAnalytics(workspaceId: string, domain = "finance"): Promise<ItemAnalytics> {
+    const qs = new URLSearchParams({ workspace_id: workspaceId, domain });
+    const r = await fetch(`${API_BASE_URL}/api/assessments/analytics?${qs.toString()}`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`Could not load analytics (${r.status})`);
+    return r.json();
+  },
+
   async getSubmissions(candidateId: string): Promise<{ submissions: AssessmentSubmission[]; count: number }> {
     const r = await fetch(`${API_BASE_URL}/api/assessments/submissions/${encodeURIComponent(candidateId)}`, { headers: authHeaders() });
     if (!r.ok) throw new Error(`Could not load submissions (${r.status})`);

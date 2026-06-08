@@ -4,7 +4,7 @@
  * publish to live, and assign. Master-detail: left = library, right = editor.
  */
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, Plus, Sparkles, FileText, Send, Layers } from "lucide-react";
+import { AlertCircle, CheckCircle2, Plus, Sparkles, FileText, Send, Layers, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +47,8 @@ type Pane =
   | { mode: "ai" }
   | { mode: "jd" }
   | { mode: "assign"; item: CatalogItem }
-  | { mode: "battery" };
+  | { mode: "battery" }
+  | { mode: "coverage" };
 
 export default function Assessments() {
   const { currentWorkspace, currentProject } = useWorkspace();
@@ -141,6 +142,7 @@ export default function Assessments() {
           <Button variant="outline" size="sm" onClick={() => setPane({ mode: "ai" })}><Sparkles className="h-3.5 w-3.5 mr-1" /> Draft with AI</Button>
           <Button variant="outline" size="sm" onClick={() => setPane({ mode: "jd" })}><FileText className="h-3.5 w-3.5 mr-1" /> From JD</Button>
           <Button variant="outline" size="sm" onClick={() => setPane({ mode: "battery" })}><Layers className="h-3.5 w-3.5 mr-1" /> Battery</Button>
+          <Button variant="outline" size="sm" onClick={() => setPane({ mode: "coverage" })}><BarChart3 className="h-3.5 w-3.5 mr-1" /> Coverage</Button>
         </div>
       </div>
 
@@ -204,6 +206,7 @@ export default function Assessments() {
           {pane.mode === "jd" && <FromJdPane wsId={wsId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); refresh(); }} />}
           {pane.mode === "assign" && <AssignPane item={pane.item} wsId={wsId} projectId={projectId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); }} />}
           {pane.mode === "battery" && <BatteryComposer catalog={catalog} wsId={wsId} projectId={projectId} onDone={(msg) => { setFlash(msg); setPane({ mode: "empty" }); }} />}
+          {pane.mode === "coverage" && <CoveragePanel wsId={wsId} onOpenItem={(id) => { const c = catalog.find((x) => x.id === id); if (c) openItem(c); }} />}
         </div>
       </div>
     </div>
@@ -411,6 +414,137 @@ function BatteryComposer({ catalog, wsId, projectId, onDone }: { catalog: Catalo
       </div>
       {err && <p className="text-xs text-danger">{err}</p>}
       <Button onClick={go} disabled={!ready}><Layers className="h-4 w-4 mr-1.5" />{busy ? "Assigning…" : "Assign battery"}</Button>
+    </div>
+  );
+}
+
+// --- Coverage + item analytics -------------------------------------------------
+
+const COVERAGE_STATE_CLS: Record<string, string> = {
+  live: "bg-success-soft text-success", draft: "bg-accent/10 text-primary", gap: "bg-paper-3 text-muted",
+};
+const COVERAGE_STATE_LABEL: Record<string, string> = { live: "Live", draft: "Draft only", gap: "No content" };
+
+function CoveragePanel({ wsId, onOpenItem }: { wsId?: string; onOpenItem: (id: string) => void }) {
+  const [tab, setTab] = useState<"skills" | "items">("skills");
+  const [coverage, setCoverage] = useState<import("@/services/recruiterAssessmentsApi").CoverageReport | null>(null);
+  const [analytics, setAnalytics] = useState<import("@/services/recruiterAssessmentsApi").ItemAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+  const [gapsOnly, setGapsOnly] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true); setErr(null);
+    Promise.all([
+      api.getCoverage("finance", wsId),
+      wsId ? api.getAnalytics(wsId, "finance") : Promise.resolve(null),
+    ])
+      .then(([cov, ana]) => { if (!cancelled) { setCoverage(cov); setAnalytics(ana); } })
+      .catch((e: any) => !cancelled && setErr(e?.message || "Could not load coverage."))
+      .finally(() => !cancelled && setLoading(false));
+    return () => { cancelled = true; };
+  }, [wsId]);
+
+  if (loading) return <p className="text-sm text-muted py-8 text-center">Loading coverage…</p>;
+  if (err) return <p className="text-xs text-danger flex items-center gap-1.5" role="alert"><AlertCircle className="h-3.5 w-3.5" /> {err}</p>;
+
+  const t = coverage?.totals;
+  const skills = (coverage?.skills || []).filter((s) => !gapsOnly || s.state !== "live");
+  // group by subdomain, preserving the server's sort order
+  const groups: Record<string, typeof skills> = {};
+  for (const s of skills) (groups[s.subdomain] ||= []).push(s);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <span className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Coverage</span>
+        <h2 className="text-lg font-semibold text-ink mt-0.5">Content coverage &amp; usage</h2>
+        {t && (
+          <p className="text-sm text-muted mt-1 tabular-nums">
+            <span className="font-semibold text-ink">{t.with_curated}</span> of {t.skills} skills live
+            {" · "}
+            <span className="font-semibold text-ink">{t.with_any}</span> have any content
+          </p>
+        )}
+      </div>
+
+      <div className="flex gap-1 border-b border-rule">
+        {(["skills", "items"] as const).map((k) => (
+          <button key={k} onClick={() => setTab(k)}
+            className={`px-3 py-1.5 text-sm -mb-px border-b-2 ${tab === k ? "border-primary text-ink font-medium" : "border-transparent text-muted hover:text-ink"}`}>
+            {k === "skills" ? "Skill coverage" : "Item usage"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "skills" ? (
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
+            <input type="checkbox" checked={gapsOnly} onChange={(e) => setGapsOnly(e.target.checked)} />
+            Show gaps only (skills without live content)
+          </label>
+          {Object.keys(groups).length === 0 ? (
+            <p className="text-sm text-muted py-6 text-center">Nothing to show.</p>
+          ) : (
+            Object.entries(groups).map(([sub, rows]) => (
+              <div key={sub}>
+                <p className="text-[10px] font-mono uppercase tracking-wider text-gold-ink mb-1">{sub}</p>
+                <ul className="divide-y divide-rule border-t border-rule">
+                  {rows.map((s) => (
+                    <li key={s.canonical_id} className="flex items-center justify-between gap-3 py-2">
+                      <span className="text-sm text-ink truncate">{s.display_name}</span>
+                      <div className="flex items-center gap-2 shrink-0 tabular-nums">
+                        {s.total > 0 && (
+                          <span className="text-[11px] text-muted">
+                            {s.curated > 0 && `${s.curated} live`}
+                            {s.curated > 0 && s.draft + s.fixture > 0 && " · "}
+                            {s.draft + s.fixture > 0 && `${s.draft + s.fixture} draft`}
+                          </span>
+                        )}
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${COVERAGE_STATE_CLS[s.state]}`}>{COVERAGE_STATE_LABEL[s.state]}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
+        </div>
+      ) : !wsId ? (
+        <p className="text-sm text-muted py-6 text-center">Select a workspace to see item usage.</p>
+      ) : !analytics || analytics.items.length === 0 ? (
+        <p className="text-sm text-muted py-6 text-center">No items yet.</p>
+      ) : (
+        <div>
+          <p className="text-xs text-muted mb-2 tabular-nums">{analytics.assigned_total} assignment{analytics.assigned_total === 1 ? "" : "s"} across the library</p>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-[10px] font-mono uppercase tracking-wider text-muted border-b border-rule">
+                <th className="text-left font-normal py-1.5">Item</th>
+                <th className="text-right font-normal py-1.5 px-2">Assigned</th>
+                <th className="text-right font-normal py-1.5 px-2">Done</th>
+                <th className="text-right font-normal py-1.5">Rate</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-rule">
+              {analytics.items.map((it) => (
+                <tr key={it.id} className="hover:bg-paper-2">
+                  <td className="py-2">
+                    <button onClick={() => onOpenItem(it.id)} className="text-left hover:text-primary">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-gold-ink mr-1.5">{MODE_LABEL[it.mode || ""] || it.mode}</span>
+                      <span className="text-ink line-clamp-1">{it.title || it.id}</span>
+                    </button>
+                  </td>
+                  <td className="text-right tabular-nums px-2 text-ink">{it.assigned}</td>
+                  <td className="text-right tabular-nums px-2 text-ink">{it.completed}</td>
+                  <td className="text-right tabular-nums text-muted">{it.completion_rate == null ? "—" : `${Math.round(it.completion_rate * 100)}%`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
