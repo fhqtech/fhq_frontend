@@ -200,6 +200,7 @@ export default function Assessments() {
                 onChange={(next) => setPane({ ...pane, item: next })}
                 onSave={save} onPublish={publish} onDelete={del}
               />
+              {!pane.isNew && <ItemHistory item={pane.item} />}
             </>
           )}
           {pane.mode === "ai" && <AIDraftPane onDrafted={(kind, item) => setPane({ mode: "edit", kind, item, isNew: true })} />}
@@ -209,6 +210,41 @@ export default function Assessments() {
           {pane.mode === "coverage" && <CoveragePanel wsId={wsId} onOpenItem={(id) => { const c = catalog.find((x) => x.id === id); if (c) openItem(c); }} />}
         </div>
       </div>
+    </div>
+  );
+}
+
+// --- audit trail (governance-lite) -------------------------------------------
+
+type HistoryEvent = { action: string; by?: string; at?: string };
+const ACTION_LABEL: Record<string, string> = {
+  created: "Created", edited: "Edited", published: "Published", deleted: "Deleted",
+};
+
+function fmtWhen(at?: string): string {
+  if (!at) return "";
+  const d = new Date(at);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function ItemHistory({ item }: { item: AssessmentItem }) {
+  const history: HistoryEvent[] = Array.isArray(item.history) ? item.history : [];
+  if (!history.length) return null;
+  // newest first
+  const rows = [...history].reverse();
+  return (
+    <div className="mt-5 pt-4 border-t border-rule">
+      <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink mb-2">Item history</p>
+      <ul className="space-y-1.5">
+        {rows.map((e, i) => (
+          <li key={i} className="flex items-center justify-between gap-3 text-xs">
+            <span className="text-ink">{ACTION_LABEL[e.action] || e.action}</span>
+            <span className="text-muted tabular-nums">
+              {e.by ? `${e.by} · ` : ""}{fmtWhen(e.at)}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
