@@ -34,6 +34,45 @@ export interface ScenarioScoreBody {
   response?: string;
 }
 
+export interface RubricCriterionView {
+  label: string;
+  description?: string;
+}
+
+export interface ArtifactView {
+  id: string;
+  mode: "case" | "work_sample";
+  prompt: string;
+  difficulty: string;
+  rubric: RubricCriterionView[];
+  submission_spec: { kind?: "upload" | "text"; accept?: string[] };
+}
+
+export interface ArtifactSubmitBody {
+  candidate_id: string;
+  item_id: string;
+  session_id?: string;
+  domain?: string;
+  artifact_ref: string;
+}
+
+export interface DefenseScoreBody {
+  candidate_id: string;
+  item_id: string;
+  session_id?: string;
+  domain?: string;
+  defense_transcript: string;
+}
+
+async function detailFrom(r: Response, fallback: string): Promise<string> {
+  if (r.status === 404) return "Assessment not found";
+  try {
+    return (await r.json())?.detail || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const assessmentsApi = {
   async getScenario(scenarioId: string, domain = "finance"): Promise<ScenarioView> {
     const r = await fetch(
@@ -56,6 +95,37 @@ export const assessmentsApi = {
       try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
       throw new Error(detail);
     }
+    return { success: true };
+  },
+
+  async getArtifact(itemId: string, domain = "finance"): Promise<ArtifactView> {
+    const r = await fetch(
+      `${API_BASE_URL}/api/assessments/artifact/${encodeURIComponent(itemId)}?domain=${encodeURIComponent(domain)}`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, `Could not load assessment (${r.status})`));
+    return r.json();
+  },
+
+  /** Submit a case/work-sample deliverable (provisional — must be defended). */
+  async submitArtifact(body: ArtifactSubmitBody): Promise<{ success: boolean }> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/artifact/submit`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error(await detailFrom(r, `Submission failed (${r.status})`));
+    return { success: true };
+  },
+
+  /** Score the live defense and finalize the artifact score. */
+  async scoreDefense(body: DefenseScoreBody): Promise<{ success: boolean }> {
+    const r = await fetch(`${API_BASE_URL}/api/assessments/defense/score`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error(await detailFrom(r, `Submission failed (${r.status})`));
     return { success: true };
   },
 };

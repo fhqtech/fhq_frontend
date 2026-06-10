@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2, UserPlus } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CloudArrowDown, CaretLeft } from "phosphor-react";
@@ -61,6 +61,7 @@ import { qualifiedListsApi } from "@/services/qualifiedListsApi";
 import { SwipeQRSection } from "@/components/interview/SwipeQRSection";
 import { ShortlistActionCard } from "@/components/interview/ShortlistActionCard";
 import { CandidateCard } from "@/components/interview/CandidateCard";
+import { AssignAssessmentDialog } from "@/components/interview/AssignAssessmentDialog";
 import { AddToQualifiedListModal } from "@/components/modals/AddToQualifiedListModal";
 import { cn } from "@/lib/utils";
 import { BlueprintViewModal } from "@/components/views/BlueprintViewModal";
@@ -157,6 +158,7 @@ const formatCreatedDate = (dateString: string) => {
 export default function InterviewDetails() {
  const { id } = useParams();
  const navigate = useNavigate();
+ const location = useLocation();
  const { toast } = useToast();
  const { currentWorkspace, currentProject } = useWorkspace();
  const startInterview = useStartInterviewMutation(currentWorkspace?.id, currentProject?.id);
@@ -292,6 +294,7 @@ export default function InterviewDetails() {
 
  // Bulk shortlist modal state
  const [showShortlistModal, setShowShortlistModal] = useState(false);
+ const [showAssignAssessment, setShowAssignAssessment] = useState(false);
  
  // Pagination state
  const [currentPage, setCurrentPage] = useState(1);
@@ -442,6 +445,15 @@ export default function InterviewDetails() {
  && !candidatesQuery.data
  && Boolean(interview && interview.status !== 'draft')
  );
+
+ // NBA "Review responses" links here via #candidates. Scroll to the results
+ // section once it has rendered — handles both arriving from another route and
+ // clicking Go while already on this page (hash flips '' → '#candidates').
+ useEffect(() => {
+ if (location.hash !== "#candidates") return;
+ const el = document.getElementById("candidates");
+ if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+ }, [location.hash, loadingCandidates, candidates.length]);
 
  // Auto-expand rows that have multiple attempts (mirrors the old behavior).
  useEffect(() => {
@@ -1215,6 +1227,7 @@ export default function InterviewDetails() {
  )}
  onAddCandidates={() => navigate(`/interviews/create?edit=${id}`)}
  onStart={handleStartInterview}
+ onRemind={handleResendStuck}
  onShare={async () => {
  try {
  const url = `${window.location.origin}/swipe/${id}`;
@@ -1611,7 +1624,7 @@ export default function InterviewDetails() {
  <ShortlistActionCard interviewId={id!} interviewName={interview?.title || 'Interview'} />
 
  {/* Candidate Results Table */}
- <Card className="shadow-2 rounded-sm">
+ <Card id="candidates" className="shadow-2 rounded-sm scroll-mt-[140px]">
  {/* Sticky Header */}
  <div className="sticky top-[120px] z-40 bg-paper border-b shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
  <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
@@ -1871,6 +1884,19 @@ export default function InterviewDetails() {
  </div>
  )}
 
+ {/* Assessment assignment */}
+ <div className="flex items-center justify-end pt-4">
+ <Button
+ size="sm"
+ variant="outline"
+ onClick={() => setShowAssignAssessment(true)}
+ disabled={candidates.length === 0}
+ className="rounded-sm text-xs h-8 px-3"
+ >
+ Assign assessment
+ </Button>
+ </div>
+
  {/* Card Grid */}
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
  {paginatedCandidates.map((candidate) => {
@@ -1890,6 +1916,8 @@ export default function InterviewDetails() {
  <CandidateCard
  key={candidate.id}
  candidate={candidate}
+ contextId={id}
+ contextType="interview"
  onRefresh={refreshCandidates}
  onClick={
  canViewResults
@@ -1966,6 +1994,17 @@ export default function InterviewDetails() {
  templateTitle={interview?.title || interview?.role || "Interview Blueprint"}
  />
  )}
+
+ {/* Assign assessment dialog */}
+ <AssignAssessmentDialog
+ isOpen={showAssignAssessment}
+ onClose={() => setShowAssignAssessment(false)}
+ candidates={candidates.map((c) => ({ email: c.email, name: c.name }))}
+ workspaceId={currentWorkspace?.id}
+ projectId={currentProject?.id}
+ blueprintId={interview?.template_id || interview?.id}
+ onSuccess={refreshCandidates}
+ />
 
  {/* Bulk Shortlist Modal */}
  <AddToQualifiedListModal

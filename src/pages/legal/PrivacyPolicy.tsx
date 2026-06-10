@@ -101,8 +101,9 @@ export default function PrivacyPolicy() {
             <li>Name, email, phone (when you provide it).</li>
             <li>Resume PDF — uploaded by you, stored encrypted in Google Cloud Storage.</li>
             <li>
-              Interview audio — captured during the live AI interview, transcribed,
-              and discarded within 24 hours. The transcript is retained.
+              Interview audio — captured during the live AI interview and transcribed.
+              The audio recording is retained until you request erasure or until the
+              end of the retention window; the transcript is retained.
             </li>
             <li>The full interview transcript and your generated Talent Analysis Graph (TAG).</li>
           </ul>
@@ -137,7 +138,7 @@ export default function PrivacyPolicy() {
 
         <Section title="How long we keep it">
           <ul className="list-disc pl-5 space-y-1 text-ink-soft">
-            <li><strong>Interview audio:</strong> ≤ 24 hours.</li>
+            <li><strong>Interview audio:</strong> retained until erasure or the end of the retention window.</li>
             <li><strong>Transcripts and TAG:</strong> retained for the workspace's account lifetime.</li>
             <li><strong>Workspace user accounts:</strong> until you delete the account.</li>
             <li>

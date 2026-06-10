@@ -77,12 +77,72 @@ export default function Settings() {
   });
 
   const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated successfully.",
-    });
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8082";
+  const authHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("auth_token");
+    return { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
+  };
+
+  // Hydrate from the persisted profile so edits survive reload.
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/api/users/me`, { headers: authHeaders() });
+        if (!r.ok) return;
+        const d = await r.json();
+        setSettings((prev) => ({
+          ...prev,
+          profile: {
+            name: d.name ?? prev.profile.name,
+            email: d.email ?? prev.profile.email,
+            phone: d.phone ?? prev.profile.phone,
+            company: d.company ?? prev.profile.company,
+          },
+          voice: { ...prev.voice, ...(d.voice || {}) },
+          communications: { ...prev.communications, ...(d.communications || {}) },
+          notifications: { ...prev.notifications, ...(d.notifications || {}) },
+          appearance: { ...prev.appearance, ...(d.appearance || {}) },
+        }));
+      } catch {
+        /* non-fatal — defaults stand */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const r = await fetch(`${API_BASE}/api/users/me`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          name: settings.profile.name,
+          phone: settings.profile.phone,
+          company: settings.profile.company,
+          voice: settings.voice,
+          communications: settings.communications,
+          notifications: settings.notifications,
+          appearance: settings.appearance,
+        }),
+      });
+      if (!r.ok) {
+        let detail = `Save failed (${r.status})`;
+        try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+        throw new Error(detail);
+      }
+      toast({ title: "Settings saved", description: "Your preferences have been updated." });
+    } catch (e) {
+      toast({
+        title: "Couldn't save settings",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateSetting = (category: string, key: string, value: any) => {
@@ -328,6 +388,11 @@ export default function Settings() {
                   />
                 </div>
               </div>
+              <div className="flex justify-end pt-2">
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? "Saving…" : "Save changes"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -466,6 +531,11 @@ export default function Settings() {
                   checked={settings.communications.email}
                   onCheckedChange={(checked) => updateSetting('communications', 'email', checked)}
                 />
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? "Saving…" : "Save changes"}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -651,6 +721,11 @@ export default function Settings() {
                     )}
                   </div>
                 </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? "Saving…" : "Save changes"}
+                </Button>
               </div>
             </CardContent>
           </Card>

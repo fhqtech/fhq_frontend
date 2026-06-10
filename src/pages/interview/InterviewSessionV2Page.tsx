@@ -230,7 +230,7 @@ export default function InterviewSessionV2Page() {
     if (interviewId) {
       navigate(`/interview/${interviewId}/pre-check`);
     } else {
-      navigate("/candidate");
+      navigate("/candidate/dashboard");
     }
   }, [staleSessionDetected, interviewId, navigate, toast]);
 
@@ -585,7 +585,7 @@ export default function InterviewSessionV2Page() {
           </p>
           <div className="flex gap-2 justify-center">
             <Button onClick={() => navigate(-1)} variant="outline">Go back</Button>
-            <Button onClick={() => navigate("/candidate")}>Open candidate portal</Button>
+            <Button onClick={() => navigate("/candidate/dashboard")}>Go to your dashboard</Button>
           </div>
         </div>
       </div>

@@ -24,12 +24,62 @@ interface CandidateCardProps {
   hideViewButton?: boolean;
   /** Called after a successful reset so the parent can refetch the candidate list. */
   onRefresh?: () => void | Promise<void>;
+  /** Interview/list id this card belongs to — needed to persist shortlist/reject. */
+  contextId?: string;
+  contextType?: "interview" | "list";
 }
 
-export function CandidateCard({ candidate, onClick, hideViewButton = false, onRefresh }: CandidateCardProps) {
+export function CandidateCard({ candidate, onClick, hideViewButton = false, onRefresh, contextId, contextType = "interview" }: CandidateCardProps) {
   const [copied, setCopied] = useState(false);
   const [resending, setResending] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [deciding, setDeciding] = useState<null | "shortlist" | "reject">(null);
+
+  const handleSwipe = async (decision: "shortlist" | "reject") => {
+    const candidateId = candidate.candidateId || candidate.id;
+    if (!candidateId || !contextId) {
+      toast({
+        title: "Couldn't save decision",
+        description: "Missing candidate or interview reference.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setDeciding(decision);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const r = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8082"}/api/swipe/decision`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({
+          candidate_id: candidateId,
+          decision,
+          context_type: contextType,
+          context_id: contextId,
+          session_id: candidate.session_id || undefined,
+          device: "desktop",
+        }),
+      });
+      if (!r.ok) {
+        let detail = `Could not save decision (${r.status})`;
+        try { detail = (await r.json())?.detail || detail; } catch { /* ignore */ }
+        throw new Error(detail);
+      }
+      toast({ title: decision === "shortlist" ? "Shortlisted" : "Rejected" });
+      if (onRefresh) await onRefresh();
+    } catch (e) {
+      toast({
+        title: "Couldn't save decision",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeciding(null);
+    }
+  };
   const credits = useCredits();
   const refreshCredits = useRefreshCredits();
   // P-Plans F4: if this candidate has a completed session, a Resend
@@ -752,9 +802,10 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
                 ? 'text-success'
                 : 'text-muted-2 hover:text-success'
                 }`}
+              disabled={deciding !== null}
               onClick={(e) => {
                 e.stopPropagation();
-                // TODO: Handle shortlist action
+                handleSwipe("shortlist");
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -789,9 +840,10 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
                 ? 'text-danger'
                 : 'text-muted-2 hover:text-danger'
                 }`}
+              disabled={deciding !== null}
               onClick={(e) => {
                 e.stopPropagation();
-                // TODO: Handle reject action
+                handleSwipe("reject");
               }}
             >
               <X className="h-6 w-6" />

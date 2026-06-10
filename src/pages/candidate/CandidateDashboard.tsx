@@ -8,6 +8,8 @@ import { useCandidateAuth } from '@/contexts/CandidateAuthContext';
 
 interface Invitation {
   id: string;
+  item_kind?: 'interview' | 'assessment';
+  candidate_id?: string;
   invitation_token: string;
   candidate_email: string;
   candidate_name: string;
@@ -23,6 +25,23 @@ interface Invitation {
   registered_at?: string;
   completed_at?: string;
   expires_at?: string;
+  // assessment assignments (item_kind === 'assessment')
+  assessment_mode?: 'scenario' | 'case' | 'work_sample' | 'defense';
+  assessment_item_id?: string;
+  assessment_domain?: string;
+}
+
+/** Route a candidate to the right assessment surface for its mode. */
+function assessmentPath(inv: Invitation): string | null {
+  const itemId = inv.assessment_item_id;
+  if (!itemId) return null;
+  const cid = inv.candidate_id || '';
+  const domain = inv.assessment_domain || 'finance';
+  const qs = `candidateId=${encodeURIComponent(cid)}&domain=${encodeURIComponent(domain)}`;
+  // scenario has its own page; case/work_sample/defense share the artifact page.
+  return inv.assessment_mode === 'scenario'
+    ? `/candidate/assessment/${encodeURIComponent(itemId)}?${qs}`
+    : `/candidate/assessment-artifact/${encodeURIComponent(itemId)}?${qs}&mode=${encodeURIComponent(inv.assessment_mode || 'case')}`;
 }
 
 const API_BASE = () => import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
@@ -73,17 +92,45 @@ function isAnalyzing(inv: Invitation): boolean {
   return Date.now() - completedMs < 5 * 60_000;
 }
 
+const ASSESSMENT_KIND_LABEL: Record<string, string> = {
+  scenario: 'Scenario assessment',
+  case: 'Case study',
+  work_sample: 'Work-sample',
+  defense: 'Defense round',
+};
+
 function InvitationCard({ inv }: { inv: Invitation }) {
   const navigate = useNavigate();
   const group = groupOf(inv.status);
   const analyzing = isAnalyzing(inv);
-  const cta =
-    group === 'completed'
-      ? analyzing ? 'Results coming soon' : 'View results'
-      : inv.status === 'started' || inv.status === 'paused'
-      ? 'Resume interview'
-      : 'Start interview';
+  const isAssessment = inv.item_kind === 'assessment';
+
+  const kindLabel = isAssessment
+    ? ASSESSMENT_KIND_LABEL[inv.assessment_mode || 'scenario'] || 'Assessment'
+    : inv.interview_type === 'fitment'
+    ? 'Fitment interview'
+    : 'Screening interview';
+
+  const cta = isAssessment
+    ? group === 'completed'
+      ? 'Submitted'
+      : 'Start assessment'
+    : group === 'completed'
+    ? analyzing ? 'Results coming soon' : 'View results'
+    : inv.status === 'started' || inv.status === 'paused'
+    ? 'Resume interview'
+    : 'Start interview';
+
+  const assessmentDest = isAssessment ? assessmentPath(inv) : null;
+  const ctaDisabled = isAssessment
+    ? group === 'completed' || !assessmentDest
+    : analyzing;
+
   const onClick = () => {
+    if (isAssessment) {
+      if (assessmentDest) navigate(assessmentDest);
+      return;
+    }
     if (group === 'completed') {
       navigate(`/candidate/interviews/${inv.interview_id}/results`);
     } else {
@@ -97,11 +144,9 @@ function InvitationCard({ inv }: { inv: Invitation }) {
     <div className="bg-paper rounded-xl border border-border shadow-1 p-5 flex flex-col gap-3 hover:border-accent transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] text-muted font-semibold">
-            {inv.interview_type === 'fitment' ? 'Fitment interview' : 'Screening interview'}
-          </p>
+          <p className="text-[10px] text-muted font-semibold">{kindLabel}</p>
           <h3 className="text-lg font-semibold text-foreground leading-tight mt-1">
-            {inv.interview_title || 'Interview'}
+            {inv.interview_title || (isAssessment ? 'Assessment' : 'Interview')}
           </h3>
         </div>
         <StatusBadge status={inv.status} />
@@ -121,7 +166,7 @@ function InvitationCard({ inv }: { inv: Invitation }) {
 
       <button
         onClick={onClick}
-        disabled={analyzing}
+        disabled={ctaDisabled}
         className="mt-auto h-9 bg-primary hover:bg-primary/90 text-paper text-sm font-medium rounded-md transition-colors disabled:bg-paper-3 disabled:text-muted disabled:cursor-not-allowed"
       >
         {cta}

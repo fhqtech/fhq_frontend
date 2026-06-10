@@ -74,6 +74,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ready/upstream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ready Upstream
+         * @description Active upstream probes for Gemini / AssemblyAI / Cartesia.
+         *
+         *     Returns 200 unconditionally; per-service health surfaces in the
+         *     response body so callers (recruiter widget + Cloud Monitoring) can
+         *     differentiate "API down" from "Gemini down". The response is cached
+         *     for 30s to cap cost when monitoring systems poll aggressively.
+         *
+         *     Body shape:
+         *       {
+         *         "checked_at": "ISO-8601 UTC",
+         *         "services": {
+         *           "gemini":     {"status": "...", "latency_ms": int, "error": str|null},
+         *           "assemblyai": {"status": "...", "latency_ms": int, "error": str|null},
+         *           "cartesia":   {"status": "...", "latency_ms": int, "error": str|null}
+         *         },
+         *         "overall": "ok|degraded|down",
+         *         "cached": bool   # true when this response came from the 30s cache
+         *       }
+         */
+        get: operations["ready_upstream_api_ready_upstream_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/scores/all": {
         parameters: {
             query?: never;
@@ -179,6 +216,22 @@ export interface paths {
         /**
          * Login
          * @description Email/password login. Returns service result (token + user).
+         *
+         *     S3.5 / P1-7: rate-limited at 5/minute keyed on client IP. Workspace
+         *     owner accounts can read every candidate in the workspace, so the
+         *     login is a credential-stuffing target — the previous unlimited
+         *     endpoint allowed an attacker to brute-force at line-rate.
+         *
+         *     Keyed on IP only (not IP+email) because slowapi's `key_func` runs
+         *     on `Request` and is synchronous, while extracting `email` requires
+         *     consuming the JSON body — which would break Pydantic body parsing
+         *     downstream. The chosen limit of 5/min/IP is the trade-off: tight
+         *     enough that a single host can't enumerate, lax enough that a real
+         *     user fat-fingering their password isn't locked out.
+         *
+         *     Follow-up (tracked in docs/S3_5_AUTH_HARDENING.md): add a per-email
+         *     failed-login counter in Firestore so a botnet rotating IPs against
+         *     one email is still throttled. Not launch-gating.
          */
         post: operations["login_api_auth_login_post"];
         delete?: never;
@@ -293,6 +346,31 @@ export interface paths {
          * @description Update the authenticated user's tour status.
          */
         put: operations["update_tour_status_api_auth_tour_status_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Me
+         * @description Return the current user's editable profile + preferences.
+         */
+        get: operations["get_me_api_users_me_get"];
+        /**
+         * Update Me
+         * @description Persist profile fields + preferences. Only supplied fields are written
+         *     (partial update); email is identity and not editable here.
+         */
+        put: operations["update_me_api_users_me_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -595,6 +673,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dpdp/applicant/correction-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Applicant Correction Requests
+         * @description List the applicant's own correction tickets so a submitted request is
+         *     visible + trackable (status open/resolved/rejected) rather than vanishing
+         *     write-only into Firestore (DPDP §12 acknowledgement).
+         */
+        get: operations["list_applicant_correction_requests_api_dpdp_applicant_correction_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/dpdp/applicant/nominee": {
         parameters: {
             query?: never;
@@ -784,6 +884,230 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Project-scoped dashboard aggregates (Phase A)
+         * @description Aggregates the four dashboard panels in a single round-trip:
+         *     funnel counts, top candidates, per-interview rollup, throughput trend.
+         *
+         *     Sized for pilot: assumes ≤ 50 interviews and ≤ a few hundred sessions
+         *     per project. Reads them all and aggregates in-process. If the pilot
+         *     outgrows this, move the aggregation to a scheduled summary doc.
+         */
+        get: operations["get_project_dashboard_api_workspaces__workspace_id__projects__project_id__dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/skill-gaps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Aggregate skill gaps across completed sessions (Phase B)
+         * @description Walks every completed interview_results in the project's interviews,
+         *     aggregates skill scores from graph_data.nodes, returns top skills by
+         *     candidate-coverage with avg_score + gap_rate.
+         *
+         *     Filters:
+         *       - domain / sub_domain: optional; restricts to interviews whose
+         *         financeDomain + subDomain match. Set via the Step 0 selector or
+         *         the backfill script.
+         *       - date_from: restricts to sessions completed on/after that date.
+         *
+         *     Pilot scale: in-process aggregation across ≤ a few hundred sessions.
+         *     If we outgrow it, move to a scheduled summary doc.
+         */
+        get: operations["get_skill_gaps_api_workspaces__workspace_id__projects__project_id__skill_gaps_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/skill-matcher": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Top-N candidate matches for a role across all interviews */
+        get: operations["get_skill_matches_api_workspaces__workspace_id__projects__project_id__skill_matcher_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/skill-matcher/fit-detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Explainable per-candidate fit detail for one session against a role (FR-MA-02)
+         * @description Per-skill 'why this fit score' breakdown for a single candidate:
+         *     required vs demonstrated, how each skill matched (canonical / skill_id /
+         *     label), and the supporting evidence + grounding confidence.
+         */
+        get: operations["get_fit_detail_api_workspaces__workspace_id__projects__project_id__skill_matcher_fit_detail_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/role-curator/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Role Curator Chat
+         * @description Stream the next assistant turn for the role-curator chat.
+         */
+        post: operations["role_curator_chat_api_role_curator_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interviews/{interview_id}/sessions/{session_id}/reviewer-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Reviewer Status
+         * @description Read the reviewer's lifecycle state from interview_sessions/{sid}.
+         *
+         *     Returns status="unknown" if the session doc doesn't exist (e.g.,
+         *     the session_id is wrong) — the frontend renders that as "no result
+         *     yet, the interview may not have completed."
+         */
+        get: operations["get_reviewer_status_api_interviews__interview_id__sessions__session_id__reviewer_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interviews/{interview_id}/sessions/{session_id}/retry-reviewer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry Reviewer
+         * @description Re-enqueue the reviewer for a session whose reviewerStatus == 'error'.
+         *
+         *     No-op if status is 'pending' (still running) or 'ready' (already
+         *     succeeded). The session doc's reviewerStatus is reset to 'pending'
+         *     here so the frontend immediately switches back to the polling UI.
+         */
+        post: operations["retry_reviewer_api_interviews__interview_id__sessions__session_id__retry_reviewer_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/skill-analysis/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upsert Skill Analysis Sources
+         * @description Recruiter-provided sources for a candidate's profile TAG.
+         *
+         *     Idempotent: re-running with new URLs replaces the prior values.
+         *
+         *     Phase 1.2: when resume_url is provided, kick off a background task
+         *     that fetches + parses + LLM-structures the resume, writing the rich
+         *     structured fields to candidate_profile_sources/{candidate_id}.parsed_resume.
+         *     The DiscoveryMap generator + interviewer read this structured shape;
+         *     the raw resume URL alone isn't sufficient.
+         *
+         *     The background task is fire-and-forget: HTTP returns immediately,
+         *     parsing completes within ~30s. The DiscoveryMap generator (Phase 1.3)
+         *     gates interview start on parsed_resume being present.
+         */
+        post: operations["upsert_skill_analysis_sources_api_skill_analysis_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate_id}/profile-tag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Candidate Profile Tag
+         * @description Latest candidate-profile TAG for this candidate.
+         *
+         *     Returns null in `profile_tag` when one hasn't been generated yet.
+         *     `sources` is the latest recruiter-provided URL set, useful for the
+         *     "regenerate this TAG" affordance.
+         *
+         *     Round 3: also returns `latest_session` so the frontend can distinguish
+         *     "no interview yet" (latest_session is null) from "interview done,
+         *     reviewer pending" (latest_session.reviewer_status == 'pending') and
+         *     "interview done, reviewer errored" (reviewer_status == 'error').
+         */
+        get: operations["get_candidate_profile_tag_api_candidates__candidate_id__profile_tag_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interviews/suggest-from-title": {
         parameters: {
             query?: never;
@@ -864,6 +1188,46 @@ export interface paths {
          *     response as a hint, not gospel, and let the candidate edit before saving.
          */
         post: operations["extract_from_resume_api_candidates_extract_from_resume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blueprint/extract-from-jd": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Extract From Jd File
+         * @description Parse an uploaded PDF/DOCX JD and return structured blueprint seed fields.
+         */
+        post: operations["extract_from_jd_file_api_blueprint_extract_from_jd_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blueprint/extract-from-jd-text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Extract From Jd Text
+         * @description Parse a pasted JD text blob and return structured blueprint seed fields.
+         */
+        post: operations["extract_from_jd_text_api_blueprint_extract_from_jd_text_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1142,6 +1506,28 @@ export interface paths {
          *     reviewer on a daemon thread (returns immediately).
          */
         post: operations["reanalyze_session_api_results_reanalyze__session_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/results/session/{session_id}/rationale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Decision Rationale
+         * @description IR-02 / CMP-1: the retrievable, human-readable per-decision rationale —
+         *     drivers (evidenced strengths), concerns (gaps), grounding confidence,
+         *     integrity flags, and any human overrides — for a scored session.
+         */
+        get: operations["get_decision_rationale_api_results_session__session_id__rationale_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1596,7 +1982,8 @@ export interface paths {
         put?: never;
         /**
          * Start Candidate Session
-         * @description Public — candidate hits this with their invitation token to start an interview.
+         * @description P7: candidate hits this with their invitation token AND a logged-in
+         *     candidate JWT (Authorization header). Both must match the same email.
          */
         post: operations["start_candidate_session_api_candidate_sessions_start_post"];
         delete?: never;
@@ -1616,7 +2003,8 @@ export interface paths {
         put?: never;
         /**
          * Complete Candidate Session
-         * @description Public — candidate completes the interview with their invitation token.
+         * @description P7: candidate completes the interview. Requires logged-in candidate
+         *     whose email matches the invitation; defence-in-depth for the WS gate.
          */
         post: operations["complete_candidate_session_api_candidate_sessions__session_id__complete_post"];
         delete?: never;
@@ -2750,6 +3138,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/interviews/{interview_id}/regenerate-blueprint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Regenerate Blueprint
+         * @description B3-1: recruiter-triggered retry for a failed/stuck blueprint.
+         *
+         *     Reuses the same _dispatch_blueprint helper the create flow uses. The
+         *     interview's blueprintStatus is reset to 'generating' + blueprintQueuedAt
+         *     so the watchdog cron's clock starts fresh and the frontend polling
+         *     loop picks up the new state immediately.
+         */
+        post: operations["regenerate_blueprint_api_workspaces__workspace_id__projects__project_id__interviews__interview_id__regenerate_blueprint_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/workspaces/{workspace_id}/projects/{project_id}/interviews/{interview_id}/pause": {
         parameters: {
             query?: never;
@@ -2869,6 +3282,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/interviews/{interview_id}/export-csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Interview Results Csv
+         * @description Stream a CSV of interview results for the given interview.
+         *
+         *     Columns (exact order):
+         *       candidate_name, candidate_email, recommendation, overall_score,
+         *       completed_at, interview_id, session_id
+         *
+         *     Empty interviews return 200 with just the header row. POST (not GET)
+         *     because the frontend wires this through fetch + Blob for a triggered
+         *     download — POST keeps it off intermediary caches.
+         */
+        post: operations["export_interview_results_csv_api_interviews__interview_id__export_csv_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/internal/blueprint/run": {
         parameters: {
             query?: never;
@@ -2960,6 +3401,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/invitations/{invitation_id}/reset-and-reinvite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset And Reinvite Candidate
+         * @description Soft-reset a candidate's interview state and re-send the invitation.
+         *
+         *     Identified by INVITATION id (same shape as /invitations/{id}/resend).
+         *     The earlier path of /interviews/{iid}/candidates/{cid}/reset-and-reinvite
+         *     was removed because the frontend has the invitation_id readily available
+         *     on every candidate card but the candidate_id field is inconsistent
+         *     across the data layer.
+         *
+         *     Used when the recruiter sees a stuck / problematic attempt and wants
+         *     the candidate to retake. Idempotent — running twice is safe.
+         *
+         *     What it does:
+         *       1. Mark all interview_sessions for this candidate as status='abandoned'.
+         *       2. Mark all interview_results for the abandoned sessions as
+         *          status='abandoned'. The data stays in Firestore for audit but the
+         *          recruiter UI filters it out of "current attempt" displays.
+         *       3. Revert the invitation back to status='registered' so the same
+         *          portal link re-opens the precheck flow.
+         *       4. Resend the invitation email so the candidate gets a fresh nudge.
+         *
+         *     The candidate's portal link does NOT change — the existing token is
+         *     reused. After this call:
+         *       - The candidate sees "Start interview" again.
+         *       - The recruiter card flips back to "Email sent · <new date> · Resend again".
+         *       - Previous attempt data stays under abandoned status if anyone needs to
+         *         audit it later.
+         */
+        post: operations["reset_and_reinvite_candidate_api_invitations__invitation_id__reset_and_reinvite_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interviews/{interview_id}/resend-invitations": {
         parameters: {
             query?: never;
@@ -3008,17 +3494,19 @@ export interface paths {
         };
         /**
          * Get Invitation Details
-         * @description Public — invitation page loads candidate's expected fields by token.
+         * @description P7: returns the full invitation payload when the caller is signed
+         *     in as the invited email; returns a masked `requires_login: true`
+         *     shape otherwise so the frontend can render a sign-in card.
          */
         get: operations["get_invitation_details_api_register__token__get"];
         put?: never;
         /**
          * Register Candidate
-         * @description Public — complete candidate registration via multipart form.
+         * @description P7: complete candidate registration via multipart form.
          *
-         *     Accepts FormData with optional resume file. Uploads resume to GCS, then
-         *     invokes the registration service. After candidate is created, attaches
-         *     the resume to the candidate document with metadata extraction.
+         *     Requires a logged-in candidate session whose email matches the
+         *     invitation. New candidates land here only after using the claim
+         *     flow to set a password (link in the invitation email).
          */
         post: operations["register_candidate_api_register__token__post"];
         delete?: never;
@@ -3036,7 +3524,7 @@ export interface paths {
         };
         /**
          * Get Candidate Portal
-         * @description Public — same as get_invitation_details, different URL for portal context.
+         * @description P7: same shape as get_invitation_details.
          */
         get: operations["get_candidate_portal_api_candidate_portal__token__get"];
         put?: never;
@@ -3098,7 +3586,9 @@ export interface paths {
         put?: never;
         /**
          * Confirm Existing Candidate Registration
-         * @description Public — used when an existing candidate clicks a new invite link.
+         * @description P7: existing candidate confirms a new invitation. Requires a
+         *     logged-in candidate session whose email matches the invitation —
+         *     closes the historic gap where confirm trusted link possession.
          */
         post: operations["confirm_existing_candidate_registration_api_register__token__confirm_post"];
         delete?: never;
@@ -3200,6 +3690,28 @@ export interface paths {
         get: operations["get_next_profile_question_api_candidate_portal__token__next_profile_question_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assign Assessment
+         * @description Assign an assessment item to candidates → one assignable, dashboard-visible
+         *     item per candidate (item_kind='assessment'). Validates the item exists (the
+         *     candidate-side serve-gate still controls whether it can be opened).
+         */
+        post: operations["assign_assessment_api_assessments_assign_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4146,6 +4658,149 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workspaces/{workspace_id}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Plan
+         * @description Return the effective plan + credit block for a workspace.
+         *
+         *     Used by the frontend on workspace switch to refresh gating state.
+         */
+        get: operations["get_plan_api_workspaces__workspace_id__plan_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/credit-ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Credit Ledger
+         * @description Return the most recent credit ledger entries (newest first).
+         *
+         *     Limited to 200 entries per request to keep the payload sane.
+         */
+        get: operations["get_credit_ledger_api_workspaces__workspace_id__credit_ledger_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Plan Matrix
+         * @description Return the live plan → feature matrix + limits.
+         *
+         *     Public (no auth) — this is marketing-grade info, identical to what's
+         *     on the pricing page. Frontend `usePlan` consumes it so a backend
+         *     matrix update doesn't require a frontend redeploy.
+         *
+         *     Note: the backend is always the security boundary at request time
+         *     (see `roles_service.check_permission`). This endpoint is read-only
+         *     metadata; the gates remain enforced server-side regardless of what
+         *     the frontend renders.
+         */
+        get: operations["get_plan_matrix_api_plans_matrix_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/workspaces/{workspace_id}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assign Plan
+         * @description Assign a plan to a workspace. Writes the workspace doc + an audit
+         *     entry in `workspaces/{ws}/plan_audit/{auto_id}` with before/after.
+         */
+        post: operations["assign_plan_api_admin_workspaces__workspace_id__plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/workspaces/{workspace_id}/credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Grant Credits Endpoint
+         * @description Add (or revoke, with negative `amount`) credits on a workspace.
+         *
+         *     Writes a ledger entry. Returns the new balance.
+         *
+         *     Safety: revokes larger than half the current balance require
+         *     `confirm_large_revoke: true` in the request body. The flag prevents
+         *     operator typos like "-100" against a workspace with 50 credits from
+         *     silently clamping to 0. Large revokes (with confirmation) are flagged
+         *     on the ledger entry for audit.
+         */
+        post: operations["grant_credits_endpoint_api_admin_workspaces__workspace_id__credits_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Workspaces
+         * @description List workspaces with their plan + credit summary. For the
+         *     `/admin/workspaces` page in the frontend.
+         */
+        get: operations["list_workspaces_api_admin_workspaces_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/agent-sessions/prepare": {
         parameters: {
             query?: never;
@@ -4222,7 +4877,9 @@ export interface paths {
         /**
          * Claim Password
          * @description Set a password for an auto-created account using the one-time
-         *     claim token emailed at registration.
+         *     claim token emailed at registration. Phase 8: optionally captures the
+         *     candidate's preferred display name (single source of truth for the
+         *     spoken greeting).
          */
         post: operations["claim_password_api_candidate_auth_claim_password_post"];
         delete?: never;
@@ -4270,7 +4927,13 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Candidate Me
+         * @description Phase 8: candidate updates their own display name. The new name
+         *     is mirrored to every linked candidate_profiles row so the interview
+         *     agent greets them by what they just confirmed.
+         */
+        patch: operations["update_candidate_me_api_candidate_auth_me_patch"];
         trace?: never;
     };
     "/api/candidate-auth/logout": {
@@ -4463,10 +5126,185 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/assessments/scenario/{scenario_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Scenario For Candidate
+         * @description Fetch a scenario to present to the candidate (answer-key scores removed).
+         */
+        get: operations["get_scenario_for_candidate_api_assessments_scenario__scenario_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/scenario/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Score Scenario
+         * @description Score a candidate's scenario submission and persist the Evidence.
+         */
+        post: operations["score_scenario_api_assessments_scenario_score_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/profile/{candidate_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Fused Profile
+         * @description Fuse all of a candidate's evidence into one converged claim per skill
+         *     (A6 v1 — cross-mode, agreement-weighted, conflict-flagged). Candidate-auth:
+         *     a candidate may only read their own profile.
+         */
+        get: operations["get_fused_profile_api_assessments_profile__candidate_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/recruiter/profile/{candidate_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Fused Profile For Recruiter
+         * @description Recruiter view of a candidate's fused cross-mode skill profile. Workspace
+         *     auth — the recruiter must belong to a workspace that owns the candidate
+         *     (verify_candidate_access fails closed).
+         */
+        get: operations["get_fused_profile_for_recruiter_api_assessments_recruiter_profile__candidate_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/artifact/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Artifact For Candidate
+         * @description Fetch a case/work-sample brief to present to the candidate. Only curated
+         *     content is served (draft/fixture 404 even by direct id).
+         */
+        get: operations["get_artifact_for_candidate_api_assessments_artifact__item_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/artifact/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Artifact
+         * @description Score a candidate's submitted case/work-sample deliverable. Produces a
+         *     PROVISIONAL artifact Evidence — NOT a final score; it must pass through the
+         *     defense round (POST /defense/score) to be finalized (FR-EV-05).
+         */
+        post: operations["submit_artifact_api_assessments_artifact_submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/defense/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Score Artifact Defense
+         * @description Score the live defense and finalize the artifact score (FR-EV-05). The
+         *     candidate must already have a provisional artifact Evidence for this item;
+         *     the defense gates it into the FINAL, defense-weighted score.
+         */
+        post: operations["score_artifact_defense_api_assessments_defense_score_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActiveWorkspacePlan */
+        ActiveWorkspacePlan: {
+            /** Workspaceid */
+            workspaceId: string;
+            /**
+             * Plan
+             * @default free
+             */
+            plan: string;
+            /**
+             * Status
+             * @default active
+             */
+            status: string;
+            /** Expiresat */
+            expiresAt?: unknown | null;
+            /** Features */
+            features?: {
+                [key: string]: unknown;
+            };
+            /** Limits */
+            limits?: {
+                [key: string]: unknown;
+            };
+            credits?: components["schemas"]["PlanCredits"];
+        };
         /** AddCandidatesBody */
         AddCandidatesBody: {
             /** Candidates */
@@ -4532,6 +5370,52 @@ export interface components {
             success: boolean;
             stats: components["schemas"]["CandidateListStats"];
         };
+        /** AppearancePrefs */
+        AppearancePrefs: {
+            /** Theme */
+            theme?: string | null;
+            /** Compactmode */
+            compactMode?: boolean | null;
+        };
+        /** ArtifactSubmitBody */
+        ArtifactSubmitBody: {
+            /** Candidate Id */
+            candidate_id: string;
+            /** Item Id */
+            item_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Domain
+             * @default finance
+             */
+            domain: string;
+            /**
+             * Artifact Ref
+             * @description GCS path / URL of the uploaded deliverable
+             */
+            artifact_ref: string;
+        };
+        /**
+         * ArtifactView
+         * @description Candidate-safe view of a case / work-sample brief.
+         */
+        ArtifactView: {
+            /** Id */
+            id: string;
+            /** Mode */
+            mode: string;
+            /** Prompt */
+            prompt: string;
+            /** Difficulty */
+            difficulty: string;
+            /** Rubric */
+            rubric?: components["schemas"]["RubricCriterionView"][];
+            /** Submission Spec */
+            submission_spec?: {
+                [key: string]: unknown;
+            };
+        };
         /**
          * AssemblyAITokenBody
          * @description C1: token-gate body for /api/assemblyai-token. Same auth model as
@@ -4540,6 +5424,37 @@ export interface components {
         AssemblyAITokenBody: {
             /** Candidate Token */
             candidate_token: string;
+        };
+        /**
+         * AssessmentInviteBody
+         * @description Assign one assessment item (scenario/case/work-sample/defense) to
+         *     candidates. Rides the candidate_invitations collection with
+         *     item_kind='assessment' so it shows up in the candidate dashboard feed
+         *     alongside interview invitations.
+         */
+        AssessmentInviteBody: {
+            /** Item Id */
+            item_id: string;
+            /**
+             * Mode
+             * @description scenario | case | work_sample | defense
+             */
+            mode: string;
+            /** Candidates */
+            candidates: components["schemas"]["CandidateInvite"][];
+            /**
+             * Domain
+             * @default finance
+             */
+            domain: string;
+            /** Workspace Id */
+            workspace_id?: string | null;
+            /** Project Id */
+            project_id?: string | null;
+            /** Blueprint Id */
+            blueprint_id?: string | null;
+            /** Title */
+            title?: string | null;
         };
         /** BlueprintPreview */
         BlueprintPreview: {
@@ -4571,6 +5486,11 @@ export interface components {
              * @default 10
              */
             duration: number;
+        };
+        /** Body_extract_from_jd_file_api_blueprint_extract_from_jd_post */
+        Body_extract_from_jd_file_api_blueprint_extract_from_jd_post: {
+            /** File */
+            file: string;
         };
         /** Body_extract_from_resume_api_candidates_extract_from_resume_post */
         Body_extract_from_resume_api_candidates_extract_from_resume_post: {
@@ -4765,6 +5685,19 @@ export interface components {
             claim_token: string;
             /** Password */
             password: string;
+            /** Name */
+            name?: string | null;
+        };
+        /** CommunicationPrefs */
+        CommunicationPrefs: {
+            /** Email */
+            email?: boolean | null;
+            /** Sms */
+            sms?: boolean | null;
+            /** Phone */
+            phone?: boolean | null;
+            /** Whatsapp */
+            whatsapp?: boolean | null;
         };
         /** CompleteSessionBody */
         CompleteSessionBody: {
@@ -4850,7 +5783,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "screening" | "fitment";
+            type: "screening" | "fitment" | "skill_analysis";
             /** Duration */
             duration: number;
             /**
@@ -4869,6 +5802,18 @@ export interface components {
             name: string;
         } & {
             [key: string]: unknown;
+        };
+        /** CreditGrantBody */
+        CreditGrantBody: {
+            /** Amount */
+            amount: number;
+            /** Reason */
+            reason: string;
+            /**
+             * Confirm Large Revoke
+             * @default false
+             */
+            confirm_large_revoke: boolean;
         };
         /** CrossListAnalysisBody */
         CrossListAnalysisBody: {
@@ -4914,6 +5859,107 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /** DashboardFunnel */
+        DashboardFunnel: {
+            /**
+             * Invited
+             * @default 0
+             */
+            invited: number;
+            /**
+             * Started
+             * @default 0
+             */
+            started: number;
+            /**
+             * Completed
+             * @default 0
+             */
+            completed: number;
+            /**
+             * Strong Match
+             * @default 0
+             */
+            strong_match: number;
+        };
+        /** DashboardInterviewRollup */
+        DashboardInterviewRollup: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Type */
+            type?: string | null;
+            /** Status */
+            status?: string | null;
+            /**
+             * Invited
+             * @default 0
+             */
+            invited: number;
+            /**
+             * Completed
+             * @default 0
+             */
+            completed: number;
+            /** Avg Score */
+            avg_score?: number | null;
+            /** Finance Domain */
+            finance_domain?: string | null;
+            /** Sub Domain */
+            sub_domain?: string | null;
+        };
+        /** DashboardResponse */
+        DashboardResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            funnel: components["schemas"]["DashboardFunnel"];
+            /** Top Candidates */
+            top_candidates?: components["schemas"]["DashboardTopCandidate"][];
+            /** Interviews Rollup */
+            interviews_rollup?: components["schemas"]["DashboardInterviewRollup"][];
+            /** Throughput */
+            throughput?: components["schemas"]["DashboardThroughputBucket"][];
+        };
+        /** DashboardThroughputBucket */
+        DashboardThroughputBucket: {
+            /** Date */
+            date: string;
+            /**
+             * Started
+             * @default 0
+             */
+            started: number;
+            /**
+             * Completed
+             * @default 0
+             */
+            completed: number;
+        };
+        /** DashboardTopCandidate */
+        DashboardTopCandidate: {
+            /** Session Id */
+            session_id: string;
+            /** Candidate Id */
+            candidate_id?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Interview Id */
+            interview_id: string;
+            /** Interview Title */
+            interview_title?: string | null;
+            /** Overall Score */
+            overall_score?: number | null;
+            /** Recommendation */
+            recommendation?: string | null;
+            /** Completed At */
+            completed_at?: string | null;
+        };
         /** DecisionsListResponse */
         DecisionsListResponse: {
             /** Success */
@@ -4922,6 +5968,25 @@ export interface components {
             decisions: unknown[];
             /** Count */
             count: number;
+        };
+        /** DefenseScoreBody */
+        DefenseScoreBody: {
+            /** Candidate Id */
+            candidate_id: string;
+            /**
+             * Item Id
+             * @description The case/work-sample item being defended
+             */
+            item_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Domain
+             * @default finance
+             */
+            domain: string;
+            /** Defense Transcript */
+            defense_transcript: string;
         };
         /** DemoFormSubmission */
         DemoFormSubmission: {
@@ -4943,6 +6008,52 @@ export interface components {
         EnhanceBatchBody: {
             /** Listids */
             listIds: string[];
+        };
+        /** EvidenceResponse */
+        EvidenceResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Evidence */
+            evidence: {
+                [key: string]: unknown;
+            };
+        };
+        /** ExtractedJD */
+        ExtractedJD: {
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * Domain
+             * @default other
+             * @enum {string}
+             */
+            domain: "accounting" | "taxation" | "management_consulting" | "other";
+            /**
+             * Seniority
+             * @default mid
+             * @enum {string}
+             */
+            seniority: "junior" | "mid" | "senior" | "lead" | "exec";
+            /** Requiredskills */
+            requiredSkills?: string[];
+            /** Responsibilities */
+            responsibilities?: string[];
+            /**
+             * Experienceyears
+             * @default 0
+             */
+            experienceYears: number;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
         };
         /** ExtractedResume */
         ExtractedResume: {
@@ -4981,6 +6092,52 @@ export interface components {
              * @default
              */
             summary: string;
+        };
+        /** FitContribution */
+        FitContribution: {
+            /** Role Skill Id */
+            role_skill_id: string;
+            /** Label */
+            label?: string | null;
+            /** Canonical Id */
+            canonical_id?: string | null;
+            /** Expected Score */
+            expected_score: number;
+            /** Demonstrated Score */
+            demonstrated_score: number;
+            /** Is Core */
+            is_core: boolean;
+            /** Weight */
+            weight: number;
+            /** Met */
+            met: boolean;
+            /** Matched Via */
+            matched_via: string;
+            /** Evidence */
+            evidence?: string[];
+            /** Confidence */
+            confidence?: number | null;
+        };
+        /** FitDetailResponse */
+        FitDetailResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            role: components["schemas"]["MatcherRole"];
+            /** Session Id */
+            session_id: string;
+            /** Candidate Id */
+            candidate_id?: string | null;
+            /** Candidate Name */
+            candidate_name?: string | null;
+            /** Candidate Email */
+            candidate_email?: string | null;
+            /** Match Score */
+            match_score: number;
+            /** Contributions */
+            contributions?: components["schemas"]["FitContribution"][];
         };
         /** ForgotPasswordBody */
         ForgotPasswordBody: {
@@ -5047,7 +6204,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "screening" | "fitment";
+            type: "screening" | "fitment" | "skill_analysis";
             /**
              * Voice Type
              * @default professional-female
@@ -5082,6 +6239,35 @@ export interface components {
              */
             role: string;
         };
+        /**
+         * JDTextBody
+         * @description Body for the paste-text path. File upload uses multipart instead.
+         */
+        JDTextBody: {
+            /** Text */
+            text: string;
+        };
+        /**
+         * LatestSessionInfo
+         * @description Round 3 R3: latest skill_analysis session for this candidate, used
+         *     by the frontend to know whether to render a 'reviewer pending' or
+         *     'reviewer error' state when profile_tag is null.
+         *
+         *     All fields optional — none of this exists for a candidate who has
+         *     never started a skill_analysis interview.
+         */
+        LatestSessionInfo: {
+            /** Session Id */
+            session_id?: string | null;
+            /** Interview Id */
+            interview_id?: string | null;
+            /** Completed At */
+            completed_at?: unknown | null;
+            /** Reviewer Status */
+            reviewer_status?: string | null;
+            /** Reviewer Error */
+            reviewer_error?: string | null;
+        };
         /** LinkBody */
         LinkBody: {
             /** Parentinterviewid */
@@ -5096,6 +6282,80 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /** MatcherCandidate */
+        MatcherCandidate: {
+            /** Session Id */
+            session_id: string;
+            /** Candidate Id */
+            candidate_id?: string | null;
+            /** Candidate Name */
+            candidate_name?: string | null;
+            /** Candidate Email */
+            candidate_email?: string | null;
+            /** Source Interview Id */
+            source_interview_id: string;
+            /** Source Interview Title */
+            source_interview_title?: string | null;
+            /** Completed At */
+            completed_at?: string | null;
+            /** Overall Score */
+            overall_score?: number | null;
+            /** Match Score */
+            match_score: number;
+            /** Gaps */
+            gaps?: components["schemas"]["MatcherGap"][];
+            /** Transferable Strengths */
+            transferable_strengths?: components["schemas"]["MatcherTransferable"][];
+        };
+        /** MatcherGap */
+        MatcherGap: {
+            /** Skill Id */
+            skill_id: string;
+            /** Label */
+            label?: string | null;
+            /** Expected */
+            expected?: number | null;
+            /** Actual */
+            actual: number;
+            /** Is Core */
+            is_core: boolean;
+        };
+        /** MatcherResponse */
+        MatcherResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            role: components["schemas"]["MatcherRole"];
+            /** Matches */
+            matches?: components["schemas"]["MatcherCandidate"][];
+            /**
+             * Total Candidates Considered
+             * @default 0
+             */
+            total_candidates_considered: number;
+        };
+        /** MatcherRole */
+        MatcherRole: {
+            /** Interview Id */
+            interview_id: string;
+            /** Title */
+            title?: string | null;
+            /** Skill Count */
+            skill_count: number;
+            /** Core Skill Count */
+            core_skill_count: number;
+        };
+        /** MatcherTransferable */
+        MatcherTransferable: {
+            /** Skill Id */
+            skill_id: string;
+            /** Label */
+            label?: string | null;
+            /** Score */
+            score: number;
         };
         /** MeResponse */
         MeResponse: {
@@ -5115,6 +6375,17 @@ export interface components {
             /** Nominee Relationship */
             nominee_relationship?: string | null;
         };
+        /** NotificationPrefs */
+        NotificationPrefs: {
+            /** Interviewcomplete */
+            interviewComplete?: boolean | null;
+            /** Candidateshortlisted */
+            candidateShortlisted?: boolean | null;
+            /** Lowscorealert */
+            lowScoreAlert?: boolean | null;
+            /** Dailydigest */
+            dailyDigest?: boolean | null;
+        };
         /** OverlapAnalysisBody */
         OverlapAnalysisBody: {
             /** Listids */
@@ -5129,6 +6400,42 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** PlanAssignBody */
+        PlanAssignBody: {
+            /** Plan */
+            plan: string;
+            /**
+             * Status
+             * @default active
+             */
+            status: string;
+            /** Expiresat */
+            expiresAt?: string | null;
+            /** Overrides */
+            overrides?: {
+                [key: string]: unknown;
+            } | null;
+            /** Reason */
+            reason: string;
+        };
+        /** PlanCredits */
+        PlanCredits: {
+            /**
+             * Remaining
+             * @default 0
+             */
+            remaining: number;
+            /**
+             * Granted
+             * @default 0
+             */
+            granted: number;
+            /**
+             * Consumed
+             * @default 0
+             */
+            consumed: number;
+        };
         /** PrepareBody */
         PrepareBody: {
             /** Candidate Token */
@@ -5140,6 +6447,8 @@ export interface components {
         };
         /** PrepareGreetingBody */
         PrepareGreetingBody: {
+            /** Candidate Token */
+            candidate_token: string;
             /** Session Id */
             session_id: string;
             /** Interview Id */
@@ -5152,9 +6461,11 @@ export interface components {
             /** Title */
             title: string;
             /** Type */
-            type?: ("screening" | "fitment") | null;
+            type?: ("screening" | "fitment" | "skill_analysis") | null;
             /** Description */
             description?: string | null;
+            /** Notes */
+            notes?: string | null;
         };
         /** PreviewSkill */
         PreviewSkill: {
@@ -5168,6 +6479,57 @@ export interface components {
              */
             skill_type: "technical" | "behavioral" | "cultural";
         };
+        /** ProfileClaim */
+        ProfileClaim: {
+            /** Canonical Id */
+            canonical_id?: string | null;
+            /** Skill Name */
+            skill_name: string;
+            /** Value */
+            value: number;
+            /** Confidence */
+            confidence: number;
+            /** Modes */
+            modes?: string[];
+            /**
+             * Conflict
+             * @default false
+             */
+            conflict: boolean;
+        };
+        /** ProfileResponse */
+        ProfileResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Candidate Id */
+            candidate_id: string;
+            /** Evidence Count */
+            evidence_count: number;
+            /** Claims */
+            claims?: components["schemas"]["ProfileClaim"][];
+        };
+        /** ProfileTagResponse */
+        ProfileTagResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Candidate Id */
+            candidate_id: string;
+            /** Profile Tag */
+            profile_tag?: {
+                [key: string]: unknown;
+            } | null;
+            /** Sources */
+            sources?: {
+                [key: string]: unknown;
+            } | null;
+            latest_session?: components["schemas"]["LatestSessionInfo"] | null;
+        };
         /** RatingBody */
         RatingBody: {
             /** Rating */
@@ -5177,6 +6539,20 @@ export interface components {
              * @default
              */
             notes: string;
+        };
+        /** RationaleResponse */
+        RationaleResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Session Id */
+            session_id: string;
+            /** Rationale */
+            rationale: {
+                [key: string]: unknown;
+            };
         };
         /** ReanalyzeResponse */
         ReanalyzeResponse: {
@@ -5241,6 +6617,13 @@ export interface components {
              */
             reason: string;
         };
+        /** RetryReviewerResponse */
+        RetryReviewerResponse: {
+            /** Success */
+            success: boolean;
+            /** Message */
+            message: string;
+        };
         /** ReviewerRunBody */
         ReviewerRunBody: {
             /** Session Id */
@@ -5264,6 +6647,46 @@ export interface components {
              */
             is_reanalyze: boolean;
         };
+        /** ReviewerStatusResponse */
+        ReviewerStatusResponse: {
+            /** Status */
+            status: string;
+            /** Error */
+            error?: string | null;
+            /** Result Collection */
+            result_collection?: string | null;
+            /** Result Doc Id */
+            result_doc_id?: string | null;
+            /** Result Url */
+            result_url?: string | null;
+        };
+        /** RoleCuratorChatBody */
+        RoleCuratorChatBody: {
+            /** Messages */
+            messages: components["schemas"]["RoleCuratorMessage"][];
+        };
+        /** RoleCuratorMessage */
+        RoleCuratorMessage: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** Content */
+            content: string;
+        };
+        /**
+         * RubricCriterionView
+         * @description Candidate-safe rubric criterion — label + description only; scoring
+         *     anchors/weights are deliberately withheld (mirrors the scenario answer-key
+         *     strip).
+         */
+        RubricCriterionView: {
+            /** Label */
+            label: string;
+            /** Description */
+            description?: string | null;
+        };
         /** SaveAsTemplateBody */
         SaveAsTemplateBody: {
             /** Title */
@@ -5275,6 +6698,51 @@ export interface components {
             scope: string;
             /** Description */
             description?: string | null;
+        };
+        /** ScenarioOptionView */
+        ScenarioOptionView: {
+            /** Id */
+            id: string;
+            /** Text */
+            text: string;
+        };
+        /** ScenarioScoreBody */
+        ScenarioScoreBody: {
+            /**
+             * Candidate Id
+             * @description The candidate profile id being assessed
+             */
+            candidate_id: string;
+            /** Scenario Id */
+            scenario_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Domain
+             * @default finance
+             */
+            domain: string;
+            /** Chosen Option Id */
+            chosen_option_id?: string | null;
+            /** Response */
+            response?: string | null;
+        };
+        /**
+         * ScenarioView
+         * @description Candidate-safe view of a scenario — option SCORES (the answer key) are
+         *     deliberately stripped so the candidate never sees them.
+         */
+        ScenarioView: {
+            /** Id */
+            id: string;
+            /** Prompt */
+            prompt: string;
+            /** Response Type */
+            response_type: string;
+            /** Difficulty */
+            difficulty: string;
+            /** Options */
+            options?: components["schemas"]["ScenarioOptionView"][];
         };
         /** ScoreRow */
         ScoreRow: {
@@ -5356,9 +6824,64 @@ export interface components {
             /** Targetprojectids */
             targetProjectIds: string[];
         };
+        /** SkillAnalysisSourcesBody */
+        SkillAnalysisSourcesBody: {
+            /** Candidate Id */
+            candidate_id: string;
+            /** Workspace Id */
+            workspace_id?: string | null;
+            /** Resume Url */
+            resume_url?: string | null;
+            /** Linkedin Url */
+            linkedin_url?: string | null;
+            /** Portfolio Url */
+            portfolio_url?: string | null;
+        };
+        /** SkillGapRow */
+        SkillGapRow: {
+            /** Skill Id */
+            skill_id: string;
+            /** Label */
+            label: string;
+            /** Candidates */
+            candidates: number;
+            /** Avg Score */
+            avg_score: number;
+            /** Gap Rate */
+            gap_rate: number;
+        };
+        /** SkillGapsResponse */
+        SkillGapsResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Skills */
+            skills?: components["schemas"]["SkillGapRow"][];
+            /**
+             * Candidate Count
+             * @default 0
+             */
+            candidate_count: number;
+        };
         /** SourceBody */
         SourceBody: {
             [key: string]: unknown;
+        };
+        /** SourcesResponse */
+        SourcesResponse: {
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+            /** Candidate Id */
+            candidate_id: string;
+            /** Sources */
+            sources: {
+                [key: string]: unknown;
+            };
         };
         /** StarBody */
         StarBody: {
@@ -5466,6 +6989,15 @@ export interface components {
         UpdateInterviewBody: {
             [key: string]: unknown;
         };
+        /**
+         * UpdateMeBody
+         * @description Phase 8: update the logged-in candidate's account profile fields.
+         *     Currently only `name` is mutable — extend as needed.
+         */
+        UpdateMeBody: {
+            /** Name */
+            name: string;
+        };
         /** UpdateProjectBody */
         UpdateProjectBody: {
             [key: string]: unknown;
@@ -5520,8 +7052,44 @@ export interface components {
             activeWorkspaceId?: string | null;
             /** Activeprojectid */
             activeProjectId?: string | null;
+            /**
+             * Is Superadmin
+             * @default false
+             */
+            is_superadmin: boolean;
+            activeWorkspacePlan?: components["schemas"]["ActiveWorkspacePlan"] | null;
         } & {
             [key: string]: unknown;
+        };
+        /** UserProfileResponse */
+        UserProfileResponse: {
+            /** Id */
+            id: string;
+            /** Email */
+            email?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Company */
+            company?: string | null;
+            voice?: components["schemas"]["VoicePrefs"];
+            communications?: components["schemas"]["CommunicationPrefs"];
+            notifications?: components["schemas"]["NotificationPrefs"];
+            appearance?: components["schemas"]["AppearancePrefs"];
+        };
+        /** UserProfileUpdate */
+        UserProfileUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Company */
+            company?: string | null;
+            voice?: components["schemas"]["VoicePrefs"] | null;
+            communications?: components["schemas"]["CommunicationPrefs"] | null;
+            notifications?: components["schemas"]["NotificationPrefs"] | null;
+            appearance?: components["schemas"]["AppearancePrefs"] | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -5558,6 +7126,15 @@ export interface components {
             otp: string;
             /** Reviewer Name */
             reviewer_name?: string | null;
+        };
+        /** VoicePrefs */
+        VoicePrefs: {
+            /** Type */
+            type?: string | null;
+            /** Speed */
+            speed?: string | null;
+            /** Accent */
+            accent?: string | null;
         };
         /** VoicePreviewRequest */
         VoicePreviewRequest: {
@@ -5674,6 +7251,8 @@ export interface components {
             type?: string | null;
             /** Duration */
             duration?: unknown | null;
+            /** Notes */
+            notes?: string | null;
         };
         /**
          * ProfileUpdateBody
@@ -5797,6 +7376,26 @@ export interface operations {
         };
     };
     ready_ready_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    ready_upstream_api_ready_upstream_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -6191,6 +7790,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_me_api_users_me_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_me_api_users_me_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponse"];
                 };
             };
             /** @description Validation Error */
@@ -6671,6 +8336,39 @@ export interface operations {
             };
         };
     };
+    list_applicant_correction_requests_api_dpdp_applicant_correction_requests_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     applicant_nominee_api_dpdp_applicant_nominee_post: {
         parameters: {
             query?: never;
@@ -6983,6 +8681,329 @@ export interface operations {
             };
         };
     };
+    get_project_dashboard_api_workspaces__workspace_id__projects__project_id__dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_skill_gaps_api_workspaces__workspace_id__projects__project_id__skill_gaps_get: {
+        parameters: {
+            query?: {
+                domain?: string | null;
+                sub_domain?: string | null;
+                /** @description YYYY-MM-DD, inclusive */
+                date_from?: string | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SkillGapsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_skill_matches_api_workspaces__workspace_id__projects__project_id__skill_matcher_get: {
+        parameters: {
+            query: {
+                /** @description Interview whose blueprint defines the role */
+                role_interview_id: string;
+                top_n?: number;
+                /** @description If true, include candidates whose source interview IS the role interview. Default false — usually you want candidates from OTHER interviews. */
+                include_self?: boolean;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatcherResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_fit_detail_api_workspaces__workspace_id__projects__project_id__skill_matcher_fit_detail_get: {
+        parameters: {
+            query: {
+                /** @description Interview whose blueprint defines the role */
+                role_interview_id: string;
+                /** @description The candidate session to explain */
+                session_id: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FitDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    role_curator_chat_api_role_curator_chat_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleCuratorChatBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_reviewer_status_api_interviews__interview_id__sessions__session_id__reviewer_status_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                interview_id: string;
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewerStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_reviewer_api_interviews__interview_id__sessions__session_id__retry_reviewer_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                interview_id: string;
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryReviewerResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_skill_analysis_sources_api_skill_analysis_sources_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkillAnalysisSourcesBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourcesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_candidate_profile_tag_api_candidates__candidate_id__profile_tag_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileTagResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     suggest_from_title_api_interviews_suggest_from_title_post: {
         parameters: {
             query?: never;
@@ -7108,6 +9129,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExtractedResume"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extract_from_jd_file_api_blueprint_extract_from_jd_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_extract_from_jd_file_api_blueprint_extract_from_jd_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractedJD"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extract_from_jd_text_api_blueprint_extract_from_jd_text_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JDTextBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractedJD"];
                 };
             };
             /** @description Validation Error */
@@ -7536,6 +9627,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReanalyzeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_decision_rationale_api_results_session__session_id__rationale_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RationaleResponse"];
                 };
             };
             /** @description Validation Error */
@@ -8315,7 +10439,9 @@ export interface operations {
     start_candidate_session_api_candidate_sessions_start_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8348,7 +10474,9 @@ export interface operations {
     complete_candidate_session_api_candidate_sessions__session_id__complete_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path: {
                 session_id: string;
             };
@@ -11034,6 +13162,41 @@ export interface operations {
             };
         };
     };
+    regenerate_blueprint_api_workspaces__workspace_id__projects__project_id__interviews__interview_id__regenerate_blueprint_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     pause_interview_api_workspaces__workspace_id__projects__project_id__interviews__interview_id__pause_post: {
         parameters: {
             query?: never;
@@ -11241,6 +13404,39 @@ export interface operations {
             };
         };
     };
+    export_interview_results_csv_api_interviews__interview_id__export_csv_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     run_blueprint_task_api_internal_blueprint_run_post: {
         parameters: {
             query?: never;
@@ -11385,6 +13581,39 @@ export interface operations {
             };
         };
     };
+    reset_and_reinvite_candidate_api_invitations__invitation_id__reset_and_reinvite_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     resend_invitations_api_interviews__interview_id__resend_invitations_post: {
         parameters: {
             query?: never;
@@ -11458,7 +13687,9 @@ export interface operations {
     get_invitation_details_api_register__token__get: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path: {
                 token: string;
             };
@@ -11489,7 +13720,9 @@ export interface operations {
     register_candidate_api_register__token__post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path: {
                 token: string;
             };
@@ -11524,7 +13757,9 @@ export interface operations {
     get_candidate_portal_api_candidate_portal__token__get: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path: {
                 token: string;
             };
@@ -11623,7 +13858,9 @@ export interface operations {
     confirm_existing_candidate_registration_api_register__token__confirm_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path: {
                 token: string;
             };
@@ -11818,6 +14055,41 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_assessment_api_assessments_assign_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssessmentInviteBody"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -14204,10 +16476,207 @@ export interface operations {
             };
         };
     };
-    prepare_agent_session_api_agent_sessions_prepare_post: {
+    get_plan_api_workspaces__workspace_id__plan_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_credit_ledger_api_workspaces__workspace_id__credit_ledger_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_plan_matrix_api_plans_matrix_get: {
         parameters: {
             query?: never;
             header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    assign_plan_api_admin_workspaces__workspace_id__plan_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanAssignBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    grant_credits_endpoint_api_admin_workspaces__workspace_id__credits_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreditGrantBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_workspaces_api_admin_workspaces_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_agent_session_api_agent_sessions_prepare_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -14240,7 +16709,9 @@ export interface operations {
     prepare_greeting_api_agent_sessions_prepare_greeting_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -14379,6 +16850,41 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_candidate_me_api_candidate_auth_me_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMeBody"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -14652,6 +17158,247 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_scenario_for_candidate_api_assessments_scenario__scenario_id__get: {
+        parameters: {
+            query?: {
+                domain?: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                scenario_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    score_scenario_api_assessments_scenario_score_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScenarioScoreBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_fused_profile_api_assessments_profile__candidate_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_fused_profile_for_recruiter_api_assessments_recruiter_profile__candidate_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_artifact_for_candidate_api_assessments_artifact__item_id__get: {
+        parameters: {
+            query?: {
+                domain?: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtifactView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_artifact_api_assessments_artifact_submit_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArtifactSubmitBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    score_artifact_defense_api_assessments_defense_score_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DefenseScoreBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceResponse"];
                 };
             };
             /** @description Validation Error */

@@ -52,8 +52,8 @@ export default function ListDetail() {
   const [hasMore, setHasMore] = useState(true);
   const [isQualified, setIsQualified] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // removed: fake "Ask AI" box — it never called any API; the search above filters honestly.
   const [isAnalyticsPanelOpen, setIsAnalyticsPanelOpen] = useState(false);
-  const [aiSearchQuery, setAiSearchQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [deletingSourceId, setDeletingSourceId] = useState<string | null>(null);
   const [isAddToListModalOpen, setIsAddToListModalOpen] = useState(false);
@@ -377,30 +377,18 @@ export default function ListDetail() {
                 <div className={`flex items-center transition-all duration-300 ${isScrolled ? 'gap-2' : 'gap-3'}`}>
                   {!isScrolled && (
                     <div className="p-2 rounded-lg bg-primary/10">
-                      <Sparkles className="h-4 w-4 text-primary" />
+                      <Search className="h-4 w-4 text-primary" />
                     </div>
                   )}
                   <div className="flex-1">
                     <Input
-                      placeholder={isScrolled ? "Ask AI..." : "Ask AI to analyze candidates..."}
-                      value={aiSearchQuery}
-                      onChange={(e) => setAiSearchQuery(e.target.value)}
+                      placeholder={isScrolled ? "Search…" : "Search candidates by name, email, or phone…"}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className={`border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 transition-all duration-300 ${isScrolled ? 'text-sm' : 'text-base'}`}
                     />
                   </div>
-                  <Badge className="bg-primary/10 text-primary border-primary/30 gap-1.5">
-                    <Zap className="h-3 w-3" />
-                    AI Powered
-                  </Badge>
                 </div>
-                {aiSearchQuery && (
-                  <div className="mt-2 pt-2 border-t border-border">
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-                      <Sparkles className="h-2.5 w-2.5 text-primary" />
-                      AI analyzing: "{aiSearchQuery}"
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

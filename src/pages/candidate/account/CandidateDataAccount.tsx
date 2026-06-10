@@ -30,6 +30,16 @@ interface DataSummary {
   rights: string[];
 }
 
+interface CorrectionRequest {
+  id: string;
+  field?: string;
+  requested_value?: string;
+  reason?: string;
+  status: string;
+  created_at?: string;
+  reviewer_note?: string;
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8082";
 
 function authHeaders(): Record<string, string> {
@@ -49,6 +59,7 @@ export default function CandidateDataAccount() {
   const [downloading, setDownloading] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [corrections, setCorrections] = useState<CorrectionRequest[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,6 +75,18 @@ export default function CandidateDataAccount() {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load");
       } finally {
         if (!cancelled) setLoading(false);
+      }
+    })();
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/api/dpdp/applicant/correction-requests`, {
+          headers: authHeaders(),
+        });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!cancelled) setCorrections(d.requests || []);
+      } catch {
+        /* non-fatal — the rest of the page still works */
       }
     })();
     return () => {
@@ -215,6 +238,46 @@ export default function CandidateDataAccount() {
           )}
         </div>
       </Card>
+
+      {/* Correction requests (§12) */}
+      {corrections && corrections.length > 0 && (
+        <Card className="p-6 space-y-3">
+          <h2 className="text-xl font-semibold text-ink">§12 Correction requests</h2>
+          <p className="text-sm text-muted">
+            Requests you've raised to correct your data. The hiring team reviews
+            each one; you'll see the status update here.
+          </p>
+          <ul className="divide-y divide-rule">
+            {corrections.map((req) => (
+              <li key={req.id} className="py-2.5 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-ink truncate">
+                    {req.field ? req.field.replace(/_/g, " ") : "Correction"}
+                    {req.requested_value ? ` → ${req.requested_value}` : ""}
+                  </p>
+                  {req.created_at && (
+                    <p className="text-[11px] text-muted">
+                      {new Date(req.created_at).toLocaleDateString()}
+                      {req.reviewer_note ? ` · ${req.reviewer_note}` : ""}
+                    </p>
+                  )}
+                </div>
+                <span
+                  className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded border ${
+                    req.status === "resolved"
+                      ? "bg-success-soft text-success border-rule"
+                      : req.status === "rejected"
+                        ? "bg-paper-3 text-muted border-rule"
+                        : "bg-accent/10 text-primary border-accent/30"
+                  }`}
+                >
+                  {req.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {/* Erasure */}
       <Card className="p-6 space-y-3 border-danger">

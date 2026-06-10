@@ -810,6 +810,13 @@ export default function CandidatePortal() {
     }
   };
 
+  const handleViewResults = (interview: { interviewId: string }) => {
+    // Candidate results resolve the candidate's own completed session
+    // server-side, so only the interview id is needed (mirrors the applicant
+    // dashboard's results navigation).
+    navigate(`/candidate/interviews/${interview.interviewId}/results`);
+  };
+
   const handleOpenEditModal = () => {
     if (portalData) {
       // Parse experience string to extract years and months
@@ -1760,6 +1767,15 @@ export default function CandidatePortal() {
                                     </>
                                   )}
                                 </Button>
+                              ) : interview.interviewDetails?.completed_session ? (
+                                <Button
+                                  variant="gold"
+                                  size="sm"
+                                  onClick={() => handleViewResults(interview)}
+                                >
+                                  View results
+                                  <ArrowRight className="w-4 h-4 ml-1" />
+                                </Button>
                               ) : (
                                 <Button variant="ghost" size="sm" disabled className="text-muted-2">
                                   {getInterviewButtonText(interview.status, !!interview.interviewDetails?.active_session?.session_id, !!interview.interviewDetails?.completed_session)}
@@ -1826,10 +1842,14 @@ export default function CandidatePortal() {
                               </div>
                             </div>
 
-                            {/* Completed Button - Bottom Right */}
+                            {/* View results - Bottom Right */}
                             <div className="absolute bottom-4 right-4 z-20">
-                              <Button variant="ghost" size="sm" disabled className="text-muted">
-                                Completed
+                              <Button
+                                variant="gold"
+                                size="sm"
+                                onClick={() => handleViewResults(interview)}
+                              >
+                                View results
                                 <ArrowRight className="w-4 h-4 ml-1" />
                               </Button>
                             </div>

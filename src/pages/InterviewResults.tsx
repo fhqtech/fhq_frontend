@@ -10,6 +10,7 @@ import { RatingPanel } from "@/components/interview/RatingPanel";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentAnalysisGraph";
+import { FusedSkillProfile } from "@/components/assessment/FusedSkillProfile";
 import { tagFromResult } from "@/components/tag/adapters";
 import { TagViewModal } from "@/components/views/TagViewModal";
 import { track, Events } from "@/lib/analytics";
@@ -512,6 +513,16 @@ export default function InterviewResults() {
             {sessionId && <TranscriptViewer sessionId={sessionId} />}
           </TabsContent>
         </Tabs>
+
+        {(rawResults as any)?.candidate_id && (
+          <Card className="p-6 mt-6">
+            <h3 className="text-sm font-semibold text-ink mb-1">Assessment skill profile</h3>
+            <p className="text-xs text-muted mb-2">
+              Cross-mode evidence (scenario, case, work-sample, defense) fused per skill.
+            </p>
+            <FusedSkillProfile candidateId={(rawResults as any).candidate_id} />
+          </Card>
+        )}
 
         <div className="mt-6 text-center">
           <Button onClick={() => navigate(`/interviews/manage`)}>
