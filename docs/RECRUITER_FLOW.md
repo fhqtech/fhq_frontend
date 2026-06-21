@@ -1,7 +1,7 @@
 # FunnelHQ — Recruiter Portal Flow & Status Reference
 
 **Audience:** Product · Design · Engineering — single source of truth for what happens, when, and to whom.
-**Last updated:** 2026-05-11 (post pipe-reconnect: blueprint auto-fires, invitations at-create, evaluation results sync to candidate doc)
+**Last updated:** 2026-06-20 (added Skill Matcher + Assessment-mode surfaces; sign-in now via FastAPI `/api/auth/google/callback` after the Flask retirement)
 
 ---
 
@@ -50,6 +50,15 @@ The product collapses into **3 mental models**:
 | 10 | Review results | `InterviewDetails.tsx` (screening) or `FitmentInterviewDetails.tsx` (fitment) | `GET /api/interviews/{id}/candidates`, `GET /api/sessions/{id}/results` | Transcripts, scores, recordings; export to qualified-list |
 
 **Routing dispatch (post-fix):** `ManageInterviewsEnhanced.handleViewDetails` now reads `interview.type` and routes screening → `/interviews/{id}`, fitment → `/fitment-interviews/{id}`.
+
+### 1a) Newer surfaces (added since the core flow above)
+
+These ship alongside the interview flow and are not yet broken out step-by-step here — entry points and routers for reference:
+
+| Surface | UI entry | Backend | What it does |
+|---|---|---|---|
+| **Skill Matcher** | `pages/SkillMatcher.tsx` | `skill_matcher` router (`funnelhq_api/routers/skill_matcher.py`) | Recruiter matches candidates against a target skill/role profile and ranks them (`TopMatchesCard.tsx`). |
+| **Assessment mode** | `components/interview/AssignAssessmentDialog.tsx` (recruiter assigns) → candidate takes via `pages/candidate/CandidateScenario.tsx` / `CandidateArtifact.tsx` | `/api/assessments` (`funnelhq_api/routers/assessments.py`) | Candidate multi-mode assessment scoring, fused into one profile (`components/assessment/FusedSkillProfile.tsx`). |
 
 ---
 

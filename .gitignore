@@ -47,6 +47,11 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Playwright (commit e2e/**/*-snapshots, ignore run output)
+playwright-report/
+test-results/
+/playwright/.cache/
+
 # TypeScript
 *.tsbuildinfo
 

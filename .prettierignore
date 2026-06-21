@@ -1,0 +1,16 @@
+# Build output
+dist
+coverage
+
+# Generated — never hand-format
+src/types/api.gen.ts
+*.gen.ts
+
+# Test artifacts
+playwright-report
+test-results
+**/__snapshots__
+
+# Deps + lockfiles
+node_modules
+package-lock.json

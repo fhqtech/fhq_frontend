@@ -1,0 +1,25 @@
+# Local quality gate — runs Prettier on staged files before a commit so
+# formatting never reaches CI. Mirrors the advisory `format:check` step in
+# .github/workflows/ci.yml. Prettier config lives in .prettierrc, ignores in
+# .prettierignore.
+#
+# One-time setup (needs Node deps installed):
+#   pip install pre-commit && pre-commit install
+# Run on demand:
+#   pre-commit run --all-files
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier (write)
+        entry: npx prettier --write --ignore-unknown
+        language: system
+        files: \.(ts|tsx|js|jsx|json|css|md)$
+        exclude: ^(src/types/api\.gen\.ts|package-lock\.json)$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+        exclude: ^package-lock\.json$

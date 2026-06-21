@@ -1,6 +1,6 @@
 # CLAUDE.md — recruiter-assist-frontend
 
-Project-local instructions for Claude sessions in this repo. Inherits and refines the workspace-wide [/Users/alokanand/funnelhq/CLAUDE.md](../CLAUDE.md).
+Project-local instructions for Claude sessions in this repo. Inherits and refines the workspace-wide [/Users/alokanand/funnelhq/CLAUDE.md](../CLAUDE.md). Tooling roster (skills + agents by SDLC phase): [../docs/SKILLS_AND_AGENTS.md](../docs/SKILLS_AND_AGENTS.md).
 
 ## Stack
 
