@@ -120,6 +120,56 @@ export interface EnrollResult {
   current_stage_id: string;
 }
 
+/**
+ * One fused skill claim from the candidate's role-TAG. `value` is the 0–100
+ * score the TAG thresholds key off (>=80 strong, 50–79 developing, <50 gap);
+ * `confidence` is the evidence-weighted certainty in that value.
+ */
+export interface RoleTagClaim {
+  canonical_id: string;
+  skill_name: string;
+  value: number;
+  confidence: number;
+}
+
+/** The candidate's fused role-TAG for a program (skills + evidence counts). */
+export interface RoleTag {
+  candidate_id: string;
+  program_id: string;
+  claims: RoleTagClaim[];
+  skill_count: number;
+  evidence_count: number;
+}
+
+/**
+ * A rule-suggested next move for a journey. Rules recommend; the human
+ * decides — `explanation` is the why, `action` + `to_stage_id` is the move.
+ */
+export interface JourneyRecommendation {
+  rule_id: string;
+  from_stage_id: string;
+  action: GatingAction;
+  to_stage_id: string;
+  explanation: string;
+}
+
+/** The manual decisions a recruiter can apply to the current stage. */
+export type DecisionAction = "advance" | "skip" | "reject";
+
+export interface DecisionBody {
+  stage_id: string;
+  action: DecisionAction | GatingAction;
+  to_stage_id?: string;
+  reason?: string;
+}
+
+export interface DecisionResult {
+  journey_instance_id: string;
+  status: string;
+  current_stage_id: string;
+  applied: boolean;
+}
+
 /** A candidate's live position within a program's pipeline. */
 export interface JourneyInstance {
   journey_instance_id: string;
@@ -198,5 +248,49 @@ export const recruiterJourneysApi = {
     if (!r.ok) throw new Error(await detailFrom(r, "Could not load journeys"));
     const data = await r.json();
     return (data?.journeys ?? []) as JourneyInstance[];
+  },
+
+  /** Fused role-TAG for one candidate within a program (skills + evidence). */
+  async getRoleTag(ws: string, programId: string, candidateId: string): Promise<RoleTag> {
+    const r = await fetch(
+      `${programsBase(ws)}/${programId}/candidates/${candidateId}/tag`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not load profile"));
+    return r.json();
+  },
+
+  /** Rule-suggested next moves for a journey instance. */
+  async getRecommendations(
+    ws: string,
+    programId: string,
+    journeyInstanceId: string,
+  ): Promise<JourneyRecommendation[]> {
+    const r = await fetch(
+      `${programsBase(ws)}/${programId}/journeys/${journeyInstanceId}/recommendations`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not load recommendations"));
+    const data = await r.json();
+    return (data?.recommendations ?? []) as JourneyRecommendation[];
+  },
+
+  /** Apply a human decision (confirmed recommendation or manual override). */
+  async postDecision(
+    ws: string,
+    programId: string,
+    journeyInstanceId: string,
+    body: DecisionBody,
+  ): Promise<DecisionResult> {
+    const r = await fetch(
+      `${programsBase(ws)}/${programId}/journeys/${journeyInstanceId}/decisions`,
+      {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(body),
+      },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not apply decision"));
+    return r.json();
   },
 };

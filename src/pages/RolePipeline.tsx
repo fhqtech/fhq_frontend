@@ -5,19 +5,45 @@
  * a candidate with their current-stage chip, journey status, and a compact
  * stage-progress strip. Data: getProgram (for stage labels + meta) and
  * listJourneys (the enrolled candidates).
+ *
+ * Each row expands into two human-in-the-loop panels:
+ *   - profile   — the candidate's fused role-TAG, rendered as a compact bar
+ *                 list keyed off the TAG thresholds (>=80 / 50–79 / <50).
+ *   - decisions — rule recommendations the recruiter can confirm, plus a
+ *                 manual override (advance | skip | reject) for the current
+ *                 stage. Rules recommend; the human decides.
  */
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, GitBranch, RefreshCw, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  GitBranch,
+  RefreshCw,
+  ScrollText,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   recruiterJourneysApi,
+  type DecisionAction,
   type JourneyInstance,
+  type JourneyRecommendation,
   type JourneyStage,
   type Program,
+  type RoleTag,
 } from "@/services/recruiterJourneysApi";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -29,6 +55,7 @@ import {
 import { ShimmerTable } from "@/components/ui/shimmer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBanner } from "@/components/ui/error-banner";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 // Journey status → sentence-case label + tone classes (token-wired).
@@ -100,10 +127,199 @@ function StageProgress({ journey, stages }: { journey: JourneyInstance; stages: 
   );
 }
 
+// ── Role-TAG threshold tones ───────────────────────────────────────────────
+// Mirror the TAG color thresholds (TalentAnalysisGraph): >=80 strong/green,
+// 50–79 developing/amber, <50 gap/red. Token colors only — no pure hex.
+type TagBand = "strong" | "developing" | "gap";
+
+function bandOf(value: number): TagBand {
+  if (value >= 80) return "strong";
+  if (value >= 50) return "developing";
+  return "gap";
+}
+
+const BAND_BAR: Record<TagBand, string> = {
+  strong: "bg-success",
+  developing: "bg-warning",
+  gap: "bg-danger",
+};
+
+const BAND_TEXT: Record<TagBand, string> = {
+  strong: "text-success",
+  developing: "text-warning",
+  gap: "text-danger",
+};
+
+/**
+ * Compact fused-skill bar list. One row per claim: dot + skill name on the
+ * left, a threshold-colored bar and the mono value on the right.
+ */
+function RoleTagPanel({ tag }: { tag: RoleTag }) {
+  if (tag.claims.length === 0) {
+    return (
+      <p className="text-xs text-muted">
+        No profile yet — runs as stages complete.
+      </p>
+    );
+  }
+
+  const claims = [...tag.claims].sort((a, b) => b.value - a.value);
+
+  return (
+    <div className="space-y-2.5">
+      <ul className="divide-y divide-rule rounded-md border border-rule bg-paper">
+        {claims.map((claim) => {
+          const band = bandOf(claim.value);
+          return (
+            <li
+              key={claim.canonical_id}
+              className="flex items-center gap-3 px-3 py-2"
+            >
+              <span
+                className={cn("h-2 w-2 shrink-0 rounded-full", BAND_BAR[band])}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                {claim.skill_name}
+              </span>
+              <div className="h-1.5 w-28 shrink-0 rounded-full bg-paper-3" aria-hidden>
+                <div
+                  className={cn("h-full rounded-full", BAND_BAR[band])}
+                  style={{ width: `${Math.max(0, Math.min(100, claim.value))}%` }}
+                />
+              </div>
+              <span
+                className={cn(
+                  "w-9 shrink-0 text-right font-mono tabular-nums text-sm font-medium",
+                  BAND_TEXT[band],
+                )}
+              >
+                {Math.round(claim.value)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="font-mono tabular-nums text-[11px] text-muted">
+        {tag.skill_count} skill{tag.skill_count === 1 ? "" : "s"} ·{" "}
+        {tag.evidence_count} evidence point{tag.evidence_count === 1 ? "" : "s"}
+      </p>
+    </div>
+  );
+}
+
+// Recommendation action → sentence-case verb for the explanation line.
+const ACTION_VERB: Record<string, string> = {
+  skip: "skip ahead",
+  reject: "reject",
+  unlock: "unlock",
+  advance: "advance",
+};
+
+const MANUAL_ACTIONS: { value: DecisionAction; label: string }[] = [
+  { value: "advance", label: "Advance" },
+  { value: "skip", label: "Skip" },
+  { value: "reject", label: "Reject" },
+];
+
+/**
+ * Decisions panel — the human-in-the-loop control. Lists rule
+ * recommendations (each confirmable) and a manual override row for the
+ * current stage. `busy` disables every control while a request is in flight.
+ */
+function DecisionsPanel({
+  recs,
+  loading,
+  error,
+  busy,
+  stageTitle,
+  onConfirm,
+  onManual,
+}: {
+  recs: JourneyRecommendation[];
+  loading: boolean;
+  error: string | null;
+  busy: boolean;
+  stageTitle: (id: string) => string;
+  onConfirm: (rec: JourneyRecommendation) => void;
+  onManual: (action: DecisionAction) => void;
+}) {
+  const [manualAction, setManualAction] = useState<DecisionAction>("advance");
+
+  return (
+    <div className="space-y-3">
+      {loading ? (
+        <p className="text-xs text-muted">Loading recommendations…</p>
+      ) : error ? (
+        <p className="text-xs text-danger">{error}</p>
+      ) : recs.length === 0 ? (
+        <p className="text-xs text-muted">
+          No rule recommendations for this stage — use a manual decision below.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {recs.map((rec) => (
+            <li
+              key={rec.rule_id}
+              className="flex items-start justify-between gap-3 rounded-md border border-rule bg-paper px-3 py-2.5"
+            >
+              <div className="min-w-0">
+                <p className="text-sm text-ink">{rec.explanation}</p>
+                <p className="mt-0.5 text-xs text-muted">
+                  Recommends {ACTION_VERB[rec.action] ?? rec.action}
+                  {rec.to_stage_id ? ` to ${stageTitle(rec.to_stage_id)}` : ""}.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="gold"
+                className="shrink-0"
+                disabled={busy}
+                onClick={() => onConfirm(rec)}
+              >
+                Confirm
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2 border-t border-rule pt-3">
+        <span className="text-xs text-muted">Manual decision:</span>
+        <Select
+          value={manualAction}
+          onValueChange={(v) => setManualAction(v as DecisionAction)}
+          disabled={busy}
+        >
+          <SelectTrigger className="h-8 w-32 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MANUAL_ACTIONS.map((a) => (
+              <SelectItem key={a.value} value={a.value}>
+                {a.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={busy}
+          onClick={() => onManual(manualAction)}
+        >
+          Apply
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function RolePipeline() {
   const { programId } = useParams<{ programId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const ws = user?.activeWorkspaceId;
 
   const [program, setProgram] = useState<Program | null>(null);
@@ -111,6 +327,21 @@ export default function RolePipeline() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Which journey row is expanded (one at a time keeps the table calm).
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Lazy per-journey caches for the two panels.
+  const [tags, setTags] = useState<Record<string, RoleTag>>({});
+  const [tagLoading, setTagLoading] = useState<Record<string, boolean>>({});
+  const [tagError, setTagError] = useState<Record<string, string | null>>({});
+
+  const [recs, setRecs] = useState<Record<string, JourneyRecommendation[]>>({});
+  const [recsLoading, setRecsLoading] = useState<Record<string, boolean>>({});
+  const [recsError, setRecsError] = useState<Record<string, string | null>>({});
+
+  // Journey ids with a decision request in flight (disables that row's buttons).
+  const [decisionBusy, setDecisionBusy] = useState<Record<string, boolean>>({});
 
   const load = async (mode: "initial" | "refresh" = "initial") => {
     if (!ws || !programId) return;
@@ -143,6 +374,103 @@ export default function RolePipeline() {
     [program?.stages],
   );
   const stageTitle = (id: string) => stages.find((s) => s.stage_id === id)?.title || "—";
+
+  // Lazy-fetch the role-TAG once per candidate (cached after first open).
+  const fetchTag = async (j: JourneyInstance) => {
+    if (!ws || !programId) return;
+    if (tags[j.journey_instance_id] || tagLoading[j.journey_instance_id]) return;
+    setTagLoading((s) => ({ ...s, [j.journey_instance_id]: true }));
+    setTagError((s) => ({ ...s, [j.journey_instance_id]: null }));
+    try {
+      const tag = await recruiterJourneysApi.getRoleTag(ws, programId, j.candidate_id);
+      setTags((s) => ({ ...s, [j.journey_instance_id]: tag }));
+    } catch (err) {
+      setTagError((s) => ({
+        ...s,
+        [j.journey_instance_id]: err instanceof Error ? err.message : "Could not load profile.",
+      }));
+    } finally {
+      setTagLoading((s) => ({ ...s, [j.journey_instance_id]: false }));
+    }
+  };
+
+  // Lazy-fetch recommendations for the journey (refetched after a decision).
+  const fetchRecs = async (j: JourneyInstance, force = false) => {
+    if (!ws || !programId) return;
+    if (!force && (recs[j.journey_instance_id] || recsLoading[j.journey_instance_id])) return;
+    setRecsLoading((s) => ({ ...s, [j.journey_instance_id]: true }));
+    setRecsError((s) => ({ ...s, [j.journey_instance_id]: null }));
+    try {
+      const list = await recruiterJourneysApi.getRecommendations(
+        ws,
+        programId,
+        j.journey_instance_id,
+      );
+      setRecs((s) => ({ ...s, [j.journey_instance_id]: list }));
+    } catch (err) {
+      setRecsError((s) => ({
+        ...s,
+        [j.journey_instance_id]: err instanceof Error ? err.message : "Could not load recommendations.",
+      }));
+    } finally {
+      setRecsLoading((s) => ({ ...s, [j.journey_instance_id]: false }));
+    }
+  };
+
+  const toggleRow = (j: JourneyInstance) => {
+    const open = expandedId === j.journey_instance_id;
+    setExpandedId(open ? null : j.journey_instance_id);
+    if (!open) {
+      fetchTag(j);
+      fetchRecs(j);
+    }
+  };
+
+  // Apply a decision (confirmed recommendation or manual override), then
+  // refetch the journeys list and this row's recommendations.
+  const applyDecision = async (
+    j: JourneyInstance,
+    body: { stage_id: string; action: DecisionAction; to_stage_id?: string; reason?: string },
+  ) => {
+    if (!ws || !programId || decisionBusy[j.journey_instance_id]) return;
+    setDecisionBusy((s) => ({ ...s, [j.journey_instance_id]: true }));
+    try {
+      const res = await recruiterJourneysApi.postDecision(
+        ws,
+        programId,
+        j.journey_instance_id,
+        body,
+      );
+      toast({
+        title: res.applied ? "Decision applied" : "Decision recorded",
+        description: `${j.candidate_name || j.candidate_id} → ${stageTitle(res.current_stage_id)}.`,
+      });
+      await Promise.all([load("refresh"), fetchRecs(j, true)]);
+    } catch (err) {
+      toast({
+        title: "Could not apply decision",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDecisionBusy((s) => ({ ...s, [j.journey_instance_id]: false }));
+    }
+  };
+
+  const confirmRecommendation = (j: JourneyInstance, rec: JourneyRecommendation) =>
+    applyDecision(j, {
+      stage_id: rec.from_stage_id,
+      action: rec.action as DecisionAction,
+      to_stage_id: rec.to_stage_id || undefined,
+      reason: "recruiter confirmed",
+    });
+
+  const applyManual = (j: JourneyInstance, action: DecisionAction) =>
+    applyDecision(j, {
+      stage_id: j.current_stage_id,
+      action,
+      reason: "recruiter manual decision",
+    });
 
   return (
     <div className="space-y-8">
@@ -210,6 +538,7 @@ export default function RolePipeline() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8" />
                 <TableHead>Candidate</TableHead>
                 <TableHead>Current stage</TableHead>
                 <TableHead>Status</TableHead>
@@ -217,29 +546,93 @@ export default function RolePipeline() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {journeys.map((j) => (
-                <TableRow key={j.journey_instance_id}>
-                  <TableCell>
-                    <div className="font-medium text-ink">
-                      {j.candidate_name || j.candidate_id}
-                    </div>
-                    {j.candidate_email && (
-                      <div className="text-xs text-muted">{j.candidate_email}</div>
+              {journeys.map((j) => {
+                const open = expandedId === j.journey_instance_id;
+                const busy = !!decisionBusy[j.journey_instance_id];
+                return (
+                  <Fragment key={j.journey_instance_id}>
+                    <TableRow
+                      className="cursor-pointer"
+                      onClick={() => toggleRow(j)}
+                      aria-expanded={open}
+                    >
+                      <TableCell className="pr-0">
+                        {open ? (
+                          <ChevronDown className="w-4 h-4 text-muted" aria-hidden />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-muted" aria-hidden />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium text-ink">
+                          {j.candidate_name || j.candidate_id}
+                        </div>
+                        {j.candidate_email && (
+                          <div className="text-xs text-muted">{j.candidate_email}</div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-normal">
+                          {stageTitle(j.current_stage_id)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <StatusChip status={j.status} />
+                      </TableCell>
+                      <TableCell>
+                        <StageProgress journey={j} stages={stages} />
+                      </TableCell>
+                    </TableRow>
+
+                    {open && (
+                      <TableRow className="bg-paper-2 hover:bg-paper-2">
+                        <TableCell colSpan={5} className="p-0">
+                          <div
+                            className="grid gap-6 px-5 py-5 md:grid-cols-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <section>
+                              <div className="mb-3 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-gold-ink" aria-hidden />
+                                <h4 className="text-sm font-semibold text-ink">Profile</h4>
+                              </div>
+                              {tagLoading[j.journey_instance_id] ? (
+                                <p className="text-xs text-muted">Loading profile…</p>
+                              ) : tagError[j.journey_instance_id] ? (
+                                <p className="text-xs text-danger">
+                                  {tagError[j.journey_instance_id]}
+                                </p>
+                              ) : tags[j.journey_instance_id] ? (
+                                <RoleTagPanel tag={tags[j.journey_instance_id]} />
+                              ) : (
+                                <p className="text-xs text-muted">
+                                  No profile yet — runs as stages complete.
+                                </p>
+                              )}
+                            </section>
+
+                            <section>
+                              <div className="mb-3 flex items-center gap-2">
+                                <ScrollText className="w-4 h-4 text-gold-ink" aria-hidden />
+                                <h4 className="text-sm font-semibold text-ink">Decisions</h4>
+                              </div>
+                              <DecisionsPanel
+                                recs={recs[j.journey_instance_id] ?? []}
+                                loading={!!recsLoading[j.journey_instance_id]}
+                                error={recsError[j.journey_instance_id] ?? null}
+                                busy={busy}
+                                stageTitle={stageTitle}
+                                onConfirm={(rec) => confirmRecommendation(j, rec)}
+                                onManual={(action) => applyManual(j, action)}
+                              />
+                            </section>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="font-normal">
-                      {stageTitle(j.current_stage_id)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <StatusChip status={j.status} />
-                  </TableCell>
-                  <TableCell>
-                    <StageProgress journey={j} stages={stages} />
-                  </TableCell>
-                </TableRow>
-              ))}
+                  </Fragment>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
