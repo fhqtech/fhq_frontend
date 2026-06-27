@@ -79,6 +79,9 @@ const CandidateArtifact = lazy(() => import("./pages/candidate/CandidateArtifact
 const CandidatePracticalSubmit = lazy(() => import("./pages/candidate/CandidatePracticalSubmit"));
 const CandidateInterviewWorkSample = lazy(() => import("./pages/candidate/CandidateInterviewWorkSample"));
 const CandidatePracticalDefense = lazy(() => import("./pages/candidate/CandidatePracticalDefense"));
+const CandidateJourney = lazy(() => import("./pages/candidate/CandidateJourney"));
+const JourneyBuilder = lazy(() => import("./pages/JourneyBuilder"));
+const RolePipeline = lazy(() => import("./pages/RolePipeline"));
 
 const LegacyFitmentRedirect = () => {
   const { id } = useParams();
@@ -234,6 +237,20 @@ const App = () => (
                 </MainLayout>
               </TourGuard>
             } />
+            <Route path="/journeys/new" element={
+              <TourGuard>
+                <MainLayout>
+                  <JourneyBuilder />
+                </MainLayout>
+              </TourGuard>
+            } />
+            <Route path="/programs/:programId" element={
+              <TourGuard>
+                <MainLayout>
+                  <RolePipeline />
+                </MainLayout>
+              </TourGuard>
+            } />
 
             <Route path="/interview/:interviewId/results/:sessionId" element={
               <ProtectedRoute>
@@ -386,6 +403,14 @@ const App = () => (
               element={
                 <CandidateProtectedRoute>
                   <CandidatePracticalDefense />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/journeys"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateJourney />
                 </CandidateProtectedRoute>
               }
             />
