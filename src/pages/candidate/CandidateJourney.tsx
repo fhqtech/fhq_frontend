@@ -57,22 +57,22 @@ export default function CandidateJourney() {
   useEffect(load, []);
 
   /**
-   * Current-stage CTA handler.
-   *
-   * TODO(integration): route per stage.type to its deep link
-   *   - interview     → /candidate/interviews/:id
-   *   - scenario      → /candidate/assessment/:scenarioId
-   *   - case|work_sample|defense → /candidate/assessment-artifact/:itemId
-   * For now this is a placeholder so the rail is interactive end-to-end.
+   * Current-stage CTA handler. The backend stamps a `candidate_action_url` on
+   * the stage when the workspace starts it (e.g. the practical registration
+   * URL `/practical-register/{token}`, which runs the existing accept→submit
+   * →defend flow). Absolute URLs (when FRONTEND_BASE_URL is set) hard-navigate;
+   * relative paths route in-app. If the stage hasn't been started yet there's
+   * no link — fall back to the dashboard.
    */
-  const handleStageCta = (journey: JourneyInstance, stage: JourneyStage) => {
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.log("[CandidateJourney] stage CTA", {
-        journey_instance_id: journey.journey_instance_id,
-        stage_id: stage.stage_id,
-        type: stage.type,
-      });
+  const handleStageCta = (_journey: JourneyInstance, stage: JourneyStage) => {
+    const url = stage.candidate_action_url;
+    if (url) {
+      if (/^https?:\/\//i.test(url)) {
+        window.location.href = url;
+      } else {
+        navigate(url);
+      }
+      return;
     }
     navigate("/candidate/dashboard");
   };
@@ -166,15 +166,21 @@ export default function CandidateJourney() {
 
                 <JourneyTimeline
                   journey={journey}
-                  renderCta={(stage) => (
-                    <Button
-                      variant="gold"
-                      size="sm"
-                      onClick={() => handleStageCta(journey, stage)}
-                    >
-                      {ctaLabel(journey)}
-                    </Button>
-                  )}
+                  renderCta={(stage) =>
+                    stage.candidate_action_url ? (
+                      <Button
+                        variant="gold"
+                        size="sm"
+                        onClick={() => handleStageCta(journey, stage)}
+                      >
+                        {ctaLabel(journey)}
+                      </Button>
+                    ) : (
+                      <p className="text-xs text-muted">
+                        This step opens when the workspace starts it.
+                      </p>
+                    )
+                  }
                 />
               </section>
             ))}

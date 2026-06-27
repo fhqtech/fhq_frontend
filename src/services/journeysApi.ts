@@ -63,7 +63,16 @@ export interface JourneyStage {
   stage_id: string;
   type: JourneyStageType;
   title: string;
+  /** Normalised tri-state the rail renders (derived from the backend status
+   *  + current_stage_id by {@link normaliseStage}). */
   status: StageStatus;
+  /** Raw backend stage status (locked|unlocked|in_progress|complete|skipped|failed). */
+  raw_status?: string;
+  /** Candidate-facing deep link to act on this stage (e.g. the practical
+   *  registration URL). Present once the stage has been started. */
+  candidate_action_url?: string | null;
+  /** The underlying engine artifact id (practical_id / interview_id). */
+  engine_artifact_ref?: string | null;
 }
 
 export interface JourneyInstance {
@@ -83,6 +92,47 @@ export interface MyJourneysResponse {
   count: number;
 }
 
+/**
+ * Map a raw backend stage (status in locked|unlocked|in_progress|complete|
+ * skipped|failed) to the rail's tri-state. The current stage is whichever
+ * matches the journey's current_stage_id; finished stages are "done"; the
+ * rest are "locked". Carries the deep-link fields through untouched.
+ */
+function normaliseStage(s: Record<string, unknown>, currentStageId: string | null): JourneyStage {
+  const raw = typeof s.status === "string" ? s.status : "";
+  let status: StageStatus;
+  if (s.stage_id === currentStageId) status = "current";
+  else if (raw === "complete" || raw === "skipped" || raw === "failed") status = "done";
+  else status = "locked";
+  return {
+    stage_id: String(s.stage_id ?? ""),
+    type: String(s.type ?? ""),
+    title: typeof s.title === "string" ? s.title : "",
+    status,
+    raw_status: raw,
+    candidate_action_url:
+      typeof s.candidate_action_url === "string" ? s.candidate_action_url : null,
+    engine_artifact_ref:
+      typeof s.engine_artifact_ref === "string" ? s.engine_artifact_ref : null,
+  };
+}
+
+function normaliseJourney(j: Record<string, unknown>): JourneyInstance {
+  const currentStageId = (j.current_stage_id as string | null) ?? null;
+  const rawStages = Array.isArray(j.stages) ? (j.stages as Record<string, unknown>[]) : [];
+  return {
+    journey_instance_id: String(j.journey_instance_id ?? ""),
+    program_id: String(j.program_id ?? ""),
+    status: String(j.status ?? ""),
+    current_stage_id: currentStageId,
+    current_stage_index: typeof j.current_stage_index === "number" ? j.current_stage_index : 0,
+    total_stages: typeof j.total_stages === "number" ? j.total_stages : rawStages.length,
+    stages: rawStages.map((s) => normaliseStage(s, currentStageId)),
+    workspace_id: String(j.workspace_id ?? ""),
+    project_id: String(j.project_id ?? ""),
+  };
+}
+
 export const journeysApi = {
   /** Journeys for the signed-in candidate across every workspace. */
   async getMyJourneys(): Promise<MyJourneysResponse> {
@@ -91,9 +141,10 @@ export const journeysApi = {
     });
     if (!r.ok) throw new Error(await detailFrom(r, "Could not load your journeys."));
     const data = await r.json();
+    const rawJourneys = Array.isArray(data?.journeys) ? data.journeys : [];
     return {
-      journeys: Array.isArray(data?.journeys) ? data.journeys : [],
-      count: typeof data?.count === "number" ? data.count : (data?.journeys?.length ?? 0),
+      journeys: rawJourneys.map(normaliseJourney),
+      count: typeof data?.count === "number" ? data.count : rawJourneys.length,
     };
   },
 };
