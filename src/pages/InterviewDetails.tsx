@@ -72,6 +72,7 @@ import { InterviewHeader } from "@/components/interview-details/InterviewHeader"
 import { InterviewSourcesPanel } from "@/components/interview-details/InterviewSourcesPanel";
 import { TopMatchesCard } from "@/components/interview-details/TopMatchesCard";
 import { StartInterviewModal } from "@/components/interview-details/StartInterviewModal";
+import { WorkSampleSubmissions } from "@/components/practicals/WorkSampleSubmissions";
 
 
 // Data layer lives in src/queries/interviewDetailsQueries.ts (F29.1).
@@ -1967,6 +1968,21 @@ export default function InterviewDetails() {
  </>
  )}
 
+ {/* Work-sample panel — only when this interview folds in a work sample.
+ workSampleEnabled / workSampleStatus live on the raw interview doc
+ (not surfaced through the typed `interview` memo), so read them off
+ the raw query payload. The interview id is passed as the practicalId
+ to the shared submissions component. */}
+ {!loadingInterview && id && currentWorkspace?.id && currentProject?.id &&
+ (interviewQuery.data as any)?.workSampleEnabled && (
+ <WorkSamplePanel
+ ws={currentWorkspace.id}
+ pr={currentProject.id}
+ interviewId={id}
+ status={(interviewQuery.data as any)?.workSampleStatus}
+ />
+ )}
+
  {/* Start Interview Modal */}
  <StartInterviewModal
  open={startModalOpen}
@@ -2031,4 +2047,76 @@ export default function InterviewDetails() {
  />
  </div>
  );
+}
+
+// Work sample folded into an interview: status badge + the shared recruiter
+// submissions panel. The interview's id is the practicalId the submission /
+// report routes key on.
+function WorkSamplePanel({
+  ws,
+  pr,
+  interviewId,
+  status,
+}: {
+  ws: string;
+  pr: string;
+  interviewId: string;
+  status?: string;
+}) {
+  return (
+    <Card className="shadow-2 rounded-sm">
+      <CardHeader>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-base text-ink">Work sample</CardTitle>
+            <CardDescription>
+              A take-home deliverable, defended in a short AI conversation and graded alongside
+              the interview.
+            </CardDescription>
+          </div>
+          <WorkSampleStatusBadge status={status} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        {status === "generating" ? (
+          <p className="text-xs text-muted" aria-busy="true">
+            Preparing the work sample. Submissions appear here once candidates have submitted.
+          </p>
+        ) : status === "failed" ? (
+          <p className="text-xs text-danger">
+            The work sample could not be prepared. Submissions can't be collected until this
+            is resolved.
+          </p>
+        ) : (
+          <WorkSampleSubmissions ws={ws} pr={pr} practicalId={interviewId} />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function WorkSampleStatusBadge({ status }: { status?: string }) {
+  if (status === "ready")
+    return (
+      <Badge variant="outline" className="text-success border-success/40">
+        <CheckCircle className="h-3 w-3 mr-1" /> Work sample: ready
+      </Badge>
+    );
+  if (status === "generating")
+    return (
+      <Badge variant="outline" className="text-gold-ink border-rule">
+        <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Work sample: generating
+      </Badge>
+    );
+  if (status === "failed")
+    return (
+      <Badge variant="outline" className="text-danger border-danger/40">
+        <AlertTriangle className="h-3 w-3 mr-1" /> Work sample: failed
+      </Badge>
+    );
+  return (
+    <Badge variant="outline" className="text-muted border-rule">
+      Work sample
+    </Badge>
+  );
 }

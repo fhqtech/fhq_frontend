@@ -15,6 +15,8 @@ interface Invitation {
   candidate_name: string;
   status: string;
   interview_id: string;
+  // True when this interview folds in a work sample the candidate must submit.
+  has_work_sample?: boolean;
   interview_type: 'screening' | 'fitment';
   interview_title?: string;
   interview_description?: string;
@@ -104,6 +106,10 @@ function InvitationCard({ inv }: { inv: Invitation }) {
   const group = groupOf(inv.status);
   const analyzing = isAnalyzing(inv);
   const isAssessment = inv.item_kind === 'assessment';
+  // Work-sample interview: surface a sub-label and route the primary action
+  // to the interview-keyed work-sample submit page (only while still active).
+  const hasWorkSample = !isAssessment && inv.has_work_sample === true;
+  const showWorkSample = hasWorkSample && group !== 'completed';
 
   const kindLabel = isAssessment
     ? ASSESSMENT_KIND_LABEL[inv.assessment_mode || 'scenario'] || 'Assessment'
@@ -117,6 +123,8 @@ function InvitationCard({ inv }: { inv: Invitation }) {
       : 'Start assessment'
     : group === 'completed'
     ? analyzing ? 'Results coming soon' : 'View results'
+    : showWorkSample
+    ? 'Start work sample'
     : inv.status === 'started' || inv.status === 'paused'
     ? 'Resume interview'
     : 'Start interview';
@@ -133,6 +141,12 @@ function InvitationCard({ inv }: { inv: Invitation }) {
     }
     if (group === 'completed') {
       navigate(`/candidate/interviews/${inv.interview_id}/results`);
+    } else if (showWorkSample) {
+      const ws = encodeURIComponent(inv.workspace_id || '');
+      const pr = encodeURIComponent(inv.project_id || '');
+      navigate(
+        `/candidate/interview/${encodeURIComponent(inv.interview_id)}/work-sample?ws=${ws}&pr=${pr}`,
+      );
     } else {
       navigate(`/candidate/interviews/${inv.interview_id}`);
     }
@@ -148,6 +162,9 @@ function InvitationCard({ inv }: { inv: Invitation }) {
           <h3 className="text-lg font-semibold text-foreground leading-tight mt-1">
             {inv.interview_title || (isAssessment ? 'Assessment' : 'Interview')}
           </h3>
+          {showWorkSample && (
+            <p className="text-xs text-gold-ink font-medium mt-1">Work sample required</p>
+          )}
         </div>
         <StatusBadge status={inv.status} />
       </div>

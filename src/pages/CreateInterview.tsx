@@ -174,6 +174,10 @@ export default function CreateInterview() {
       blueprintNotes: "", // recruiter "Refine this preview" notes
       financeDomain: "" as FinanceDomainId | "",
       subDomain: "",
+      // Opt-in: fold a work sample into this interview. When true the create
+      // payload carries workSampleEnabled and the backend prepares a
+      // work-sample task the candidate submits + defends.
+      workSampleEnabled: false,
       duration: "10",
       voiceType: "professional-female",
       voiceSpeed: "normal",
@@ -799,6 +803,7 @@ export default function CreateInterview() {
           blueprintNotes: interviewData.blueprintNotes || "",
           financeDomain: (interviewData.financeDomain || "") as FinanceDomainId | "",
           subDomain: interviewData.subDomain || "",
+          workSampleEnabled: interviewData.workSampleEnabled ?? false,
           duration: interviewData.duration || "30",
           voiceType: interviewData.voiceType || "professional-female",
           voiceSpeed: interviewData.voiceSpeed || "normal",
@@ -1695,6 +1700,9 @@ export default function CreateInterview() {
       },
       selectedListIds: formData.selectedListIds, // Selected candidate lists
       duplicateAnalysis: formData.duplicateAnalysis, // Store duplicate analysis results
+      // Work sample opt-in (backend body is extra=allow). When true the
+      // interview doc carries workSampleEnabled + workSampleStatus.
+      ...(formData.workSampleEnabled && { workSampleEnabled: true }),
       // Phase B: finance sub-domain taxonomy (both fields optional today)
       ...(formData.financeDomain && { financeDomain: formData.financeDomain }),
       ...(formData.subDomain && { subDomain: formData.subDomain }),
@@ -2767,6 +2775,32 @@ export default function CreateInterview() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              )}
+
+              {/* Work sample — opt-in. Folds a take-home deliverable + AI
+                  defense into this interview. */}
+              {formData.type !== 'skill_analysis' && (
+              <div
+                className="flex items-start justify-between gap-4 rounded bg-paper p-4"
+                style={{ boxShadow: 'var(--shadow-1)' }}
+              >
+                <div className="space-y-1">
+                  <Label htmlFor="workSampleEnabled" className="text-sm font-medium text-ink">
+                    Attach a work sample
+                  </Label>
+                  <p className="text-xs text-muted max-w-md">
+                    Candidates submit a short deliverable and defend their key choices in a
+                    follow-up conversation. We grade the defended work alongside the interview.
+                  </p>
+                </div>
+                <Switch
+                  id="workSampleEnabled"
+                  checked={formData.workSampleEnabled}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, workSampleEnabled: checked }))
+                  }
+                />
               </div>
               )}
 

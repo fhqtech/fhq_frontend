@@ -38,6 +38,7 @@ const SkillMatcher = lazy(() => import("./pages/SkillMatcher"));
 const CreateInterview = lazy(() => import("./pages/CreateInterview"));
 const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
+const Practicals = lazy(() => import("./pages/Practicals"));
 const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
 const QuickTour = lazy(() => import("./pages/QuickTour"));
@@ -75,6 +76,9 @@ const CandidateProfileTag = lazy(() => import("./pages/candidate/CandidateProfil
 const CandidateSettings = lazy(() => import("./pages/candidate/CandidateSettings"));
 const CandidateScenario = lazy(() => import("./pages/candidate/CandidateScenario"));
 const CandidateArtifact = lazy(() => import("./pages/candidate/CandidateArtifact"));
+const CandidatePracticalSubmit = lazy(() => import("./pages/candidate/CandidatePracticalSubmit"));
+const CandidateInterviewWorkSample = lazy(() => import("./pages/candidate/CandidateInterviewWorkSample"));
+const CandidatePracticalDefense = lazy(() => import("./pages/candidate/CandidatePracticalDefense"));
 
 const LegacyFitmentRedirect = () => {
   const { id } = useParams();
@@ -222,6 +226,15 @@ const App = () => (
               </TourGuard>
             } />
 
+            {/* Unified-evaluation practical flow (recruiter) */}
+            <Route path="/practicals" element={
+              <TourGuard>
+                <MainLayout>
+                  <Practicals />
+                </MainLayout>
+              </TourGuard>
+            } />
+
             <Route path="/interview/:interviewId/results/:sessionId" element={
               <ProtectedRoute>
                 <MainLayout>
@@ -351,6 +364,32 @@ const App = () => (
                 </CandidateProtectedRoute>
               }
             />
+            {/* Practical flow (candidate). Submit page is token-gated and
+                prompts sign-in itself (it must show the public invitation
+                first); the defense page requires a candidate session. */}
+            <Route
+              path="/practical-register/:token"
+              element={<CandidatePracticalSubmit />}
+            />
+            {/* Work sample folded into an interview — candidate already
+                invited, so this is candidate-session-guarded (no token). */}
+            <Route
+              path="/candidate/interview/:interviewId/work-sample"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateInterviewWorkSample />
+                </CandidateProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate/practical-defense/:submissionId"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidatePracticalDefense />
+                </CandidateProtectedRoute>
+              }
+            />
+
             <Route
               path="/candidate/interviews/:id"
               element={

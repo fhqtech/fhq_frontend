@@ -174,6 +174,9 @@ export interface paths {
         /**
          * Register
          * @description Register a new user. Returns service result verbatim (token + user).
+         *
+         *     H4: rate-limited at 3/minute/IP — registration is a spam-account-creation
+         *     surface. Tighter than /login (5/min) since legitimate users register once.
          */
         post: operations["register_api_auth_register_post"];
         delete?: never;
@@ -240,6 +243,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh
+         * @description Rotate the httpOnly refresh cookie → a fresh access token.
+         *
+         *     Reads the refresh token from the cookie (EventSource/JS never sees it),
+         *     rotates it (revoking the old jti, detecting replay/theft), sets the new
+         *     cookie, and returns the new access token in the body. 401 + cookie-clear on
+         *     any invalid/expired/reused token.
+         */
+        post: operations["refresh_api_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/google/token": {
         parameters: {
             query?: never;
@@ -260,6 +288,58 @@ export interface paths {
          *     recruiter.
          */
         post: operations["google_token_auth_api_auth_google_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Google Login
+         * @description Initiate recruiter Google OAuth (redirect flow).
+         *
+         *     The frontend points the browser here (window.location); we 302 to Google's
+         *     consent screen. A per-request CSRF token is set in an HttpOnly cookie and
+         *     echoed in `state`; the callback validates them with secrets.compare_digest.
+         *     An optional `redirect_to` query param (allowlisted on the callback) overrides
+         *     the post-login frontend URL. Path + GOOGLE_REDIRECT_URI are unchanged from
+         *     the retired Flask handler, so no Google-console or frontend change is needed.
+         */
+        get: operations["google_login_api_auth_google_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/google/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Google Callback
+         * @description Handle the recruiter Google OAuth callback.
+         *
+         *     Exchanges the auth code for an id_token, runs the shared
+         *     authenticate_google_user (verify + user lookup/create + workspace
+         *     provisioning + JWT), then 302s the browser to the frontend OAuth-callback
+         *     URL with the token in the query string.
+         */
+        get: operations["google_callback_api_auth_google_callback_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -596,6 +676,84 @@ export interface paths {
          * @description Returns availability + remaining-interview count.
          */
         get: operations["check_sufficient_credits_api_projects__project_id__check_credits_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/validate-google-sheet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate Google Sheet
+         * @description Validate a Google Sheets URL + data format.
+         */
+        post: operations["validate_google_sheet_api_validate_google_sheet_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/upload-file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload File
+         * @description Upload + validate a candidate data file (CSV/Excel).
+         */
+        post: operations["upload_file_api_upload_file_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/validate-excel-csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate Excel Csv
+         * @description Validate an Excel/CSV file from a GCS path (JSON body) or a direct
+         *     multipart upload. The frontend uses the GCS file_path / JSON branch.
+         */
+        post: operations["validate_excel_csv_api_validate_excel_csv_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/places/autocomplete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Places Autocomplete */
+        get: operations["places_autocomplete_api_places_autocomplete_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1749,6 +1907,9 @@ export interface paths {
         /**
          * Verify Swipe Session
          * @description Mobile reviewer enters the OTP to bind their device to this session.
+         *
+         *     A4: rate-limited at 5/minute/IP. The OTP is the only gate on the public
+         *     mobile-reviewer flow, so an unthrottled endpoint is brute-forceable.
          */
         post: operations["verify_swipe_session_api_swipe_session__interview_id__verify_post"];
         delete?: never;
@@ -3282,6 +3443,282 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Practicals */
+        get: operations["list_practicals_api_workspaces__workspace_id__projects__project_id__practicals_get"];
+        put?: never;
+        /** Create Practical */
+        post: operations["create_practical_api_workspaces__workspace_id__projects__project_id__practicals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Practical */
+        get: operations["get_practical_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Practical Status */
+        patch: operations["update_practical_status_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__status_patch"];
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/generate-assignment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate Assignment Endpoint */
+        post: operations["generate_assignment_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__generate_assignment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/submission/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Submission */
+        post: operations["start_submission_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submission_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/submission/{submission_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Submission */
+        post: operations["submit_submission_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submission__submission_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Submissions */
+        get: operations["list_submissions_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practical-submissions/{submission_id}/defense/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Defense */
+        post: operations["start_defense_api_practical_submissions__submission_id__defense_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practical-defense/{session_id}/message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Defense Message */
+        post: operations["send_defense_message_api_practical_defense__session_id__message_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practical-defense/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Defense */
+        get: operations["get_defense_api_practical_defense__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/invite-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invite Candidates */
+        post: operations["invite_candidates_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__invite_candidates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practical-invitations/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Invitation */
+        get: operations["get_invitation_api_practical_invitations__token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practical-invitations/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Invitation */
+        post: operations["accept_invitation_api_practical_invitations__token__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/submissions/{submission_id}/synthesize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Synthesize Endpoint */
+        post: operations["synthesize_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions__submission_id__synthesize_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/submissions/{submission_id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Report Endpoint
+         * @description Recruiter reads the synthesized DefenseReport for a submission (owns the practical).
+         */
+        get: operations["get_report_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions__submission_id__report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/projects/{project_id}/practicals/{practical_id}/submissions/{submission_id}/probe-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate Probe Plan Endpoint */
+        post: operations["generate_probe_plan_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions__submission_id__probe_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interviews/{interview_id}/export-csv": {
         parameters: {
             query?: never;
@@ -3325,7 +3762,7 @@ export interface paths {
          *     the connection open for the agent's full duration. Non-2xx returns
          *     trigger Cloud Tasks retries per the queue's max-attempts policy.
          *
-         *     Idempotency: the BlueprintAgentService writes to a deterministic
+         *     Idempotency: blueprint generation writes to a deterministic
          *     Firestore doc keyed on interview_id; redelivery of the same task
          *     overwrites the doc — safe.
          */
@@ -4563,6 +5000,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/invitations/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get All My Invitations
+         * @description Pending invitations across ALL workspaces for the current user's email.
+         *
+         *     Ported from the Flask governance route (Phase E of the Flask retirement).
+         *     Uses the authenticated principal's email (the frontend passes its own
+         *     email as a query param; we read it from the token instead so a caller
+         *     can't enumerate someone else's invitations).
+         */
+        get: operations["get_all_my_invitations_api_invitations_all_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/invitations/{invitation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Dismiss Invitation
+         * @description Dismiss/reject a pending workspace invitation (marks status='rejected').
+         *
+         *     Ported from the Flask governance route (Phase E). Note this is the bare
+         *     workspace-scoped invitation path — distinct from the list-scoped
+         *     /lists/{list_id}/invitations/{invitation_id} cancel route above.
+         */
+        delete: operations["dismiss_invitation_api_workspaces__workspace_id__invitations__invitation_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/workspaces/{workspace_id}/invitations/{invitation_id}/reject": {
         parameters: {
             query?: never;
@@ -5511,6 +5997,16 @@ export interface components {
             /** Candidate Token */
             candidate_token: string;
         };
+        /** Body_upload_file_api_upload_file_post */
+        Body_upload_file_api_upload_file_post: {
+            /** File */
+            file?: string;
+            /**
+             * Expected Columns
+             * @default Name,Email
+             */
+            expected_columns: string;
+        };
         /** BudgetBody */
         BudgetBody: {
             /**
@@ -5756,6 +6252,25 @@ export interface components {
         CreateListBody: {
             /** Name */
             name: string;
+        } & {
+            [key: string]: unknown;
+        };
+        /** CreatePracticalBody */
+        CreatePracticalBody: {
+            /** Title */
+            title: string;
+            /**
+             * Jobdescription
+             * @default
+             */
+            jobDescription: string;
+            /** Format */
+            format?: ("case_study" | "assignment" | "challenge" | "scenario") | null;
+            /**
+             * Domain
+             * @default finance
+             */
+            domain: string;
         } & {
             [key: string]: unknown;
         };
@@ -6361,6 +6876,11 @@ export interface components {
         MeResponse: {
             user: components["schemas"]["UserPayload"];
         };
+        /** MessageBody */
+        MessageBody: {
+            /** Message */
+            message: string;
+        };
         /** MessageResponse */
         MessageResponse: {
             /** Message */
@@ -6529,6 +7049,18 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             latest_session?: components["schemas"]["LatestSessionInfo"] | null;
+        };
+        /** ProvenanceBody */
+        ProvenanceBody: {
+            /** Ai Tools Disclosed */
+            ai_tools_disclosed?: string[];
+            /**
+             * Approach Note
+             * @default
+             */
+            approach_note: string;
+        } & {
+            [key: string]: unknown;
         };
         /** RatingBody */
         RatingBody: {
@@ -6895,6 +7427,14 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        /** SubmitBody */
+        SubmitBody: {
+            /** Artifact Refs */
+            artifact_refs?: string[];
+            provenance?: components["schemas"]["ProvenanceBody"];
+        } & {
+            [key: string]: unknown;
+        };
         /** SuggestionRequest */
         SuggestionRequest: {
             /** Title */
@@ -7004,6 +7544,13 @@ export interface components {
         };
         /** UpdateProjectListBody */
         UpdateProjectListBody: {
+            [key: string]: unknown;
+        };
+        /** UpdateStatusBody */
+        UpdateStatusBody: {
+            /** Status */
+            status: string;
+        } & {
             [key: string]: unknown;
         };
         /** UpdateTemplateBody */
@@ -7607,6 +8154,26 @@ export interface operations {
             };
         };
     };
+    refresh_api_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     google_token_auth_api_auth_google_token_post: {
         parameters: {
             query?: never;
@@ -7638,6 +8205,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    google_login_api_auth_google_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    google_callback_api_auth_google_callback_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };
@@ -8229,6 +8836,99 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_google_sheet_api_validate_google_sheet_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    upload_file_api_upload_file_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_file_api_upload_file_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_excel_csv_api_validate_excel_csv_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    places_autocomplete_api_places_autocomplete_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };
@@ -13404,6 +14104,611 @@ export interface operations {
             };
         };
     };
+    list_practicals_api_workspaces__workspace_id__projects__project_id__practicals_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_practical_api_workspaces__workspace_id__projects__project_id__practicals_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePracticalBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practical_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_practical_status_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__status_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStatusBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_assignment_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__generate_assignment_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_submission_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submission_start_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_submission_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submission__submission_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_submissions_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_defense_api_practical_submissions__submission_id__defense_start_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_defense_message_api_practical_defense__session_id__message_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_defense_api_practical_defense__session_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invite_candidates_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__invite_candidates_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteCandidatesBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_invitation_api_practical_invitations__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    accept_invitation_api_practical_invitations__token__accept_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    synthesize_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions__submission_id__synthesize_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_report_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions__submission_id__report_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_probe_plan_endpoint_api_workspaces__workspace_id__projects__project_id__practicals__practical_id__submissions__submission_id__probe_plan_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                practical_id: string;
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     export_interview_results_csv_api_interviews__interview_id__export_csv_post: {
         parameters: {
             query?: never;
@@ -16274,6 +17579,71 @@ export interface operations {
         };
     };
     accept_invitation_api_workspaces__workspace_id__invitations__invitation_id__accept_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_all_my_invitations_api_invitations_all_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_invitation_api_workspaces__workspace_id__invitations__invitation_id__delete: {
         parameters: {
             query?: never;
             header?: {
