@@ -39,6 +39,8 @@ import { PcmPlayer, startMicCapture, classifyMicError, type CaptureHandle, type 
 import { ParticleSphere } from "@/components/interview/ParticleSphere";
 import { AiInterviewer } from "@/components/interview/AiInterviewer";
 import { TranscriptBox, type TranscriptMessage } from "@/components/interview/TranscriptBox";
+import SubmissionPanel from "@/components/interview/SubmissionPanel";
+import type { SubmissionReference } from "@/services/voiceWebSocketClient";
 import { ConversationState } from "@/types/interview";
 
 // sessionStorage keys for resume-after-refresh.
@@ -172,6 +174,13 @@ export default function InterviewSessionV2Page() {
   // by default (so the candidate can read along) with a chevron to hide
   // it down to a header-only strip if they want a cleaner view.
   const [transcriptVisible, setTranscriptVisible] = useState(true);
+  // Grounded interview (a journey defense stage): the candidate's submission shows
+  // alongside, and the AI highlights the span it references. Gated on route state so
+  // the standard interview renders the untouched full-screen layout.
+  const groundedState = location.state as { grounded?: boolean; submissionText?: string } | null;
+  const grounded = !!groundedState?.grounded;
+  const submissionText = groundedState?.submissionText || "";
+  const [submissionHighlight, setSubmissionHighlight] = useState<SubmissionReference | null>(null);
   // T1b — mic level (0-1) and "mic silent" warning (true when mic has
   // been active for 5s+ with peak amplitude staying near 0).
   const [micLevel, setMicLevel] = useState(0);
@@ -425,6 +434,7 @@ export default function InterviewSessionV2Page() {
           });
         },
         onAgentTextPartial: (text) => setAgentPartial(text),
+        onSubmissionReference: (ref) => setSubmissionHighlight(ref),
         onAgentAudioChunk: (pcm) => playerRef.current?.enqueue(pcm),
         onCandidateTurnPartial: (text) => setCandidatePartial(text),
         onCandidateTurnFinal: (text) => {
@@ -916,6 +926,14 @@ export default function InterviewSessionV2Page() {
               <ChevronLeft className="w-4 h-4" />
             </button>
           )}
+        </div>
+      )}
+      {grounded && submissionText && (
+        <div
+          className="hidden lg:block absolute top-20 left-6 w-96 z-10"
+          style={{ height: "calc(100dvh - 220px)" }}
+        >
+          <SubmissionPanel submissionText={submissionText} highlight={submissionHighlight} />
         </div>
       )}
 

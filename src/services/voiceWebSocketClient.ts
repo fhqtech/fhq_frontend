@@ -33,6 +33,19 @@ export interface ServerMessage {
   // S1.4: payload of the agent_thinking event (true = LLM dispatch in
   // flight, false = LLM dispatch completed).
   value?: boolean;
+  // Grounded interview: the agent is referencing a span of the candidate's
+  // submission so the UI can highlight it. Additive; older clients ignore it.
+  submission_reference?: SubmissionReference;
+}
+
+/** A pointer to a span of the candidate's submitted work the AI is asking about. */
+export interface SubmissionReference {
+  submission_id?: string;
+  section_id: string;
+  char_start?: number;
+  char_end?: number;
+  preview_text?: string;
+  reason?: string;
 }
 
 export interface VoiceClientEvents {
@@ -46,6 +59,9 @@ export interface VoiceClientEvents {
   onStateChange?: (state: VoiceState) => void;
   /** Live captions of what the agent is currently speaking. */
   onAgentTextPartial?: (text: string) => void;
+  /** Grounded interview: the agent referenced a span of the candidate's
+   *  submission — the UI scrolls to + highlights it. */
+  onSubmissionReference?: (ref: SubmissionReference) => void;
   /** Server is about to send audio chunks for the next agent turn. */
   onAgentTurnStart?: () => void;
   /** Server finished an agent turn; mic capture should resume. */
@@ -284,6 +300,9 @@ export class VoiceWebSocketClient {
         break;
       case "error":
         this.events.onError?.(msg.error ?? "unknown_error");
+        break;
+      case "submission_reference":
+        if (msg.submission_reference) this.events.onSubmissionReference?.(msg.submission_reference);
         break;
       default:
         // Unknown — ignore (server may add events; client need not handle all).
