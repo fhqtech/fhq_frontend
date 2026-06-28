@@ -7,6 +7,8 @@ import {
   Gear as Settings,
   ChartBar as BarChart3,
   Briefcase,
+  FlowArrow as ProgramsIcon,
+  ClipboardText as PracticalsIcon,
   CaretDown as ChevronDown,
   Robot as Bot,
   List as Menu,
@@ -42,6 +44,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Quick tour", url: "/quick-tour", icon: Play },
+  { title: "Programs", url: "/programs", icon: ProgramsIcon },
   {
     title: "Interviews",
     icon: Briefcase,
@@ -52,6 +55,7 @@ const menuItems = [
       { title: "Skill analysis", url: "/interviews/skill-analysis" }
     ]
   },
+  { title: "Practicals", url: "/practicals", icon: PracticalsIcon },
   { title: "Talent pools", url: "/lists", icon: Users },
   { title: "Skill matcher", url: "/skill-matcher", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings }

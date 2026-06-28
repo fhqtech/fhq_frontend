@@ -82,6 +82,7 @@ const CandidatePracticalDefense = lazy(() => import("./pages/candidate/Candidate
 const CandidateJourney = lazy(() => import("./pages/candidate/CandidateJourney"));
 const JourneyBuilder = lazy(() => import("./pages/JourneyBuilder"));
 const RolePipeline = lazy(() => import("./pages/RolePipeline"));
+const Programs = lazy(() => import("./pages/Programs"));
 
 const LegacyFitmentRedirect = () => {
   const { id } = useParams();
@@ -244,6 +245,14 @@ const App = () => (
                 </MainLayout>
               </TourGuard>
             } />
+            <Route path="/programs" element={
+              <TourGuard>
+                <MainLayout>
+                  <Programs />
+                </MainLayout>
+              </TourGuard>
+            } />
+
             <Route path="/programs/:programId" element={
               <TourGuard>
                 <MainLayout>

@@ -726,7 +726,7 @@ export default function RolePipeline() {
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/programs")} aria-label="Back to programs">
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
