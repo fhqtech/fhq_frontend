@@ -192,9 +192,20 @@ function InvitationCard({ inv }: { inv: Invitation }) {
   );
 }
 
+type PracticalCard = { practical_id: string; title: string; status: string; register_url: string };
+type JourneyCard = {
+  journey_instance_id: string;
+  status: string;
+  current_stage_index: number;
+  total_stages: number;
+  stages?: Array<{ title?: string; type?: string }>;
+};
+
 export default function CandidateDashboard() {
   const { account, logout } = useCandidateAuth();
   const [invitations, setInvitations] = useState<Invitation[] | null>(null);
+  const [practicals, setPracticals] = useState<PracticalCard[]>([]);
+  const [journeys, setJourneys] = useState<JourneyCard[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -204,11 +215,10 @@ export default function CandidateDashboard() {
       setLoading(false);
       return;
     }
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
     (async () => {
       try {
-        const resp = await fetch(`${API_BASE()}/api/candidate-me/invitations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const resp = await fetch(`${API_BASE()}/api/candidate-me/invitations`, auth);
         if (!resp.ok) throw new Error(`Failed to load (${resp.status})`);
         const data = await resp.json();
         setInvitations(data.invitations || []);
@@ -217,12 +227,27 @@ export default function CandidateDashboard() {
       } finally {
         setLoading(false);
       }
+      // Practicals + journeys are best-effort — never block the dashboard.
+      try {
+        const r = await fetch(`${API_BASE()}/api/candidate-me/practicals`, auth);
+        if (r.ok) setPracticals((await r.json()).practicals || []);
+      } catch { /* noop */ }
+      try {
+        const r = await fetch(`${API_BASE()}/api/candidate-me/journeys`, auth);
+        if (r.ok) setJourneys((await r.json()).journeys || []);
+      } catch { /* noop */ }
     })();
   }, []);
 
   const active = (invitations || []).filter((i) => groupOf(i.status) === 'active');
   const completed = (invitations || []).filter((i) => groupOf(i.status) === 'completed');
   const closed = (invitations || []).filter((i) => groupOf(i.status) === 'closed');
+  // A practical the candidate hasn't finished yet is still actionable.
+  const openPracticals = practicals.filter(
+    (p) => !['submitted', 'completed', 'report_ready'].includes((p.status || '').toLowerCase()),
+  );
+  const hasAnything =
+    (invitations?.length || 0) > 0 || openPracticals.length > 0 || journeys.length > 0;
 
   return (
     <div className="min-h-dvh bg-paper-2">
@@ -291,7 +316,7 @@ export default function CandidateDashboard() {
           />
         )}
 
-        {!loading && !error && invitations && invitations.length === 0 && (
+        {!loading && !error && !hasAnything && (
           <EmptyState
             icon={Mail}
             title="No invitations yet"
@@ -299,8 +324,22 @@ export default function CandidateDashboard() {
           />
         )}
 
-        {!loading && !error && invitations && invitations.length > 0 && (
+        {!loading && !error && hasAnything && (
           <div className="space-y-10">
+            {journeys.length > 0 && (
+              <Section title="Evaluation journeys" count={journeys.length}>
+                {journeys.map((j) => (
+                  <JourneyDashCard key={j.journey_instance_id} j={j} />
+                ))}
+              </Section>
+            )}
+            {openPracticals.length > 0 && (
+              <Section title="Practical assignments" count={openPracticals.length}>
+                {openPracticals.map((p) => (
+                  <PracticalDashCard key={p.practical_id} p={p} />
+                ))}
+              </Section>
+            )}
             {active.length > 0 && (
               <Section title="Active" count={active.length}>
                 {active.map((inv) => (
@@ -346,5 +385,53 @@ function Section({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{children}</div>
     </section>
+  );
+}
+
+/** A standalone practical assignment. The candidate is already signed in here,
+ *  so the register link opens straight into the submit flow. */
+function PracticalDashCard({ p }: { p: PracticalCard }) {
+  return (
+    <div className="rounded-xl border border-border bg-paper p-5 flex flex-col">
+      <p className="font-mono uppercase tracking-[0.14em] text-[10px] text-gold-ink mb-2">
+        Work sample
+      </p>
+      <h4 className="text-base font-semibold text-foreground">{p.title}</h4>
+      <p className="text-sm text-muted mt-1 flex-1">
+        Upload your deliverable and a short note, then defend your key choices.
+      </p>
+      <Link
+        to={p.register_url}
+        className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+      >
+        Start assignment
+      </Link>
+    </div>
+  );
+}
+
+/** An evaluation journey — links to the full timeline. */
+function JourneyDashCard({ j }: { j: JourneyCard }) {
+  const total = j.total_stages || (j.stages?.length ?? 0);
+  const current = j.stages?.[j.current_stage_index];
+  return (
+    <div className="rounded-xl border border-border bg-paper p-5 flex flex-col">
+      <p className="font-mono uppercase tracking-[0.14em] text-[10px] text-gold-ink mb-2">
+        Evaluation journey
+      </p>
+      <h4 className="text-base font-semibold text-foreground">
+        {current?.title || 'Your journey'}
+      </h4>
+      <p className="text-sm text-muted mt-1 flex-1">
+        Stage {Math.min(j.current_stage_index + 1, total)} of {total}
+        {current?.type ? ` · ${current.type.replace(/_/g, ' ')}` : ''}
+      </p>
+      <Link
+        to="/candidate/journeys"
+        className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+      >
+        Open journey
+      </Link>
+    </div>
   );
 }
