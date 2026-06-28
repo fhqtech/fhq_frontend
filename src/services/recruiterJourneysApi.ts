@@ -86,6 +86,33 @@ export interface CreateProgramResult {
   status: ProgramStatus;
 }
 
+/**
+ * One target skill for a skill_analysis program. `target` is the 0–100 bar the
+ * candidate's demonstrated value is measured against. `canonical_id` is the
+ * resolved taxonomy id (the backend fills it on save; absent for fresh rows).
+ */
+export interface Competency {
+  canonical_id?: string;
+  skill_name: string;
+  target: number;
+}
+
+/** One row of a candidate's gap-vs-target read for a skill_analysis program. */
+export interface GapRow {
+  canonical_id: string;
+  skill_name: string;
+  target: number;
+  demonstrated: number;
+  gap: number;
+  met: boolean;
+}
+
+/** The full gap read: per-skill rows plus a rollup summary. */
+export interface GapResult {
+  gaps: GapRow[];
+  summary: { met_count: number; total: number; avg_gap: number };
+}
+
 export interface Program {
   program_id: string;
   title: string;
@@ -94,6 +121,8 @@ export interface Program {
   domain?: string;
   jdText?: string;
   stages?: JourneyStage[];
+  /** Saved competency target for a skill_analysis program (may be absent/empty). */
+  target_competencies?: Competency[];
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown;
@@ -280,6 +309,41 @@ export const recruiterJourneysApi = {
       { headers: authHeaders() },
     );
     if (!r.ok) throw new Error(await detailFrom(r, "Could not load profile"));
+    return r.json();
+  },
+
+  /**
+   * Save (replace) a skill_analysis program's competency target. The backend
+   * resolves each skill to a canonical id and returns the persisted list.
+   */
+  async setTarget(
+    ws: string,
+    programId: string,
+    competencies: Competency[],
+  ): Promise<{ count: number; target_competencies: Competency[] }> {
+    const r = await fetch(`${programsBase(ws)}/${programId}/target`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ competencies }),
+    });
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not save target"));
+    return r.json();
+  },
+
+  /**
+   * Gap-vs-target read for one candidate. The backend returns 404 when the
+   * candidate has no fused role tag yet — callers catch the thrown error to
+   * show a "no evidence yet" empty state.
+   */
+  async getGap(ws: string, programId: string, candidateId: string): Promise<GapResult> {
+    const r = await fetch(
+      `${programsBase(ws)}/${programId}/candidates/${candidateId}/gap`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) {
+      if (r.status === 404) throw new Error("no evidence yet");
+      throw new Error(await detailFrom(r, "Could not load gap analysis"));
+    }
     return r.json();
   },
 

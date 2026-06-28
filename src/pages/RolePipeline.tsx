@@ -17,6 +17,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  Check,
   ChevronDown,
   ChevronRight,
   GitBranch,
@@ -25,6 +26,7 @@ import {
   RefreshCw,
   ScrollText,
   Sparkles,
+  Target,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -33,12 +35,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   recruiterJourneysApi,
   type DecisionAction,
+  type GapResult,
   type JourneyInstance,
   type JourneyRecommendation,
   type JourneyStage,
   type Program,
   type RoleTag,
 } from "@/services/recruiterJourneysApi";
+import { TargetEditor } from "@/components/journey/TargetEditor";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -278,6 +282,70 @@ function RoleTagPanel({ tag }: { tag: RoleTag }) {
   );
 }
 
+/**
+ * Gap-vs-target panel for skill_analysis programs. One row per target skill:
+ * skill name on the left, demonstrated/target in mono on the right, and a
+ * met/gap indicator (met → success check; gap sized to warning vs danger).
+ * Closes with a summary line (met_count/total, avg gap).
+ */
+function GapPanel({ gap }: { gap: GapResult }) {
+  if (gap.gaps.length === 0) {
+    return (
+      <p className="text-xs text-muted">
+        No target set yet — define a competency target above.
+      </p>
+    );
+  }
+
+  // Largest gaps first so the recruiter sees the biggest shortfalls up top.
+  const rows = [...gap.gaps].sort((a, b) => b.gap - a.gap);
+
+  return (
+    <div className="space-y-2.5">
+      <ul className="divide-y divide-rule rounded-md border border-rule bg-paper">
+        {rows.map((row) => {
+          // gap is target − demonstrated; >20 reads as a hard miss (danger),
+          // a smaller shortfall is a soft miss (warning).
+          const tone = row.met
+            ? "text-success"
+            : row.gap > 20
+              ? "text-danger"
+              : "text-warning";
+          return (
+            <li key={row.canonical_id} className="flex items-center gap-3 px-3 py-2">
+              <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                {row.skill_name}
+              </span>
+              <span className="shrink-0 font-mono tabular-nums text-sm text-muted">
+                <span className={cn("font-medium", tone)}>
+                  {Math.round(row.demonstrated)}
+                </span>
+                /{Math.round(row.target)}
+              </span>
+              <span className={cn("flex w-16 shrink-0 items-center justify-end gap-1 text-right", tone)}>
+                {row.met ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" aria-hidden />
+                    <span className="text-xs font-medium">met</span>
+                  </>
+                ) : (
+                  <span className="font-mono tabular-nums text-sm font-medium">
+                    −{Math.round(row.gap)}
+                  </span>
+                )}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="font-mono tabular-nums text-[11px] text-muted">
+        {gap.summary.met_count}/{gap.summary.total} met · avg gap{" "}
+        {gap.summary.avg_gap.toFixed(1)}
+      </p>
+    </div>
+  );
+}
+
 // Recommendation action → sentence-case verb for the explanation line.
 const ACTION_VERB: Record<string, string> = {
   skip: "skip ahead",
@@ -406,6 +474,12 @@ export default function RolePipeline() {
   const [tagLoading, setTagLoading] = useState<Record<string, boolean>>({});
   const [tagError, setTagError] = useState<Record<string, string | null>>({});
 
+  // Lazy per-journey gap caches (skill_analysis programs only). Mirrors the
+  // TAG caches above. A "no evidence yet" error is surfaced as an empty state.
+  const [gaps, setGaps] = useState<Record<string, GapResult>>({});
+  const [gapLoading, setGapLoading] = useState<Record<string, boolean>>({});
+  const [gapError, setGapError] = useState<Record<string, string | null>>({});
+
   const [recs, setRecs] = useState<Record<string, JourneyRecommendation[]>>({});
   const [recsLoading, setRecsLoading] = useState<Record<string, boolean>>({});
   const [recsError, setRecsError] = useState<Record<string, string | null>>({});
@@ -454,6 +528,9 @@ export default function RolePipeline() {
   );
   const stageTitle = (id: string) => stages.find((s) => s.stage_id === id)?.title || "—";
 
+  // Skill-analysis programs swap the hire-TAG for a gap-vs-target read.
+  const skillAnalysis = program?.purpose === "skill_analysis";
+
   // Lazy-fetch the role-TAG once per candidate (cached after first open).
   const fetchTag = async (j: JourneyInstance) => {
     if (!ws || !programId) return;
@@ -470,6 +547,27 @@ export default function RolePipeline() {
       }));
     } finally {
       setTagLoading((s) => ({ ...s, [j.journey_instance_id]: false }));
+    }
+  };
+
+  // Lazy-fetch the gap-vs-target read once per candidate (skill_analysis only).
+  // A 404 (no fused role tag yet) surfaces as a recognizable error the panel
+  // renders as a "no evidence yet" empty state.
+  const fetchGap = async (j: JourneyInstance) => {
+    if (!ws || !programId) return;
+    if (gaps[j.journey_instance_id] || gapLoading[j.journey_instance_id]) return;
+    setGapLoading((s) => ({ ...s, [j.journey_instance_id]: true }));
+    setGapError((s) => ({ ...s, [j.journey_instance_id]: null }));
+    try {
+      const gap = await recruiterJourneysApi.getGap(ws, programId, j.candidate_id);
+      setGaps((s) => ({ ...s, [j.journey_instance_id]: gap }));
+    } catch (err) {
+      setGapError((s) => ({
+        ...s,
+        [j.journey_instance_id]: err instanceof Error ? err.message : "Could not load gap analysis.",
+      }));
+    } finally {
+      setGapLoading((s) => ({ ...s, [j.journey_instance_id]: false }));
     }
   };
 
@@ -500,7 +598,8 @@ export default function RolePipeline() {
     const open = expandedId === j.journey_instance_id;
     setExpandedId(open ? null : j.journey_instance_id);
     if (!open) {
-      fetchTag(j);
+      if (skillAnalysis) fetchGap(j);
+      else fetchTag(j);
       fetchRecs(j);
     }
   };
@@ -712,6 +811,17 @@ export default function RolePipeline() {
         </form>
       )}
 
+      {skillAnalysis && ws && programId && (
+        <TargetEditor
+          ws={ws}
+          programId={programId}
+          initial={program?.target_competencies ?? []}
+          onSaved={(competencies) =>
+            setProgram((p) => (p ? { ...p, target_competencies: competencies } : p))
+          }
+        />
+      )}
+
       {!ws && (
         <ErrorBanner
           tone="warning"
@@ -804,25 +914,49 @@ export default function RolePipeline() {
                               onCopyLink={copyCandidateLink}
                             />
                             <div className="grid gap-6 md:grid-cols-2">
-                            <section>
-                              <div className="mb-3 flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-gold-ink" aria-hidden />
-                                <h4 className="text-sm font-semibold text-ink">Profile</h4>
-                              </div>
-                              {tagLoading[j.journey_instance_id] ? (
-                                <p className="text-xs text-muted">Loading profile…</p>
-                              ) : tagError[j.journey_instance_id] ? (
-                                <p className="text-xs text-danger">
-                                  {tagError[j.journey_instance_id]}
-                                </p>
-                              ) : tags[j.journey_instance_id] ? (
-                                <RoleTagPanel tag={tags[j.journey_instance_id]} />
-                              ) : (
-                                <p className="text-xs text-muted">
-                                  No profile yet — runs as stages complete.
-                                </p>
-                              )}
-                            </section>
+                            {skillAnalysis ? (
+                              <section>
+                                <div className="mb-3 flex items-center gap-2">
+                                  <Target className="w-4 h-4 text-gold-ink" aria-hidden />
+                                  <h4 className="text-sm font-semibold text-ink">Gap vs target</h4>
+                                </div>
+                                {gapLoading[j.journey_instance_id] ? (
+                                  <p className="text-xs text-muted">Loading gap analysis…</p>
+                                ) : gapError[j.journey_instance_id] ? (
+                                  <EmptyState
+                                    icon={Target}
+                                    title="No evidence yet"
+                                    description="Start a stage to build this profile, then the gap-vs-target read appears here."
+                                  />
+                                ) : gaps[j.journey_instance_id] ? (
+                                  <GapPanel gap={gaps[j.journey_instance_id]} />
+                                ) : (
+                                  <p className="text-xs text-muted">
+                                    No gap analysis yet — runs as stages complete.
+                                  </p>
+                                )}
+                              </section>
+                            ) : (
+                              <section>
+                                <div className="mb-3 flex items-center gap-2">
+                                  <Sparkles className="w-4 h-4 text-gold-ink" aria-hidden />
+                                  <h4 className="text-sm font-semibold text-ink">Profile</h4>
+                                </div>
+                                {tagLoading[j.journey_instance_id] ? (
+                                  <p className="text-xs text-muted">Loading profile…</p>
+                                ) : tagError[j.journey_instance_id] ? (
+                                  <p className="text-xs text-danger">
+                                    {tagError[j.journey_instance_id]}
+                                  </p>
+                                ) : tags[j.journey_instance_id] ? (
+                                  <RoleTagPanel tag={tags[j.journey_instance_id]} />
+                                ) : (
+                                  <p className="text-xs text-muted">
+                                    No profile yet — runs as stages complete.
+                                  </p>
+                                )}
+                              </section>
+                            )}
 
                             <section>
                               <div className="mb-3 flex items-center gap-2">
