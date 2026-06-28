@@ -275,6 +275,12 @@ export default function CandidateDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <Link
+              to="/candidate/profile-tag"
+              className="text-sm text-muted hover:text-primary"
+            >
+              Insights
+            </Link>
+            <Link
               to="/candidate/profile"
               className="text-sm text-muted hover:text-primary"
             >
@@ -425,8 +431,22 @@ function PracticalDashCard({ p }: { p: PracticalCard }) {
 
 /** An evaluation journey — links to the full timeline. */
 function JourneyDashCard({ j }: { j: JourneyCard }) {
+  const navigate = useNavigate();
   const total = j.total_stages || (j.stages?.length ?? 0);
   const current = j.stages?.[j.current_stage_index];
+  const actionUrl = current?.candidate_action_url || null;
+
+  // Route straight to the current stage when the workspace has started it
+  // (absolute URLs hard-nav; relative route in-app); else open the full timeline.
+  const go = () => {
+    if (actionUrl) {
+      if (/^https?:\/\//i.test(actionUrl)) window.location.href = actionUrl;
+      else navigate(actionUrl);
+      return;
+    }
+    navigate('/candidate/journeys');
+  };
+
   return (
     <div className="rounded-xl border border-border bg-paper p-5 flex flex-col">
       <p className="font-mono uppercase tracking-[0.14em] text-[10px] text-gold-ink mb-2">
@@ -440,12 +460,13 @@ function JourneyDashCard({ j }: { j: JourneyCard }) {
         Stage {Math.min(j.current_stage_index + 1, total)} of {total}
         {current?.type ? ` · ${current.type.replace(/_/g, ' ')}` : ''}
       </p>
-      <Link
-        to="/candidate/journeys"
+      <button
+        type="button"
+        onClick={go}
         className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
       >
-        Open journey
-      </Link>
+        {actionUrl ? 'Continue' : 'Open journey'}
+      </button>
     </div>
   );
 }
