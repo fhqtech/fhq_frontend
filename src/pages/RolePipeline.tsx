@@ -20,6 +20,8 @@ import {
   ChevronDown,
   ChevronRight,
   GitBranch,
+  Link as LinkIcon,
+  Play,
   RefreshCw,
   ScrollText,
   Sparkles,
@@ -123,6 +125,72 @@ function StageProgress({ journey, stages }: { journey: JourneyInstance; stages: 
       <span className="ml-2 font-mono tabular-nums text-[11px] text-muted">
         {Math.max(0, currentIndex + 1)}/{stages.length}
       </span>
+    </div>
+  );
+}
+
+/**
+ * Stage runner — the recruiter's launch control for the current stage. When the
+ * stage is `unlocked` it offers a Start button (provisions the engine artifact +
+ * invites the candidate). Once `in_progress` it shows a live indicator plus a
+ * copy-link affordance so the recruiter can hand the candidate the deep link
+ * directly. Hidden for terminal journeys.
+ */
+function StageRunner({
+  journey,
+  stageTitle,
+  busy,
+  onStart,
+  onCopyLink,
+}: {
+  journey: JourneyInstance;
+  stageTitle: (id: string) => string;
+  busy: boolean;
+  onStart: () => void;
+  onCopyLink: (url: string) => void;
+}) {
+  const terminal = ["rejected", "completed", "withdrawn", "hired"].includes(
+    (journey.status || "").toLowerCase(),
+  );
+  if (terminal) return null;
+
+  const stage = (journey.stages ?? []).find((s) => s.stage_id === journey.current_stage_id);
+  const status = stage?.status;
+  const title = stageTitle(journey.current_stage_id);
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-rule bg-paper px-4 py-3">
+      <div className="min-w-0">
+        <span className="font-mono uppercase tracking-[0.14em] text-[10px] text-gold-ink">
+          Current stage
+        </span>
+        <p className="text-sm font-medium text-ink">{title}</p>
+      </div>
+      {status === "unlocked" ? (
+        <Button size="sm" variant="gold" disabled={busy} onClick={onStart}>
+          <Play className="w-4 h-4" />
+          {busy ? "Starting…" : "Start stage"}
+        </Button>
+      ) : status === "in_progress" ? (
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-1.5 text-xs text-info">
+            <span className="h-1.5 w-1.5 rounded-full bg-info animate-pulse" aria-hidden />
+            In progress — candidate invited
+          </span>
+          {stage?.candidate_action_url && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onCopyLink(stage.candidate_action_url as string)}
+            >
+              <LinkIcon className="w-4 h-4" />
+              Copy link
+            </Button>
+          )}
+        </div>
+      ) : (
+        <span className="text-xs text-muted">Stage not ready to start.</span>
+      )}
     </div>
   );
 }
@@ -343,6 +411,9 @@ export default function RolePipeline() {
   // Journey ids with a decision request in flight (disables that row's buttons).
   const [decisionBusy, setDecisionBusy] = useState<Record<string, boolean>>({});
 
+  // Journey ids with a start-stage request in flight.
+  const [startBusy, setStartBusy] = useState<Record<string, boolean>>({});
+
   const load = async (mode: "initial" | "refresh" = "initial") => {
     if (!ws || !programId) return;
     if (mode === "initial") setLoading(true);
@@ -472,6 +543,52 @@ export default function RolePipeline() {
       reason: "recruiter manual decision",
     });
 
+  // Start the current stage — provisions the engine artifact + invites the
+  // candidate, then refreshes so the row reflects in_progress.
+  const startCurrentStage = async (j: JourneyInstance) => {
+    if (!ws || !programId || startBusy[j.journey_instance_id]) return;
+    const stageId = j.current_stage_id;
+    setStartBusy((s) => ({ ...s, [j.journey_instance_id]: true }));
+    try {
+      const res = await recruiterJourneysApi.startStage(
+        ws,
+        programId,
+        j.journey_instance_id,
+        stageId,
+      );
+      toast({
+        title: "Stage started",
+        description: res.candidate_action_url
+          ? `${j.candidate_name || j.candidate_id} was invited to ${stageTitle(stageId)}.`
+          : `${stageTitle(stageId)} started.`,
+      });
+      await load("refresh");
+    } catch (err) {
+      toast({
+        title: "Could not start stage",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setStartBusy((s) => ({ ...s, [j.journey_instance_id]: false }));
+    }
+  };
+
+  // Copy a candidate deep link (absolutising relative paths) to the clipboard.
+  const copyCandidateLink = async (url: string) => {
+    const abs = /^https?:\/\//i.test(url) ? url : `${window.location.origin}${url}`;
+    try {
+      await navigator.clipboard.writeText(abs);
+      toast({ title: "Link copied", description: "Candidate stage link is on your clipboard." });
+    } catch {
+      toast({
+        title: "Could not copy",
+        description: abs,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-4">
@@ -588,9 +705,17 @@ export default function RolePipeline() {
                       <TableRow className="bg-paper-2 hover:bg-paper-2">
                         <TableCell colSpan={5} className="p-0">
                           <div
-                            className="grid gap-6 px-5 py-5 md:grid-cols-2"
+                            className="space-y-5 px-5 py-5"
                             onClick={(e) => e.stopPropagation()}
                           >
+                            <StageRunner
+                              journey={j}
+                              stageTitle={stageTitle}
+                              busy={!!startBusy[j.journey_instance_id]}
+                              onStart={() => startCurrentStage(j)}
+                              onCopyLink={copyCandidateLink}
+                            />
+                            <div className="grid gap-6 md:grid-cols-2">
                             <section>
                               <div className="mb-3 flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-gold-ink" aria-hidden />
@@ -626,6 +751,7 @@ export default function RolePipeline() {
                                 onManual={(action) => applyManual(j, action)}
                               />
                             </section>
+                            </div>
                           </div>
                         </TableCell>
                       </TableRow>

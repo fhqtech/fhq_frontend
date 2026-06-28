@@ -185,8 +185,26 @@ export interface JourneyInstance {
     status: string; // pending | in_progress | passed | failed | skipped
     score?: number | null;
   }>;
+  /** Raw stage instances from the candidate journey. `status` drives the stage
+   *  runner: `unlocked` is startable; `in_progress` is awaiting the candidate. */
+  stages?: Array<{
+    stage_id: string;
+    type?: string;
+    title?: string;
+    status: string; // locked | unlocked | in_progress | complete | skipped | failed
+    engine_artifact_ref?: string | null;
+    candidate_action_url?: string | null;
+  }>;
   updatedAt?: string;
   [key: string]: unknown;
+}
+
+/** Result of starting a stage — the provisioned artifact + candidate deep link. */
+export interface StartStageResult {
+  journey_instance_id: string;
+  stage_id: string;
+  artifact_ref: string;
+  candidate_action_url?: string | null;
 }
 
 // ── Client ───────────────────────────────────────────────────────────────
@@ -273,6 +291,25 @@ export const recruiterJourneysApi = {
     if (!r.ok) throw new Error(await detailFrom(r, "Could not load recommendations"));
     const data = await r.json();
     return (data?.recommendations ?? []) as JourneyRecommendation[];
+  },
+
+  /**
+   * Start a candidate's stage — provisions the underlying engine artifact
+   * (e.g. generates the practical + invites the candidate) and moves the stage
+   * to in_progress. Returns the artifact ref + the candidate's deep-link URL.
+   */
+  async startStage(
+    ws: string,
+    programId: string,
+    journeyInstanceId: string,
+    stageId: string,
+  ): Promise<StartStageResult> {
+    const r = await fetch(
+      `${programsBase(ws)}/${programId}/journeys/${journeyInstanceId}/stages/${stageId}/start`,
+      { method: "POST", headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not start this stage"));
+    return r.json();
   },
 
   /** Apply a human decision (confirmed recommendation or manual override). */
