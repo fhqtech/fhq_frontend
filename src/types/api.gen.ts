@@ -3719,6 +3719,214 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workspaces/{workspace_id}/programs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Programs */
+        get: operations["list_programs_api_workspaces__workspace_id__programs_get"];
+        put?: never;
+        /** Create Program */
+        post: operations["create_program_api_workspaces__workspace_id__programs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Program */
+        get: operations["get_program_api_workspaces__workspace_id__programs__program_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/journey-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save Journey Template */
+        post: operations["save_journey_template_api_workspaces__workspace_id__programs__program_id__journey_template_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enroll Candidate */
+        post: operations["enroll_candidate_api_workspaces__workspace_id__programs__program_id__enroll_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/journeys/{journey_instance_id}/stages/{stage_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start Stage
+         * @description Run a journey stage: provision its engine artifact (assignment generated +
+         *     candidate invited) and move the stage to in_progress.
+         */
+        post: operations["start_stage_api_workspaces__workspace_id__programs__program_id__journeys__journey_instance_id__stages__stage_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/journeys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Program Journeys */
+        get: operations["list_program_journeys_api_workspaces__workspace_id__programs__program_id__journeys_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/journeys/{journey_instance_id}/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Recommendations
+         * @description Recommend stage transitions for a journey from its gating rules. Read-only —
+         *     a recruiter confirms one via POST .../decisions.
+         */
+        get: operations["get_recommendations_api_workspaces__workspace_id__programs__program_id__journeys__journey_instance_id__recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/journeys/{journey_instance_id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply Decision
+         * @description Apply a human-confirmed / manual-override transition (advance | skip |
+         *     reject) to a journey, logging the decision.
+         */
+        post: operations["apply_decision_api_workspaces__workspace_id__programs__program_id__journeys__journey_instance_id__decisions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/candidates/{candidate_id}/tag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Role Tag */
+        get: operations["get_role_tag_api_workspaces__workspace_id__programs__program_id__candidates__candidate_id__tag_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/candidates/{candidate_id}/gap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Gap
+         * @description Render the candidate's skill gap vs the program's competency target
+         *     (target_skills, else a default bar over canonical_ids). 404 if no role tag.
+         */
+        get: operations["get_gap_api_workspaces__workspace_id__programs__program_id__candidates__candidate_id__gap_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspaces/{workspace_id}/programs/{program_id}/target": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Program Target
+         * @description Define a skill_analysis program's competency target — the per-skill expected
+         *     bars the gap-vs-target view is rendered against.
+         */
+        put: operations["set_program_target_api_workspaces__workspace_id__programs__program_id__target_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interviews/{interview_id}/export-csv": {
         parameters: {
             query?: never;
@@ -5541,6 +5749,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/candidate-me/journeys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Journeys
+         * @description All evaluation journeys across the candidate's linked profiles — the
+         *     ordered, staged source of truth for the unified dashboard. Standalone
+         *     invitations remain on /invitations.
+         */
+        get: operations["get_my_journeys_api_candidate_me_journeys_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/candidate-me/invitations": {
         parameters: {
             query?: never;
@@ -6195,6 +6425,18 @@ export interface components {
             /** Whatsapp */
             whatsapp?: boolean | null;
         };
+        /** Competency */
+        Competency: {
+            /** Skill Name */
+            skill_name: string;
+            /**
+             * Target
+             * @default 70
+             */
+            target: number;
+            /** Canonical Id */
+            canonical_id?: string | null;
+        };
         /** CompleteSessionBody */
         CompleteSessionBody: {
             /** Conversation History */
@@ -6266,6 +6508,31 @@ export interface components {
             jobDescription: string;
             /** Format */
             format?: ("case_study" | "assignment" | "challenge" | "scenario") | null;
+            /**
+             * Domain
+             * @default finance
+             */
+            domain: string;
+        } & {
+            [key: string]: unknown;
+        };
+        /** CreateProgramBody */
+        CreateProgramBody: {
+            /**
+             * Purpose
+             * @default hiring
+             */
+            purpose: string;
+            /** Title */
+            title: string;
+            /** Jdtext */
+            jdText?: string | null;
+            /** Targetframework */
+            targetFramework?: string | null;
+            /** Blueprintid */
+            blueprintId?: string | null;
+            /** Projectid */
+            projectId?: string | null;
             /**
              * Domain
              * @default finance
@@ -6475,6 +6742,22 @@ export interface components {
             /** Completed At */
             completed_at?: string | null;
         };
+        /** DecisionBody */
+        DecisionBody: {
+            /** Stage Id */
+            stage_id: string;
+            /** Action */
+            action: string;
+            /** To Stage Id */
+            to_stage_id?: string | null;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+        } & {
+            [key: string]: unknown;
+        };
         /** DecisionsListResponse */
         DecisionsListResponse: {
             /** Success */
@@ -6523,6 +6806,24 @@ export interface components {
         EnhanceBatchBody: {
             /** Listids */
             listIds: string[];
+        };
+        /**
+         * EnrollBody
+         * @description Enroll an existing candidate (candidate_id) OR a new one by email. At
+         *     least one of candidate_id / email is required; email-enrolled subjects get a
+         *     minted candidate_id anchor and are reconciled to their account by email.
+         */
+        EnrollBody: {
+            /** Candidate Id */
+            candidate_id?: string | null;
+            /** Account Id */
+            account_id?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Name */
+            name?: string | null;
+        } & {
+            [key: string]: unknown;
         };
         /** EvidenceResponse */
         EvidenceResponse: {
@@ -7231,6 +7532,22 @@ export interface components {
             /** Description */
             description?: string | null;
         };
+        /** SaveTemplateBody */
+        SaveTemplateBody: {
+            /** Stages */
+            stages: components["schemas"]["StageBody"][];
+            /** Rules */
+            rules?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        } & {
+            [key: string]: unknown;
+        };
         /** ScenarioOptionView */
         ScenarioOptionView: {
             /** Id */
@@ -7346,6 +7663,11 @@ export interface components {
             /** Candidate Token */
             candidate_token: string;
         };
+        /** SetTargetBody */
+        SetTargetBody: {
+            /** Competencies */
+            competencies?: components["schemas"]["Competency"][];
+        };
         /** ShareBody */
         ShareBody: {
             /** Projectids */
@@ -7414,6 +7736,26 @@ export interface components {
             sources: {
                 [key: string]: unknown;
             };
+        };
+        /** StageBody */
+        StageBody: {
+            /** Stage Id */
+            stage_id: string;
+            /** Order */
+            order: number;
+            /** Type */
+            type: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /** Engine Ref */
+            engine_ref?: {
+                [key: string]: unknown;
+            };
+        } & {
+            [key: string]: unknown;
         };
         /** StarBody */
         StarBody: {
@@ -14709,6 +15051,438 @@ export interface operations {
             };
         };
     };
+    list_programs_api_workspaces__workspace_id__programs_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_program_api_workspaces__workspace_id__programs_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProgramBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_program_api_workspaces__workspace_id__programs__program_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_journey_template_api_workspaces__workspace_id__programs__program_id__journey_template_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveTemplateBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enroll_candidate_api_workspaces__workspace_id__programs__program_id__enroll_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_stage_api_workspaces__workspace_id__programs__program_id__journeys__journey_instance_id__stages__stage_id__start_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+                journey_instance_id: string;
+                stage_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_program_journeys_api_workspaces__workspace_id__programs__program_id__journeys_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_recommendations_api_workspaces__workspace_id__programs__program_id__journeys__journey_instance_id__recommendations_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+                journey_instance_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_decision_api_workspaces__workspace_id__programs__program_id__journeys__journey_instance_id__decisions_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+                journey_instance_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_role_tag_api_workspaces__workspace_id__programs__program_id__candidates__candidate_id__tag_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_gap_api_workspaces__workspace_id__programs__program_id__candidates__candidate_id__gap_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_program_target_api_workspaces__workspace_id__programs__program_id__target_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                workspace_id: string;
+                program_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetTargetBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     export_interview_results_csv_api_interviews__interview_id__export_csv_post: {
         parameters: {
             query?: never;
@@ -18414,6 +19188,37 @@ export interface operations {
         };
     };
     delete_my_account_api_candidate_me_account_delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_journeys_api_candidate_me_journeys_get: {
         parameters: {
             query?: never;
             header?: {
