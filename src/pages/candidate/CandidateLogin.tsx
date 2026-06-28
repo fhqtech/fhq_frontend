@@ -81,7 +81,7 @@ export default function CandidateLogin() {
           <Button
             variant="outline"
             className="w-full h-11"
-            onClick={loginWithGoogle}
+            onClick={() => loginWithGoogle(from !== "/candidate/dashboard" ? from : undefined)}
             disabled={isLoading}
           >
             <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" aria-hidden>

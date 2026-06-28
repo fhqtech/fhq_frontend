@@ -19,7 +19,7 @@ interface CandidateAuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => void;
+  loginWithGoogle: (next?: string) => void;
   logout: () => Promise<void>;
   claimPassword: (claimToken: string, password: string, name?: string) => Promise<void>;
   updateName: (name: string) => Promise<void>;
@@ -121,13 +121,16 @@ export const CandidateAuthProvider: React.FC<ProviderProps> = ({ children }) => 
     }
   };
 
-  const loginWithGoogle = () => {
+  const loginWithGoogle = (next?: string) => {
     // P8: stash where the user came from so OAuthSuccess can route them
     // back to (e.g.) the invitation page after the optional name-
     // confirmation interstitial. Survives the OAuth round-trip via
-    // sessionStorage (same-origin, no cookie clutter).
+    // sessionStorage (same-origin, no cookie clutter). An explicit `next`
+    // (e.g. the practical-register URL the login page was reached from) wins
+    // over the current path, which on /candidate/login would otherwise stash
+    // the login page itself and bounce the user to the dashboard.
     try {
-      const current = window.location.pathname + window.location.search;
+      const current = next || window.location.pathname + window.location.search;
       if (current && !current.startsWith('/candidate/oauth-success')) {
         sessionStorage.setItem('candidate_oauth_next', current);
       }
