@@ -25,8 +25,10 @@ import {
   RefreshCw,
   ScrollText,
   Sparkles,
+  UserPlus,
   Users,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   recruiterJourneysApi,
@@ -414,6 +416,12 @@ export default function RolePipeline() {
   // Journey ids with a start-stage request in flight.
   const [startBusy, setStartBusy] = useState<Record<string, boolean>>({});
 
+  // Enroll-by-email panel.
+  const [enrollOpen, setEnrollOpen] = useState(false);
+  const [enrollName, setEnrollName] = useState("");
+  const [enrollEmail, setEnrollEmail] = useState("");
+  const [enrollBusy, setEnrollBusy] = useState(false);
+
   const load = async (mode: "initial" | "refresh" = "initial") => {
     if (!ws || !programId) return;
     if (mode === "initial") setLoading(true);
@@ -574,6 +582,32 @@ export default function RolePipeline() {
     }
   };
 
+  // Enroll a new candidate into this program by email.
+  const enrollByEmail = async () => {
+    const email = enrollEmail.trim();
+    if (!ws || !programId || !email || enrollBusy) return;
+    setEnrollBusy(true);
+    try {
+      await recruiterJourneysApi.enroll(ws, programId, { email, name: enrollName.trim() || undefined });
+      toast({
+        title: "Candidate enrolled",
+        description: `${enrollName.trim() || email} is now in this program. Start their first stage to invite them.`,
+      });
+      setEnrollName("");
+      setEnrollEmail("");
+      setEnrollOpen(false);
+      await load("refresh");
+    } catch (err) {
+      toast({
+        title: "Could not enroll candidate",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setEnrollBusy(false);
+    }
+  };
+
   // Copy a candidate deep link (absolutising relative paths) to the clipboard.
   const copyCandidateLink = async (url: string) => {
     const abs = /^https?:\/\//i.test(url) ? url : `${window.location.origin}${url}`;
@@ -613,16 +647,70 @@ export default function RolePipeline() {
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => load("refresh")}
-          disabled={loading || refreshing || !ws}
-        >
-          <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="gold"
+            size="sm"
+            onClick={() => setEnrollOpen((v) => !v)}
+            disabled={!ws}
+          >
+            <UserPlus className="w-4 h-4" />
+            Enroll candidate
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => load("refresh")}
+            disabled={loading || refreshing || !ws}
+          >
+            <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
+            Refresh
+          </Button>
+        </div>
       </div>
+
+      {enrollOpen && (
+        <form
+          className="flex flex-wrap items-end gap-3 rounded-md border border-rule bg-paper-2 px-4 py-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            enrollByEmail();
+          }}
+        >
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted" htmlFor="enroll-name">
+              Name (optional)
+            </label>
+            <Input
+              id="enroll-name"
+              value={enrollName}
+              onChange={(e) => setEnrollName(e.target.value)}
+              placeholder="Priya Sharma"
+              className="h-9 w-48"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted" htmlFor="enroll-email">
+              Email
+            </label>
+            <Input
+              id="enroll-email"
+              type="email"
+              required
+              value={enrollEmail}
+              onChange={(e) => setEnrollEmail(e.target.value)}
+              placeholder="priya@firm.in"
+              className="h-9 w-64"
+            />
+          </div>
+          <Button type="submit" variant="gold" size="sm" disabled={enrollBusy || !enrollEmail.trim()}>
+            {enrollBusy ? "Enrolling…" : "Enroll"}
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setEnrollOpen(false)}>
+            Cancel
+          </Button>
+        </form>
+      )}
 
       {!ws && (
         <ErrorBanner

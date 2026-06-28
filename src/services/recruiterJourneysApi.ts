@@ -111,8 +111,13 @@ export interface JourneyTemplateResult {
 }
 
 export interface EnrollBody {
-  candidate_id: string;
+  /** Existing candidate to enroll. Omit when enrolling a new candidate by email. */
+  candidate_id?: string;
   account_id?: string;
+  /** Enroll a new candidate by email — the backend mints a candidate_id anchor
+   *  and reconciles the journey to their account by email once they register. */
+  email?: string;
+  name?: string;
 }
 
 export interface EnrollResult {
