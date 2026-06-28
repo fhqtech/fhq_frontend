@@ -152,13 +152,43 @@ export default function CandidatePracticalSubmit() {
       ) : invitation ? (
         <Card className="p-0">
           <CardHeader>
-            <CardTitle className="text-base text-ink">Your practical</CardTitle>
+            <CardTitle className="text-base text-ink">
+              {invitation.title || "Your practical"}
+            </CardTitle>
             <CardDescription className="text-sm text-ink/80 pt-1">
-              Upload your deliverable and a short note on your approach. After you submit, you'll
-              defend your key choices in a short conversation.
+              Read the task, then upload your deliverable and a short note on your approach. After
+              you submit, you'll defend your key choices in a short conversation.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            {invitation.assignment?.task_brief && (
+              <div className="rounded-md border border-rule bg-paper-2 p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-mono uppercase tracking-[0.14em] text-[10px] text-gold-ink">
+                    Your task
+                  </p>
+                  {invitation.assignment.estimated_effort_min ? (
+                    <span className="text-xs text-muted">
+                      ~{invitation.assignment.estimated_effort_min} min
+                    </span>
+                  ) : null}
+                </div>
+                <p className="whitespace-pre-wrap text-sm text-ink leading-relaxed">
+                  {invitation.assignment.task_brief}
+                </p>
+                {invitation.assignment.expected_artifacts &&
+                invitation.assignment.expected_artifacts.length > 0 ? (
+                  <div>
+                    <p className="text-xs font-medium text-ink mb-1">What to submit</p>
+                    <ul className="list-disc pl-5 text-sm text-ink/80 space-y-0.5">
+                      {invitation.assignment.expected_artifacts.map((a, i) => (
+                        <li key={i}>{a}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            )}
             {starting && !submissionId ? (
               <p className="text-sm text-muted" aria-busy="true">
                 Preparing your submission…

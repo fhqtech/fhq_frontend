@@ -67,6 +67,14 @@ export async function uploadArtifact(file: File): Promise<string> {
   return result.upload_info.gcs_url as string;
 }
 
+/** The Gemini-generated task the candidate must complete. */
+export interface PracticalAssignmentBrief {
+  task_brief?: string | null;
+  expected_artifacts?: string[];
+  estimated_effort_min?: number | null;
+  format?: string | null;
+}
+
 export interface PracticalInvitationView {
   name: string;
   email: string;
@@ -75,6 +83,10 @@ export interface PracticalInvitationView {
   workspaceId: string;
   projectId: string;
   status: string;
+  /** Role title (e.g. "Senior Tax Analyst") + the generated task brief, so the
+   *  candidate knows what to do. Best-effort — may be absent on older docs. */
+  title?: string | null;
+  assignment?: PracticalAssignmentBrief | null;
 }
 
 export interface AcceptInvitationResult {

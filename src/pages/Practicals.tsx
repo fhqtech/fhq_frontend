@@ -40,6 +40,7 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import {
   practicalsApi,
   type Practical,
+  type PracticalAssignment,
   type PracticalFormat,
   type Submission,
   type DefenseReport,
@@ -288,6 +289,25 @@ function PracticalDetail({
   const [loadingSubs, setLoadingSubs] = useState(false);
 
   const assignmentStatus = practical?.assignmentStatus;
+  const [brief, setBrief] = useState<PracticalAssignment | null>(null);
+
+  // Pull the generated brief once the assignment is ready, so the recruiter can
+  // review exactly what the candidate will see.
+  useEffect(() => {
+    if (assignmentStatus !== "ready") {
+      setBrief(null);
+      return;
+    }
+    let cancelled = false;
+    practicalsApi
+      .getAssignment(ws, pr, practicalId)
+      .then((a) => !cancelled && setBrief(a))
+      .catch(() => !cancelled && setBrief(null));
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignmentStatus, practicalId]);
 
   async function loadPractical() {
     try {
@@ -455,6 +475,33 @@ function PracticalDetail({
             </Button>
           )}
         </section>
+
+        {/* Generated brief — what the candidate will see */}
+        {assignmentStatus === "ready" && brief?.task_brief && (
+          <section className="space-y-3 border-t border-rule pt-6">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-ink">Task the candidate sees</h3>
+              {brief.estimated_effort_min ? (
+                <span className="text-xs text-muted">~{brief.estimated_effort_min} min</span>
+              ) : null}
+            </div>
+            <div className="rounded-md border border-rule bg-paper-2 p-4 space-y-3">
+              <p className="whitespace-pre-wrap text-sm text-ink leading-relaxed">
+                {brief.task_brief}
+              </p>
+              {brief.expected_artifacts && brief.expected_artifacts.length > 0 ? (
+                <div>
+                  <p className="text-xs font-medium text-ink mb-1">Candidate submits</p>
+                  <ul className="list-disc pl-5 text-sm text-ink/80 space-y-0.5">
+                    {brief.expected_artifacts.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          </section>
+        )}
 
         {/* Invite */}
         <section className="space-y-3 border-t border-rule pt-6">

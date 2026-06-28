@@ -70,6 +70,16 @@ export interface CreatePracticalResult {
   status: string;
 }
 
+/** The Gemini-generated brief — the task the candidate sees. For recruiter review. */
+export interface PracticalAssignment {
+  ready: boolean;
+  task_brief?: string | null;
+  expected_artifacts?: string[];
+  estimated_effort_min?: number | null;
+  format?: string | null;
+  understanding_map?: Array<{ concept?: string; load_bearing?: boolean }>;
+}
+
 export interface PracticalInvitation {
   invitation_id: string;
   name: string;
@@ -137,6 +147,13 @@ export const practicalsApi = {
   async getPractical(ws: string, pr: string, practicalId: string): Promise<Practical> {
     const r = await fetch(`${scope(ws, pr)}/${practicalId}`, { headers: authHeaders() });
     if (!r.ok) throw new Error(await detailFrom(r, "Could not load practical"));
+    return r.json();
+  },
+
+  /** The generated brief (task the candidate sees) — for recruiter review. */
+  async getAssignment(ws: string, pr: string, practicalId: string): Promise<PracticalAssignment> {
+    const r = await fetch(`${scope(ws, pr)}/${practicalId}/assignment`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not load assignment"));
     return r.json();
   },
 
