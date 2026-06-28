@@ -130,9 +130,20 @@ export default function CandidatePracticalSubmit() {
             <AlertCircle className="h-5 w-5 text-warning" />
             <p className="text-sm text-ink">Sign in to start this practical.</p>
             <Button
-              onClick={() =>
-                navigate("/candidate/login", { state: { from: `/practical-register/${token}` } })
-              }
+              onClick={() => {
+                // Stash the return URL in sessionStorage too: React Router state
+                // is destroyed by the Google OAuth full-page redirect, so the
+                // stash is the only thing that survives the round-trip back here.
+                try {
+                  sessionStorage.setItem(
+                    "candidate_post_login_redirect",
+                    `/practical-register/${token}`,
+                  );
+                } catch {
+                  /* private mode — state.from still covers the email path */
+                }
+                navigate("/candidate/login", { state: { from: `/practical-register/${token}` } });
+              }}
             >
               Sign in
             </Button>

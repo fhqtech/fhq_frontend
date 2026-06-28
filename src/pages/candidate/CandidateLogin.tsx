@@ -24,13 +24,33 @@ export default function CandidateLogin() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const from = (location.state as { from?: string } | null)?.from || "/candidate/dashboard";
+  // Prefer router state, but fall back to the sessionStorage stash the invite
+  // pages set — router state is lost across a Google OAuth full-page redirect.
+  const stashedFrom = (() => {
+    try {
+      return sessionStorage.getItem("candidate_post_login_redirect");
+    } catch {
+      return null;
+    }
+  })();
+  const from =
+    (location.state as { from?: string } | null)?.from || stashedFrom || "/candidate/dashboard";
+
+  const goAfterAuth = () => {
+    try {
+      sessionStorage.removeItem("candidate_post_login_redirect");
+    } catch {
+      /* noop */
+    }
+    navigate(from, { replace: true });
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(from, { replace: true });
+      goAfterAuth();
     }
-  }, [isAuthenticated, from, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   if (isAuthenticated) {
     return null;
@@ -42,7 +62,7 @@ export default function CandidateLogin() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate(from, { replace: true });
+      goAfterAuth();
     } catch (err: any) {
       setError(err?.message || "Login failed");
     } finally {
