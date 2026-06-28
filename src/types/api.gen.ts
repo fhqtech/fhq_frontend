@@ -5816,6 +5816,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/candidate-me/interviews/{interview_id}/grounding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Interview Grounding
+         * @description Grounded-interview payload: the candidate's previously-submitted work,
+         *     stamped on the interview blueprint when this interview follows an assignment
+         *     stage (see interview_adapter._maybe_seed_submission_grounding). Drives the
+         *     split-view SubmissionPanel in the voice interview. Ownership is gated the
+         *     same way as the interview detail; a standard (ungrounded) interview returns
+         *     grounded=False so the panel simply doesn't render.
+         */
+        get: operations["get_my_interview_grounding_api_candidate_me_interviews__interview_id__grounding_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/candidate-me/interviews/{interview_id}/results": {
         parameters: {
             query?: never;
@@ -19281,6 +19306,39 @@ export interface operations {
         };
     };
     get_my_interview_api_candidate_me_interviews__interview_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_interview_grounding_api_candidate_me_interviews__interview_id__grounding_get: {
         parameters: {
             query?: never;
             header?: {

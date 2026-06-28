@@ -133,6 +133,19 @@ function normaliseJourney(j: Record<string, unknown>): JourneyInstance {
   };
 }
 
+/** Grounded-interview payload — the candidate's submitted work shown alongside
+ *  a journey voice interview. `grounded` is false for a standard interview. */
+export interface InterviewGrounding {
+  grounded: boolean;
+  submission_text: string | null;
+  submission_sections: Array<{
+    section_id: string;
+    char_start?: number;
+    char_end?: number;
+    preview_text?: string;
+  }>;
+}
+
 export const journeysApi = {
   /** Journeys for the signed-in candidate across every workspace. */
   async getMyJourneys(): Promise<MyJourneysResponse> {
@@ -145,6 +158,25 @@ export const journeysApi = {
     return {
       journeys: rawJourneys.map(normaliseJourney),
       count: typeof data?.count === "number" ? data.count : rawJourneys.length,
+    };
+  },
+
+  /**
+   * Grounded-interview payload for one interview (the candidate's submitted work
+   * shown alongside the voice interview). Returns `grounded:false` for a standard
+   * interview. Best-effort by the caller — a failure just means no panel.
+   */
+  async getInterviewGrounding(interviewId: string): Promise<InterviewGrounding> {
+    const r = await fetch(
+      `${API_BASE_URL}/api/candidate-me/interviews/${encodeURIComponent(interviewId)}/grounding`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not load interview context."));
+    const data = await r.json();
+    return {
+      grounded: !!data?.grounded,
+      submission_text: typeof data?.submission_text === "string" ? data.submission_text : null,
+      submission_sections: Array.isArray(data?.submission_sections) ? data.submission_sections : [],
     };
   },
 };
