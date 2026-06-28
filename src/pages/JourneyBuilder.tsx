@@ -14,6 +14,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2, GitBranch, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   FINANCE_DOMAINS,
@@ -68,8 +69,12 @@ function defaultStages(): JourneyStage[] {
 export default function JourneyBuilder() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { currentProject } = useWorkspace();
   const { toast } = useToast();
   const ws = user?.activeWorkspaceId;
+  // Stages that use the interview engine (screen/interview/fitment) write to a
+  // project-scoped path, so the program must carry the active project id.
+  const projectId = currentProject?.id;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -129,6 +134,7 @@ export default function JourneyBuilder() {
         title: title.trim(),
         jdText: jdText.trim() || undefined,
         domain,
+        projectId,
       });
 
       await recruiterJourneysApi.saveJourneyTemplate(ws, program.program_id, {

@@ -78,6 +78,8 @@ export interface CreateProgramBody {
   title: string;
   jdText?: string;
   domain: string;
+  /** Active project id — interview-engine stages write to a project-scoped path. */
+  projectId?: string;
 }
 
 export interface CreateProgramResult {
