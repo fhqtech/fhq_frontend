@@ -156,7 +156,7 @@ export default function CandidateJourney() {
                       Program
                     </p>
                     <h3 className="mt-1 truncate text-base font-semibold text-foreground">
-                      {journey.program_id}
+                      {journey.program_title || "Your journey"}
                     </h3>
                   </div>
                   <span className="shrink-0 font-mono text-xs text-muted tabular-nums">

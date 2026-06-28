@@ -78,6 +78,9 @@ export interface JourneyStage {
 export interface JourneyInstance {
   journey_instance_id: string;
   program_id: string;
+  /** Human role/program name (e.g. "Senior GST Analyst") for the candidate UI. */
+  program_title?: string | null;
+  program_purpose?: string | null;
   status: string;
   current_stage_id: string | null;
   current_stage_index: number;
@@ -123,6 +126,8 @@ function normaliseJourney(j: Record<string, unknown>): JourneyInstance {
   return {
     journey_instance_id: String(j.journey_instance_id ?? ""),
     program_id: String(j.program_id ?? ""),
+    program_title: typeof j.program_title === "string" ? j.program_title : null,
+    program_purpose: typeof j.program_purpose === "string" ? j.program_purpose : null,
     status: String(j.status ?? ""),
     current_stage_id: currentStageId,
     current_stage_index: typeof j.current_stage_index === "number" ? j.current_stage_index : 0,

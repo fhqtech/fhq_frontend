@@ -192,13 +192,26 @@ function InvitationCard({ inv }: { inv: Invitation }) {
   );
 }
 
-type PracticalCard = { practical_id: string; title: string; status: string; register_url: string };
+type PracticalCard = {
+  practical_id: string;
+  title: string;
+  program_title?: string | null;
+  status: string;
+  register_url: string;
+};
 type JourneyCard = {
   journey_instance_id: string;
+  program_title?: string | null;
   status: string;
+  current_stage_id?: string | null;
   current_stage_index: number;
   total_stages: number;
-  stages?: Array<{ title?: string; type?: string }>;
+  stages?: Array<{
+    stage_id?: string;
+    title?: string;
+    type?: string;
+    candidate_action_url?: string | null;
+  }>;
 };
 
 export default function CandidateDashboard() {
@@ -420,9 +433,10 @@ function JourneyDashCard({ j }: { j: JourneyCard }) {
         Evaluation journey
       </p>
       <h4 className="text-base font-semibold text-foreground">
-        {current?.title || 'Your journey'}
+        {j.program_title || 'Your journey'}
       </h4>
       <p className="text-sm text-muted mt-1 flex-1">
+        {current?.title ? `${current.title} · ` : ''}
         Stage {Math.min(j.current_stage_index + 1, total)} of {total}
         {current?.type ? ` · ${current.type.replace(/_/g, ' ')}` : ''}
       </p>
