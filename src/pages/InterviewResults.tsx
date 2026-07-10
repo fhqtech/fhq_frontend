@@ -8,10 +8,20 @@ import { TranscriptViewer } from "@/components/interview/TranscriptViewer";
 import { AlertCircle, CheckCircle, AlertTriangle, Lightbulb, Sparkles, TrendingDown, MessageSquareQuote, ArrowLeft, Clock, RefreshCw, Maximize2 } from "lucide-react";
 import { RatingPanel } from "@/components/interview/RatingPanel";
 import { Spinner } from "@/components/ui/spinner";
+import { useFlag } from "@/lib/flags/FlagProvider";
+import { useOperationEta } from "@/queries/useOperationEta";
+import { etaPhrase } from "@/lib/eta";
 import { useAuth } from "@/contexts/AuthContext";
 import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentAnalysisGraph";
 import { FusedSkillProfile } from "@/components/assessment/FusedSkillProfile";
+import { TransferableBand } from "@/components/trust/TransferableBand";
+import { IntegrityNote } from "@/components/trust/IntegrityNote";
+import { integrityApi } from "@/services/integrityApi";
+import type { IntegrityFlag } from "@/lib/integrity";
+import { StageResults } from "@/components/results/StageResults";
 import { tagFromResult } from "@/components/tag/adapters";
+import { SkillGapSummary } from "@/components/tag/SkillGapSummary";
+import { summarizeFromNodes } from "@/lib/skillGap";
 import { TagViewModal } from "@/components/views/TagViewModal";
 import { track, Events } from "@/lib/analytics";
 import { useQueryClient } from "@tanstack/react-query";
@@ -108,10 +118,22 @@ export default function InterviewResults() {
   // exhausted-retries (ResultsPendingError surfaces). One screen for the whole
   // ~60s polling window — user always sees the retry counter + Check Now CTA.
   const isWaiting = (resultsQuery.isPending || isResultsPending) && Boolean(sessionId);
+  // P1-1: server-sourced ETA for the reviewer wait, behind async_progress.
+  const asyncProgressFlag = useFlag("async_progress");
+  // P5-3: consolidated stage-results surface (default-off -> legacy body below).
+  const stageResultsFlag = useFlag("stage_results");
+  const reviewerEta = useOperationEta("reviewer", isWaiting && asyncProgressFlag);
   const evaluation = useMemo(
     () => (rawResults ? transformToLegacyFormat(rawResults) : null),
     [rawResults],
   );
+  // B3: zero-setup skill-gap summary derived from the TAG's own status buckets.
+  // Renders only when the result carries scored skill nodes; null otherwise.
+  const gapSummary = useMemo(() => {
+    const nodes = (rawResults as any)?.graph_data?.nodes;
+    if (!nodes || nodes.length === 0) return null;
+    return summarizeFromNodes(tagFromResult(rawResults as any, (rawResults as any).role || "Role").nodes);
+  }, [rawResults]);
 
   // Scroll to top when results land (replaces the old setTimeout cluster).
   useEffect(() => {
@@ -253,7 +275,10 @@ export default function InterviewResults() {
           </h1>
 
           <p className="text-base text-ink-soft max-w-3xl mx-auto mb-8 leading-relaxed">
-            Our AI is analyzing the conversation and generating a detailed skill assessment. This usually takes under a minute.
+            Our AI is analyzing the conversation and generating a detailed skill assessment.{" "}
+            {asyncProgressFlag
+              ? `Usually ready ${reviewerEta ? `in ${etaPhrase(reviewerEta)}` : "in under a minute"}.`
+              : "This usually takes under a minute."}
           </p>
 
           <div className="flex items-center gap-2 text-sm bg-warning-soft px-4 py-2 rounded-md border border-warning/30 text-warning">
@@ -363,6 +388,20 @@ export default function InterviewResults() {
     if (lowerDecision.includes("recommend")) return <CheckCircle className="w-5 h-5 text-success" />;
     return null;
   };
+
+  // P5-3: consolidated stage-agnostic results surface (flag-on). Reached only
+  // after the waiting/error/no-evaluation guards, so rawResults is non-null. The
+  // legacy body below is the unchanged flag-off path.
+  if (stageResultsFlag) {
+    return (
+      <StageResults
+        results={rawResults!}
+        sessionId={sessionId}
+        interviewId={interviewId}
+        onOverridden={() => resultsQuery.refetch()}
+      />
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-gradient-subtle p-4 animate-in fade-in duration-300">
@@ -513,6 +552,34 @@ export default function InterviewResults() {
             {sessionId && <TranscriptViewer sessionId={sessionId} />}
           </TabsContent>
         </Tabs>
+
+        {/* B3 — skill-gap summary: how many skills clear the role's bar, and which
+            fall short. Derived from the TAG's own status buckets (zero setup);
+            renders nothing when the result has no scored skills. */}
+        {gapSummary && <SkillGapSummary data={gapSummary} className="mt-6" />}
+
+        {/* P4-5 — transferable-skill band (self-gated on `transferable`; renders
+            null when off, empty, or all rows filter out as non-finance). */}
+        <TransferableBand skills={rawResults?.transferable_skills} className="mt-6" />
+
+        {/* P4-4 — contestable integrity notes (self-gated on `integrity`). The
+            payload carries no turn-cited flags today, so this stays dark until the
+            backend persists them; an empty list renders nothing. */}
+        {(((rawResults as any)?.integrity_flags ?? []) as IntegrityFlag[]).map((f) => (
+          <IntegrityNote
+            key={`${f.canonicalId ?? f.skillName}-${f.turn}`}
+            flag={f}
+            onMarkFair={(flag) => {
+              // Fire-and-forget: the note keeps its optimistic state; the endpoint
+              // is idempotent so a failure just retries on the next mark.
+              if (sessionId) {
+                integrityApi.markFair(sessionId, flag).catch(() => {
+                  /* best-effort; optimistic UI already reflects the mark */
+                });
+              }
+            }}
+          />
+        ))}
 
         {(rawResults as any)?.candidate_id && (
           <Card className="p-6 mt-6">

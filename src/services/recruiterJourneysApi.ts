@@ -258,6 +258,30 @@ export const recruiterJourneysApi = {
     return r.json();
   },
 
+  /**
+   * P2-2 — open a role: create the program, then save its stage template, in one
+   * call. Defaults to a single screen stage so a fresh role lands on the board
+   * with the screen column ready. Shared by JourneyBuilder and OpenRoleFlow.
+   * Returns the new program (role) id.
+   */
+  async createRoleWithTemplate(
+    ws: string,
+    input: { title: string; jdText?: string; domain?: string; projectId?: string; stages?: JourneyStage[] },
+  ): Promise<string> {
+    const created = await this.createProgram(ws, {
+      purpose: "hiring",
+      title: input.title,
+      jdText: input.jdText,
+      domain: input.domain ?? "finance",
+      projectId: input.projectId,
+    });
+    const stages = input.stages ?? [
+      { stage_id: "screen", order: 0, type: "screen" as StageType, title: "Screen" },
+    ];
+    await this.saveJourneyTemplate(ws, created.program_id, { stages, rules: [], version: 1 });
+    return created.program_id;
+  },
+
   async listPrograms(ws: string): Promise<Program[]> {
     const r = await fetch(programsBase(ws), { headers: authHeaders() });
     if (!r.ok) throw new Error(await detailFrom(r, "Could not load programs"));

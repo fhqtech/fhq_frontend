@@ -526,24 +526,22 @@ export function ListCard({ list, onClick, onDelete, onShare, onCopy, sources = [
                 )}
               </div>
 
-              {/* Add Source Button */}
-              <div className="mt-4 pt-4 border-t border-border/50 shrink-0">
-                <Button
-                  variant="outline"
-                  className="w-full justify-center gap-2 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onAddSource) {
+              {/* Add source — only shown when the host wires a real handler. */}
+              {onAddSource && (
+                <div className="mt-4 pt-4 border-t border-border/50 shrink-0">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center gap-2 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onAddSource(list.id);
-                    } else {
-                      toast.info("Add source functionality coming soon");
-                    }
-                  }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add Google Sheet
-                </Button>
-              </div>
+                    }}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Google sheet
+                  </Button>
+                </div>
+              )}
             </div>
           </Card>
         </div>

@@ -11,9 +11,11 @@ import {
   ClipboardText as PracticalsIcon,
   CaretDown as ChevronDown,
   Robot as Bot,
+  Bookmarks as BookmarksIcon,
   List as Menu,
   X,
   Play,
+  House as HomeIcon,
   Power
 } from "phosphor-react";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFlag } from "@/lib/flags/FlagProvider";
 
 // TAG is reserved for the Talent Analysis Graph (the output artifact).
 // Sidebar uses domain language (Interviews / Setup / Screening / Fitment)
@@ -71,7 +74,29 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  
+  // P2-1/P2-2: when role_home is on, Home replaces Dashboard; when one_builder is
+  // on, "Programs" reads as "Roles" (the promoted backbone).
+  const roleHome = useFlag("role_home");
+  const oneBuilder = useFlag("one_builder");
+  const talent = useFlag("talent");
+  let items = oneBuilder
+    ? menuItems.map((m) => (m.title === "Programs" ? { ...m, title: "Roles" } : m))
+    : menuItems;
+  if (roleHome) {
+    items = [{ title: "Home", url: "/home", icon: HomeIcon }, ...items.filter((m) => m.url !== "/dashboard")];
+  }
+  if (talent) {
+    // P3-1: surface the cross-role Talent index; the old "Talent pools" (lists)
+    // reads as "Shortlists", anticipating the P3-2 Lists+Qualified merge.
+    items = items.map((m) => (m.url === "/lists" ? { ...m, title: "Shortlists", icon: BookmarksIcon } : m));
+    const idx = items.findIndex((m) => m.url === "/lists");
+    const talentItem = { title: "Talent", url: "/talent", icon: Users };
+    items = idx >= 0 ? [...items.slice(0, idx), talentItem, ...items.slice(idx)] : [...items, talentItem];
+    // P3-3: skill matching now lives inside the Talent surface (SkillMatchEntry),
+    // so the standalone nav item folds away when talent is on.
+    items = items.filter((m) => m.url !== "/skill-matcher");
+  }
+
   const toggleMenu = (title: string) => {
     setOpenMenus(prev => 
       prev.includes(title) 
@@ -123,7 +148,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       )}>
         {/* Navigation */}
       <nav className="flex-1 px-4 pb-4 space-y-2">
-        {menuItems.map((item) => {
+        {items.map((item) => {
           const hasSubItems = item.subItems && item.subItems.length > 0;
           const isMenuOpen = openMenus.includes(item.title);
 

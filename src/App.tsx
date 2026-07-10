@@ -11,12 +11,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CandidateAuthProvider } from "@/contexts/CandidateAuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { ConsentProvider } from "@/contexts/ConsentContext";
+import { FlagProvider } from "@/lib/flags/FlagProvider";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { CommandPalette } from "@/components/CommandPalette";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AdminRoute from "@/components/auth/AdminRoute";
+import { OneBuilderRedirect } from "@/components/role/OneBuilderRedirect";
 import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
 import { InvitationAuthGate } from "@/components/auth/InvitationAuthGate";
-import TourGuard from "@/components/tour/TourGuard";
 import { PageSkeleton } from "@/components/ui/shimmer";
 // Eager: landing-path bundle (marketing → login → OAuth → 404). Keep these
 // in the entry chunk so the first-paint network round trip stays small.
@@ -32,6 +34,11 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 // download the AssemblyAI + Three.js + framer-motion session bundle.
 const ProductLanding = lazy(() => import("./pages/ProductLanding"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Home = lazy(() => import("./pages/Home"));
+const RoleContainer = lazy(() => import("./pages/RoleContainer"));
+const OpenRoleFlow = lazy(() => import("./components/role/OpenRoleFlow"));
+const Talent = lazy(() => import("./pages/Talent"));
+const Candidate360 = lazy(() => import("./pages/Candidate360"));
 const PilotDashboard = lazy(() => import("./pages/PilotDashboard"));
 const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
 const SkillMatcher = lazy(() => import("./pages/SkillMatcher"));
@@ -58,6 +65,7 @@ const InterviewSwipeView = lazy(() => import("./pages/InterviewSwipeView"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
 const TestAssets = lazy(() => import("./pages/TestAssets"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const SampleTag = lazy(() => import("./pages/SampleTag"));
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const DataAccount = lazy(() => import("./pages/account/DataAccount"));
 const CandidateDataAccount = lazy(() => import("./pages/candidate/account/CandidateDataAccount"));
@@ -91,6 +99,7 @@ const LegacyFitmentRedirect = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <FlagProvider>
     <ConsentProvider>
     <AuthProvider>
       <CandidateAuthProvider>
@@ -112,6 +121,8 @@ const App = () => (
             {/* Marketing landing page (public) */}
             <Route path="/" element={<MarketingLanding />} />
             <Route path="/start" element={<StartChooser />} />
+            {/* P1-5: public sample Talent Analysis Graph — the payoff before signup */}
+            <Route path="/sample-tag" element={<SampleTag />} />
 
             {/* Legal — DPDP-required, linked from CandidateRegistration consent */}
             <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -165,100 +176,139 @@ const App = () => (
 
             {/* Dashboard and other authenticated routes (with header, sidebar and protection) */}
             <Route path="/dashboard" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <Dashboard />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
+            } />
+            {/* P2-1: workspace-pulse Home (default post-login when role_home is on) */}
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Home />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+            {/* P2-2: role-as-home pipeline board (additive; legacy /programs/:id stays) */}
+            <Route path="/roles/new" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <OpenRoleFlow />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/roles/:programId" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <RoleContainer />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* P5-2: candidate-360 read-time fan-in. Flag gate is inside Candidate360
+                (candidate_360 off -> NotFound, i.e. today's 404 for this URL). */}
+            <Route path="/roles/:programId/candidates/:candidateId" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Candidate360 />
+                </MainLayout>
+              </ProtectedRoute>
             } />
 
             {/* P1 O5: pilot operational dashboard (recruiter-only) */}
             <Route path="/admin/pilot" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <PilotDashboard />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             {/* T3: Pool TAG dashboard — aggregate view of a qualified list. */}
             <Route path="/lists/:listId/pool" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <PoolDashboard />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/interviews/create" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <CreateInterview />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/interviews/manage" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <ManageInterviews />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/interviews/fitment" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <ManageInterviews />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/interviews/skill-analysis" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <ManageInterviews />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/interviews/:id" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <InterviewDetails />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             {/* Unified-evaluation practical flow (recruiter) */}
             <Route path="/practicals" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <Practicals />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
+            {/* P2-4: with one_builder on, the legacy create surface redirects to open-a-role */}
             <Route path="/journeys/new" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
-                  <JourneyBuilder />
+                  <OneBuilderRedirect to={() => "/roles/new"}>
+                    <JourneyBuilder />
+                  </OneBuilderRedirect>
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
             <Route path="/programs" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <Programs />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
+            {/* P2-4: with one_builder on, the legacy pipeline redirects to the new board */}
             <Route path="/programs/:programId" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
-                  <RolePipeline />
+                  <OneBuilderRedirect to={(p) => `/roles/${p.programId}`}>
+                    <RolePipeline />
+                  </OneBuilderRedirect>
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/interview/:interviewId/results/:sessionId" element={
@@ -272,14 +322,18 @@ const App = () => (
             {/* C1: video review routes removed; recruiters now click into
                 /interview/:interviewId/results/:sessionId for the TAG view. */}
 
-            {/* A0.3 (Sprint 0): dev/test-only tools. Mounted ONLY in dev
-                builds so they aren't reachable unauthenticated in prod
-                (import.meta.env.DEV is false in production bundles). */}
+            {/* P0-8: dev/test-only tools. Mounted ONLY in dev builds (import.meta.env.DEV
+                is false in production bundles) AND gated behind AdminRoute, so even in a
+                dev/preview build a non-admin can't reach them. Paths live under /admin/test/*. */}
             {import.meta.env.DEV && (
               <>
-                <Route path="/email-templates/prelims" element={<EmailTemplatePreview />} />
+                <Route path="/admin/test/email-templates" element={
+                  <AdminRoute><EmailTemplatePreview /></AdminRoute>
+                } />
                 {/* Test Assets page for 3D model viewing */}
-                <Route path="/test-assets" element={<TestAssets />} />
+                <Route path="/admin/test/assets" element={
+                  <AdminRoute><TestAssets /></AdminRoute>
+                } />
               </>
             )}
 
@@ -293,36 +347,46 @@ const App = () => (
 
             <Route path="/fitment-interviews/:id" element={<LegacyFitmentRedirect />} />
 
+            {/* P3-1: cross-role Talent index. Route is always mounted (deep links
+                resolve); the `talent` flag only gates its surfacing in the nav. */}
+            <Route path="/talent" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Talent />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/lists" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <Lists />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/skill-matcher" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <SkillMatcher />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/lists/:listId" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <ListDetail />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/quick-tour" element={
-              <TourGuard>
+              <ProtectedRoute>
                 <MainLayout>
                   <QuickTour />
                 </MainLayout>
-              </TourGuard>
+              </ProtectedRoute>
             } />
 
             <Route path="/settings" element={
@@ -497,6 +561,7 @@ const App = () => (
       </CandidateAuthProvider>
     </AuthProvider>
     </ConsentProvider>
+    </FlagProvider>
   </QueryClientProvider>
 );
 

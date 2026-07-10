@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { PageSpinner } from '@/components/ui/spinner';
+import { useFlag } from '@/lib/flags/FlagProvider';
+import { InterviewReassurance } from '@/components/interview/interview-reassurance';
 
 const API_BASE = () => import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082';
 
@@ -31,6 +33,7 @@ export default function CandidateInterviewDetail() {
   const [data, setData] = useState<InterviewDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const candidateCalm = useFlag('candidate_calm'); // P1-4
 
   useEffect(() => {
     if (!id) return;
@@ -74,6 +77,8 @@ export default function CandidateInterviewDetail() {
   const canStart = ['pending', 'link_clicked', 'registered', 'scheduling'].includes(
     inv.status?.toLowerCase()
   );
+  // P1-4: a started/paused interview must always offer a way back in, never a dead end.
+  const canResume = ['started', 'paused'].includes(inv.status?.toLowerCase());
 
   const handleStart = async () => {
     if (!data) return;
@@ -150,6 +155,15 @@ export default function CandidateInterviewDetail() {
             <p className="text-sm text-foreground/80 leading-relaxed mb-6">{data.description}</p>
           )}
 
+          {/* P1-4: reassurance before the call to act, for candidates who haven't finished yet. */}
+          {candidateCalm && !isCompleted && (
+            <InterviewReassurance
+              roleTitle={data.title || 'this role'}
+              durationMinutes={Number(data.duration) || 30}
+              className="mb-6"
+            />
+          )}
+
           <div className="border-t border-border pt-5 flex flex-wrap items-center gap-3">
             {isCompleted && (
               <button
@@ -165,6 +179,14 @@ export default function CandidateInterviewDetail() {
                 className="h-10 px-5 bg-primary hover:bg-primary/90 text-paper font-medium rounded-md text-sm"
               >
                 Start interview
+              </button>
+            )}
+            {canResume && (
+              <button
+                onClick={handleStart}
+                className="h-10 px-5 bg-primary hover:bg-primary/90 text-paper font-medium rounded-md text-sm"
+              >
+                Continue interview
               </button>
             )}
             <button

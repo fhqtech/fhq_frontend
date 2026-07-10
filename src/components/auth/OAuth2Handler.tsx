@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageSpinner } from '@/components/ui/spinner';
+import { useFlag } from '@/lib/flags/FlagProvider';
 
 const OAuth2Handler = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isProcessing, setIsProcessing] = useState(true);
   const { checkAuthStatus } = useAuth();
+  const roleHome = useFlag('role_home'); // P2-1: post-login lands on /home when on
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -37,8 +39,8 @@ const OAuth2Handler = () => {
             localStorage.removeItem('pendingInvitationToken');
             navigate(`/accept-invitation/${pendingInvitationToken}`);
           } else {
-            // Navigate to dashboard after successful authentication
-            navigate('/dashboard');
+            // Navigate to the post-login surface after successful authentication
+            navigate(roleHome ? '/home' : '/dashboard');
           }
         } catch (error) {
           console.error('Error handling OAuth callback:', error);

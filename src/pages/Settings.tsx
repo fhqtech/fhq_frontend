@@ -559,12 +559,6 @@ export default function Settings() {
                 <div className="flex gap-3 mt-4">
                   {[
                     {
-                      value: "professional-male",
-                      label: "Grace · American English",
-                      icon: "🎙️",
-                      disabled: true
-                    },
-                    {
                       value: "professional-female",
                       label: "Smriti · Indian English",
                       icon: "🎙️",
@@ -596,11 +590,6 @@ export default function Settings() {
                           <div className={`font-medium text-sm ${isDisabled ? 'text-muted-2' : 'text-ink'}`}>{voice.label}</div>
                         </div>
 
-                        {isDisabled && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xs text-muted bg-paper px-2 py-1 rounded">Coming soon</span>
-                          </div>
-                        )}
                       </div>
                     );
                   })}

@@ -1,13 +1,16 @@
 import React, { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Plus, Minus, Loader2, Check, AlertCircle, Upload, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ErrorBanner } from "@/components/ui/error-banner";
 import { useToast } from "@/hooks/use-toast";
 import { interviewApi } from "@/services/interviewApi";
 import { toastPlanError } from "@/lib/planErrorToast";
+import { isBlueprintBroken } from "@/lib/blueprintGuard";
 import { useCredits, useRefreshCredits } from "@/hooks/usePlan";
 
 interface AddCandidatesModalProps {
@@ -16,6 +19,12 @@ interface AddCandidatesModalProps {
   interviewId: string;
   interviewTitle?: string;
   onInvited?: () => void;
+  /**
+   * A3-fe: current blueprint status for this role. When "failed" / "error"
+   * the invite is disabled (the backend would reject it with a 422
+   * `blueprint_invalid`), and a banner points the recruiter to the editor.
+   */
+  blueprintStatus?: string | null;
 }
 
 interface Row {
@@ -168,8 +177,14 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
   interviewId,
   interviewTitle,
   onInvited,
+  blueprintStatus,
 }) => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<"individual" | "bulk">("individual");
+
+  // A3-fe: server-reported invite block (422 blueprint_invalid) if the
+  // blueprint breaks after the modal is already open (race defence).
+  const [serverBlockMessage, setServerBlockMessage] = useState<string | null>(null);
 
   // Individual tab state
   const [rows, setRows] = useState<Row[]>([emptyRow()]);
@@ -250,7 +265,10 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
   // P-Plans F3: also gate on credit balance. 1 credit per candidate.
   const requiredCredits = candidatesToSend.length;
   const hasEnoughCredits = credits.remaining >= requiredCredits;
-  const canSubmit = candidatesToSend.length > 0 && !submitting && hasEnoughCredits;
+  // A3-fe: mirror the backend 422 guard — a broken blueprint blocks invites.
+  const blueprintBroken = isBlueprintBroken(blueprintStatus);
+  const canSubmit =
+    candidatesToSend.length > 0 && !submitting && hasEnoughCredits && !blueprintBroken;
 
   const handleClose = () => {
     if (submitting) return;
@@ -260,6 +278,7 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
     setFileName(null);
     setFileError(null);
     setSubmitOutcome(null);
+    setServerBlockMessage(null);
     setTab("individual");
     onClose();
   };
@@ -343,6 +362,13 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
           title: "Send cancelled",
           description: "No invitations were created.",
         });
+      } else if ((err as any)?.detail?.error === "blueprint_invalid") {
+        // A3-fe: blueprint broke after the modal opened — surface the
+        // backend's message inline and point at the editor.
+        setServerBlockMessage(
+          (err as any).detail.message ||
+            "This role's blueprint failed to generate. Fix it before inviting candidates.",
+        );
       } else if (!toastPlanError(toast, err)) {
         // Not a credit/plan denial — generic error.
         toast({
@@ -397,6 +423,20 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
         </header>
 
         <div className="flex-1 overflow-auto p-6">
+          {(blueprintBroken || serverBlockMessage) && (
+            <div className="mb-4">
+              <ErrorBanner
+                tone="danger"
+                title="Blueprint isn't ready"
+                description={
+                  serverBlockMessage ??
+                  "This role's blueprint failed to generate. Fix it before inviting candidates."
+                }
+                retryLabel="Go to blueprint"
+                onRetry={() => navigate(`/interview-blueprint/${interviewId}`)}
+              />
+            </div>
+          )}
           <Tabs
             value={tab}
             onValueChange={(v) => {

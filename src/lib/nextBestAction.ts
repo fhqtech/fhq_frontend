@@ -22,6 +22,8 @@ export interface NBA {
 
 export interface InterviewSnapshot {
   id: string;
+  /** Display title (optional; consumed by the P2-1 action queue rows). */
+  title?: string;
   status?: "draft" | "active" | "running" | "paused" | "stopped" | "completed" | string;
   candidateCount?: number;
   blueprintStatus?: "pending" | "generating" | "ready" | "completed" | "failed" | "error" | "not_applicable" | string;

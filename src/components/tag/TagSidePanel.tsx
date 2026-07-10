@@ -20,6 +20,11 @@ import type { TagMode, TagNode } from "./types";
 import { nodeStatus } from "./adapters";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { ScoreOverrideModal } from "./ScoreOverrideModal";
+import { useFlag } from "@/lib/flags/FlagProvider";
+import { isUnverifiedScore } from "@/lib/nodeEvidence";
+import { UnverifiedMark } from "./UnverifiedMark";
+import { NodeProvenancePanel } from "./NodeProvenancePanel";
+import { TrustExpander } from "./TrustExpander";
 
 interface TagSidePanelProps {
   node: TagNode | null;
@@ -37,6 +42,9 @@ const tierName = (level: number | undefined | null) => {
 
 export function TagSidePanel({ node, mode, sessionId, onOverridden }: TagSidePanelProps) {
   const [overrideOpen, setOverrideOpen] = useState(false);
+  // P4-1 — the evidence contract (default-off). Hook stays above the early
+  // return so hook order is stable.
+  const evidenceContract = useFlag("evidence_contract");
   if (!node) {
     return (
       <div className="tag-panel-empty">
@@ -58,6 +66,8 @@ export function TagSidePanel({ node, mode, sessionId, onOverridden }: TagSidePan
   const status: TagStatus = nodeStatus(node);
   const styleSet = STATUS_STYLES[status];
   const showScore = mode === "result" && typeof node.score === "number";
+  // P4-1 — a score with no grounding evidence renders as unverified, never a number.
+  const scoreUnverified = evidenceContract && isUnverifiedScore(node);
   const labelStatus =
     status === "role_center" ? "Role" : STATUS_LABELS[status];
 
@@ -98,7 +108,9 @@ export function TagSidePanel({ node, mode, sessionId, onOverridden }: TagSidePan
           </p>
         )}
 
-        {showScore && (
+        {showScore && scoreUnverified && <UnverifiedMark />}
+
+        {showScore && !scoreUnverified && (
           <div
             className="tag-panel-score"
             style={{ background: TAG_PALETTE.paper3 }}
@@ -170,6 +182,15 @@ export function TagSidePanel({ node, mode, sessionId, onOverridden }: TagSidePan
               {node.evidence[0]}
             </blockquote>
           </section>
+        )}
+
+        {/* P4-2 — provenance + "why you can trust this" (self-gated on tag_evidence;
+            renders null when off, so node tap behaves as today by default). */}
+        {mode === "result" && (
+          <>
+            <NodeProvenancePanel node={node} className="tag-panel-section" />
+            <TrustExpander node={node} className="tag-panel-section" />
+          </>
         )}
 
         {/* Required vs demonstrated — when blueprint metadata present */}

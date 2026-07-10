@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AsyncProgress } from "@/components/ui/async-progress";
+import { useFlag } from "@/lib/flags/FlagProvider";
+import { useOperationEta } from "@/queries/useOperationEta";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -289,6 +292,12 @@ function PracticalDetail({
   const [loadingSubs, setLoadingSubs] = useState(false);
 
   const assignmentStatus = practical?.assignmentStatus;
+  // P1-1: server-sourced ETA for the assignment generating state.
+  const asyncProgressFlag = useFlag("async_progress");
+  const practicalEta = useOperationEta(
+    "practical_assignment",
+    asyncProgressFlag && assignmentStatus === "generating",
+  );
   const [brief, setBrief] = useState<PracticalAssignment | null>(null);
 
   // Pull the generated brief once the assignment is ready, so the recruiter can
@@ -456,6 +465,12 @@ function PracticalDetail({
             </div>
             <AssignmentBadge status={assignmentStatus} />
           </div>
+          {asyncProgressFlag && assignmentStatus === "generating" && (
+            <AsyncProgress
+              label="Building the assignment and its understanding map"
+              etaSeconds={practicalEta ?? undefined}
+            />
+          )}
           {assignmentStatus !== "ready" && (
             <Button
               variant="outline"

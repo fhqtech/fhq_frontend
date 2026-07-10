@@ -76,7 +76,6 @@ export default function ListsPage() {
             font-size: 0.875rem;
             letter-spacing: 0.05em;
             font-weight: 600;
-            text-transform: uppercase;
             color: var(--color-secondary);
             background: transparent;
             padding: 16px 20px;
@@ -148,7 +147,7 @@ export default function ListsPage() {
               onChange={() => setActiveTab('yours')}
             />
             <label className="tab-label" htmlFor="rd-1">
-              <span>Your Pools</span>
+              <span>Your pools</span>
             </label>
 
             <input
@@ -162,8 +161,8 @@ export default function ListsPage() {
             />
             <label className="tab-label" htmlFor="rd-2">
               <span className="flex flex-col items-center gap-0.5">
-                <span>Shared with You</span>
-                <span className="text-[10px] text-muted-foreground font-normal">(READ ONLY)</span>
+                <span>Shared with you</span>
+                <span className="text-[10px] text-muted-foreground font-normal">(read only)</span>
               </span>
             </label>
 
@@ -178,8 +177,8 @@ export default function ListsPage() {
             />
             <label className="tab-label" htmlFor="rd-3">
               <span className="flex flex-col items-center gap-0.5">
-                <span>Global Pools</span>
-                <span className="text-[10px] text-muted-foreground font-normal">(ADMIN CONTROLLED)</span>
+                <span>Global pools</span>
+                <span className="text-[10px] text-muted-foreground font-normal">(admin controlled)</span>
               </span>
             </label>
 

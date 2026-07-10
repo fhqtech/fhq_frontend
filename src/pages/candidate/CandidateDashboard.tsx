@@ -122,7 +122,7 @@ function InvitationCard({ inv }: { inv: Invitation }) {
       ? 'Submitted'
       : 'Start assessment'
     : group === 'completed'
-    ? analyzing ? 'Results coming soon' : 'View results'
+    ? analyzing ? 'Preparing results' : 'View results'
     : showWorkSample
     ? 'Start work sample'
     : inv.status === 'started' || inv.status === 'paused'

@@ -4,15 +4,17 @@
  *   <MadeInIndiaMark />            — default sm
  *   <MadeInIndiaMark size="md" />  — slightly larger
  *
- * Design rule: gold-ink only. We don't paint the tricolor because the
- * design system restricts accents to gold-ink (≤ 10% of any surface).
- * The flag glyph reads as a flag by shape, not color.
+ * Design note: this glyph paints the real tricolor (saffron / white / green
+ * with the navy Ashoka chakra) at the user's explicit request — a deliberate
+ * override of the gold-ink-only accent rule. It stays a tiny inline SVG (no
+ * emoji, per the design ban) and reads as a flag by both shape and colour.
  *
  * Two exports:
  *   - MadeInIndiaMark: the full glyph + wordmark, drop into a footer.
  *   - IndiaFlagGlyph: just the icon, for use inside a SecurityTrust card
  *     where the card already provides its own label box.
  */
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 
 type Size = "sm" | "md";
@@ -37,16 +39,26 @@ interface IndiaFlagGlyphProps {
   className?: string;
 }
 
+// Flag geometry in the viewBox 0..28 × 0..20: a tricolour chip inset to
+// x 2..26, y 3..17 (24 × 14), split into three equal horizontal bands. The
+// navy Ashoka chakra sits in the white band, centred on (14, 10).
+const FLAG = { x: 2, y: 3, w: 24, h: 14 };
+const BAND_H = FLAG.h / 3; // 4.667
+const CHAKRA = { cx: 14, cy: FLAG.y + FLAG.h / 2, r: 2.0 }; // r fits the white band
+
+// India tricolour + navy chakra (BIS-standard-ish hexes).
+const SAFFRON = "#FF9933";
+const GREEN = "#138808";
+const NAVY = "#000080";
+
 // Pre-computed Ashoka chakra spokes: 24 evenly-spaced radial lines from
-// inner radius 1.4 to outer radius 4.0, centred on (14, 10) in the
-// viewBox 0..28 × 0..20. We bake the trig at build-time as a const array
-// so render is plain JSX, no runtime math, no <g transform="rotate(...)">
-// nested per spoke. 24 = canonical spoke count for the Ashoka chakra.
+// inner radius 0.55 to outer radius (r), centred on the chakra. Baked at
+// build-time so render is plain JSX — no runtime trig, no per-spoke rotate.
+// 24 = canonical spoke count for the Ashoka chakra.
 const CHAKRA_SPOKES: Array<{ x1: number; y1: number; x2: number; y2: number }> = (() => {
-  const cx = 14;
-  const cy = 10;
-  const inner = 1.4;
-  const outer = 4.0;
+  const { cx, cy, r } = CHAKRA;
+  const inner = 0.55;
+  const outer = r - 0.25;
   const out: Array<{ x1: number; y1: number; x2: number; y2: number }> = [];
   for (let i = 0; i < 24; i++) {
     const theta = (i * Math.PI * 2) / 24;
@@ -63,52 +75,58 @@ const CHAKRA_SPOKES: Array<{ x1: number; y1: number; x2: number; y2: number }> =
 })();
 
 /**
- * Renders the flag glyph. If `className` carries width/height utilities
- * (e.g. "w-5 h-5"), they win and `size` is ignored — this is what the
+ * Renders the flag glyph in full tricolour. If `className` carries width/height
+ * utilities (e.g. "w-5 h-5"), they win and `size` is ignored — this is what the
  * SecurityTrust card grid needs (the card sets `w-5 h-5` on every icon).
  * Otherwise the size prop drives a fixed pixel dimension.
  *
- * Glyph: pole + flag rectangle + Ashoka chakra (24 spokes) on the
- * middle band. Gold-ink stroke only — tricolor is communicated by
- * structure (chakra), not color.
+ * Glyph: a rounded tricolour chip — saffron / white / green bands — with the
+ * navy Ashoka chakra (24 spokes + hub + ring) in the white band and a hairline
+ * border for contrast on light and dark grounds alike.
  */
 export function IndiaFlagGlyph({ size = "sm", className }: IndiaFlagGlyphProps) {
   const hasClassDim =
     !!className && /(^|\s)(w-|h-)/.test(className);
   const { w, h } = GLYPH_PX[size];
+  const clipId = useId();
   return (
     <svg
       {...(hasClassDim ? {} : { width: w, height: h })}
       viewBox="0 0 28 20"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
       aria-hidden="true"
-      className={cn("text-gold-ink shrink-0", className)}
+      className={cn("shrink-0", className)}
     >
-      {/* Pole */}
-      <line x1="2" y1="2" x2="2" y2="19" />
-      {/* Flag rectangle (single outline, no fills — gold-ink only) */}
-      <path d="M2 3 L26 3 L26 14 L2 14 Z" />
-      {/* Two thin band rules — keep top/bottom stripe separation */}
-      <line x1="2" y1="6.7" x2="26" y2="6.7" opacity="0.45" />
-      <line x1="2" y1="10.3" x2="26" y2="10.3" opacity="0.45" />
-      {/* Ashoka chakra — outer ring + 24 spokes + hub */}
-      <circle cx="14" cy="10" r="4" strokeWidth="1" />
-      {CHAKRA_SPOKES.map((s, i) => (
-        <line
-          key={i}
-          x1={s.x1}
-          y1={s.y1}
-          x2={s.x2}
-          y2={s.y2}
-          strokeWidth="0.7"
-          opacity="0.85"
-        />
-      ))}
-      <circle cx="14" cy="10" r="0.7" fill="currentColor" stroke="none" />
+      <defs>
+        <clipPath id={clipId}>
+          <rect x={FLAG.x} y={FLAG.y} width={FLAG.w} height={FLAG.h} rx="1.6" />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>
+        {/* Saffron / white / green bands */}
+        <rect x={FLAG.x} y={FLAG.y} width={FLAG.w} height={BAND_H} fill={SAFFRON} />
+        <rect x={FLAG.x} y={FLAG.y + BAND_H} width={FLAG.w} height={BAND_H} fill="#ffffff" />
+        <rect x={FLAG.x} y={FLAG.y + BAND_H * 2} width={FLAG.w} height={BAND_H} fill={GREEN} />
+        {/* Ashoka chakra — ring + 24 spokes + hub, navy */}
+        <circle cx={CHAKRA.cx} cy={CHAKRA.cy} r={CHAKRA.r} fill="none" stroke={NAVY} strokeWidth="0.5" />
+        {CHAKRA_SPOKES.map((s, i) => (
+          <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={NAVY} strokeWidth="0.32" />
+        ))}
+        <circle cx={CHAKRA.cx} cy={CHAKRA.cy} r="0.5" fill={NAVY} />
+      </g>
+      {/* Hairline border so the chip reads on any ground */}
+      <rect
+        x={FLAG.x}
+        y={FLAG.y}
+        width={FLAG.w}
+        height={FLAG.h}
+        rx="1.6"
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity="0.18"
+        strokeWidth="0.75"
+        className="text-ink"
+      />
     </svg>
   );
 }

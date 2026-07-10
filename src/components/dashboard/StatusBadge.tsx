@@ -22,6 +22,28 @@ interface StatusBadgeProps {
   className?: string;
 }
 
+/**
+ * Canonical list of every status this badge knows. The unified <CandidateState>
+ * token (P0-3) gates on this: a status added here without a mapping there fails CI.
+ */
+export const STATUS_VALUES: Status[] = [
+  "pending",
+  "in-progress",
+  "completed",
+  "cancelled",
+  "shortlisted",
+  "scheduled",
+  "under-review",
+  "draft",
+  "active",
+  "paused",
+  "paused_credits",
+  "stopped",
+  "link_clicked",
+  "registered",
+  "linked_to_existing",
+];
+
 const statusConfig = {
   pending: {
     label: "Pending",

@@ -250,21 +250,6 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
           </AreaChart>
         </ResponsiveContainer>
 
-        {/* Key Insight */}
-        <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
-          <div className="flex items-start gap-1.5">
-            <div className="p-1 rounded-lg bg-primary/10 shrink-0">
-              <Star className="h-3 w-3 text-primary" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-[10px] text-foreground mb-0.5">Key Insight</h4>
-              <p className="text-[9px] text-muted-foreground leading-tight">
-                Coming Soon
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="mt-2 grid grid-cols-3 gap-1.5">
           <div className="text-center p-1.5 rounded-lg border border-success/30 bg-success/5">
             <div className="text-[8px] text-muted-foreground mb-0.5">Top</div>

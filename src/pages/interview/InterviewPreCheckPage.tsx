@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { InterviewPreCheck } from "@/components/interview/InterviewPreCheck";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertTriangle } from "lucide-react";
+import { resolvePrecheckInterview } from "@/lib/precheck";
 
 export default function InterviewPreCheckPage() {
   const { interviewId } = useParams<{ interviewId: string }>();
@@ -207,17 +208,40 @@ export default function InterviewPreCheckPage() {
     }));
   };
 
-  // Use data from navigation state or fallback to mock data
-  const interviewData = stateData?.interviewData || {
-    id: interviewId || "",
-    title: "AI Accounting Interview",
-    description: "A comprehensive AI-powered interview to assess your accounting knowledge and skills.",
-    duration: 30,
-    type: "ai_interview"
-  };
+  // P1-3: never fabricate a mock interview in production. Navigation state is
+  // authoritative; when it's absent, prod resolves to null (recoverable error
+  // below) and dev gets a clearly-labelled fixture.
+  const interviewData = resolvePrecheckInterview(
+    stateData?.interviewData,
+    interviewId,
+    import.meta.env.DEV,
+  );
 
   // Removed: Pre-create agent session moved to resume selection
   // The /prepare API should only run AFTER a resume is selected, not on page load
+
+  // P1-3: reached without interview context (deep link / refresh with no nav
+  // state). Recover gracefully instead of starting a fabricated session.
+  if (!interviewData) {
+    return (
+      <div className="min-h-dvh bg-paper flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-16 h-16 rounded-full bg-gold-soft flex items-center justify-center">
+            <AlertTriangle className="w-8 h-8 text-gold-ink" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold text-ink">We couldn't load this interview</h1>
+            <p className="text-sm text-muted">
+              Open the invitation link again, or head to your dashboard to resume.
+            </p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => navigate("/candidate/dashboard")}>Go to dashboard</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (interviewBlocked) {
     return (

@@ -597,10 +597,6 @@ export default function ListDetail() {
                     <p className="text-xl font-bold text-primary">{listDetails.sourcesCount || 0}</p>
                   </div>
                 </div>
-
-                <div className="text-center text-sm text-muted-foreground mt-4">
-                  <p>More analytics coming soon...</p>
-                </div>
               </div>
             </div>
           )}

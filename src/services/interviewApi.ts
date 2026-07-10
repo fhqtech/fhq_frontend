@@ -261,7 +261,24 @@ class InterviewApiService {
 
     if (!response.ok && response.status !== 207) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || error.error || 'Failed to invite candidates');
+      // A3-fe: preserve structured `detail` (e.g. 422
+      // `{error:'blueprint_invalid', message}` or 402 credits) so callers can
+      // render the backend's message inline. The old `new Error(error.detail)`
+      // stringified an object `detail` to "[object Object]" and dropped it.
+      const detail = (error as any)?.detail;
+      const message =
+        (typeof detail === 'object' && detail?.message) ||
+        (typeof detail === 'string' && detail) ||
+        (error as any)?.error ||
+        'Failed to invite candidates';
+      const err: Error & { status?: number; detail?: unknown } = new Error(message);
+      err.status = response.status;
+      if (typeof detail === 'object' && detail !== null) {
+        err.detail = detail;
+      }
+      // Deliberately no `err.code` — the existing 402/credits `toastPlanError`
+      // path keys off `err.code` and must stay unchanged.
+      throw err;
     }
 
     const data: any = await response.json();

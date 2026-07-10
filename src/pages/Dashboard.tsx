@@ -18,6 +18,7 @@ import { FirstRunStepper } from "@/components/onboarding/FirstRunStepper";
 import { useOnboardingState } from "@/components/onboarding/useOnboardingState";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useFlag } from "@/lib/flags/FlagProvider";
 import { useInterviewsQuery, useInvalidateInterviewsOnRevision, usePrefetchInterview } from "@/queries/interviewsQueries";
 import { computeDashboardNBA, type InterviewSnapshot } from "@/lib/nextBestAction";
 import { PipelineFunnel } from "@/components/dashboard/PipelineFunnel";
@@ -33,6 +34,7 @@ import type { ProjectDashboardResponse } from "@/types/analytics";
 export default function Dashboard() {
  const [searchParams, setSearchParams] = useSearchParams();
  const navigate = useNavigate();
+ const sampleRole = useFlag("sample_role");
  const { user } = useAuth();
  const { currentWorkspace, currentProject } = useWorkspace();
 
@@ -200,6 +202,7 @@ export default function Dashboard() {
  title="No interviews yet"
  description="Create an interview to start collecting applicant responses. We'll guide you the rest of the way."
  primaryAction={{ label: "Create your first interview", onClick: () => navigate("/interviews/create") }}
+ sampleDataAction={sampleRole ? { label: "See a sample analysis", onClick: () => navigate("/sample-tag") } : undefined}
  />
  ) : (
  <>

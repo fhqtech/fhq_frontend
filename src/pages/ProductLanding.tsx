@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { LogoMark } from "@/components/ui/logo-mark";
+import { useFlag } from "@/lib/flags/FlagProvider";
 
 export default function ProductLanding() {
   const [email, setEmail] = useState("");
@@ -21,6 +22,8 @@ export default function ProductLanding() {
   const navigate = useNavigate();
   const { login, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const roleHome = useFlag("role_home"); // P2-1: post-login lands on /home when on
+  const postLogin = roleHome ? "/home" : "/dashboard";
 
   // Redirect if already authenticated. Honor a pending invitation token
   // captured pre-login so applicants who clicked a link land in the right
@@ -32,7 +35,7 @@ export default function ProductLanding() {
       localStorage.removeItem("pendingInvitationToken");
       navigate(`/accept-invitation/${pendingInvitationToken}`);
     } else {
-      navigate("/dashboard");
+      navigate(postLogin);
     }
   }, [isAuthenticated, navigate]);
 
@@ -53,7 +56,7 @@ export default function ProductLanding() {
         localStorage.removeItem("pendingInvitationToken");
         navigate(`/accept-invitation/${pending}`);
       } else {
-        navigate("/dashboard");
+        navigate(postLogin);
       }
     } catch (err) {
       toast({

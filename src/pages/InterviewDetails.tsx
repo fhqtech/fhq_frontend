@@ -54,6 +54,9 @@ import { Input } from "@/components/ui/input";
 import { Shimmer, ShimmerCard, ShimmerTable, ShimmerInterviewConfig } from "@/components/ui/shimmer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/ui/empty-state";
+import { AsyncProgress } from "@/components/ui/async-progress";
+import { useFlag } from "@/lib/flags/FlagProvider";
+import { useOperationEta } from "@/queries/useOperationEta";
 import { ArrowsOut, CircleNotch, ClockCounterClockwise, ArrowsClockwise } from "phosphor-react";
 import { pauseInterview, stopInterview, resumeInterview } from "@/services/interviewControlService";
 import { listsApi } from "@/services/listsApi";
@@ -559,6 +562,9 @@ export default function InterviewDetails() {
  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
  const [blueprintStatus, setBlueprintStatus] = useState<string | null>(null); // "generating" | "completed" | "failed"
  const [blueprintError, setBlueprintError] = useState<string | null>(null);
+ // P1-1: hedged, server-sourced ETA for the blueprint generating state.
+ const asyncProgressFlag = useFlag("async_progress");
+ const blueprintEta = useOperationEta("blueprint", asyncProgressFlag && blueprintStatus === "generating");
 
  // Sync blueprint status from the interview query result. The local
  // blueprintStatus/blueprintError state is read by other effects + the
@@ -1296,6 +1302,16 @@ export default function InterviewDetails() {
  ? (typeof createdAtRaw === 'string' ? Date.parse(createdAtRaw) : Number(createdAtRaw))
  : NaN;
  const isFresh = Number.isFinite(createdMs) && (Date.now() - createdMs) < 120_000;
+ // P1-1: behind async_progress, show the shared progress surface with a
+ // server-sourced ETA instead of the hardcoded "~30s" caption.
+ if (asyncProgressFlag) {
+ return (
+ <AsyncProgress
+ label="Tailoring the interview blueprint to your role"
+ etaSeconds={blueprintEta ?? undefined}
+ />
+ );
+ }
  return (
  <div className="flex flex-col gap-1">
  <div className="flex items-center gap-2 px-3 py-2 bg-gold-soft border border-rule rounded-sm">
@@ -2044,6 +2060,7 @@ export default function InterviewDetails() {
  interviewId={id!}
  interviewTitle={interview?.title}
  onInvited={refreshCandidates}
+ blueprintStatus={blueprintStatus ?? interview?.blueprintStatus}
  />
  </div>
  );
