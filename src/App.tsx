@@ -191,6 +191,14 @@ const App = () => (
               </ProtectedRoute>
             } />
             {/* P2-2: role-as-home pipeline board (additive; legacy /programs/:id stays) */}
+            {/* Unified IA front door: role list index route (Task 3) */}
+            <Route path="/roles" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Programs />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/roles/new" element={
               <ProtectedRoute>
                 <MainLayout>
