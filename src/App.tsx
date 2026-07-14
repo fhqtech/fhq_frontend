@@ -17,6 +17,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
 import { OneBuilderRedirect } from "@/components/role/OneBuilderRedirect";
+import { UnifiedRedirect } from "@/components/routing/UnifiedRedirect";
 import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
 import { InvitationAuthGate } from "@/components/auth/InvitationAuthGate";
 import { PageSkeleton } from "@/components/ui/shimmer";
@@ -175,12 +176,15 @@ const App = () => (
             <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
 
             {/* Dashboard and other authenticated routes (with header, sidebar and protection) */}
+            {/* Unified IA cutover: redirects to /home before the shell renders when unified_ia is on (Task 4) */}
             <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/home">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
             {/* P2-1: workspace-pulse Home (default post-login when role_home is on) */}
             <Route path="/home" element={
@@ -242,36 +246,45 @@ const App = () => (
               </ProtectedRoute>
             } />
 
+            {/* Unified IA cutover: retired create/manage surfaces redirect before the shell renders when unified_ia is on (Task 4) */}
             <Route path="/interviews/create" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <CreateInterview />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles/new">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <CreateInterview />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
 
             <Route path="/interviews/manage" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <ManageInterviews />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ManageInterviews />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
 
             <Route path="/interviews/fitment" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <ManageInterviews />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ManageInterviews />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
 
             <Route path="/interviews/skill-analysis" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <ManageInterviews />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ManageInterviews />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
 
             <Route path="/interviews/:id" element={
@@ -282,13 +295,15 @@ const App = () => (
               </ProtectedRoute>
             } />
 
-            {/* Unified-evaluation practical flow (recruiter) */}
+            {/* Unified-evaluation practical flow (recruiter). Retired under unified_ia -> /roles (Task 4) */}
             <Route path="/practicals" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Practicals />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Practicals />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
             {/* P2-4: with one_builder on, the legacy create surface redirects to open-a-role */}
             <Route path="/journeys/new" element={
@@ -300,12 +315,15 @@ const App = () => (
                 </MainLayout>
               </ProtectedRoute>
             } />
+            {/* Retired under unified_ia -> /roles, folded in with the Task 3 /roles index route (Task 4) */}
             <Route path="/programs" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Programs />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Programs />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
 
             {/* P2-4: with one_builder on, the legacy pipeline redirects to the new board */}
@@ -373,12 +391,15 @@ const App = () => (
               </ProtectedRoute>
             } />
 
+            {/* Retired under unified_ia -> /talent (Task 4) */}
             <Route path="/skill-matcher" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <SkillMatcher />
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/talent">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <SkillMatcher />
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
 
             <Route path="/lists/:listId" element={
