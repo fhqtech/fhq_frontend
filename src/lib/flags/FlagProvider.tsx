@@ -6,6 +6,16 @@
  * (set by the Admin feature-flag console or a dev) and `remote` from the backend
  * /flags endpoint; both can be injected for tests. The hook is safe outside a
  * provider and resolves to the default-off legacy path.
+ *
+ * Rollout note: the pilot has no live users yet, so the redesign is now the
+ * default experience. REDESIGN_BASELINE seeds the vetted Tier 1 + Tier 2 flags
+ * as the LOWEST-precedence source (folded under `remote`), so every workspace
+ * gets the new IA out of the box while a per-workspace remote flag or a dev's
+ * localStorage override still wins. The registry stays default-off (resolve.ts
+ * invariant) and the hook is still off outside a provider — the baseline lives
+ * only inside the provider. Tier 3 trust surfaces (evidence_contract,
+ * tag_evidence, integrity) stay OFF: under reviewer v1 they render every score
+ * "unverified". Flip those per-workspace once reviewer v2 grounds them.
  */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { resolveFlag, type FlagSources, type FlagValues } from "./resolve";
@@ -13,6 +23,35 @@ import { fetchRemoteFlags } from "@/services/flagsApi";
 import type { FlagKey } from "./registry";
 
 const OVERRIDES_STORAGE_KEY = "flag_overrides";
+
+/**
+ * Vetted Tier 1 + Tier 2 redesign flags, on by default (see rollout note above).
+ * Held back on purpose: evidence_contract / tag_evidence / integrity (Tier 3,
+ * v1-unverified), candidate_write (write-side, deferred), unified_status /
+ * ws_reconnect (not in the vetted tier lists).
+ */
+const REDESIGN_BASELINE: FlagValues = {
+  // Tier 1 — safe UX, no data dependency
+  soft_delete: true,
+  settings_save: true,
+  credit_gate: true,
+  async_progress: true,
+  precheck_chat_fallback: true,
+  candidate_calm: true,
+  sample_role: true,
+  role_home: true,
+  one_builder: true,
+  nba: true,
+  talent: true,
+  bulk: true,
+  compare: true,
+  keyboard: true,
+  // Tier 2 — read-only fan-in, safe under v1
+  candidate_360: true,
+  canonical_id: true,
+  stage_results: true,
+  transferable: true,
+};
 
 const FlagContext = createContext<FlagSources | null>(null);
 
@@ -53,7 +92,12 @@ export function FlagProvider({ children, remote, overrides }: FlagProviderProps)
   }, [remote]);
 
   const value = useMemo<FlagSources>(
-    () => ({ remote: remote ?? fetchedRemote, overrides: overrides ?? readStoredOverrides() }),
+    // Baseline is folded under `remote` so a per-workspace remote flag and a
+    // localStorage override both still win (override > remote > baseline).
+    () => ({
+      remote: { ...REDESIGN_BASELINE, ...(remote ?? fetchedRemote) },
+      overrides: overrides ?? readStoredOverrides(),
+    }),
     [remote, fetchedRemote, overrides],
   );
   return <FlagContext.Provider value={value}>{children}</FlagContext.Provider>;
