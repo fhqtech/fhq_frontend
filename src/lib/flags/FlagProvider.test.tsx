@@ -56,4 +56,13 @@ describe("FlagProvider / useFlag", () => {
     render(<Probe flag="role_home" />);
     expect(screen.getByText("off")).toBeInTheDocument();
   });
+
+  it("defaults unified_ia on (kill-switch is on by default)", () => {
+    render(
+      <FlagProvider>
+        <Probe flag="unified_ia" />
+      </FlagProvider>,
+    );
+    expect(screen.getByText("on")).toBeInTheDocument();
+  });
 });

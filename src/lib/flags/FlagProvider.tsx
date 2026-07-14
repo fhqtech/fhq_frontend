@@ -42,6 +42,7 @@ const REDESIGN_BASELINE: FlagValues = {
   role_home: true,
   one_builder: true,
   nba: true,
+  unified_ia: true,
   talent: true,
   bulk: true,
   compare: true,
