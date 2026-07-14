@@ -64,6 +64,17 @@ const menuItems = [
   { title: "Settings", url: "/settings", icon: Settings }
 ];
 
+// unified_ia: the single collapsed nav. Role is the only object; screening/
+// practical/interview/fitment/decision are stages inside a role, so their
+// standalone nav entries are gone. Shortlists is the saved-view over Talent.
+const UNIFIED_MENU = [
+  { title: "Home", url: "/home", icon: HomeIcon },
+  { title: "Roles", url: "/roles", icon: ProgramsIcon },
+  { title: "Talent", url: "/talent", icon: Users },
+  { title: "Shortlists", url: "/lists", icon: BookmarksIcon },
+  { title: "Settings", url: "/settings", icon: Settings },
+];
+
 interface SidebarProps {
   collapsed?: boolean;
 }
@@ -79,6 +90,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const roleHome = useFlag("role_home");
   const oneBuilder = useFlag("one_builder");
   const talent = useFlag("talent");
+  const unifiedIa = useFlag("unified_ia");
   let items = oneBuilder
     ? menuItems.map((m) => (m.title === "Programs" ? { ...m, title: "Roles" } : m))
     : menuItems;
@@ -95,6 +107,10 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
     // P3-3: skill matching now lives inside the Talent surface (SkillMatchEntry),
     // so the standalone nav item folds away when talent is on.
     items = items.filter((m) => m.url !== "/skill-matcher");
+  }
+  // unified_ia wins: one collapsed nav, ignore the incremental per-flag mutations.
+  if (unifiedIa) {
+    items = UNIFIED_MENU;
   }
 
   const toggleMenu = (title: string) => {
