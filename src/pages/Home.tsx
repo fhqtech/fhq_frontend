@@ -30,6 +30,7 @@ export default function Home() {
   const { currentWorkspace, currentProject } = useWorkspace();
   const sampleRole = useFlag("sample_role");
   const oneBuilder = useFlag("one_builder"); // P2-2: first-run opens a role, not an interview
+  const unifiedIa = useFlag("unified_ia"); // Task 5: unified create funnels into "Open a role"
 
   // Same live-updates + interviews data the dashboard uses (not refactored here,
   // to keep the pilot's dashboard untouched while role_home is gated).
@@ -106,7 +107,7 @@ export default function Home() {
           title="Set up your first role"
           description="Open a role to start screening candidates. The graph builds itself from there."
           primaryAction={
-            oneBuilder
+            unifiedIa || oneBuilder
               ? { label: "Open a role", onClick: () => navigate("/roles/new") }
               : { label: "Create your first interview", onClick: () => navigate("/interviews/create") }
           }

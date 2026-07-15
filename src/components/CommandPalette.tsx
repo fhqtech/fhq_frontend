@@ -26,9 +26,28 @@ import {
 } from "@/components/ui/command";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useFlag } from "@/lib/flags/FlagProvider";
 
 const RECENT_STORAGE_KEY = "fh_cmdk_recent";
 const MAX_RECENT = 5;
+
+/**
+ * Navigation targets used by the palette's actions. `/interviews/screening`
+ * used to live here but was never a real route — it fell through to
+ * `/interviews/:id` with id="screening" — so it's gone, not repointed.
+ * `createRoleUnified` is the single "Open a role" entry point the create
+ * commands route to once `unified_ia` is on (see Task 4/5).
+ */
+export const COMMAND_TARGETS = {
+  dashboard: "/dashboard",
+  fitmentInterviews: "/interviews/fitment",
+  talentPools: "/lists",
+  settings: "/settings",
+  dataPrivacy: "/account/data",
+  createInterviewScreening: "/interviews/create?type=screening",
+  createInterviewFitment: "/interviews/create?type=fitment",
+  createRoleUnified: "/roles/new",
+} as const;
 
 interface PaletteAction {
   id: string;
@@ -62,6 +81,7 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const { logout, isAuthenticated } = useAuth();
   const { setCurrentWorkspace } = useWorkspace();
+  const unifiedIa = useFlag("unified_ia");
 
   // Cmd+K / Ctrl+K binding
   useEffect(() => {
@@ -90,16 +110,26 @@ export function CommandPalette() {
 
   const actions: PaletteAction[] = [
     // Navigation
-    { id: "nav.dashboard", label: "Go to dashboard", group: "navigation", perform: () => navigate("/dashboard") },
-    { id: "nav.screening", label: "Go to screening interviews", group: "navigation", perform: () => navigate("/interviews/screening") },
-    { id: "nav.fitment", label: "Go to fitment interviews", group: "navigation", perform: () => navigate("/interviews/fitment") },
-    { id: "nav.lists", label: "Go to talent pools", group: "navigation", perform: () => navigate("/lists") },
-    { id: "nav.settings", label: "Go to settings", group: "navigation", perform: () => navigate("/settings") },
-    { id: "nav.data", label: "Open data & privacy", group: "navigation", perform: () => navigate("/account/data") },
+    { id: "nav.dashboard", label: "Go to dashboard", group: "navigation", perform: () => navigate(COMMAND_TARGETS.dashboard) },
+    { id: "nav.fitment", label: "Go to fitment interviews", group: "navigation", perform: () => navigate(COMMAND_TARGETS.fitmentInterviews) },
+    { id: "nav.lists", label: "Go to talent pools", group: "navigation", perform: () => navigate(COMMAND_TARGETS.talentPools) },
+    { id: "nav.settings", label: "Go to settings", group: "navigation", perform: () => navigate(COMMAND_TARGETS.settings) },
+    { id: "nav.data", label: "Open data & privacy", group: "navigation", perform: () => navigate(COMMAND_TARGETS.dataPrivacy) },
 
-    // Create
-    { id: "create.interview.screening", label: "Create screening interview", shortcut: "C", group: "create", perform: () => navigate("/interviews/create?type=screening") },
-    { id: "create.interview.fitment", label: "Create fitment interview", group: "create", perform: () => navigate("/interviews/create?type=fitment") },
+    // Create — under unified_ia, both funnel into the single "Open a role" flow.
+    {
+      id: "create.interview.screening",
+      label: "Create screening interview",
+      shortcut: "C",
+      group: "create",
+      perform: () => navigate(unifiedIa ? COMMAND_TARGETS.createRoleUnified : COMMAND_TARGETS.createInterviewScreening),
+    },
+    {
+      id: "create.interview.fitment",
+      label: "Create fitment interview",
+      group: "create",
+      perform: () => navigate(unifiedIa ? COMMAND_TARGETS.createRoleUnified : COMMAND_TARGETS.createInterviewFitment),
+    },
 
     // Session
     { id: "session.signout", label: "Sign out", group: "session", perform: () => { logout(); navigate("/"); } },

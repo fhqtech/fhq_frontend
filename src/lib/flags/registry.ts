@@ -23,6 +23,7 @@ export type FlagKey =
   | "role_home"
   | "one_builder"
   | "nba"
+  | "unified_ia"
   // Phase 3 — talent, compare, bulk velocity
   | "talent"
   | "bulk"
@@ -62,6 +63,7 @@ export const FLAG_REGISTRY: Record<FlagKey, FlagDef> = {
   role_home: def("role_home", "Role-as-home information architecture and workspace pulse"),
   one_builder: def("one_builder", "Single open-a-role flow with typed add-stage"),
   nba: def("nba", "Next-best-action chip and bar on candidate rows"),
+  unified_ia: def("unified_ia", "Unified role model: collapsed nav + legacy-surface redirects"),
   talent: def("talent", "Cross-role talent index, shortlists, and skill-matcher filter view"),
   bulk: def("bulk", "Bulk action bar across talent, compare, and results"),
   compare: def("compare", "Compare tray for two to four graphs side by side"),
