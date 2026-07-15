@@ -42,4 +42,11 @@ describe("Lists route gate", () => {
     expect(await screen.findByText("unified shortlists surface")).toBeInTheDocument();
     expect(screen.queryByText("legacy lists page")).not.toBeInTheDocument();
   });
+
+  it("renders the unified shortlists surface under unified_ia even when talent is off", async () => {
+    mockUseFlag.mockImplementation((key: string) => key === "unified_ia");
+    renderRoute();
+    expect(await screen.findByText("unified shortlists surface")).toBeInTheDocument();
+    expect(screen.queryByText("legacy lists page")).not.toBeInTheDocument();
+  });
 });
