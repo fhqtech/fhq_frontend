@@ -305,15 +305,19 @@ const App = () => (
                 </ProtectedRoute>
               </UnifiedRedirect>
             } />
-            {/* P2-4: with one_builder on, the legacy create surface redirects to open-a-role */}
+            {/* Retired under unified_ia -> /roles/new (Task 4 follow-up: matches the
+                UNIFIED_REDIRECTS contract). Inner OneBuilderRedirect stays as the
+                flag-off (unified_ia off) fallback, preserving pre-branch behavior. */}
             <Route path="/journeys/new" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <OneBuilderRedirect to={() => "/roles/new"}>
-                    <JourneyBuilder />
-                  </OneBuilderRedirect>
-                </MainLayout>
-              </ProtectedRoute>
+              <UnifiedRedirect to="/roles/new">
+                <ProtectedRoute>
+                  <MainLayout>
+                    <OneBuilderRedirect to={() => "/roles/new"}>
+                      <JourneyBuilder />
+                    </OneBuilderRedirect>
+                  </MainLayout>
+                </ProtectedRoute>
+              </UnifiedRedirect>
             } />
             {/* Retired under unified_ia -> /roles, folded in with the Task 3 /roles index route (Task 4) */}
             <Route path="/programs" element={
