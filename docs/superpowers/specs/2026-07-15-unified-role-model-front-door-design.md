@@ -138,3 +138,15 @@ The explicit ask — *"from practicals we move/select profiles for interview"* �
 
 1. **Data stance** — confirm legacy standalone interview/practical data is dev/throwaway (no migration). If not, add the optional backfill task.
 2. **Quick tour** — keep as a nav item, fold into onboarding, or drop? (minor; default: fold into Home onboarding.)
+
+## Delivered (Spec 1 foundation)
+
+All 9 implementation tasks for this spec landed on branch
+`unified-ia-foundation`, behind the `unified_ia` kill-switch flag (frontend,
+default-on) paired with the `UNIFIED_IA` Cloud Run env flag (backend,
+default-off). Nav collapse, the redirect contract, the single "Open a role"
+create flow, Shortlists, and the guarded backend front-doors are all in
+place; nothing is physically deleted yet (adopt-and-redirect, per §2/§6).
+See `docs/UNIFIED_IA_ROLLOUT.md` for the flag reference, redirect contract
+table, cutover sequence, revert procedure, manual click-through checklist,
+and the follow-up deletion checklist.
