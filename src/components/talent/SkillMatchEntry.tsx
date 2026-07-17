@@ -4,9 +4,9 @@
  * Behind the `talent` flag (default-off): when a workspace opts in, a candidate
  * viewing their talent index gets one affordance to flip the question around —
  * pick a role and see who across their other interviews fits it. The matcher
- * itself already lives at /skill-matcher (deep-linkable, actionable, with the
- * "why this fit" explainer); this is purely the entry point, so the Talent diff
- * stays a one-liner and this stays isolate-testable.
+ * itself now lives at /talent (the old /skill-matcher route unconditionally
+ * redirects there under unified_ia); this is purely the entry point, so the
+ * Talent diff stays a one-liner and this stays isolate-testable.
  *
  * Off (the pilot default) → renders nothing, leaving the legacy surface untouched.
  */
@@ -22,7 +22,7 @@ export function SkillMatchEntry() {
 
   return (
     <Link
-      to="/skill-matcher"
+      to="/talent"
       className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}
     >
       <Sparkles className="h-4 w-4 text-gold-ink" />

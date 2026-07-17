@@ -1,10 +1,8 @@
 /**
- * Task 4 — the unified_ia redirect contract, verified behaviorally. Each
- * legacy path listed here is wrapped in App.tsx with <UnifiedRedirect
- * to={target}>. This test doesn't just assert the map's shape — it renders
- * UnifiedRedirect for every [legacy, target] pair inside a real MemoryRouter
- * and asserts the flag actually drives navigation both ways: redirect when
- * unified_ia is on, legacy content when off (the kill-switch).
+ * Task 4 — the unified_ia redirect contract, now unconditional. Every legacy
+ * path listed here is wired in App.tsx as a bare `<Navigate to={target}
+ * replace />` (unified_ia cutover follow-up: the flag-off legacy targets are
+ * gone, so the redirect no longer branches on the flag).
  *
  * Deep-link result routes (e.g. the interview results TAG view) must never
  * appear in this map — URL stability is a hard constraint (see App.tsx and
@@ -12,9 +10,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { UnifiedRedirect } from "@/components/routing/UnifiedRedirect";
-import { FlagProvider } from "@/lib/flags/FlagProvider";
+import { MemoryRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // The retired-path -> unified-target contract. Keep in sync with App.tsx.
 export const UNIFIED_REDIRECTS: Record<string, string> = {
@@ -29,31 +25,22 @@ export const UNIFIED_REDIRECTS: Record<string, string> = {
   "/journeys/new": "/roles/new",
 };
 
-// Deep-link routes that must stay live regardless of unified_ia — never add
-// these to UNIFIED_REDIRECTS.
+// Deep-link routes that must stay live regardless of the redirect map — never
+// add these to UNIFIED_REDIRECTS.
 const EXCLUDED_DEEP_LINKS = [
   "/interview/:interviewId/results/:sessionId",
   "/interviews/:id",
   "/interview-blueprint/:interviewId",
 ];
 
-function renderPair(legacy: string, target: string, on: boolean) {
+function renderPair(legacy: string, target: string) {
   return render(
-    <FlagProvider overrides={{ unified_ia: on }}>
-      <MemoryRouter initialEntries={[legacy]}>
-        <Routes>
-          <Route
-            path={legacy}
-            element={
-              <UnifiedRedirect to={target}>
-                <span>legacy</span>
-              </UnifiedRedirect>
-            }
-          />
-          <Route path={target} element={<span>target</span>} />
-        </Routes>
-      </MemoryRouter>
-    </FlagProvider>,
+    <MemoryRouter initialEntries={[legacy]}>
+      <Routes>
+        <Route path={legacy} element={<Navigate to={target} replace />} />
+        <Route path={target} element={<span>target</span>} />
+      </Routes>
+    </MemoryRouter>,
   );
 }
 
@@ -70,16 +57,9 @@ describe("unified_ia redirect contract", () => {
   });
 
   describe.each(Object.entries(UNIFIED_REDIRECTS))("%s -> %s", (legacy, target) => {
-    it(`redirects ${legacy} to ${target} when unified_ia is on`, () => {
-      renderPair(legacy, target, true);
+    it(`redirects ${legacy} to ${target} unconditionally`, () => {
+      renderPair(legacy, target);
       expect(screen.getByText("target")).toBeInTheDocument();
-      expect(screen.queryByText("legacy")).not.toBeInTheDocument();
-    });
-
-    it(`renders the legacy element for ${legacy} when unified_ia is off`, () => {
-      renderPair(legacy, target, false);
-      expect(screen.getByText("legacy")).toBeInTheDocument();
-      expect(screen.queryByText("target")).not.toBeInTheDocument();
     });
   });
 });

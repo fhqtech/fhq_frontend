@@ -16,8 +16,6 @@ import { ConsentBanner } from "@/components/ConsentBanner";
 import { CommandPalette } from "@/components/CommandPalette";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
-import { OneBuilderRedirect } from "@/components/role/OneBuilderRedirect";
-import { UnifiedRedirect } from "@/components/routing/UnifiedRedirect";
 import CandidateProtectedRoute from "@/components/auth/CandidateProtectedRoute";
 import { InvitationAuthGate } from "@/components/auth/InvitationAuthGate";
 import { PageSkeleton } from "@/components/ui/shimmer";
@@ -34,7 +32,6 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 // recruiter dashboard JS; recruiters hitting /dashboard no longer
 // download the AssemblyAI + Three.js + framer-motion session bundle.
 const ProductLanding = lazy(() => import("./pages/ProductLanding"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Home = lazy(() => import("./pages/Home"));
 const RoleContainer = lazy(() => import("./pages/RoleContainer"));
 const OpenRoleFlow = lazy(() => import("./components/role/OpenRoleFlow"));
@@ -42,11 +39,7 @@ const Talent = lazy(() => import("./pages/Talent"));
 const Candidate360 = lazy(() => import("./pages/Candidate360"));
 const PilotDashboard = lazy(() => import("./pages/PilotDashboard"));
 const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
-const SkillMatcher = lazy(() => import("./pages/SkillMatcher"));
-const CreateInterview = lazy(() => import("./pages/CreateInterview"));
-const ManageInterviews = lazy(() => import("./pages/ManageInterviewsEnhanced"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
-const Practicals = lazy(() => import("./pages/Practicals"));
 const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
 const QuickTour = lazy(() => import("./pages/QuickTour"));
@@ -89,13 +82,16 @@ const CandidatePracticalSubmit = lazy(() => import("./pages/candidate/CandidateP
 const CandidateInterviewWorkSample = lazy(() => import("./pages/candidate/CandidateInterviewWorkSample"));
 const CandidatePracticalDefense = lazy(() => import("./pages/candidate/CandidatePracticalDefense"));
 const CandidateJourney = lazy(() => import("./pages/candidate/CandidateJourney"));
-const JourneyBuilder = lazy(() => import("./pages/JourneyBuilder"));
-const RolePipeline = lazy(() => import("./pages/RolePipeline"));
 const Programs = lazy(() => import("./pages/Programs"));
 
 const LegacyFitmentRedirect = () => {
   const { id } = useParams();
   return <Navigate to={`/interviews/${id}`} replace />;
+};
+
+const LegacyProgramRedirect = () => {
+  const { programId } = useParams();
+  return <Navigate to={`/roles/${programId}`} replace />;
 };
 
 const App = () => (
@@ -176,16 +172,8 @@ const App = () => (
             <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
 
             {/* Dashboard and other authenticated routes (with header, sidebar and protection) */}
-            {/* Unified IA cutover: redirects to /home before the shell renders when unified_ia is on (Task 4) */}
-            <Route path="/dashboard" element={
-              <UnifiedRedirect to="/home">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Dashboard />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
+            {/* Unified IA cutover: unconditional redirect to /home (Task 4) */}
+            <Route path="/dashboard" element={<Navigate to="/home" replace />} />
             {/* P2-1: workspace-pulse Home (default post-login when role_home is on) */}
             <Route path="/home" element={
               <ProtectedRoute>
@@ -246,46 +234,11 @@ const App = () => (
               </ProtectedRoute>
             } />
 
-            {/* Unified IA cutover: retired create/manage surfaces redirect before the shell renders when unified_ia is on (Task 4) */}
-            <Route path="/interviews/create" element={
-              <UnifiedRedirect to="/roles/new">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <CreateInterview />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
-
-            <Route path="/interviews/manage" element={
-              <UnifiedRedirect to="/roles">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <ManageInterviews />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
-
-            <Route path="/interviews/fitment" element={
-              <UnifiedRedirect to="/roles">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <ManageInterviews />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
-
-            <Route path="/interviews/skill-analysis" element={
-              <UnifiedRedirect to="/roles">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <ManageInterviews />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
+            {/* Unified IA cutover: retired create/manage surfaces now redirect unconditionally (Task 4) */}
+            <Route path="/interviews/create" element={<Navigate to="/roles/new" replace />} />
+            <Route path="/interviews/manage" element={<Navigate to="/roles" replace />} />
+            <Route path="/interviews/fitment" element={<Navigate to="/roles" replace />} />
+            <Route path="/interviews/skill-analysis" element={<Navigate to="/roles" replace />} />
 
             <Route path="/interviews/:id" element={
               <ProtectedRoute>
@@ -296,50 +249,15 @@ const App = () => (
             } />
 
             {/* Unified-evaluation practical flow (recruiter). Retired under unified_ia -> /roles (Task 4) */}
-            <Route path="/practicals" element={
-              <UnifiedRedirect to="/roles">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Practicals />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
+            <Route path="/practicals" element={<Navigate to="/roles" replace />} />
             {/* Retired under unified_ia -> /roles/new (Task 4 follow-up: matches the
-                UNIFIED_REDIRECTS contract). Inner OneBuilderRedirect stays as the
-                flag-off (unified_ia off) fallback, preserving pre-branch behavior. */}
-            <Route path="/journeys/new" element={
-              <UnifiedRedirect to="/roles/new">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <OneBuilderRedirect to={() => "/roles/new"}>
-                      <JourneyBuilder />
-                    </OneBuilderRedirect>
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
+                UNIFIED_REDIRECTS contract). */}
+            <Route path="/journeys/new" element={<Navigate to="/roles/new" replace />} />
             {/* Retired under unified_ia -> /roles, folded in with the Task 3 /roles index route (Task 4) */}
-            <Route path="/programs" element={
-              <UnifiedRedirect to="/roles">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Programs />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
+            <Route path="/programs" element={<Navigate to="/roles" replace />} />
 
-            {/* P2-4: with one_builder on, the legacy pipeline redirects to the new board */}
-            <Route path="/programs/:programId" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <OneBuilderRedirect to={(p) => `/roles/${p.programId}`}>
-                    <RolePipeline />
-                  </OneBuilderRedirect>
-                </MainLayout>
-              </ProtectedRoute>
-            } />
+            {/* Unified IA cutover: legacy pipeline unconditionally redirects to the new board (Task 4) */}
+            <Route path="/programs/:programId" element={<LegacyProgramRedirect />} />
 
             <Route path="/interview/:interviewId/results/:sessionId" element={
               <ProtectedRoute>
@@ -396,15 +314,7 @@ const App = () => (
             } />
 
             {/* Retired under unified_ia -> /talent (Task 4) */}
-            <Route path="/skill-matcher" element={
-              <UnifiedRedirect to="/talent">
-                <ProtectedRoute>
-                  <MainLayout>
-                    <SkillMatcher />
-                  </MainLayout>
-                </ProtectedRoute>
-              </UnifiedRedirect>
-            } />
+            <Route path="/skill-matcher" element={<Navigate to="/talent" replace />} />
 
             <Route path="/lists/:listId" element={
               <ProtectedRoute>

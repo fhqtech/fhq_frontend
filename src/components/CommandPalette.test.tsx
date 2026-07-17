@@ -3,8 +3,8 @@
  *
  * `/interviews/screening` was never a real route (it falls through to
  * `/interviews/:id` with id="screening") — it's removed unconditionally.
- * Under `unified_ia`, the create-interview commands route to the single
- * "Open a role" flow (`/roles/new`) instead of the legacy interview builder.
+ * The create-interview commands route unconditionally to the single "Open a
+ * role" flow (`/roles/new`).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -36,14 +36,9 @@ vi.mock("@/contexts/WorkspaceContext", () => ({
 }));
 
 import { CommandPalette, COMMAND_TARGETS } from "./CommandPalette";
-import { FlagProvider } from "@/lib/flags/FlagProvider";
 
-function renderPalette(unifiedIa: boolean) {
-  return render(
-    <FlagProvider overrides={{ unified_ia: unifiedIa }}>
-      <CommandPalette />
-    </FlagProvider>,
-  );
+function renderPalette() {
+  return render(<CommandPalette />);
 }
 
 async function openAndSelect(label: string) {
@@ -60,30 +55,23 @@ describe("CommandPalette unified targets", () => {
     expect(Object.values(COMMAND_TARGETS)).not.toContain("/interviews/screening");
   });
 
-  it("routes create actions to /roles/new under unified_ia", () => {
+  it("routes create actions to /roles/new", () => {
     expect(COMMAND_TARGETS.createRoleUnified).toBe("/roles/new");
   });
 
-  it("navigates the create-screening-interview command to /roles/new when unified_ia is on", async () => {
+  it("navigates the create-screening-interview command to /roles/new", async () => {
     navigate.mockReset();
-    renderPalette(true);
+    renderPalette();
     await openAndSelect("Create screening interview");
     // The palette defers navigation to a requestAnimationFrame callback (dialog
     // close animation), so give it a tick before asserting.
     await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith(COMMAND_TARGETS.createRoleUnified));
   });
 
-  it("navigates the create-fitment-interview command to /roles/new when unified_ia is on", async () => {
+  it("navigates the create-fitment-interview command to /roles/new", async () => {
     navigate.mockReset();
-    renderPalette(true);
+    renderPalette();
     await openAndSelect("Create fitment interview");
     await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith(COMMAND_TARGETS.createRoleUnified));
-  });
-
-  it("keeps the legacy create-interview routing when unified_ia is off", async () => {
-    navigate.mockReset();
-    renderPalette(false);
-    await openAndSelect("Create screening interview");
-    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith("/interviews/create?type=screening"));
   });
 });
