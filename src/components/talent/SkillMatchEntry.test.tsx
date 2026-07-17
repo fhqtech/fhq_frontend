@@ -21,7 +21,7 @@ describe("SkillMatchEntry", () => {
     );
     const link = screen.getByRole("link", { name: /match candidates to a role/i });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/skill-matcher");
+    expect(link).toHaveAttribute("href", "/talent");
   });
 
   it("renders nothing when the talent flag is off", () => {

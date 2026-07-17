@@ -1,20 +1,10 @@
 import { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  SquaresFour as LayoutDashboard,
-  UserPlus,
   Users,
   Gear as Settings,
-  ChartBar as BarChart3,
-  Briefcase,
   FlowArrow as ProgramsIcon,
-  ClipboardText as PracticalsIcon,
-  CaretDown as ChevronDown,
-  Robot as Bot,
   Bookmarks as BookmarksIcon,
-  List as Menu,
-  X,
-  Play,
   House as HomeIcon,
   Power
 } from "phosphor-react";
@@ -22,11 +12,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SpinnerWithCopy } from "@/components/ui/spinner";
 import { MadeInIndiaMark } from "@/components/brand/MadeInIndiaMark";
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,30 +24,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFlag } from "@/lib/flags/FlagProvider";
-
-// TAG is reserved for the Talent Analysis Graph (the output artifact).
-// Sidebar uses domain language (Interviews / Setup / Screening / Fitment)
-// to match how recruiters actually think about the work.
-const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Quick tour", url: "/quick-tour", icon: Play },
-  { title: "Programs", url: "/programs", icon: ProgramsIcon },
-  {
-    title: "Interviews",
-    icon: Briefcase,
-    subItems: [
-      { title: "Setup", url: "/interviews/create" },
-      { title: "Screening", url: "/interviews/manage" },
-      { title: "Fitment", url: "/interviews/fitment" },
-      { title: "Skill analysis", url: "/interviews/skill-analysis" }
-    ]
-  },
-  { title: "Practicals", url: "/practicals", icon: PracticalsIcon },
-  { title: "Talent pools", url: "/lists", icon: Users },
-  { title: "Skill matcher", url: "/skill-matcher", icon: BarChart3 },
-  { title: "Settings", url: "/settings", icon: Settings }
-];
 
 // unified_ia: the single collapsed nav. Role is the only object; screening/
 // practical/interview/fitment/decision are stages inside a role, so their
@@ -80,46 +41,11 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false }: SidebarProps) {
-  const [openMenus, setOpenMenus] = useState<string[]>(["TAGs"]);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  // P2-1/P2-2: when role_home is on, Home replaces Dashboard; when one_builder is
-  // on, "Programs" reads as "Roles" (the promoted backbone).
-  const roleHome = useFlag("role_home");
-  const oneBuilder = useFlag("one_builder");
-  const talent = useFlag("talent");
-  const unifiedIa = useFlag("unified_ia");
-  let items = oneBuilder
-    ? menuItems.map((m) => (m.title === "Programs" ? { ...m, title: "Roles" } : m))
-    : menuItems;
-  if (roleHome) {
-    items = [{ title: "Home", url: "/home", icon: HomeIcon }, ...items.filter((m) => m.url !== "/dashboard")];
-  }
-  if (talent) {
-    // P3-1: surface the cross-role Talent index; the old "Talent pools" (lists)
-    // reads as "Shortlists", anticipating the P3-2 Lists+Qualified merge.
-    items = items.map((m) => (m.url === "/lists" ? { ...m, title: "Shortlists", icon: BookmarksIcon } : m));
-    const idx = items.findIndex((m) => m.url === "/lists");
-    const talentItem = { title: "Talent", url: "/talent", icon: Users };
-    items = idx >= 0 ? [...items.slice(0, idx), talentItem, ...items.slice(idx)] : [...items, talentItem];
-    // P3-3: skill matching now lives inside the Talent surface (SkillMatchEntry),
-    // so the standalone nav item folds away when talent is on.
-    items = items.filter((m) => m.url !== "/skill-matcher");
-  }
-  // unified_ia wins: one collapsed nav, ignore the incremental per-flag mutations.
-  if (unifiedIa) {
-    items = UNIFIED_MENU;
-  }
-
-  const toggleMenu = (title: string) => {
-    setOpenMenus(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    );
-  };
+  const items = UNIFIED_MENU;
 
   const isActive = (path: string) => {
     // Special case: /analytics/list/* should highlight Lists menu
@@ -131,10 +57,6 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       return true;
     }
     return location.pathname === path || location.pathname.startsWith(path + "/");
-  };
-
-  const isSubItemActive = (item: any) => {
-    return item.subItems?.some((sub: any) => isActive(sub.url)) || isActive(item.url);
   };
 
   const handleLogout = async () => {
@@ -165,56 +87,6 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         {/* Navigation */}
       <nav className="flex-1 px-4 pb-4 space-y-2">
         {items.map((item) => {
-          const hasSubItems = item.subItems && item.subItems.length > 0;
-          const isMenuOpen = openMenus.includes(item.title);
-
-          if (hasSubItems) {
-            return (
-              <Collapsible
-                key={item.title}
-                open={isMenuOpen && !collapsed}
-                onOpenChange={() => toggleMenu(item.title)}
-              >
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-between text-left px-3 py-2 rounded-sm transition-all text-sm font-medium",
-                      isSubItemActive(item)
-                        ? "bg-paper-3 text-ink border-l-2 border-gold"
-                        : "text-ink-soft hover:text-ink hover:bg-paper-3",
-                      collapsed && "justify-center"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <item.icon className="w-4 h-4" />
-                      {!collapsed && <span className="whitespace-nowrap">{item.title}</span>}
-                    </div>
-                    {!collapsed && <ChevronDown className={cn("w-4 h-4 transition-transform", isMenuOpen && "rotate-180")} />}
-                  </Button>
-                </CollapsibleTrigger>
-                {!collapsed && (
-                  <CollapsibleContent className="space-y-1 mt-1">
-                    {item.subItems?.map((subItem) => (
-                      <NavLink
-                        key={subItem.url}
-                        to={subItem.url}
-                        className={({ isActive }) => cn(
-                          "block py-2 px-3 ml-7 text-sm rounded-sm transition-all",
-                          isActive
-                            ? "bg-paper-3 text-ink border-l-2 border-gold font-medium"
-                            : "text-muted hover:text-ink hover:bg-paper-3"
-                        )}
-                      >
-                        {subItem.title}
-                      </NavLink>
-                    ))}
-                  </CollapsibleContent>
-                )}
-              </Collapsible>
-            );
-          }
-
           return (
             <NavLink
               key={item.title}
