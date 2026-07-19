@@ -5,6 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { resolvePrecheckInterview } from "@/lib/precheck";
 
+/**
+ * FastAPI's `detail` is either a plain string or a structured object
+ * (`{error, message}`). Rendering the object straight into JSX throws React
+ * error #31 ("objects are not valid as a React child") and whites out the
+ * page. Always coerce to a display string before it reaches state.
+ */
+function detailToMessage(detail: unknown, fallback: string): string {
+  if (typeof detail === "string" && detail.trim()) return detail;
+  if (detail && typeof detail === "object") {
+    const msg = (detail as { message?: unknown }).message;
+    if (typeof msg === "string" && msg.trim()) return msg;
+  }
+  return fallback;
+}
+
 export default function InterviewPreCheckPage() {
   const { interviewId } = useParams<{ interviewId: string }>();
   const navigate = useNavigate();
@@ -103,22 +118,23 @@ export default function InterviewPreCheckPage() {
         // Honest blocking: blueprint/candidate not loadable yet. Show retry
         // screen instead of starting a junk interview.
         const body = await sessionResponse.json().catch(() => ({}));
-        setContextNotReady(body?.detail || 'Interview context not ready. Please try again in a moment.');
+        setContextNotReady(
+          detailToMessage(body?.detail, 'Interview context not ready. Please try again in a moment.'),
+        );
         return;
       }
 
       if (sessionResponse.status === 403) {
-        // Recruiter workspace lacks credits for this seat. Non-retryable
-        // from candidate side — they need to reach the recruiter.
+        // Not authorized for this seat — credits not charged, identity
+        // mismatch, etc. Non-retryable from the candidate side, so show a
+        // clear message and stop rather than falling through to the generic
+        // "something went wrong, try again" path (which is both misleading
+        // and, when `detail` is an object, crashed the page with React #31).
         const body = await sessionResponse.json().catch(() => ({}));
-        const detail = body?.detail;
-        if (detail && typeof detail === 'object' && detail.error === 'credits_required') {
-          setInterviewBlocked(
-            detail.message ||
-              'This interview is not active. Please contact the recruiter.'
-          );
-          return;
-        }
+        setInterviewBlocked(
+          detailToMessage(body?.detail, 'This interview is not active yet. Please contact the recruiter.'),
+        );
+        return;
       }
 
       if (!sessionResponse.ok) {
