@@ -259,29 +259,9 @@ export function CandidateCard({ candidate, onViewDetails, onToggleStar, onAddToL
               </div>
             ))
           ) : (
-            <>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-foreground truncate mb-1">Key Strength 1</div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary transition-all duration-500" style={{ width: '0%' }} />
-                </div>
-                <div className="text-xs text-muted-foreground mt-0.5">0%</div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-foreground truncate mb-1">Key Strength 2</div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary transition-all duration-500" style={{ width: '0%' }} />
-                </div>
-                <div className="text-xs text-muted-foreground mt-0.5">0%</div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-foreground truncate mb-1">Key Strength 3</div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary transition-all duration-500" style={{ width: '0%' }} />
-                </div>
-                <div className="text-xs text-muted-foreground mt-0.5">0%</div>
-              </div>
-            </>
+            <p className="text-xs text-muted-foreground">
+              Not assessed yet — invite them to a role to generate a talent analysis graph.
+            </p>
           )}
         </div>
       </div>

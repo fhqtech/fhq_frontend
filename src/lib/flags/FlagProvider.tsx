@@ -52,6 +52,10 @@ const REDESIGN_BASELINE: FlagValues = {
   canonical_id: true,
   stage_results: true,
   transferable: true,
+  // Spec 2 — the defense authenticity verdict. Real grounded signal (defense_reviewer
+  // is independent of reviewer v1/v2), and it only renders when an interview actually
+  // followed a scored practical, so it's safe on by default.
+  defense_authenticity: true,
 };
 
 const FlagContext = createContext<FlagSources | null>(null);
