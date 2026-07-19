@@ -31,6 +31,7 @@ import {
   TalentAnalysisGraph,
 } from "@/components/tag/TalentAnalysisGraph";
 import { UnverifiedMark } from "@/components/tag/UnverifiedMark";
+import { AuthenticityVerdict } from "@/components/trust/AuthenticityVerdict";
 import { SkillGapSummary } from "@/components/tag/SkillGapSummary";
 import { summarizeFromGapResult } from "@/lib/skillGap";
 import { Button } from "@/components/ui/button";
@@ -209,6 +210,10 @@ export function Candidate360Content({
           </ul>
         )}
       </section>
+
+      {/* Spec 2: practical-defense authenticity verdict (behind defense_authenticity;
+          renders only when the interview followed a scored practical). */}
+      <AuthenticityVerdict report={view.defense} />
 
       {/* Fused role-TAG (reused marquee graph) + trust panel */}
       <section aria-labelledby="c360-skills">

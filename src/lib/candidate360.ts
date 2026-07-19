@@ -101,6 +101,12 @@ export interface Candidate360View {
   /** Count of provenance-grounded claims (0 under the live backend — see gap note). */
   verifiedClaimCount: number;
   missing: Candidate360Missing;
+  /**
+   * Spec 2: the practical-defense authenticity verdict, present when this
+   * candidate's interview followed a practical and the defense was scored.
+   * Rendered behind the `defense_authenticity` flag; absent otherwise.
+   */
+  defense?: import("@/components/trust/AuthenticityVerdict").DefenseReportView | null;
 }
 
 /** The raw read payloads the caller fetched (all optional / possibly empty). */

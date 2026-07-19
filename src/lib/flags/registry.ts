@@ -33,6 +33,7 @@ export type FlagKey =
   | "evidence_contract"
   | "tag_evidence"
   | "integrity"
+  | "defense_authenticity"
   | "transferable"
   // Phase 5 — candidate-360 & stage-results consolidation
   | "canonical_id"
@@ -71,6 +72,7 @@ export const FLAG_REGISTRY: Record<FlagKey, FlagDef> = {
   evidence_contract: def("evidence_contract", "Render ungrounded scores as unverified"),
   tag_evidence: def("tag_evidence", "Provenance and grounding on graph-node tap"),
   integrity: def("integrity", "Contestable integrity indicator on results and candidate-360"),
+  defense_authenticity: def("defense_authenticity", "Authenticity verdict and integrity flags from the practical defense"),
   transferable: def("transferable", "Transferable-skill band on results"),
   canonical_id: def("canonical_id", "Canonical candidate id with merge and unmerge"),
   candidate_360: def("candidate_360", "Read-time candidate-360 fan-in view"),

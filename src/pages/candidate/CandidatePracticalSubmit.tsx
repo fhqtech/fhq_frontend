@@ -206,12 +206,12 @@ export default function CandidatePracticalSubmit() {
                     ) : (
                       <>
                         <Upload className="h-4 w-4" />
-                        {uploading ? "Uploading…" : "Upload your deliverable (PDF or DOCX)"}
+                        {uploading ? "Uploading…" : "Upload your deliverable (PDF, DOCX, or XLSX)"}
                       </>
                     )}
                     <input
                       type="file"
-                      accept=".pdf,.docx"
+                      accept=".pdf,.docx,.xlsx"
                       onChange={onFile}
                       disabled={uploading || submitting}
                       className="hidden"
