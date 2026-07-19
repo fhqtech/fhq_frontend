@@ -17,6 +17,7 @@ import { FusedSkillProfile } from "@/components/assessment/FusedSkillProfile";
 import { TransferableBand } from "@/components/trust/TransferableBand";
 import { IntegrityNote } from "@/components/trust/IntegrityNote";
 import { integrityApi } from "@/services/integrityApi";
+import { AuthenticityVerdict } from "@/components/trust/AuthenticityVerdict";
 import type { IntegrityFlag } from "@/lib/integrity";
 import { StageResults } from "@/components/results/StageResults";
 import { tagFromResult } from "@/components/tag/adapters";
@@ -580,6 +581,23 @@ export default function InterviewResults() {
             }}
           />
         ))}
+
+        {/* Spec 2 — practical-defense authenticity verdict (self-gated on
+            `defense_authenticity`). The result doc carries defense_authenticity +
+            defense_integrity_flags when the interview followed a scored practical;
+            renders nothing when the flag is off or this wasn't a defense. */}
+        <div className="mt-6">
+          <AuthenticityVerdict
+            report={
+              (rawResults as any)?.defense_authenticity
+                ? {
+                    authenticity: (rawResults as any).defense_authenticity,
+                    integrity_flags: (rawResults as any).defense_integrity_flags ?? [],
+                  }
+                : null
+            }
+          />
+        </div>
 
         {(rawResults as any)?.candidate_id && (
           <Card className="p-6 mt-6">
