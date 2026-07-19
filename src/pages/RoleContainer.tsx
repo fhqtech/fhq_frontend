@@ -22,6 +22,7 @@ import { appendStage } from "@/lib/stageColumns";
 import { PageSkeleton } from "@/components/ui/shimmer";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { EmptyState } from "@/components/ui/empty-state";
+import { toast } from "@/hooks/use-toast";
 import { Users, Target } from "lucide-react";
 
 export default function RoleContainer() {
@@ -46,6 +47,44 @@ export default function RoleContainer() {
     );
     const refreshed = await recruiterJourneysApi.listJourneys(ws, programId).catch(() => journeys);
     setJourneys(refreshed);
+  };
+
+  // Provision the candidate's current stage's engine artifact + invite them.
+  // The linear engine auto-advances on completion, so per-stage "start" is the
+  // one recruiter action the board needs to drive the loop.
+  const handleStart = async (j: JourneyInstance) => {
+    if (!ws || !programId) return;
+    try {
+      const res = await recruiterJourneysApi.startStage(
+        ws,
+        programId,
+        j.journey_instance_id,
+        j.current_stage_id,
+      );
+      const refreshed = await recruiterJourneysApi
+        .listJourneys(ws, programId)
+        .catch(() => journeys);
+      setJourneys(refreshed);
+      if (res.candidate_action_url) {
+        try {
+          await navigator.clipboard.writeText(res.candidate_action_url);
+        } catch {
+          /* clipboard may be unavailable; the link is still in the toast */
+        }
+        toast({
+          title: "Stage started — invite link copied",
+          description: res.candidate_action_url,
+        });
+      } else {
+        toast({ title: "Stage started" });
+      }
+    } catch (e) {
+      toast({
+        title: "Couldn't start the stage",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddStage = async (type: StageType) => {
@@ -161,6 +200,7 @@ export default function RoleContainer() {
           stages={stages}
           journeys={journeys}
           onOpenCandidate={(j) => navigate(`/roles/${programId}/candidates/${j.candidate_id}`)}
+          onStart={handleStart}
         />
       )}
     </div>
