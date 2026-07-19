@@ -17,7 +17,12 @@ describe("journeyAction", () => {
     expect(journeyAction({ status: "hired", current_stage_id: "decide" }, STAGES)).toEqual({
       label: "Hired",
       terminal: true,
+      kind: "outcome",
     });
+  });
+
+  it("tags an engine-backed not-yet-started stage as a `start` action", () => {
+    expect(journeyAction({ status: "active", current_stage_id: "screen" }, STAGES).kind).toBe("start");
   });
 
   it("offers a manual decision on a decision stage (no engine start)", () => {

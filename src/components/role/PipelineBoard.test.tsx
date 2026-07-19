@@ -51,4 +51,21 @@ describe("PipelineBoard", () => {
     await userEvent.click(screen.getByText("Priya Sharma"));
     expect(onOpenCandidate).toHaveBeenCalledWith(expect.objectContaining({ journey_instance_id: "j1" }));
   });
+
+  it("fires onStart (not onOpenCandidate) when the Start action is clicked", async () => {
+    const onStart = vi.fn();
+    const onOpenCandidate = vi.fn();
+    render(
+      <PipelineBoard
+        stages={STAGES}
+        journeys={[journey("j1", "Priya Sharma", "fitment")]}
+        onOpenCandidate={onOpenCandidate}
+        onStart={onStart}
+      />,
+    );
+    // the "Start fitment" action is a button for a not-yet-started engine stage
+    await userEvent.click(screen.getByRole("button", { name: /start fitment/i }));
+    expect(onStart).toHaveBeenCalledWith(expect.objectContaining({ journey_instance_id: "j1" }));
+    expect(onOpenCandidate).not.toHaveBeenCalled();
+  });
 });

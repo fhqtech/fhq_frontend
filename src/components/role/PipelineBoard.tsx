@@ -17,9 +17,11 @@ export interface PipelineBoardProps {
   stages: JourneyStage[];
   journeys: JourneyInstance[];
   onOpenCandidate?: (journey: JourneyInstance) => void;
+  /** Provision the candidate's current stage + invite them (the `start` action). */
+  onStart?: (journey: JourneyInstance) => void;
 }
 
-export function PipelineBoard({ stages, journeys, onOpenCandidate }: PipelineBoardProps) {
+export function PipelineBoard({ stages, journeys, onOpenCandidate, onStart }: PipelineBoardProps) {
   const ordered = [...stages].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const columns = groupJourneysByStage(ordered, journeys);
 
@@ -41,23 +43,36 @@ export function PipelineBoard({ stages, journeys, onOpenCandidate }: PipelineBoa
               items.map((j) => {
                 const action = journeyAction(j, ordered);
                 return (
-                  <button
+                  <div
                     key={j.journey_instance_id}
-                    onClick={() => onOpenCandidate?.(j)}
-                    className="w-full rounded-md border border-rule bg-paper px-3 py-2 text-left transition-colors hover:border-gold-ink"
+                    className="w-full rounded-md border border-rule bg-paper px-3 py-2 transition-colors hover:border-gold-ink"
                   >
-                    <p className="truncate text-sm font-medium text-ink">
-                      {j.candidate_name || j.candidate_id}
-                    </p>
-                    <span
-                      className={cn(
-                        "mt-1 inline-block rounded-sm px-1.5 py-0.5 text-[10px] font-medium",
-                        action.terminal ? "bg-paper-3 text-muted" : "bg-gold-soft text-gold-ink",
-                      )}
+                    <button
+                      type="button"
+                      onClick={() => onOpenCandidate?.(j)}
+                      className="block w-full truncate text-left text-sm font-medium text-ink"
                     >
-                      {action.label}
-                    </span>
-                  </button>
+                      {j.candidate_name || j.candidate_id}
+                    </button>
+                    {action.kind === "start" ? (
+                      <button
+                        type="button"
+                        onClick={() => onStart?.(j)}
+                        className="mt-1 inline-block rounded-sm bg-gold-soft px-1.5 py-0.5 text-[10px] font-medium text-gold-ink transition-colors hover:bg-gold-ink hover:text-paper"
+                      >
+                        {action.label}
+                      </button>
+                    ) : (
+                      <span
+                        className={cn(
+                          "mt-1 inline-block rounded-sm px-1.5 py-0.5 text-[10px] font-medium",
+                          action.terminal ? "bg-paper-3 text-muted" : "bg-gold-soft text-gold-ink",
+                        )}
+                      >
+                        {action.label}
+                      </span>
+                    )}
+                  </div>
                 );
               })
             )}
