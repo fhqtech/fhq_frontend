@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import SkillsGraph from "../ui/SkillsGraph";
 import { ReviewerSkillsGraph } from "../ui/ReviewerSkillsGraph";
+import { graphSkillsFromNodes } from "@/lib/miniGraphSkills";
 
 interface CandidateCardProps {
   candidate: any;
@@ -667,46 +668,11 @@ export function CandidateCard({ candidate, onClick, hideViewButton = false, onRe
         {blueprint?.graph_data ? (
           <div className="mb-4 -mx-2 bg-paper rounded-sm p-0 overflow-hidden flex justify-center">
             {(() => {
-              // Transform graph_data nodes to BlueprintSkill format
-              const graphSkills = blueprint.graph_data.nodes
-                .filter((n: any) => ['skill', 'gap', 'transferable'].includes(n.type))
-                .map((node: any) => {
-                  let category = 'developing';
-
-                  if (node.type === 'gap') {
-                    category = 'gap';
-                  } else if (node.type === 'transferable') {
-                    category = 'transferable';
-                  } else {
-                    // Skill Type Analysis
-                    const prof = (node.proficiency_label || '').toLowerCase();
-                    const label = (node.label || '').toLowerCase();
-
-                    if (prof.includes('gap') || prof.includes('significant') || prof.includes('minimal') || prof.includes('below')) {
-                      category = 'gap';
-                    } else if (prof.includes('not assessed')) {
-                      category = 'not_assessed';
-                    } else if (prof.includes('expert') || prof.includes('advanced') || prof.includes('strong')) {
-                      category = 'strong_match';
-                    } else {
-                      category = 'developing';
-                    }
-                  }
-
-                  return {
-                    skill_id: node.id,
-                    name: node.label,
-                    shortName: node.label,
-                    description: node.proficiency_label || 'Skill evaluation based on interview performance',
-                    findings: node.evidence || [],
-                    category: category,
-                    expected_proficiency: 3,
-                    proficiency_levels: []
-                  };
-                });
-
-              // Construct layout from graph_data if needed, or let SkillsGraph auto-layout
-              // SkillsGraph uses generateLayoutFromData. We need to pass skills.
+              // Transform graph_data nodes to the mini-graph skill format.
+              // The reviewer emits node types core|regular|transferable|role_center;
+              // the render category is derived from nodeStatus so strong/developing/
+              // gap/not-assessed all show (was a blank graph under the old filter).
+              const graphSkills = graphSkillsFromNodes(blueprint.graph_data.nodes);
 
               return (
                 <ReviewerSkillsGraph
