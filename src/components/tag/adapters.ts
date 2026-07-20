@@ -153,10 +153,28 @@ export function tagFromResult(
 
 // --- helpers ---
 
+/**
+ * True when a skill was never probed in the interview — distinct from a
+ * demonstrated failure (gap). Keyed on soft signals the reviewer emits:
+ * demonstrated_proficiency of "not discussed"/"not assessed", or an evidence
+ * sentinel ("skill not covered ..."). Never true for role_center/transferable,
+ * and deliberately NOT true for a bare score of 0/undefined (that stays a gap).
+ * Mirror of the backend `_is_not_assessed` in tag_synthesiser.py.
+ */
+export function isNotAssessed(
+  node: Pick<TagNode, "type" | "score" | "demonstrated_proficiency" | "evidence">,
+): boolean {
+  if (node.type === "role_center" || node.type === "transferable") return false;
+  const dp = (node.demonstrated_proficiency || "").trim().toLowerCase();
+  if (dp === "not discussed" || dp === "not assessed") return true;
+  return (node.evidence || []).some((e) => (e || "").toLowerCase().includes("skill not covered"));
+}
+
 /** Infer status from a node, falling back to score bucketing. */
 export function nodeStatus(node: TagNode): TagStatus {
   if (node.type === "role_center") return "role_center";
   if (node.type === "transferable") return "transferable";
+  if (isNotAssessed(node)) return "not_assessed";
   return STATUS_OF_SCORE(node.score ?? null);
 }
 
@@ -165,7 +183,7 @@ export function computeStats(nodes: TagNode[]) {
   const counts = { strong: 0, developing: 0, gap: 0, transferable: 0 };
   for (const n of nodes) {
     const s = nodeStatus(n);
-    if (s === "role_center") continue;
+    if (s === "role_center" || s === "not_assessed") continue;
     counts[s] += 1;
   }
   return counts;

@@ -83,6 +83,7 @@ export type TagStatus =
   | "developing"
   | "gap"
   | "transferable"
+  | "not_assessed"
   | "role_center";
 
 export const STATUS_OF_SCORE = (s: number | null | undefined): TagStatus => {
@@ -124,6 +125,12 @@ export const STATUS_STYLES: Record<TagStatus, StatusStyle> = {
     tint: TAG_PALETTE.purpleTint,
     text: TAG_PALETTE.purple,
   },
+  not_assessed: {
+    fill: TAG_PALETTE.paper3,
+    stroke: TAG_PALETTE.muted2,
+    tint: "rgba(107, 115, 133, 0.10)",
+    text: TAG_PALETTE.muted,
+  },
   role_center: {
     fill: TAG_PALETTE.ink,
     stroke: "rgba(255, 255, 255, 0.25)",
@@ -137,4 +144,5 @@ export const STATUS_LABELS: Record<Exclude<TagStatus, "role_center">, string> = 
   developing: "Developing",
   gap: "Gap",
   transferable: "Transferable",
+  not_assessed: "Not assessed",
 };

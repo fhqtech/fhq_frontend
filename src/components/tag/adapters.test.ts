@@ -140,6 +140,21 @@ describe("nodeStatus + computeStats", () => {
     expect(nodeStatus(node({ type: "transferable", score: 10 }))).toBe("transferable");
   });
 
+  it("marks un-probed skills not_assessed by proficiency or evidence sentinel", () => {
+    expect(nodeStatus(node({ score: 0, demonstrated_proficiency: "Not Discussed" }))).toBe("not_assessed");
+    expect(nodeStatus(node({ score: 0, evidence: ["Skill not covered during interview."] }))).toBe("not_assessed");
+    // a bare score of 0/undefined without the sentinel stays a gap
+    expect(nodeStatus(node({ score: 0 }))).toBe("gap");
+  });
+
+  it("excludes not_assessed nodes from computeStats counts", () => {
+    const counts = computeStats([
+      node({ score: 85 }),
+      node({ score: 0, demonstrated_proficiency: "Not Discussed" }),
+    ]);
+    expect(counts).toEqual({ strong: 1, developing: 0, gap: 0, transferable: 0 });
+  });
+
   it("tallies counts and excludes the role center", () => {
     const counts = computeStats([
       node({ type: "role_center" }),
