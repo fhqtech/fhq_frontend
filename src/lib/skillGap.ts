@@ -9,7 +9,7 @@
  *    when a role has authored target bars.
  */
 import type { TagNode } from "@/components/tag/types";
-import { nodeStatus } from "@/components/tag/adapters";
+import { nodeStatus, isNotAssessed } from "@/components/tag/adapters";
 import type { GapResult } from "@/services/recruiterJourneysApi";
 
 export type SkillGapStatus = "strong" | "developing" | "gap";
@@ -23,6 +23,10 @@ export interface SkillGapItem {
   target?: number;
   /** Points short of target — target mode only. */
   gap?: number;
+  /** Demonstrated proficiency level (e.g. "Awareness"), node/status mode. */
+  demonstratedProficiency?: string;
+  /** Required proficiency level (e.g. "Intermediate"), node/status mode. */
+  requiredProficiency?: string;
 }
 
 export interface SkillGapSummaryData {
@@ -43,7 +47,11 @@ export interface SkillGapSummaryData {
  */
 export function summarizeFromNodes(nodes: TagNode[]): SkillGapSummaryData | null {
   const scored = nodes.filter(
-    (n) => n.type !== "role_center" && n.type !== "transferable" && typeof n.score === "number",
+    (n) =>
+      n.type !== "role_center" &&
+      n.type !== "transferable" &&
+      typeof n.score === "number" &&
+      !isNotAssessed(n), // un-probed skills are not a gap and don't count toward the bar
   );
   if (scored.length === 0) return null;
 
@@ -54,7 +62,13 @@ export function summarizeFromNodes(nodes: TagNode[]): SkillGapSummaryData | null
     if (status === "strong") {
       met += 1;
     } else if (status === "developing" || status === "gap") {
-      gapItems.push({ skillName: n.label, status, score: n.score });
+      gapItems.push({
+        skillName: n.label,
+        status,
+        score: n.score,
+        demonstratedProficiency: n.demonstrated_proficiency ?? undefined,
+        requiredProficiency: n.required_proficiency ?? undefined,
+      });
     }
   }
   // Worst first: lowest score leads.

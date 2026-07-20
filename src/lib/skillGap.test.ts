@@ -41,6 +41,37 @@ describe("summarizeFromNodes (TAG status buckets)", () => {
     expect(s.gapItems[0].status).toBe("gap"); // 34 -> gap
     expect(s.gapItems[1].status).toBe("developing"); // 61 -> developing
   });
+
+  it("excludes un-probed (not_assessed) skills from total, met and gaps", () => {
+    const s = summarizeFromNodes([
+      node("GST compliance", 88),
+      {
+        id: "u",
+        label: "Consolidation",
+        score: 0,
+        type: "regular",
+        demonstrated_proficiency: "Not Discussed",
+      } as TagNode,
+    ])!;
+    expect(s.total).toBe(1); // only the probed skill counts toward the bar
+    expect(s.met).toBe(1);
+    expect(s.gapItems).toEqual([]); // an un-probed skill is not a gap
+  });
+
+  it("carries demonstrated + required proficiency onto gap items", () => {
+    const s = summarizeFromNodes([
+      {
+        id: "g",
+        label: "Financial reporting",
+        score: 34,
+        type: "regular",
+        demonstrated_proficiency: "Awareness",
+        required_proficiency: "Intermediate",
+      } as TagNode,
+    ])!;
+    expect(s.gapItems[0].demonstratedProficiency).toBe("Awareness");
+    expect(s.gapItems[0].requiredProficiency).toBe("Intermediate");
+  });
 });
 
 describe("summarizeFromGapResult (explicit target bars)", () => {
