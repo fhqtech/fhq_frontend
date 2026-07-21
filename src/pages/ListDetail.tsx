@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { listsApi, CandidateSource } from "@/services/listsApi";
 import { qualifiedListsApi } from "@/services/qualifiedListsApi";
+import { rankByFit } from "@/lib/shortlistRank";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -203,7 +204,9 @@ export default function ListDetail() {
       starred: candidate.starred || false,
       skills: candidate.skills || {},
       scores: candidate.scores || {
-        overall: 0,
+        // Enriched shortlist rows (B05.1) carry a flat overall_score from the
+        // interview result; surface it as the fit score when no nested scores.
+        overall: candidate.overall_score ?? 0,
         screening: 0,
         prelims: 0,
         fitment: 0
@@ -217,7 +220,7 @@ export default function ListDetail() {
   }, [candidates]);
 
   const filteredCandidates = useMemo(() => {
-    return transformedCandidates.filter(candidate => {
+    const matched = transformedCandidates.filter(candidate => {
       const name = candidate.name || '';
       const email = candidate.email || '';
       const phone = candidate.phone || '';
@@ -229,6 +232,8 @@ export default function ListDetail() {
 
       return matchesSearch;
     });
+    // Ranked by fit (best first) so the shortlist reads as a decision artifact.
+    return rankByFit(matched);
   }, [transformedCandidates, searchQuery]);
 
   const stats = useMemo(() => {
