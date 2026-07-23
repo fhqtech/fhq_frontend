@@ -151,6 +151,23 @@ export interface InterviewGrounding {
   }>;
 }
 
+export interface InterviewAssignmentBrief {
+  interview_id: string;
+  task_brief: string | null;
+  expected_artifacts: string[];
+  expected_artifacts_structured: Array<{
+    label: string;
+    kind?: string;
+    required?: boolean;
+    accept?: string[];
+  }>;
+  exhibits: Array<{ label: string; kind?: string; description?: string | null }>;
+  estimated_effort_min: number | null;
+  time_limit_min: number | null;
+  deadline_at: string | null;
+  rubric_public: Array<{ label: string }>;
+}
+
 export const journeysApi = {
   /** Journeys for the signed-in candidate across every workspace. */
   async getMyJourneys(): Promise<MyJourneysResponse> {
@@ -183,6 +200,18 @@ export const journeysApi = {
       submission_text: typeof data?.submission_text === "string" ? data.submission_text : null,
       submission_sections: Array.isArray(data?.submission_sections) ? data.submission_sections : [],
     };
+  },
+
+  /** The assignment brief for an interview-folded work sample, so the candidate
+   * can see the case while they submit. Public fields only (no interrogation
+   * plan / answer key). */
+  async getInterviewAssignment(interviewId: string): Promise<InterviewAssignmentBrief> {
+    const r = await fetch(
+      `${API_BASE_URL}/api/candidate-me/interviews/${encodeURIComponent(interviewId)}/assignment`,
+      { headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not load the assignment."));
+    return r.json();
   },
 };
 

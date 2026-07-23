@@ -6,21 +6,21 @@
  * (passed to the practical submission routes in the {practical_id} slot).
  *
  * `ws` / `pr` arrive as query params from the dashboard card. Flow:
- *   startSubmission(ws, pr, interviewId)
- *     → uploadArtifact(file)
- *     → submitArtifact(ws, pr, interviewId, submissionId, {...})
+ *   startSubmission(ws, pr, interviewId) + getInterviewAssignment(interviewId)
+ *     → SubmissionWorkspace (brief left, multi-file + notes + review right)
+ *     → uploadArtifact per file → submitArtifact(...)
  *     → /candidate/practical-defense/:submissionId
  *
  * Per CR-04 nothing here shows a score — only the task and confirmations.
  */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AlertCircle, Upload, FileCheck } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { practicalDefenseApi, uploadArtifact } from "@/services/practicalDefenseApi";
+import { journeysApi, type InterviewAssignmentBrief } from "@/services/journeysApi";
+import { SubmissionWorkspace } from "@/components/practicals/SubmissionWorkspace";
+import { clearDraft } from "@/lib/submissionDraft";
 
 export default function CandidateInterviewWorkSample() {
   const { interviewId = "" } = useParams();
@@ -33,9 +33,7 @@ export default function CandidateInterviewWorkSample() {
 
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
-  const [artifactRef, setArtifactRef] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [approachNote, setApproachNote] = useState("");
+  const [brief, setBrief] = useState<InterviewAssignmentBrief | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,29 +59,46 @@ export default function CandidateInterviewWorkSample() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, submissionId]);
 
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError(null);
-    try {
-      setArtifactRef(await uploadArtifact(file));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not upload your file.");
-    } finally {
-      setUploading(false);
-    }
-  }
+  // Fetch the brief so the candidate can SEE the case while they work.
+  // Best-effort — a missing brief just shows the answer side.
+  useEffect(() => {
+    if (!interviewId) return;
+    let cancelled = false;
+    journeysApi
+      .getInterviewAssignment(interviewId)
+      .then((b) => {
+        if (!cancelled) setBrief(b);
+      })
+      .catch(() => {
+        /* no brief for this interview — the answer side still renders */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [interviewId]);
 
-  async function submit() {
-    if (!ready || !submissionId || !artifactRef || submitting) return;
+  async function handleSubmit({
+    files,
+    notes,
+    aiDisclosed,
+  }: {
+    files: File[];
+    notes: string;
+    aiDisclosed: boolean;
+  }) {
+    if (!ready || !submissionId || submitting || files.length === 0) return;
     setSubmitting(true);
     setError(null);
     try {
+      const refs: string[] = [];
+      for (const f of files) refs.push(await uploadArtifact(f));
       await practicalDefenseApi.submitArtifact(ws, pr, interviewId, submissionId, {
-        artifact_refs: [artifactRef],
-        provenance: { ai_tools_disclosed: [], approach_note: approachNote.trim() },
+        // The candidate attested own-work via the review checkbox (aiDisclosed);
+        // specific tool-name capture is a follow-up, so the list stays empty.
+        artifact_refs: refs,
+        provenance: { ai_tools_disclosed: [], approach_note: notes.trim() },
       });
+      clearDraft(interviewId);
       navigate(`/candidate/practical-defense/${submissionId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit your work.");
@@ -91,87 +106,43 @@ export default function CandidateInterviewWorkSample() {
     }
   }
 
-  return (
-    <div className="container mx-auto max-w-2xl px-4 py-10">
-      {!ready ? (
-        <div className="py-12 flex flex-col items-center gap-2 text-center" role="alert">
+  if (!ready) {
+    return (
+      <div className="container mx-auto max-w-2xl px-4 py-10">
+        <div className="flex flex-col items-center gap-2 py-12 text-center" role="alert">
           <AlertCircle className="h-5 w-5 text-warning" />
           <p className="text-sm text-ink">This work sample link is missing some details.</p>
           <Button variant="outline" onClick={() => navigate("/candidate/dashboard")}>
             Back to dashboard
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto max-w-6xl px-4 py-10">
+      <header className="mb-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-ink">Work sample</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Complete the case</h1>
+        <p className="mt-1 text-sm text-ink-soft">
+          Work through the brief on the left and submit your deliverables on the right. After you
+          submit, you'll defend your key choices in a short conversation.
+        </p>
+      </header>
+
+      {starting && !submissionId ? (
+        <p className="text-sm text-muted" aria-busy="true">
+          Preparing your submission…
+        </p>
       ) : (
-        <Card className="p-0">
-          <CardHeader>
-            <CardTitle className="text-base text-ink">Your work sample</CardTitle>
-            <CardDescription className="text-sm text-ink/80 pt-1">
-              Upload your deliverable and a short note on your approach. After you submit, you'll
-              defend your key choices in a short conversation.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {starting && !submissionId ? (
-              <p className="text-sm text-muted" aria-busy="true">
-                Preparing your submission…
-              </p>
-            ) : (
-              <>
-                <div className="flex flex-col gap-2">
-                  <Label>Deliverable</Label>
-                  <label className="flex items-center justify-center gap-2 rounded border border-dashed border-rule p-6 cursor-pointer hover:bg-paper-2 text-sm text-ink">
-                    {artifactRef ? (
-                      <>
-                        <FileCheck className="h-4 w-4 text-success" /> File uploaded — choose another
-                        to replace
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4" />
-                        {uploading ? "Uploading…" : "Upload your deliverable (PDF or DOCX)"}
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept=".pdf,.docx"
-                      onChange={onFile}
-                      disabled={uploading || submitting}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="approach-note">Approach note</Label>
-                  <Textarea
-                    id="approach-note"
-                    value={approachNote}
-                    onChange={(e) => setApproachNote(e.target.value)}
-                    placeholder="Briefly describe how you approached the task and the key judgments you made…"
-                    rows={6}
-                    disabled={submitting}
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-xs text-danger flex items-center gap-1.5" role="alert">
-                    <AlertCircle className="h-3.5 w-3.5" /> {error}
-                  </p>
-                )}
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={submit}
-                    disabled={!artifactRef || !submissionId || submitting}
-                    className="rounded"
-                  >
-                    {submitting ? "Submitting…" : "Submit and start defense"}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <SubmissionWorkspace
+          brief={brief}
+          draftKey={interviewId}
+          onSubmit={handleSubmit}
+          submitting={submitting}
+          error={error}
+        />
       )}
     </div>
   );
