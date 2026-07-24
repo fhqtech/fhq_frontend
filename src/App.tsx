@@ -83,6 +83,7 @@ const CandidatePracticalSubmit = lazy(() => import("./pages/candidate/CandidateP
 const CandidateInterviewWorkSample = lazy(() => import("./pages/candidate/CandidateInterviewWorkSample"));
 const CandidatePracticalDefense = lazy(() => import("./pages/candidate/CandidatePracticalDefense"));
 const CandidateJourney = lazy(() => import("./pages/candidate/CandidateJourney"));
+const CandidateFeedback = lazy(() => import("./pages/candidate/CandidateFeedback"));
 const Programs = lazy(() => import("./pages/Programs"));
 
 const LegacyFitmentRedirect = () => {
@@ -437,6 +438,17 @@ const App = () => (
               element={
                 <CandidateProtectedRoute>
                   <CandidateJourney />
+                </CandidateProtectedRoute>
+              }
+            />
+            {/* P12: candidate-facing feedback report (consent-first, DPDP). Route
+                exists but is unlinked in the pilot — entry points gate on
+                useFlag('candidate_feedback') (default off). */}
+            <Route
+              path="/candidate/feedback/:programId"
+              element={
+                <CandidateProtectedRoute>
+                  <CandidateFeedback />
                 </CandidateProtectedRoute>
               }
             />

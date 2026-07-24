@@ -42,7 +42,8 @@ export type FlagKey =
   | "candidate_write"
   // Phase 5 — expanded-value slices
   | "cohort_gap"
-  | "blueprint_target_seed";
+  | "blueprint_target_seed"
+  | "candidate_feedback";
 
 export interface FlagDef {
   key: FlagKey;
@@ -85,5 +86,9 @@ export const FLAG_REGISTRY: Record<FlagKey, FlagDef> = {
   blueprint_target_seed: def(
     "blueprint_target_seed",
     "Seed the role skill target from the role blueprint's required proficiencies",
+  ),
+  candidate_feedback: def(
+    "candidate_feedback",
+    "Candidate-facing per-skill feedback report with DPDP consent and retention",
   ),
 };
