@@ -22,7 +22,15 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StageResults, type StageResultsPayload } from "./StageResults";
+
+// PercentileBadge (Overview) self-fetches the cohort via react-query; give it a
+// client and stub the endpoint so these parity tests stay offline. The badge
+// self-suppresses on empty data, so it never affects the assertions below.
+vi.mock("@/services/scoreAnalyticsApi", () => ({
+  scoreAnalyticsApi: { getAllScores: vi.fn().mockResolvedValue([]) },
+}));
 
 // The TAG is SACRED — never re-implemented. Mock it to a sentinel that echoes
 // the wiring props (mode, session, adapter output) so we prove the composition.
@@ -126,15 +134,18 @@ function renderStage(
   props: Record<string, unknown> = {},
 ) {
   const results = { ...baseResults, ...overrides } as StageResultsPayload;
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <StageResults
-        results={results}
-        sessionId={results.session_id}
-        interviewId={results.interview_id}
-        {...props}
-      />
-    </MemoryRouter>,
+    <QueryClientProvider client={qc}>
+      <MemoryRouter>
+        <StageResults
+          results={results}
+          sessionId={results.session_id}
+          interviewId={results.interview_id}
+          {...props}
+        />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 

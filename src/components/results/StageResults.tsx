@@ -55,6 +55,7 @@ import { TalentAnalysisGraph } from "@/components/tag/TalentAnalysisGraph";
 import { TranscriptViewer } from "@/components/interview/TranscriptViewer";
 import { RatingPanel } from "@/components/interview/RatingPanel";
 import { FusedSkillProfile } from "@/components/assessment/FusedSkillProfile";
+import { PercentileBadge } from "./PercentileBadge";
 import { TransferableBand } from "@/components/trust/TransferableBand";
 import { IntegrityNote } from "@/components/trust/IntegrityNote";
 import { TagViewModal } from "@/components/views/TagViewModal";
@@ -251,6 +252,11 @@ export function StageResults({
                     {hireability_recommendation}
                   </Badge>
                 </div>
+                <PercentileBadge
+                  candidateId={results.candidate_id}
+                  interviewId={interviewId}
+                  className="ml-auto"
+                />
               </div>
             </Card>
 
