@@ -61,7 +61,7 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
     return (
       <Card>
         <CardHeader className="p-3">
-          <CardTitle className="text-sm">Candidate Distribution</CardTitle>
+          <CardTitle className="text-sm">Candidate distribution</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-[180px]">
@@ -146,7 +146,7 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
       <CardHeader className="p-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-sm">Candidate Distribution</CardTitle>
+            <CardTitle className="text-sm">Candidate distribution</CardTitle>
             <p className="text-[10px] text-muted-foreground mt-0.5">
               <span className="text-primary font-medium">FlowDot AI</span> vs <span className="text-destructive font-medium">ATS</span>
             </p>
@@ -214,7 +214,7 @@ export const ScoreDistributionChart = ({ candidates, aiQuery, totalCandidatesInL
               formatter={(value: any, name: string) => {
                 if (name === "aiDensity") return [`${Number(value).toFixed(2)}`, "FlowDot AI"];
                 if (name === "atsDensity") return [`${Number(value).toFixed(2)}`, "ATS"];
-                if (name === "starredDensity") return [`${Number(value).toFixed(2)}`, "Top Performers"];
+                if (name === "starredDensity") return [`${Number(value).toFixed(2)}`, "Top performers"];
                 return [value, name];
               }}
               labelFormatter={(label) => `Score: ${Number(label).toFixed(1)}`}
