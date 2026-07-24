@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Plus, Minus, Loader2, Check, AlertCircle, Upload, FileText } from "lucide-react";
+import { Plus, Minus, Loader2, Check, AlertCircle, Upload, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -210,7 +211,6 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
     [parsed.rows],
   );
 
-  if (!isOpen) return null;
 
   /* ------------------------- individual-tab helpers ----------------------- */
 
@@ -396,31 +396,14 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
         : "Send invitations";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs"
-      onClick={handleClose}
-    >
-      <div
-        className="bg-paper rounded-xl shadow-3 w-full max-w-[720px] max-h-[85vh] overflow-hidden flex flex-col border-2 border-rule"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="flex items-center justify-between px-6 py-4 border-b-2 border-rule bg-paper-2">
-          <div>
-            <h2 className="text-lg font-semibold text-ink">Add candidates</h2>
-            {interviewTitle && (
-              <p className="text-xs text-muted mt-0.5">{interviewTitle}</p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            aria-label="Close"
-            className="p-2 hover:bg-paper-3 rounded transition-colors"
-            disabled={submitting}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </header>
+    <Dialog open={isOpen} onOpenChange={(o) => { if (!o) handleClose(); }}>
+      <DialogContent className="flex max-h-[85vh] w-full max-w-[720px] flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="space-y-0.5 border-b border-rule bg-paper-2 px-6 py-4 text-left">
+          <DialogTitle className="text-lg text-ink">Add candidates</DialogTitle>
+          {interviewTitle && (
+            <p className="text-xs text-muted">{interviewTitle}</p>
+          )}
+        </DialogHeader>
 
         <div className="flex-1 overflow-auto p-6">
           {(blueprintBroken || serverBlockMessage) && (
@@ -654,8 +637,8 @@ export const AddCandidatesModal: React.FC<AddCandidatesModalProps> = ({
             </Button>
           </div>
         </footer>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
