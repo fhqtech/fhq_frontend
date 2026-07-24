@@ -14,6 +14,14 @@ const snap: MonitorSnapshot = {
   submission_reference: { preview_text: "ITC claimed 4,20,000 against the suspense ledger" },
   cheat_score: 0.31,
   coverage: { defended: ["GST"], hollow: ["TDS"], unprobed: ["Consolidation"] },
+  expected_vs_submitted_diff: {
+    concept: "ITC suspense",
+    target_level: 4,
+    model_answer: "reverses the ITC against the suspense ledger",
+    submitted: "usually not claimable",
+    grounding_ratio: 0.1,
+    flag: true,
+  },
 };
 
 describe("InterviewMonitorPanels", () => {
@@ -23,10 +31,12 @@ describe("InterviewMonitorPanels", () => {
     expect(screen.getByText(/question 2 of 5/i)).toBeInTheDocument();
     expect(screen.getByText(/why does your reconciliation skip/i)).toBeInTheDocument();
     expect(screen.getByText(/they skip the suspense account/i)).toBeInTheDocument(); // rationale (recruiter-only)
-    expect(screen.getByText(/against the suspense ledger/i)).toBeInTheDocument();
+    expect(screen.getByText(/ITC claimed 4,20,000/i)).toBeInTheDocument();
     expect(screen.getByText(/cheat score 0.31/i)).toBeInTheDocument();
     expect(screen.getByText(/advisory only/i)).toBeInTheDocument();
     expect(screen.getByText(/consolidation/i)).toBeInTheDocument(); // unprobed coverage
+    expect(screen.getByText(/target L4/i)).toBeInTheDocument();
+    expect(screen.getByText(/sounds hollow vs the model answer/i)).toBeInTheDocument();
   });
 
   it("shows a waiting state before the first turn", () => {

@@ -22,7 +22,15 @@ export interface MonitorSnapshot {
   cheat_signals?: string[];
   coverage?: { defended?: string[]; hollow?: string[]; unprobed?: string[] };
   model_answer?: string;
-  expected_vs_submitted_diff?: unknown;
+  expected_vs_submitted_diff?: {
+    concept?: string;
+    target_level?: number | null;
+    model_answer?: string;
+    hollow_basis?: string;
+    submitted?: string;
+    grounding_ratio?: number;
+    flag?: boolean;
+  } | null;
   authenticity_verdict?: string;
 }
 

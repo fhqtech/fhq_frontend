@@ -74,6 +74,41 @@ export function InterviewMonitorPanels({ snapshot, status }: InterviewMonitorPan
         </Panel>
       )}
 
+      {s.expected_vs_submitted_diff && (
+        <Panel title="Expected vs submitted">
+          <div className="flex flex-wrap items-center gap-2">
+            {typeof s.expected_vs_submitted_diff.target_level === "number" && (
+              <span className="rounded-sm bg-paper-2 px-1.5 py-0.5 text-[11px] text-ink-soft">
+                target L{s.expected_vs_submitted_diff.target_level}
+              </span>
+            )}
+            {typeof s.expected_vs_submitted_diff.grounding_ratio === "number" && (
+              <span
+                className={
+                  "font-mono text-xs tabular-nums " +
+                  (s.expected_vs_submitted_diff.flag ? "text-danger" : "text-good")
+                }
+              >
+                grounding {(s.expected_vs_submitted_diff.grounding_ratio * 100).toFixed(0)}%
+              </span>
+            )}
+            {s.expected_vs_submitted_diff.flag && (
+              <span className="text-xs text-danger">sounds hollow vs the model answer</span>
+            )}
+          </div>
+          {s.expected_vs_submitted_diff.model_answer && (
+            <p className="mt-2 text-xs text-ink-soft">
+              <span className="text-muted">Model:</span> {s.expected_vs_submitted_diff.model_answer}
+            </p>
+          )}
+          {s.expected_vs_submitted_diff.submitted && (
+            <p className="mt-1 text-xs text-ink-soft">
+              <span className="text-muted">Said:</span> {s.expected_vs_submitted_diff.submitted}
+            </p>
+          )}
+        </Panel>
+      )}
+
       {cov && (cov.defended?.length || cov.hollow?.length || cov.unprobed?.length) ? (
         <Panel title="Coverage">
           <ul className="space-y-1 text-xs">
