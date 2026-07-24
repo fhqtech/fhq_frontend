@@ -36,6 +36,10 @@ export interface ServerMessage {
   // Grounded interview: the agent is referencing a span of the candidate's
   // submission so the UI can highlight it. Additive; older clients ignore it.
   submission_reference?: SubmissionReference;
+  // Phase 3: the defense probe now firing — the "now discussing" cue.
+  skill_label?: string;
+  question_index?: number;
+  question_total?: number;
 }
 
 /** A pointer to a span of the candidate's submitted work the AI is asking about. */
@@ -46,6 +50,14 @@ export interface SubmissionReference {
   char_end?: number;
   preview_text?: string;
   reason?: string;
+}
+
+/** The defense probe firing this turn — candidate-safe cue (no rubric/rationale). */
+export interface ActiveProbe {
+  skill_label: string;
+  question_index: number;
+  question_total: number;
+  submission_reference?: SubmissionReference;
 }
 
 export interface VoiceClientEvents {
@@ -62,6 +74,8 @@ export interface VoiceClientEvents {
   /** Grounded interview: the agent referenced a span of the candidate's
    *  submission — the UI scrolls to + highlights it. */
   onSubmissionReference?: (ref: SubmissionReference) => void;
+  /** Phase 3: the defense probe firing now — drives the "now discussing" cue. */
+  onActiveProbe?: (probe: ActiveProbe) => void;
   /** Server is about to send audio chunks for the next agent turn. */
   onAgentTurnStart?: () => void;
   /** Server finished an agent turn; mic capture should resume. */
@@ -300,6 +314,16 @@ export class VoiceWebSocketClient {
         break;
       case "error":
         this.events.onError?.(msg.error ?? "unknown_error");
+        break;
+      case "active_probe":
+        if (typeof msg.skill_label === "string") {
+          this.events.onActiveProbe?.({
+            skill_label: msg.skill_label,
+            question_index: msg.question_index ?? 0,
+            question_total: msg.question_total ?? 0,
+            submission_reference: msg.submission_reference,
+          });
+        }
         break;
       case "submission_reference":
         if (msg.submission_reference) this.events.onSubmissionReference?.(msg.submission_reference);

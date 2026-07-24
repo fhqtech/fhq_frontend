@@ -40,7 +40,8 @@ import { ParticleSphere } from "@/components/interview/ParticleSphere";
 import { AiInterviewer } from "@/components/interview/AiInterviewer";
 import { TranscriptBox, type TranscriptMessage } from "@/components/interview/TranscriptBox";
 import SubmissionPanel from "@/components/interview/SubmissionPanel";
-import type { SubmissionReference } from "@/services/voiceWebSocketClient";
+import { NowDiscussingCue } from "@/components/interview/NowDiscussingCue";
+import type { SubmissionReference, ActiveProbe } from "@/services/voiceWebSocketClient";
 import { journeysApi } from "@/services/journeysApi";
 import { ConversationState } from "@/types/interview";
 
@@ -184,6 +185,7 @@ export default function InterviewSessionV2Page() {
   const [grounded, setGrounded] = useState(!!groundedState?.grounded);
   const [submissionText, setSubmissionText] = useState(groundedState?.submissionText || "");
   const [submissionHighlight, setSubmissionHighlight] = useState<SubmissionReference | null>(null);
+  const [activeProbe, setActiveProbe] = useState<ActiveProbe | null>(null);
 
   useEffect(() => {
     if (!interviewId) return;
@@ -456,6 +458,7 @@ export default function InterviewSessionV2Page() {
         },
         onAgentTextPartial: (text) => setAgentPartial(text),
         onSubmissionReference: (ref) => setSubmissionHighlight(ref),
+        onActiveProbe: (probe) => setActiveProbe(probe),
         onAgentAudioChunk: (pcm) => playerRef.current?.enqueue(pcm),
         onCandidateTurnPartial: (text) => setCandidatePartial(text),
         onCandidateTurnFinal: (text) => {
@@ -947,6 +950,15 @@ export default function InterviewSessionV2Page() {
               <ChevronLeft className="w-4 h-4" />
             </button>
           )}
+        </div>
+      )}
+      {grounded && activeProbe && (
+        <div className="absolute top-6 left-1/2 z-20 -translate-x-1/2">
+          <NowDiscussingCue
+            skillLabel={activeProbe.skill_label}
+            questionIndex={activeProbe.question_index}
+            questionTotal={activeProbe.question_total}
+          />
         </div>
       )}
       {grounded && submissionText && (
