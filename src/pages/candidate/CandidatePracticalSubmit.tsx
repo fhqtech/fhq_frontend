@@ -6,19 +6,20 @@
  *
  * Per CR-04 nothing here shows a score — only the task and confirmations.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AlertCircle, Upload, CheckCircle2, FileCheck } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useCandidateAuth } from "@/contexts/CandidateAuthContext";
 import {
   practicalDefenseApi,
   uploadArtifact,
   type PracticalInvitationView,
 } from "@/services/practicalDefenseApi";
+import { SubmissionWorkspace } from "@/components/practicals/SubmissionWorkspace";
+import { clearDraft } from "@/lib/submissionDraft";
+import type { InterviewAssignmentBrief } from "@/services/journeysApi";
 
 export default function CandidatePracticalSubmit() {
   const { token = "" } = useParams();
@@ -31,10 +32,25 @@ export default function CandidatePracticalSubmit() {
 
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
-  const [artifactRef, setArtifactRef] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [approachNote, setApproachNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Adapt the invitation's brief to the shared workspace shape. The practical-
+  // invitation endpoint carries the basic fields; the rest default empty.
+  const brief = useMemo<InterviewAssignmentBrief | null>(() => {
+    const a = invitation?.assignment;
+    if (!a) return null;
+    return {
+      interview_id: invitation.practicalId,
+      task_brief: a.task_brief ?? null,
+      expected_artifacts: a.expected_artifacts ?? [],
+      expected_artifacts_structured: [],
+      exhibits: [],
+      estimated_effort_min: a.estimated_effort_min ?? null,
+      time_limit_min: null,
+      deadline_at: null,
+      rubric_public: [],
+    };
+  }, [invitation]);
 
   // Load the invitation (public).
   useEffect(() => {
@@ -77,35 +93,36 @@ export default function CandidatePracticalSubmit() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invitation, isAuthenticated, submissionId]);
 
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError(null);
-    try {
-      setArtifactRef(await uploadArtifact(file));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not upload your file.");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function submit() {
-    if (!invitation || !submissionId || !artifactRef || submitting) return;
+  async function handleSubmit({
+    files,
+    notes,
+    aiDisclosed,
+  }: {
+    files: File[];
+    notes: string;
+    aiDisclosed: boolean;
+  }) {
+    if (!invitation || !submissionId || submitting || files.length === 0) return;
     setSubmitting(true);
     setError(null);
     try {
+      const refs: string[] = [];
+      for (const f of files) refs.push(await uploadArtifact(f));
       await practicalDefenseApi.submitArtifact(
         invitation.workspaceId,
         invitation.projectId,
         invitation.practicalId,
         submissionId,
         {
-          artifact_refs: [artifactRef],
-          provenance: { ai_tools_disclosed: [], approach_note: approachNote.trim() },
+          artifact_refs: refs,
+          provenance: {
+            ai_tools_disclosed: [],
+            approach_note: notes.trim(),
+            own_work_attested: aiDisclosed,
+          },
         },
       );
+      clearDraft(invitation.practicalId);
       navigate(`/candidate/practical-defense/${submissionId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit your work.");
@@ -114,7 +131,7 @@ export default function CandidatePracticalSubmit() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-10">
+    <div className="container mx-auto max-w-6xl px-4 py-10">
       {loading || authLoading ? (
         <p className="text-sm text-muted py-12 text-center" aria-busy="true">
           Loading your task…
@@ -150,106 +167,33 @@ export default function CandidatePracticalSubmit() {
           </CardContent>
         </Card>
       ) : invitation ? (
-        <Card className="p-0">
-          <CardHeader>
-            <CardTitle className="text-base text-ink">
-              {invitation.title || "Your practical"}
-            </CardTitle>
-            <CardDescription className="text-sm text-ink/80 pt-1">
-              Read the task, then upload your deliverable and a short note on your approach. After
-              you submit, you'll defend your key choices in a short conversation.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {invitation.assignment?.task_brief && (
-              <div className="rounded-md border border-rule bg-paper-2 p-4 space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-mono uppercase tracking-[0.14em] text-[10px] text-gold-ink">
-                    Your task
-                  </p>
-                  {invitation.assignment.estimated_effort_min ? (
-                    <span className="text-xs text-muted">
-                      ~{invitation.assignment.estimated_effort_min} min
-                    </span>
-                  ) : null}
-                </div>
-                <p className="whitespace-pre-wrap text-sm text-ink leading-relaxed">
-                  {invitation.assignment.task_brief}
-                </p>
-                {invitation.assignment.expected_artifacts &&
-                invitation.assignment.expected_artifacts.length > 0 ? (
-                  <div>
-                    <p className="text-xs font-medium text-ink mb-1">What to submit</p>
-                    <ul className="list-disc pl-5 text-sm text-ink/80 space-y-0.5">
-                      {invitation.assignment.expected_artifacts.map((a, i) => (
-                        <li key={i}>{a}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
-            )}
-            {starting && !submissionId ? (
-              <p className="text-sm text-muted" aria-busy="true">
-                Preparing your submission…
+        starting && !submissionId ? (
+          <p className="text-sm text-muted" aria-busy="true">
+            Preparing your submission…
+          </p>
+        ) : (
+          <>
+            <header className="mb-6">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-ink">
+                Practical
               </p>
-            ) : (
-              <>
-                <div className="flex flex-col gap-2">
-                  <Label>Deliverable</Label>
-                  <label className="flex items-center justify-center gap-2 rounded border border-dashed border-rule p-6 cursor-pointer hover:bg-paper-2 text-sm text-ink">
-                    {artifactRef ? (
-                      <>
-                        <FileCheck className="h-4 w-4 text-success" /> File uploaded — choose another
-                        to replace
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4" />
-                        {uploading ? "Uploading…" : "Upload your deliverable (PDF, DOCX, or XLSX)"}
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept=".pdf,.docx,.xlsx"
-                      onChange={onFile}
-                      disabled={uploading || submitting}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="approach-note">Approach note</Label>
-                  <Textarea
-                    id="approach-note"
-                    value={approachNote}
-                    onChange={(e) => setApproachNote(e.target.value)}
-                    placeholder="Briefly describe how you approached the task and the key judgments you made…"
-                    rows={6}
-                    disabled={submitting}
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-xs text-danger flex items-center gap-1.5" role="alert">
-                    <AlertCircle className="h-3.5 w-3.5" /> {error}
-                  </p>
-                )}
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={submit}
-                    disabled={!artifactRef || !submissionId || submitting}
-                    className="rounded"
-                  >
-                    {submitting ? "Submitting…" : "Submit and start defense"}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">
+                {invitation.title || "Your practical"}
+              </h1>
+              <p className="mt-1 text-sm text-ink-soft">
+                Work through the brief on the left and submit your deliverables on the right. After
+                you submit, you'll defend your key choices in a short conversation.
+              </p>
+            </header>
+            <SubmissionWorkspace
+              brief={brief}
+              draftKey={invitation.practicalId}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+              error={error}
+            />
+          </>
+        )
       ) : (
         <div className="py-12 flex flex-col items-center gap-2 text-center" role="alert">
           <CheckCircle2 className="h-5 w-5 text-muted" />
