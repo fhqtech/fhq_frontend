@@ -19,6 +19,13 @@ import type { ProjectDashboardResponse } from "@/types/analytics";
 import type { InterviewSnapshot, InterviewStats } from "@/lib/nextBestAction";
 import { buildActionQueue, type QueueItem } from "@/lib/buildActionQueue";
 import { ActionQueue } from "@/components/home/ActionQueue";
+import { BentoGrid, BentoCell } from "@/components/dashboard/BentoGrid";
+import { HeroKPI } from "@/components/dashboard/HeroKPI";
+import { PipelineFunnel } from "@/components/dashboard/PipelineFunnel";
+import { ThroughputChart } from "@/components/dashboard/ThroughputChart";
+import { DomainSplit } from "@/components/dashboard/DomainSplit";
+import { InterviewRollupTable } from "@/components/dashboard/InterviewRollupTable";
+import { TopCandidatesStrip } from "@/components/dashboard/TopCandidatesStrip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { PageSkeleton } from "@/components/ui/shimmer";
@@ -88,7 +95,7 @@ export default function Home() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 px-6 py-8">
+    <div className="mx-auto max-w-6xl space-y-8 px-6 py-8">
       <header>
         <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">Workspace</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">What needs you</h1>
@@ -114,7 +121,48 @@ export default function Home() {
           sampleDataAction={sampleRole ? { label: "See a sample analysis", onClick: () => navigate("/sample-tag") } : undefined}
         />
       ) : (
-        <ActionQueue items={queue} onAction={onAction} />
+        <div className="space-y-8">
+          <ActionQueue items={queue} onAction={onAction} />
+
+          {dashboardData && (
+            <section className="space-y-4">
+              <div>
+                <p className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
+                  Workspace pulse
+                </p>
+                <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink">
+                  This project at a glance
+                </h2>
+              </div>
+              <BentoGrid>
+                <BentoCell cols={4}>
+                  <HeroKPI
+                    className="h-full"
+                    kicker="Pipeline"
+                    label="Strong matches"
+                    value={dashboardData.funnel.strong_match}
+                    body={`of ${dashboardData.funnel.completed} completed · ${dashboardData.funnel.invited} invited`}
+                  />
+                </BentoCell>
+                <BentoCell cols={8}>
+                  <PipelineFunnel className="h-full" funnel={dashboardData.funnel} />
+                </BentoCell>
+                <BentoCell cols={8}>
+                  <ThroughputChart className="h-full" buckets={dashboardData.throughput} />
+                </BentoCell>
+                <BentoCell cols={4}>
+                  <DomainSplit className="h-full" interviews={dashboardData.interviews_rollup} />
+                </BentoCell>
+                <BentoCell cols={7}>
+                  <InterviewRollupTable className="h-full" interviews={dashboardData.interviews_rollup} />
+                </BentoCell>
+                <BentoCell cols={5}>
+                  <TopCandidatesStrip className="h-full" candidates={dashboardData.top_candidates} />
+                </BentoCell>
+              </BentoGrid>
+            </section>
+          )}
+        </div>
       )}
     </div>
   );
