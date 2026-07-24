@@ -8,11 +8,12 @@
  */
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { CheckCircle2, AlertCircle, Upload } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { assessmentsApi, type ArtifactView } from "@/services/assessmentsApi";
+import { FileDropzone } from "@/components/practicals/FileDropzone";
+import { MarkdownNotes } from "@/components/practicals/MarkdownNotes";
 
 const API_BASE = () => import.meta.env.VITE_API_BASE_URL || "http://localhost:8082";
 
@@ -47,6 +48,7 @@ export default function CandidateArtifact() {
   const [step, setStep] = useState<"artifact" | "defense" | "done">(
     defenseOnly ? "defense" : "artifact",
   );
+  const [artifactFiles, setArtifactFiles] = useState<File[]>([]);
   const [defense, setDefense] = useState("");
 
   useEffect(() => {
@@ -63,13 +65,13 @@ export default function CandidateArtifact() {
     };
   }, [itemId, domain]);
 
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !candidateId) return;
+  async function submitArtifactStep() {
+    if (artifactFiles.length === 0 || !candidateId || busy) return;
     setBusy(true);
     setError(null);
     try {
-      const ref = await uploadArtifact(file);
+      // This assessment path stores a single artifact_ref, so submit the one file.
+      const ref = await uploadArtifact(artifactFiles[0]);
       await assessmentsApi.submitArtifact({
         candidate_id: candidateId,
         item_id: itemId,
@@ -149,31 +151,36 @@ export default function CandidateArtifact() {
 
             {step === "artifact" ? (
               <div className="flex flex-col gap-3">
-                <label className="flex items-center justify-center gap-2 rounded border border-dashed border-rule p-6 cursor-pointer hover:bg-paper-2 text-sm text-ink">
-                  <Upload className="h-4 w-4" />
-                  {busy ? "Uploading…" : "Upload your deliverable (PDF or DOCX)"}
-                  <input
-                    type="file"
-                    accept={(item.submission_spec?.accept || [".pdf", ".docx"]).join(",")}
-                    onChange={onFile}
-                    disabled={busy}
-                    className="hidden"
-                  />
-                </label>
+                <FileDropzone
+                  files={artifactFiles}
+                  onChange={setArtifactFiles}
+                  accept={item.submission_spec?.accept || [".pdf", ".docx"]}
+                  maxFiles={1}
+                  disabled={busy}
+                />
                 <p className="text-xs text-muted">
                   After you upload, you'll be asked to defend the key choices in your work.
                 </p>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={submitArtifactStep}
+                    disabled={artifactFiles.length === 0 || busy}
+                    className="rounded"
+                  >
+                    {busy ? "Submitting…" : "Submit and defend"}
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 <p className="text-xs text-muted">
                   Explain the key judgments in your submission, and how your approach would change if a core assumption changed.
                 </p>
-                <Textarea
+                <MarkdownNotes
                   value={defense}
-                  onChange={(e) => setDefense(e.target.value)}
+                  onChange={setDefense}
+                  label="Defense"
                   placeholder="Walk through your reasoning and the choices you made…"
-                  rows={10}
                 />
                 <div className="flex justify-end">
                   <Button onClick={submitDefense} disabled={defense.trim().length === 0 || busy} className="rounded">
