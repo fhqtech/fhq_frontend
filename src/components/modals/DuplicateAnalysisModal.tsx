@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, X, Info, ArrowsClockwise, Users, Warning } from 'phosphor-react';
+import { CheckCircle, Info, ArrowsClockwise, Users, Warning } from 'phosphor-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { DuplicateAnalysis } from '@/services/duplicateDetectionApi';
@@ -178,48 +179,15 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
     visible: { scaleX: 1 }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        variants={overlayVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        {/* Backdrop */}
-        <motion.div
-          className="absolute inset-0 bg-ink/50 backdrop-blur-xs"
-          onClick={step === 'results' ? onCancel : undefined}
-        />
-
-        {/* Modal */}
-        <motion.div
-          className="relative bg-paper rounded-xl shadow-3 max-w-lg w-full mx-4 overflow-hidden"
-          variants={modalVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="flex w-full max-w-lg flex-col gap-0 overflow-hidden p-0">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-rule">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-ink">
-                {step === 'analyzing' ? 'Analyzing candidate lists' : 'Duplicate analysis results'}
-              </h2>
-              {step === 'results' && (
-                <button
-                  onClick={onCancel}
-                  aria-label="Close dialog"
-                  className="text-muted-2 hover:text-muted transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          </div>
+          <DialogHeader className="border-b border-rule px-6 py-4 text-left">
+            <DialogTitle className="text-lg font-semibold text-ink">
+              {step === 'analyzing' ? 'Analyzing candidate lists' : 'Duplicate analysis results'}
+            </DialogTitle>
+          </DialogHeader>
 
           {/* Content */}
           <div className="px-6 py-6">
@@ -447,18 +415,18 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
 
           {/* Footer */}
           {step === 'results' && analysisResult && analysisResult.totalDuplicates > 0 && (
-            <div className="px-6 py-4 border-t border-rule bg-paper-2">
+            <DialogFooter className="border-t border-rule bg-paper-2 px-6 py-4">
               <div className="flex justify-end gap-3">
                 <Button
                   variant="outline"
                   onClick={onCancel}
-                  className="uppercase rounded-sm text-danger hover:text-danger hover:bg-danger-soft"
+                  className="rounded-sm text-danger hover:text-danger hover:bg-danger-soft"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={onContinue}
-                  className="uppercase rounded-sm text-paper font-medium transition-all duration-200"
+                  className="rounded-sm text-paper font-medium transition-all duration-200"
                   style={{
                     backgroundColor: 'hsl(var(--ink))',
                     boxShadow: 'var(--shadow-1)'
@@ -466,13 +434,12 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}
                 >
-                  Continue Anyway
+                  Continue anyway
                 </Button>
               </div>
-            </div>
+            </DialogFooter>
           )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   );
 };

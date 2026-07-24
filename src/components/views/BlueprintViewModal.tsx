@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Award, Wrench } from 'lucide-react';
+import { Award, Wrench } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { SpinnerWithCopy } from '@/components/ui/spinner';
 import { fetchFullBlueprint, FullBlueprintData, EvaluationPillar } from '@/services/templateApi';
 import SkillsGraph from '../ui/SkillsGraph';
@@ -48,54 +49,37 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   // Check if we have the new skills-based structure
   const hasNewStructure = blueprint?.skills && blueprint.skills.length > 0;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs"
-      onClick={onClose}
-    >
-      <div
-        className="bg-paper rounded-xl shadow-3 w-full max-w-[1400px] max-h-[92vh] overflow-hidden flex flex-col border-2 border-rule"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header - Gen Z style */}
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-rule bg-paper-2">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="font-mono font-black text-xl text-ink">
-                {blueprint?.role || templateTitle}
-              </h2>
-              {blueprint?.type && (
-                <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded uppercase ${
-                  blueprint.type === 'screening'
-                    ? 'bg-paper-3 text-ink'
-                    : 'bg-paper-3 text-gold-ink'
-                }`}>
-                  {blueprint.type}
-                </span>
-              )}
-              <span className="bg-ink text-paper text-[10px] font-mono font-bold px-2 py-1 rounded uppercase">
-                skill tree
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="flex max-h-[92vh] w-full max-w-[1400px] flex-col gap-0 overflow-hidden p-0">
+        {/* Header */}
+        <DialogHeader className="space-y-1 border-b-2 border-rule bg-paper-2 px-6 py-4 text-left">
+          <div className="flex items-center gap-3">
+            <DialogTitle className="font-mono text-xl text-ink">
+              {blueprint?.role || templateTitle}
+            </DialogTitle>
+            {blueprint?.type && (
+              <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded ${
+                blueprint.type === 'screening'
+                  ? 'bg-paper-3 text-ink'
+                  : 'bg-paper-3 text-gold-ink'
+              }`}>
+                {blueprint.type}
               </span>
-            </div>
-            {(blueprint?.description || blueprint?.overview) && (
-              <p className="text-sm text-muted font-mono mt-1 max-w-2xl">
-                {blueprint.description || blueprint.overview}
-              </p>
             )}
+            <span className="bg-ink text-paper text-[10px] font-mono font-bold px-2 py-1 rounded">
+              skill tree
+            </span>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close blueprint"
-            className="p-2 bg-paper-3 hover:bg-paper-4 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-muted" />
-          </button>
-        </div>
+          {(blueprint?.description || blueprint?.overview) && (
+            <p className="text-sm text-muted font-mono mt-1 max-w-2xl">
+              {blueprint.description || blueprint.overview}
+            </p>
+          )}
+        </DialogHeader>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto flex">
@@ -218,16 +202,16 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t-2 border-rule px-6 py-4 bg-paper-2 flex justify-end">
+        <DialogFooter className="border-t-2 border-rule bg-paper-2 px-6 py-4">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-ink text-paper rounded-lg font-mono font-bold uppercase text-sm hover:bg-ink transition-colors"
+            className="px-6 py-2.5 bg-ink text-paper rounded-lg font-mono font-bold text-sm hover:bg-ink transition-colors"
           >
             Close
           </button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

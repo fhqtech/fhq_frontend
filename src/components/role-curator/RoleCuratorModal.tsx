@@ -7,7 +7,8 @@
  * proposal, onAccept fires with the proposed fields and the modal closes.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { X, Sparkles, Send, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, Send, Loader2, Wand2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -54,8 +55,6 @@ export const RoleCuratorModal: React.FC<RoleCuratorModalProps> = ({
     if (!scrollRef.current) return;
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, pendingAssistantText]);
-
-  if (!isOpen) return null;
 
   const submit = async () => {
     const text = draft.trim();
@@ -124,34 +123,17 @@ export const RoleCuratorModal: React.FC<RoleCuratorModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs"
-      onClick={() => !streaming && onClose()}
-    >
-      <div
-        className="bg-paper rounded-xl shadow-3 w-full max-w-[720px] max-h-[85vh] overflow-hidden flex flex-col border-2 border-rule"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="flex items-center justify-between px-6 py-4 border-b-2 border-rule bg-paper-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-gold-ink" />
-              <h2 className="text-base font-semibold text-ink">Role curator</h2>
-            </div>
-            <p className="text-xs text-muted mt-0.5">
-              Describe the role; I'll ask a couple of questions and draft the brief.
-            </p>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !streaming) onClose(); }}>
+      <DialogContent className="flex max-h-[85vh] w-full max-w-[720px] flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="space-y-1 border-b-2 border-rule bg-paper-2 px-6 py-4 text-left">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-gold-ink" />
+            <DialogTitle className="text-base font-semibold text-ink">Role curator</DialogTitle>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={streaming}
-            aria-label="Close"
-            className="p-2 hover:bg-paper-3 rounded transition-colors disabled:opacity-30"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </header>
+          <p className="text-xs text-muted mt-0.5">
+            Describe the role; I'll ask a couple of questions and draft the brief.
+          </p>
+        </DialogHeader>
 
         {/* Transcript */}
         <div
@@ -299,7 +281,7 @@ export const RoleCuratorModal: React.FC<RoleCuratorModalProps> = ({
             Enter to send, Shift+Enter for newline.
           </p>
         </footer>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
