@@ -261,7 +261,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
                 onChange={(e) => setFormData(prev => ({ ...prev, googleSheetUrl: e.target.value }))}
                 className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
                 style={{
-                  boxShadow: 'var(--shadow-clay)'
+                  boxShadow: 'var(--shadow-1)'
                 }}
               />
               <div className="mt-2">
@@ -291,7 +291,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
                 onChange={handleFileUpload}
                 className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
                 style={{
-                  boxShadow: 'var(--shadow-clay)'
+                  boxShadow: 'var(--shadow-1)'
                 }}
               />
               {formData.file && (
@@ -313,7 +313,7 @@ export function SourceConfigModal({ sourceType, onClose, onSave, isOpen }: Sourc
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="mt-2 rounded-sm border-none transition-all duration-300 bg-paper"
               style={{
-                boxShadow: 'var(--shadow-clay)'
+                boxShadow: 'var(--shadow-1)'
               }}
               rows={3}
             />

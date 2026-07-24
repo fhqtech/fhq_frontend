@@ -737,7 +737,7 @@ export const InterviewPreCheck = ({
             {/* RIGHT CARD - Choose from Existing */}
             <Card className="p-8 rounded relative overflow-hidden group transition-all duration-300 bg-paper" style={{
               border: 'none',
-              boxShadow: 'var(--shadow-clay)'
+              boxShadow: 'var(--shadow-1)'
             }}>
 
               <div className="flex flex-col h-full relative z-10">
@@ -772,7 +772,7 @@ export const InterviewPreCheck = ({
                           position: 'relative',
                           overflow: 'hidden',
                           backgroundColor: 'var(--paper)',
-                          boxShadow: 'var(--shadow-clay)'
+                          boxShadow: 'var(--shadow-1)'
                         }}
                         className={`p-4 rounded transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 ${
                           isUploadingResume
@@ -862,7 +862,7 @@ export const InterviewPreCheck = ({
                   overflow: 'hidden',
                   backgroundColor: 'var(--paper)',
                   color: 'var(--ink)',
-                  boxShadow: 'var(--shadow-clay)'
+                  boxShadow: 'var(--shadow-1)'
                 }}
                 className="h-12 px-8 rounded text-xs font-medium transition-all duration-200"
               >
@@ -898,7 +898,7 @@ export const InterviewPreCheck = ({
             {/* Do's */}
             <Card className="p-6 rounded bg-paper" style={{
               border: 'none',
-              boxShadow: 'var(--shadow-clay)'
+              boxShadow: 'var(--shadow-1)'
             }}>
               <h2 className="text-xl font-bold text-ink mb-4">
                 How to succeed
@@ -923,7 +923,7 @@ export const InterviewPreCheck = ({
             {/* Don'ts */}
             <Card className="p-6 rounded bg-paper" style={{
               border: 'none',
-              boxShadow: 'var(--shadow-clay)'
+              boxShadow: 'var(--shadow-1)'
             }}>
               <h2 className="text-xl font-bold text-ink mb-4">
                 Important precautions
@@ -951,7 +951,7 @@ export const InterviewPreCheck = ({
             {/* Microphone Test */}
             <Card className="p-6 rounded bg-paper" style={{
               border: 'none',
-              boxShadow: 'var(--shadow-clay)'
+              boxShadow: 'var(--shadow-1)'
             }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -971,7 +971,7 @@ export const InterviewPreCheck = ({
                         border: 'none',
                         backgroundColor: 'var(--ink)',
                         color: 'white',
-                        boxShadow: 'var(--shadow-clay)'
+                        boxShadow: 'var(--shadow-1)'
                       }}
                       className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
@@ -998,7 +998,7 @@ export const InterviewPreCheck = ({
                         border: 'none',
                         backgroundColor: '#22c55e',
                         color: 'white',
-                        boxShadow: 'var(--shadow-clay)'
+                        boxShadow: 'var(--shadow-1)'
                       }}
                       className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
@@ -1016,7 +1016,7 @@ export const InterviewPreCheck = ({
                         style={{
                           border: 'none',
                           backgroundColor: 'var(--paper)',
-                          boxShadow: 'var(--shadow-clay)'
+                          boxShadow: 'var(--shadow-1)'
                         }}
                         className="text-xs h-8 px-4 rounded transition-all duration-200"
                       >
@@ -1036,7 +1036,7 @@ export const InterviewPreCheck = ({
             {/* Speaker Test */}
             <Card className="p-6 rounded bg-paper" style={{
               border: 'none',
-              boxShadow: 'var(--shadow-clay)'
+              boxShadow: 'var(--shadow-1)'
             }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -1056,7 +1056,7 @@ export const InterviewPreCheck = ({
                         border: 'none',
                         backgroundColor: 'var(--ink)',
                         color: 'white',
-                        boxShadow: 'var(--shadow-clay)'
+                        boxShadow: 'var(--shadow-1)'
                       }}
                       className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
@@ -1070,7 +1070,7 @@ export const InterviewPreCheck = ({
                         border: 'none',
                         backgroundColor: 'var(--ink)',
                         color: 'white',
-                        boxShadow: 'var(--shadow-clay)'
+                        boxShadow: 'var(--shadow-1)'
                       }}
                       className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
@@ -1084,7 +1084,7 @@ export const InterviewPreCheck = ({
                         border: 'none',
                         backgroundColor: '#22c55e',
                         color: 'white',
-                        boxShadow: 'var(--shadow-clay)'
+                        boxShadow: 'var(--shadow-1)'
                       }}
                       className="text-sm font-medium h-10 px-6 rounded transition-all duration-200"
                     >
@@ -1127,7 +1127,7 @@ export const InterviewPreCheck = ({
                   border: 'none',
                   backgroundColor: 'var(--paper)',
                   color: 'var(--ink)',
-                  boxShadow: 'var(--shadow-clay)'
+                  boxShadow: 'var(--shadow-1)'
                 }}
                 className="flex-1 h-12 rounded text-xs font-medium transition-all duration-200"
               >

@@ -1261,7 +1261,7 @@ export default function InterviewDetails() {
  <div
  className="rounded-sm bg-paper"
  style={{
- boxShadow: 'var(--shadow-clay)'
+ boxShadow: 'var(--shadow-1)'
  }}
  >
  <div className="px-6 py-5 border-b">
@@ -1573,7 +1573,7 @@ export default function InterviewDetails() {
  className="w-10 h-10 rounded-full flex flex-col items-center justify-center gap-0"
  style={{
  backgroundColor: 'hsl(var(--ink))',
- boxShadow: 'var(--shadow-clay)'
+ boxShadow: 'var(--shadow-1)'
  }}
  >
  <span className="text-lg font-bold leading-tight text-paper">{interview.duration?.replace(' minutes', '').replace(' mins', '').replace('min', '').trim()}</span>

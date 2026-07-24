@@ -461,7 +461,7 @@ export const DuplicateAnalysisModal: React.FC<DuplicateAnalysisModalProps> = ({
                   className="uppercase rounded-sm text-paper font-medium transition-all duration-200"
                   style={{
                     backgroundColor: 'hsl(var(--ink))',
-                    boxShadow: 'var(--shadow-clay)'
+                    boxShadow: 'var(--shadow-1)'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}

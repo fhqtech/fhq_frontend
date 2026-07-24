@@ -984,7 +984,7 @@ export default function CandidateRegistration() {
                             onChange={(e) => handleInputChange("jobTitle", e.target.value)}
                             className="mt-2 rounded border-none transition-all duration-300 bg-paper h-10 text-base"
                             style={{
-                              boxShadow: formErrors.jobTitle ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
+                              boxShadow: formErrors.jobTitle ? 'var(--shadow-danger)' : 'var(--shadow-1)'
                             }}
                           />
                           {formErrors.jobTitle && <p className="text-xs text-danger mt-1">{formErrors.jobTitle}</p>}
@@ -1004,7 +1004,7 @@ export default function CandidateRegistration() {
                                 onChange={(e) => handleInputChange("experienceYears", e.target.value)}
                                 className="rounded border-none transition-all duration-300 bg-paper h-10 text-base"
                                 style={{
-                                  boxShadow: formErrors.experience ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
+                                  boxShadow: formErrors.experience ? 'var(--shadow-danger)' : 'var(--shadow-1)'
                                 }}
                               />
                             </div>
@@ -1019,7 +1019,7 @@ export default function CandidateRegistration() {
                                 onChange={(e) => handleInputChange("experienceMonths", e.target.value)}
                                 className="rounded border-none transition-all duration-300 bg-paper h-10 text-base"
                                 style={{
-                                  boxShadow: 'var(--shadow-clay)'
+                                  boxShadow: 'var(--shadow-1)'
                                 }}
                               />
                             </div>
@@ -1051,7 +1051,7 @@ export default function CandidateRegistration() {
                                   backgroundColor: isSelected ? avail.color : '#e2e8f0',
                                   color: isSelected ? 'white' : '#64748b',
                                   opacity: 1,
-                                  boxShadow: isSelected ? 'var(--shadow-clay-active)' : 'var(--shadow-clay)',
+                                  boxShadow: isSelected ? 'var(--shadow-2)' : 'var(--shadow-1)',
                                   transform: isSelected ? 'scale(1.05)' : 'scale(1)'
                                 }}
                                 onMouseEnter={(e) => {
@@ -1099,7 +1099,7 @@ export default function CandidateRegistration() {
                           onChange={(e) => handleInputChange("linkedin", e.target.value)}
                           className="mt-2 rounded border-none transition-all duration-300 bg-paper h-10 text-base"
                           style={{
-                            boxShadow: formErrors.linkedin ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
+                            boxShadow: formErrors.linkedin ? 'var(--shadow-danger)' : 'var(--shadow-1)'
                           }}
                         />
                         {formErrors.linkedin && <p className="text-xs text-danger mt-1">{formErrors.linkedin}</p>}
@@ -1114,7 +1114,7 @@ export default function CandidateRegistration() {
                               onChange={(e) => handleInputChange("countryCode", e.target.value)}
                               className="h-10 pl-2 pr-6 rounded border-none bg-paper text-ink-soft font-medium w-24 text-base transition-all duration-300 appearance-none bg-no-repeat"
                               style={{
-                                boxShadow: 'var(--shadow-clay)',
+                                boxShadow: 'var(--shadow-1)',
                                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
                                 backgroundPosition: 'right 0.5rem center',
                                 backgroundSize: '12px'
@@ -1154,7 +1154,7 @@ export default function CandidateRegistration() {
                               onChange={(e) => handleInputChange("phone", e.target.value)}
                               className="rounded border-none transition-all duration-300 bg-paper h-10 text-base flex-1"
                               style={{
-                                boxShadow: formErrors.phone ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
+                                boxShadow: formErrors.phone ? 'var(--shadow-danger)' : 'var(--shadow-1)'
                               }}
                             />
                           </div>
@@ -1172,7 +1172,7 @@ export default function CandidateRegistration() {
                               onFocus={() => locationSuggestions.length > 0 && setShowLocationDropdown(true)}
                               className="rounded border-none transition-all duration-300 bg-paper h-10 text-base"
                               style={{
-                                boxShadow: formErrors.location ? 'var(--shadow-clay-error)' : 'var(--shadow-clay)'
+                                boxShadow: formErrors.location ? 'var(--shadow-danger)' : 'var(--shadow-1)'
                               }}
                               autoComplete="off"
                             />
@@ -1285,7 +1285,7 @@ export default function CandidateRegistration() {
                       onChange={(e) => handleInputChange("portfolioUrl", e.target.value)}
                       className="mt-2 rounded border-none transition-all duration-300 bg-paper h-10 text-base"
                       style={{
-                        boxShadow: 'var(--shadow-clay)'
+                        boxShadow: 'var(--shadow-1)'
                       }}
                     />
                   </div>

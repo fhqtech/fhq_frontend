@@ -41,7 +41,7 @@ interface InterviewKpiTilesProps {
 }
 
 const tileShellClasses = "rounded-sm p-6 bg-paper transition-shadow duration-200";
-const tileShellStyle = { boxShadow: 'var(--shadow-clay)' as const };
+const tileShellStyle = { boxShadow: 'var(--shadow-1)' as const };
 const labelClasses = "text-sm text-muted text-xs tracking-wider leading-tight";
 
 export function InterviewKpiTiles({

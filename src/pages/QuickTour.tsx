@@ -134,7 +134,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
           <div className="space-y-2">
             <div
               className="flex items-center gap-3 p-4 bg-paper rounded-sm"
-              style={{ boxShadow: 'var(--shadow-clay)' }}
+              style={{ boxShadow: 'var(--shadow-1)' }}
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">1</div>
               <div>
@@ -144,7 +144,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </div>
             <div
               className="flex items-center gap-3 p-4 bg-paper rounded-sm"
-              style={{ boxShadow: 'var(--shadow-clay)' }}
+              style={{ boxShadow: 'var(--shadow-1)' }}
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">2</div>
               <div>
@@ -154,7 +154,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </div>
             <div
               className="flex items-center gap-3 p-4 bg-paper rounded-sm"
-              style={{ boxShadow: 'var(--shadow-clay)' }}
+              style={{ boxShadow: 'var(--shadow-1)' }}
             >
               <div className="w-8 h-8 bg-[hsl(var(--ink))] rounded-full flex items-center justify-center text-paper text-sm font-bold">3</div>
               <div>
@@ -164,7 +164,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
             </div>
             <div
               className="flex items-center gap-3 p-4 bg-paper rounded-sm"
-              style={{ boxShadow: 'var(--shadow-clay)' }}
+              style={{ boxShadow: 'var(--shadow-1)' }}
             >
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-paper text-sm font-bold">4</div>
               <div>
@@ -365,7 +365,7 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
               </p>
             </div>
 
-            <div className="bg-paper p-6 rounded-sm shadow-1" style={{ boxShadow: 'var(--shadow-clay)' }}>
+            <div className="bg-paper p-6 rounded-sm shadow-1" style={{ boxShadow: 'var(--shadow-1)' }}>
               <h4 className="font-bold mb-2">Pro Tips for Success</h4>
               <ul className="text-[10px] text-left space-y-2 text-muted-foreground">
                 <li>• Start with a small batch (10-20 candidates) to test your interview setup</li>
@@ -538,7 +538,7 @@ export default function QuickTour() {
       {/* Main Content */}
       <div
         className="min-h-96 rounded-sm bg-paper transition-shadow duration-200"
-        style={{ boxShadow: 'var(--shadow-clay)' }}
+        style={{ boxShadow: 'var(--shadow-1)' }}
       >
         <div className="text-center pb-6 p-6">
           <div className="flex items-center justify-center gap-2 mb-2">

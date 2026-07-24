@@ -201,10 +201,9 @@
     --shadow-1:     0 1px 2px hsl(var(--ink) / 0.04);
     --shadow-2:     0 2px 8px hsl(var(--ink) / 0.06), 0 1px 2px hsl(var(--ink) / 0.04);
     --shadow-3:     0 12px 32px -8px hsl(var(--ink) / 0.10);
-    /* Claymorphism inset — used by FunnelHQ "soft tile" surfaces (CreateInterview wizard, FitmentInterviewDetails stat tiles, CandidateRegistration form fields). Single source of truth so tile feel stays consistent. */
-    --shadow-clay:        inset 1px 1px 2px hsl(var(--paper-3)), 2px 2px 4px hsl(var(--paper-4));
-    --shadow-clay-error:  inset 1px 1px 2px hsl(var(--danger-soft)), 2px 2px 4px hsl(var(--danger) / 0.25);
-    --shadow-clay-active: 0 4px 12px hsl(var(--ink) / 0.15);
+    /* Danger-field elevation: shadow-1 plus a hairline danger ring, for form
+       inputs in an error state (replaces the retired claymorphism error tile). */
+    --shadow-danger:      0 0 0 1px hsl(var(--danger) / 0.45), var(--shadow-1);
     --ease-spring:  cubic-bezier(.2,.72,.28,1);
 
     /* Type — single family */

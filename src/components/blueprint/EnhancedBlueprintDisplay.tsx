@@ -24,7 +24,7 @@ const EnhancedBlueprintDisplay: React.FC<EnhancedBlueprintDisplayProps> = ({ dat
   }
 
   return (
-    <div className="enhanced-blueprint-display space-y-6 relative bg-paper p-6 rounded-sm border border-rule" style={{ boxShadow: 'var(--shadow-clay)' }}>
+    <div className="enhanced-blueprint-display space-y-6 relative bg-paper p-6 rounded-sm border border-rule" style={{ boxShadow: 'var(--shadow-1)' }}>
 
       {/* Mission Statement - HIDDEN */}
       {/* <MissionSection mission={data.role_summary.mission} /> */}
@@ -100,7 +100,7 @@ const OverviewSection = ({ data }: { data: EnhancedBlueprintData }) => (
 
     {/* Quick Stats */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
+      <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-1)' }}>
         <div className="flex items-center gap-4">
           <p className="text-5xl font-bold text-foreground">
             {data.evaluation_pillars.length}
@@ -111,7 +111,7 @@ const OverviewSection = ({ data }: { data: EnhancedBlueprintData }) => (
           </div>
         </div>
       </div>
-      <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
+      <div className="rounded-sm p-6 bg-paper" style={{ boxShadow: 'var(--shadow-1)' }}>
         <div className="flex items-center gap-4">
           <p className="text-5xl font-bold text-foreground">
             {data.evaluation_pillars.reduce((acc, p) => {
@@ -173,7 +173,7 @@ const QualifyingQuestionsSection = ({ questions }: { questions: string[] | strin
   }
 
   return (
-    <div className="bg-paper rounded-sm border border-rule p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
+    <div className="bg-paper rounded-sm border border-rule p-6" style={{ boxShadow: 'var(--shadow-1)' }}>
       <h2 className="text-lg font-bold mb-4 text-ink">
         Qualifying Topics
       </h2>
@@ -197,7 +197,7 @@ const CandidateProfileSection = ({ profile }: { profile: string }) => {
   }
 
   return (
-    <div className="bg-success-soft/40 backdrop-blur-xs border border-success/30/90 rounded-sm p-6" style={{ boxShadow: 'var(--shadow-clay)' }}>
+    <div className="bg-success-soft/40 backdrop-blur-xs border border-success/30/90 rounded-sm p-6" style={{ boxShadow: 'var(--shadow-1)' }}>
       <h3 className="text-lg font-bold text-ink mb-4">
         Ideal Candidate Profile
       </h3>

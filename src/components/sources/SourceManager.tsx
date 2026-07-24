@@ -113,7 +113,7 @@ export function SourceManager({ sources, onSourcesChange, downloadSampleFormat, 
                   position: 'relative',
                   overflow: 'hidden',
                   backgroundColor: 'transparent',
-                  boxShadow: 'var(--shadow-clay)'
+                  boxShadow: 'var(--shadow-1)'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))';

@@ -269,7 +269,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="mt-2 rounded-sm border-none"
                   style={{
-                    boxShadow: 'var(--shadow-clay)'
+                    boxShadow: 'var(--shadow-1)'
                   }}
                 />
               </div>
@@ -282,7 +282,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   className="mt-2 rounded-sm border-none"
                   style={{
-                    boxShadow: 'var(--shadow-clay)'
+                    boxShadow: 'var(--shadow-1)'
                   }}
                 />
               </div>
@@ -401,7 +401,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                             row.status === 'error' ? 'ring-2 ring-red-500' : ''
                           }`}
                           style={{
-                            boxShadow: 'var(--shadow-clay)'
+                            boxShadow: 'var(--shadow-1)'
                           }}
                         />
                         {/* Status indicator */}
@@ -502,7 +502,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                               }}
                               className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showNameError ? 'ring-1 ring-red-500' : ''}`}
                               style={{
-                                boxShadow: 'var(--shadow-clay)'
+                                boxShadow: 'var(--shadow-1)'
                               }}
                             />
                             {showNameError && (
@@ -521,7 +521,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                               }}
                               className={`rounded-sm border-none transition-all duration-300 bg-paper text-sm ${showEmailError ? 'ring-1 ring-red-500' : ''}`}
                               style={{
-                                boxShadow: 'var(--shadow-clay)'
+                                boxShadow: 'var(--shadow-1)'
                               }}
                             />
                             {showEmailError && (
@@ -670,7 +670,7 @@ export function CreateListDialog({ open, onClose, onCreate }: CreateListDialogPr
                 className="uppercase rounded-sm text-paper font-medium tracking-wider transition-all duration-200"
                 style={{
                   backgroundColor: 'hsl(var(--ink))',
-                  boxShadow: 'var(--shadow-clay)'
+                  boxShadow: 'var(--shadow-1)'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink-soft))'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--ink))'}

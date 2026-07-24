@@ -42,7 +42,7 @@ export function InterviewSourcesPanel({
   const isLockedAfterStart = interviewStatus && interviewStatus !== 'draft';
 
   return (
-    <div className="rounded-sm bg-paper" style={{ boxShadow: 'var(--shadow-clay)' }}>
+    <div className="rounded-sm bg-paper" style={{ boxShadow: 'var(--shadow-1)' }}>
       <div className="px-6 py-5 border-b">
         <div className="flex items-center gap-4">
           <CloudArrowDown size={48} weight="thin" />
