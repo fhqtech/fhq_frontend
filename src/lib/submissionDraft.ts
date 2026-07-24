@@ -8,6 +8,9 @@
 export interface SubmissionDraft {
   notes: string;
   aiDisclosed: boolean;
+  /** Persisted timed-sprint deadline (epoch ms) so a reload can't reset the
+   * clock. Absent for untimed / absolute-deadline submissions. */
+  deadline?: number | null;
 }
 
 const PREFIX = "flowdot:submission-draft:";
@@ -26,7 +29,11 @@ export function loadDraft(key: string): SubmissionDraft | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && typeof parsed.notes === "string") {
-      return { notes: parsed.notes, aiDisclosed: Boolean(parsed.aiDisclosed) };
+      return {
+        notes: parsed.notes,
+        aiDisclosed: Boolean(parsed.aiDisclosed),
+        deadline: typeof parsed.deadline === "number" ? parsed.deadline : null,
+      };
     }
     return null;
   } catch {

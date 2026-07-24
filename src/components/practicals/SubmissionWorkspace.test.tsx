@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SubmissionWorkspace } from "./SubmissionWorkspace";
+import { loadDraft } from "@/lib/submissionDraft";
 import type { InterviewAssignmentBrief } from "@/services/journeysApi";
 
 const brief: InterviewAssignmentBrief = {
@@ -59,6 +60,17 @@ describe("SubmissionWorkspace", () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit.mock.calls[0][0].aiDisclosed).toBe(true);
     expect(onSubmit.mock.calls[0][0].files).toHaveLength(2);
+  });
+
+  it("anchors a timed sprint to a persisted deadline (refresh-safe)", async () => {
+    const timed: InterviewAssignmentBrief = { ...brief, time_limit_min: 45 };
+    const { unmount } = render(<SubmissionWorkspace brief={timed} draftKey="ivT" onSubmit={vi.fn()} />);
+    await waitFor(() => expect(typeof loadDraft("ivT")?.deadline).toBe("number"));
+    const first = loadDraft("ivT")!.deadline!;
+    unmount();
+    // remounting reuses the persisted deadline instead of resetting the clock
+    render(<SubmissionWorkspace brief={timed} draftKey="ivT" onSubmit={vi.fn()} />);
+    await waitFor(() => expect(loadDraft("ivT")!.deadline).toBe(first));
   });
 
   it("restores autosaved notes on mount", () => {

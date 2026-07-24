@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,20 +38,43 @@ export function AssignmentBuilder({ ws, pr, practicalId }: AssignmentBuilderProp
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const attempts = useRef(0);
+  const mounted = useRef(true);
+
+  // Stop polling + block state updates once the surface unmounts.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      if (pollTimer.current) clearTimeout(pollTimer.current);
+    };
+  }, []);
+
+  // ~60s cap so a stuck/dead generation job doesn't poll forever.
+  const MAX_POLLS = 40;
 
   async function poll() {
+    if (!mounted.current) return;
     try {
       const p = await practicalsApi.getPractical(ws, pr, practicalId);
+      if (!mounted.current) return;
       if (p.assignmentStatus === "ready") {
-        setBrief(await practicalsApi.getAssignment(ws, pr, practicalId));
+        const a = await practicalsApi.getAssignment(ws, pr, practicalId);
+        if (!mounted.current) return;
+        setBrief(a);
         setPhase("ready");
       } else if (p.assignmentStatus === "failed") {
         setError(p.assignmentError || "Generation failed. Try again.");
         setPhase("failed");
+      } else if (attempts.current >= MAX_POLLS) {
+        setError("Generation is taking too long. Try again.");
+        setPhase("failed");
       } else {
+        attempts.current += 1;
         pollTimer.current = setTimeout(poll, 1500);
       }
     } catch (e) {
+      if (!mounted.current) return;
       setError(e instanceof Error ? e.message : "Could not load the assignment.");
       setPhase("failed");
     }
@@ -60,6 +83,7 @@ export function AssignmentBuilder({ ws, pr, practicalId }: AssignmentBuilderProp
   async function generate() {
     setError(null);
     setPhase("generating");
+    attempts.current = 0;
     try {
       await practicalsApi.generateAssignment(ws, pr, practicalId);
       await poll();

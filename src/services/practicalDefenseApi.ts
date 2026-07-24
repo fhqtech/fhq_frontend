@@ -102,7 +102,12 @@ export interface StartSubmissionResult {
 
 export interface SubmitArtifactBody {
   artifact_refs: string[];
-  provenance: { ai_tools_disclosed: string[]; approach_note: string };
+  provenance: {
+    ai_tools_disclosed: string[];
+    approach_note: string;
+    /** The candidate ticked the own-work / AI-disclosure acknowledgement. */
+    own_work_attested?: boolean;
+  };
 }
 
 export interface DefenseStartResult {

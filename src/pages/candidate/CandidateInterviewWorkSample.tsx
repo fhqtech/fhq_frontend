@@ -93,10 +93,14 @@ export default function CandidateInterviewWorkSample() {
       const refs: string[] = [];
       for (const f of files) refs.push(await uploadArtifact(f));
       await practicalDefenseApi.submitArtifact(ws, pr, interviewId, submissionId, {
-        // The candidate attested own-work via the review checkbox (aiDisclosed);
-        // specific tool-name capture is a follow-up, so the list stays empty.
+        // Persist the own-work acknowledgement the candidate ticked at review.
+        // Specific AI tool-name capture is a follow-up, so the list stays empty.
         artifact_refs: refs,
-        provenance: { ai_tools_disclosed: [], approach_note: notes.trim() },
+        provenance: {
+          ai_tools_disclosed: [],
+          approach_note: notes.trim(),
+          own_work_attested: aiDisclosed,
+        },
       });
       clearDraft(interviewId);
       navigate(`/candidate/practical-defense/${submissionId}`);

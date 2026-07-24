@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -37,6 +37,7 @@ export function SubmissionWorkspace({
   const [notes, setNotes] = useState("");
   const [aiDisclosed, setAiDisclosed] = useState(false);
   const [phase, setPhase] = useState<"work" | "review">("work");
+  const [deadline, setDeadline] = useState<number | null>(null);
 
   // Restore an autosaved draft once on mount.
   useEffect(() => {
@@ -47,22 +48,29 @@ export function SubmissionWorkspace({
     }
   }, [draftKey]);
 
-  // Autosave the text answer (files can't be persisted).
+  // Resolve the deadline once the brief loads. Absolute deadline_at is
+  // refresh-safe as-is; a time_limit_min sprint anchors to a persisted deadline
+  // (stored in the draft) so a reload can't reset the clock.
+  const deadlineInit = useRef(false);
   useEffect(() => {
-    saveDraft(draftKey, { notes, aiDisclosed });
-  }, [draftKey, notes, aiDisclosed]);
-
-  // Timed sprint: prefer an absolute deadline, else derive one from the limit
-  // at mount. Untimed (both null) → no countdown, never auto-submits.
-  const deadline = useMemo<number | null>(() => {
-    if (brief?.deadline_at) {
+    if (!brief || deadlineInit.current) return;
+    deadlineInit.current = true;
+    if (brief.deadline_at) {
       const t = Date.parse(brief.deadline_at);
-      return Number.isNaN(t) ? null : t;
+      setDeadline(Number.isNaN(t) ? null : t);
+      return;
     }
-    if (brief?.time_limit_min) return Date.now() + brief.time_limit_min * 60_000;
-    return null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brief?.deadline_at, brief?.time_limit_min]);
+    if (brief.time_limit_min) {
+      const saved = loadDraft(draftKey);
+      const d = saved?.deadline ?? Date.now() + brief.time_limit_min * 60_000;
+      setDeadline(d);
+    }
+  }, [brief, draftKey]);
+
+  // Autosave the text answer + the anchored deadline (files can't be persisted).
+  useEffect(() => {
+    saveDraft(draftKey, { notes, aiDisclosed, deadline });
+  }, [draftKey, notes, aiDisclosed, deadline]);
 
   const requiredArtifacts = (brief?.expected_artifacts_structured || []).filter((a) => a.required);
   const accept = useMemo(() => {

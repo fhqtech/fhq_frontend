@@ -6,7 +6,12 @@ describe("submissionDraft", () => {
 
   it("round-trips a draft", () => {
     saveDraft("iv1", { notes: "reconciled ITC", aiDisclosed: true });
-    expect(loadDraft("iv1")).toEqual({ notes: "reconciled ITC", aiDisclosed: true });
+    expect(loadDraft("iv1")).toEqual({ notes: "reconciled ITC", aiDisclosed: true, deadline: null });
+  });
+
+  it("round-trips a persisted deadline", () => {
+    saveDraft("iv1", { notes: "x", aiDisclosed: false, deadline: 1234567 });
+    expect(loadDraft("iv1")?.deadline).toBe(1234567);
   });
 
   it("returns null for a missing draft", () => {
