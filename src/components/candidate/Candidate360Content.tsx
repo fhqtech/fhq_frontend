@@ -26,6 +26,7 @@ import {
   Users,
   ListChecks,
   Network,
+  Download,
 } from "lucide-react";
 import {
   TalentAnalysisGraph,
@@ -34,6 +35,7 @@ import { UnverifiedMark } from "@/components/tag/UnverifiedMark";
 import { AuthenticityVerdict } from "@/components/trust/AuthenticityVerdict";
 import { SkillGapSummary } from "@/components/tag/SkillGapSummary";
 import { summarizeFromGapResult } from "@/lib/skillGap";
+import { downloadGapCsv } from "@/lib/gapCsv";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBanner } from "@/components/ui/error-banner";
@@ -265,6 +267,22 @@ export function Candidate360Content({
             <span className="font-mono tabular-nums text-[11px] text-muted">
               {gap.summary.met_count}/{gap.summary.total} met
             </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto"
+              onClick={() =>
+                downloadGapCsv(
+                  `skill-gap-${displayName.toLowerCase().replace(/\s+/g, "-")}-${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.csv`,
+                  gap,
+                )
+              }
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              Export CSV
+            </Button>
           </header>
           <ul className="divide-y divide-rule border-t border-rule">
             {gap.gaps.map((g) => (
