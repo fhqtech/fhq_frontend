@@ -86,7 +86,7 @@ export function InterviewMonitorPanels({ snapshot, status }: InterviewMonitorPan
               <span
                 className={
                   "font-mono text-xs tabular-nums " +
-                  (s.expected_vs_submitted_diff.flag ? "text-danger" : "text-good")
+                  (s.expected_vs_submitted_diff.flag ? "text-danger" : "text-success")
                 }
               >
                 grounding {(s.expected_vs_submitted_diff.grounding_ratio * 100).toFixed(0)}%
@@ -112,7 +112,7 @@ export function InterviewMonitorPanels({ snapshot, status }: InterviewMonitorPan
       {cov && (cov.defended?.length || cov.hollow?.length || cov.unprobed?.length) ? (
         <Panel title="Coverage">
           <ul className="space-y-1 text-xs">
-            <li><span className="text-good">Defended:</span> {(cov.defended || []).join(", ") || "—"}</li>
+            <li><span className="text-success">Defended:</span> {(cov.defended || []).join(", ") || "—"}</li>
             <li><span className="text-danger">Hollow:</span> {(cov.hollow || []).join(", ") || "—"}</li>
             <li><span className="text-muted">Unprobed:</span> {(cov.unprobed || []).join(", ") || "—"}</li>
           </ul>
