@@ -51,6 +51,9 @@ export function useInterviewMonitor(interviewId: string | null | undefined): Mon
   const [status, setStatus] = useState<MonitorStatus>("connecting");
 
   useEffect(() => {
+    // Reset on interview change so a previous session's snapshot doesn't linger.
+    setSnapshot(null);
+    setStatus("connecting");
     if (!interviewId) return;
     const token = localStorage.getItem("auth_token");
     if (!token) return;

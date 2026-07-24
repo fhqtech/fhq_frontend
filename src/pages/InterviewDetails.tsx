@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Users, Clock, Calendar, Phone, Mail, MessageSquare, UserCheck, Upload, FileText, Target, Eye, Search, Play, Pause, Square, AlertTriangle, Filter, Copy, Check, CheckCircle, FileCheck, Settings, RefreshCw, Mic, Video, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ArrowLeft, Download, Loader2, UserPlus } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CloudArrowDown, CaretLeft } from "phosphor-react";
@@ -2093,12 +2093,12 @@ function WorkSamplePanel({
             </CardDescription>
           </div>
           <div className="flex items-center gap-3">
-            <a
-              href={`/interviews/${interviewId}/monitor`}
+            <Link
+              to={`/interviews/${interviewId}/monitor`}
               className="text-xs text-gold-ink hover:underline"
             >
               Live monitor
-            </a>
+            </Link>
             <WorkSampleStatusBadge status={status} />
           </div>
         </div>
