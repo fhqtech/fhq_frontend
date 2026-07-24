@@ -115,6 +115,28 @@ export interface GapResult {
   summary: { met_count: number; total: number; avg_gap: number };
 }
 
+/** One skill in the cohort-level gap rollup: the average gap across the
+ * candidates that carried evidence (contributors), never a fabricated 0. */
+export interface CohortGapSkillRow {
+  canonical_id: string;
+  skill_name: string;
+  target: number;
+  avg_gap: number;
+  avg_demonstrated: number;
+  met_count: number;
+  contributors: number;
+}
+
+/** The cohort gap rollup for a program. `cohort.without_evidence` candidates are
+ * excluded from the skill math (honest under the default runtime, where most
+ * candidates have no evidence yet). */
+export interface CohortGapResult {
+  program_id: string;
+  cohort: { enrolled: number; with_evidence: number; without_evidence: number };
+  skills: CohortGapSkillRow[];
+  summary: { avg_gap: number; skills_total: number };
+}
+
 export interface Program {
   program_id: string;
   title: string;
@@ -370,6 +392,19 @@ export const recruiterJourneysApi = {
       if (r.status === 404) throw new Error("no evidence yet");
       throw new Error(await detailFrom(r, "Could not load gap analysis"));
     }
+    return r.json();
+  },
+
+  /**
+   * Cohort-level gap rollup for a program: average per-skill gap across the
+   * enrolled candidates that carry fused evidence. Candidates with no evidence
+   * yet are excluded from the math and reported under `cohort.without_evidence`.
+   */
+  async cohortGap(ws: string, programId: string): Promise<CohortGapResult> {
+    const r = await fetch(`${programsBase(ws)}/${programId}/cohort-gap`, {
+      headers: authHeaders(),
+    });
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not load cohort gap analysis"));
     return r.json();
   },
 
