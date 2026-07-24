@@ -16,6 +16,7 @@ import { TalentAnalysisGraph, type TagGraphNode } from "@/components/tag/TalentA
 import { FusedSkillProfile } from "@/components/assessment/FusedSkillProfile";
 import { TransferableBand } from "@/components/trust/TransferableBand";
 import { IntegrityNote } from "@/components/trust/IntegrityNote";
+import { IntegrityCoverageSummary } from "@/components/results/IntegrityCoverageSummary";
 import { integrityApi } from "@/services/integrityApi";
 import { AuthenticityVerdict } from "@/components/trust/AuthenticityVerdict";
 import type { IntegrityFlag } from "@/lib/integrity";
@@ -581,6 +582,11 @@ export default function InterviewResults() {
             }}
           />
         ))}
+
+        {/* P8 — post-interview integrity & coverage summary (self-gated on
+            `integrity`). Coverage/diff + an advisory suspicion score + turn-cited
+            contestable flags; renders nothing when the flag is off. */}
+        {sessionId && <IntegrityCoverageSummary sessionId={sessionId} />}
 
         {/* Spec 2 — practical-defense authenticity verdict (self-gated on
             `defense_authenticity`). The result doc carries defense_authenticity +

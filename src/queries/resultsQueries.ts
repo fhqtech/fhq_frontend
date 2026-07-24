@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { InterviewResultsData } from "@/types/interviewResults";
+import {
+  integritySummaryApi,
+  type IntegritySummary,
+} from "@/services/integritySummaryApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8082";
 
@@ -104,6 +108,24 @@ export function useResultsStatusQuery(
  * fresh — the reviewer runs on a backend daemon thread so we don't wait
  * for it inline.
  */
+/**
+ * P8 — post-interview integrity & coverage summary.
+ *
+ * Advisory read for a recruiter who didn't watch the defense live: coverage,
+ * the expected-vs-submitted diff, and turn-cited integrity flags. Read-only and
+ * self-gated by the caller (component returns null when the `integrity` flag is
+ * off); pass `undefined` to keep the query from firing.
+ */
+export function useIntegritySummary(sessionId: string | undefined) {
+  return useQuery<IntegritySummary>({
+    queryKey: ["results", "integrity-summary", sessionId],
+    enabled: Boolean(sessionId),
+    staleTime: 30_000,
+    retry: false,
+    queryFn: () => integritySummaryApi.getIntegritySummary(sessionId as string),
+  });
+}
+
 export function useReanalyzeMutation() {
   const qc = useQueryClient();
   return useMutation({
