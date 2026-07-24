@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Warning } from 'phosphor-react';
+import { X, AlertTriangle } from 'lucide-react';
 import { Button } from './button';
 import { Spinner } from './spinner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
@@ -52,7 +52,7 @@ export function DeleteConfirmationModal({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2 text-danger">
-              <Warning className="w-5 h-5" weight="fill" />
+              <AlertTriangle className="w-5 h-5" />
               <span>Delete interview</span>
             </CardTitle>
             <button

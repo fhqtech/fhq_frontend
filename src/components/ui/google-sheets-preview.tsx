@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Warning, X, Eye, Users, MagnifyingGlass as Search, CaretDown, CaretUp } from 'phosphor-react';
+import { CheckCircle2, AlertTriangle, X, Eye, Users, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './button';
 import { Spinner } from './spinner';
 import { Input } from './input';
@@ -198,7 +198,7 @@ export function GoogleSheetsPreview({ url, onValidation, className }: GoogleShee
         <Card className="border-danger">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <X className="w-5 h-5 text-danger" weight="fill" />
+              <X className="w-5 h-5 text-danger" />
               <span>Unable to Access Sheet</span>
             </CardTitle>
             <CardDescription>
@@ -218,7 +218,7 @@ export function GoogleSheetsPreview({ url, onValidation, className }: GoogleShee
               error.toLowerCase().includes('authentication')) && (
               <div className="p-4 bg-info-light/10 border border-info/20 rounded-lg">
                 <p className="font-medium text-sm mb-3 flex items-center gap-2">
-                  <Warning className="w-4 h-4 text-info" />
+                  <AlertTriangle className="w-4 h-4 text-info" />
                   How to Make Your Sheet Public:
                 </p>
                 <ol className="text-sm text-muted space-y-2 list-decimal list-inside ml-4">
@@ -230,7 +230,7 @@ export function GoogleSheetsPreview({ url, onValidation, className }: GoogleShee
                 </ol>
                 <div className="mt-3 p-3 bg-warning-light/10 rounded border border-warning/20">
                   <p className="text-xs text-muted flex items-center gap-1">
-                    <Warning className="w-3 h-3" />
+                    <AlertTriangle className="w-3 h-3" />
                     <strong>Note:</strong> Making your sheet public means anyone with the link can view it. Only include non-sensitive candidate information.
                   </p>
                 </div>
@@ -240,7 +240,7 @@ export function GoogleSheetsPreview({ url, onValidation, className }: GoogleShee
             {error.toLowerCase().includes('not found') && (
               <div className="p-4 bg-warning-light/10 border border-warning/20 rounded-lg">
                 <p className="font-medium text-sm mb-2 flex items-center gap-2">
-                  <Warning className="w-4 h-4 text-warning" />
+                  <AlertTriangle className="w-4 h-4 text-warning" />
                   URL Check:
                 </p>
                 <ul className="text-sm text-muted space-y-1 list-disc list-inside ml-4">
@@ -265,7 +265,7 @@ export function GoogleSheetsPreview({ url, onValidation, className }: GoogleShee
         <Card className="border-danger">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <X className="w-5 h-5 text-danger" weight="fill" />
+              <X className="w-5 h-5 text-danger" />
               <span>Template Format Error</span>
             </CardTitle>
             <CardDescription>
@@ -332,9 +332,9 @@ export function GoogleSheetsPreview({ url, onValidation, className }: GoogleShee
             <span className="text-lg font-medium">Column Mapping</span>
             <div>
               {showColumnMapping ? (
-                <CaretUp className="w-4 h-4 text-muted" />
+                <ChevronUp className="w-4 h-4 text-muted" />
               ) : (
-                <CaretDown className="w-4 h-4 text-muted" />
+                <ChevronDown className="w-4 h-4 text-muted" />
               )}
             </div>
           </div>

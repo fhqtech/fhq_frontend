@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle, Warning, X } from "phosphor-react";
+import { CheckCircle2, AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
@@ -75,9 +75,9 @@ export function Stepper({
                   !isActive && !isCompleted && !hasError && "border-border bg-surface text-muted hover:border-ink/50"
                 )}>
                   {hasError ? (
-                    <X className="w-5 h-5" weight="bold" />
+                    <X className="w-5 h-5" />
                   ) : isCompleted ? (
-                    <CheckCircle className="w-6 h-6" weight="fill" />
+                    <CheckCircle2 className="w-6 h-6" />
                   ) : showStepNumbers ? (
                     <span className="text-base font-semibold">{index + 1}</span>
                   ) : (

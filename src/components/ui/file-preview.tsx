@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Warning, X, Eye, MagnifyingGlass as Search, CaretDown, CaretUp } from 'phosphor-react';
+import { CheckCircle2, AlertTriangle, X, Eye, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './button';
 import { Spinner } from './spinner';
 import { Label } from './label';
@@ -220,7 +220,7 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
         <Card className="border-danger">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <X className="w-5 h-5 text-danger" weight="fill" />
+              <X className="w-5 h-5 text-danger" />
               <span>Unable to Process File</span>
             </CardTitle>
             <CardDescription>
@@ -247,7 +247,7 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
         <Card className="border-danger">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <X className="w-5 h-5 text-danger" weight="fill" />
+              <X className="w-5 h-5 text-danger" />
               <span>Template Format Error</span>
             </CardTitle>
             <CardDescription>
@@ -314,9 +314,9 @@ export function FilePreview({ file, onValidation, className }: FilePreviewProps)
             <span className="text-lg font-medium">Column Mapping</span>
             <div>
               {showColumnMapping ? (
-                <CaretUp className="w-4 h-4 text-muted" />
+                <ChevronUp className="w-4 h-4 text-muted" />
               ) : (
-                <CaretDown className="w-4 h-4 text-muted" />
+                <ChevronDown className="w-4 h-4 text-muted" />
               )}
             </div>
           </div>
