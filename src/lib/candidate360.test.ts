@@ -254,3 +254,50 @@ describe("composeCandidate360 — read-only (zero writes)", () => {
     expect(input.sources.scores.length).toBe(before);
   });
 });
+
+// --- P11: gap honesty — an all-zero, claimless gap is not a real gap ---------
+
+const _scoreRow = (): CandidateScore => ({
+  candidate_id: "c9",
+  candidate_name: "Rohan Iyer",
+  candidate_email: "rohan@x.com",
+  interview_type: "preliminary",
+  interview_id: "iv9",
+  ats_score: null,
+  ats_method: null,
+  ai_interview_score: 70,
+  human_score: null,
+  created_at: "2026-01-01",
+  updated_at: "2026-01-01",
+});
+
+const _gapInput = (demonstrated: number): Candidate360Input => ({
+  candidateId: "c9",
+  workspaceId: "ws1",
+  sources: {
+    scores: [_scoreRow()],
+    roleTag: null,
+    fusedProfile: null,
+    journey: null,
+    gap: {
+      gaps: [
+        { canonical_id: "fin.recon", skill_name: "Reconciliation", target: 80, demonstrated, gap: Math.max(0, 80 - demonstrated), met: demonstrated >= 80 },
+      ],
+      summary: { met_count: 0, total: 1, avg_gap: Math.max(0, 80 - demonstrated) },
+    },
+  },
+});
+
+describe("composeCandidate360 — gap honesty (P11)", () => {
+  it("flags an all-zero, claimless gap as ungrounded", () => {
+    const view = composeCandidate360(_gapInput(0));
+    expect(view.found).toBe(true);
+    expect(view.gapUngrounded).toBe(true);
+    expect(view.missing.claims).toBe(true);
+  });
+
+  it("does not flag a grounded gap (some demonstrated > 0)", () => {
+    const view = composeCandidate360(_gapInput(61));
+    expect(view.gapUngrounded).toBe(false);
+  });
+});

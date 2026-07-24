@@ -121,3 +121,44 @@ describe("Candidate360Content — graceful states", () => {
     expect(screen.getByText(/could not load this candidate/i)).toBeInTheDocument();
   });
 });
+
+// --- P11: gap-vs-target honesty --------------------------------------------
+
+const gapOnly = (demonstrated: number): Candidate360Input => ({
+  candidateId: "c-priya",
+  workspaceId: "ws-1",
+  sources: {
+    scores: [score({ interview_id: "iv-1" })],
+    roleTag: null,
+    gap: {
+      gaps: [
+        {
+          canonical_id: "fin.recon",
+          skill_name: "Reconciliation",
+          target: 80,
+          demonstrated,
+          gap: Math.max(0, 80 - demonstrated),
+          met: demonstrated >= 80,
+        },
+      ],
+      summary: { met_count: 0, total: 1, avg_gap: Math.max(0, 80 - demonstrated) },
+    },
+  },
+});
+
+describe("Candidate360Content — gap honesty (P11)", () => {
+  it("degrades honestly and hides rows + Export when the gap is ungrounded", () => {
+    renderContent({ view: composeCandidate360(gapOnly(0)) });
+    expect(screen.getByText(/isn't measurable yet/)).toBeTruthy();
+    expect(screen.queryByText("Export CSV")).toBeNull();
+    expect(screen.queryByText("Reconciliation")).toBeNull();
+  });
+
+  it("renders the gap rows + Export when grounded", () => {
+    renderContent({ view: composeCandidate360(gapOnly(61)) });
+    // "Reconciliation" appears in both the summary and the per-skill row.
+    expect(screen.getAllByText("Reconciliation").length).toBeGreaterThan(0);
+    expect(screen.getByText("Export CSV")).toBeTruthy();
+    expect(screen.queryByText(/isn't measurable yet/)).toBeNull();
+  });
+});

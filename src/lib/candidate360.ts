@@ -97,6 +97,13 @@ export interface Candidate360View {
   /** Legacy TAG node shape for TalentAnalysisGraph (reuse, do not fork). */
   graphNodes: TagGraphNode[];
   gap: GapResult | null;
+  /**
+   * True when a gap read is present but nothing backs it: no claims and every
+   * target skill reads demonstrated 0 — i.e. evidence capture is off, so the gap
+   * would fabricate a full miss on every skill. The UI shows an honest degraded
+   * panel instead of zero-gap rows.
+   */
+  gapUngrounded: boolean;
   nextAction: { label: string; terminal: boolean } | null;
   /** Count of provenance-grounded claims (0 under the live backend — see gap note). */
   verifiedClaimCount: number;
@@ -166,6 +173,7 @@ const EMPTY_VIEW = (
   claims: [],
   graphNodes: [],
   gap: null,
+  gapUngrounded: false,
   nextAction: null,
   verifiedClaimCount: 0,
   missing: {
@@ -351,6 +359,10 @@ export function composeCandidate360(input: Candidate360Input): Candidate360View 
   }
 
   const gapPresent = !!gap && (gap.gaps?.length ?? 0) > 0;
+  // A gap with no claims where every skill reads demonstrated 0 is not a real
+  // gap — it's the absence of evidence. Flag it so the UI degrades honestly.
+  const gapUngrounded =
+    gapPresent && claims.length === 0 && (gap!.gaps ?? []).every((g) => (g.demonstrated ?? 0) === 0);
 
   return {
     found: true,
@@ -360,6 +372,7 @@ export function composeCandidate360(input: Candidate360Input): Candidate360View 
     claims,
     graphNodes,
     gap: gap ?? null,
+    gapUngrounded,
     nextAction,
     verifiedClaimCount,
     missing: {

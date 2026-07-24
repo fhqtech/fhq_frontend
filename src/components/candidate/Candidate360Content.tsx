@@ -113,7 +113,7 @@ export function Candidate360Content({
     );
   }
 
-  const { identity, timeline, claims, graphNodes, gap, nextAction, verifiedClaimCount, missing } = view;
+  const { identity, timeline, claims, graphNodes, gap, gapUngrounded, nextAction, verifiedClaimCount, missing } = view;
   const displayName = identity?.name || "Unnamed candidate";
 
   return (
@@ -252,8 +252,28 @@ export function Candidate360Content({
         )}
       </section>
 
+      {/* Gap-vs-target: honest degraded panel when no evidence backs it. */}
+      {!missing.gap && gap && gapUngrounded && (
+        <section aria-labelledby="c360-gap" className="rounded-lg border border-rule bg-paper-2 p-5">
+          <header className="mb-2 flex items-center gap-2">
+            <Target className="h-3.5 w-3.5 text-muted" aria-hidden />
+            <span
+              id="c360-gap"
+              className="font-mono uppercase tracking-[0.18em] text-[11px] text-muted"
+            >
+              Gap vs target
+            </span>
+          </header>
+          <p className="max-w-[65ch] text-sm text-ink-soft">
+            Gap vs target isn't measurable yet — no skill evidence has been captured for this role,
+            so every target skill would read as zero. Once evidence capture is on and this candidate
+            completes a scored stage, the gap appears here.
+          </p>
+        </section>
+      )}
+
       {/* Gap-vs-target (optional) — B3 summary headline + the per-skill detail. */}
-      {!missing.gap && gap && (
+      {!missing.gap && gap && !gapUngrounded && (
         <section aria-labelledby="c360-gap">
           <SkillGapSummary data={summarizeFromGapResult(gap)} className="mb-4" />
           <header className="mb-3 flex items-center gap-2">
