@@ -3,6 +3,7 @@ import { X, Award, Wrench } from 'lucide-react';
 import { SpinnerWithCopy } from '@/components/ui/spinner';
 import { fetchFullBlueprint, FullBlueprintData, EvaluationPillar } from '@/services/templateApi';
 import SkillsGraph from '../ui/SkillsGraph';
+import { BlueprintRubricTable } from '../blueprint/BlueprintRubricTable';
 
 interface BlueprintViewModalProps {
   isOpen: boolean;
@@ -178,12 +179,20 @@ export const BlueprintViewModal: React.FC<BlueprintViewModalProps> = ({
               {/* Center - Skill Map */}
               <div className="flex-1 px-6 py-4 bg-paper">
                 {hasNewStructure && blueprint.skills ? (
-                  <SkillsGraph
-                    roleTitle={blueprint.role || templateTitle}
-                    skills={blueprint.skills}
-                    skillLayout={blueprint.skill_layout}
-                    size={520}
-                  />
+                  <div className="space-y-6">
+                    <SkillsGraph
+                      roleTitle={blueprint.role || templateTitle}
+                      skills={blueprint.skills}
+                      skillLayout={blueprint.skill_layout}
+                      size={520}
+                    />
+                    <div>
+                      <h3 className="mb-2 font-mono text-[10px] uppercase tracking-wide text-muted">
+                        Proficiency rubric
+                      </h3>
+                      <BlueprintRubricTable skills={blueprint.skills} />
+                    </div>
+                  </div>
                 ) : blueprint.evaluation_pillars && blueprint.evaluation_pillars.length > 0 ? (
                   // Legacy pillars view
                   <div className="space-y-4">
