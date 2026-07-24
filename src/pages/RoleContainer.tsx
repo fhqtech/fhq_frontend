@@ -19,13 +19,15 @@ import { cn } from "@/lib/utils";
 import { AddStageMenu } from "@/components/role/AddStageMenu";
 import { AddCandidatesToRole } from "@/components/role/AddCandidatesToRole";
 import { TargetEditor } from "@/components/journey/TargetEditor";
+import { PipelineBuilder } from "@/components/journey/PipelineBuilder";
+import type { GatingRule } from "@/services/recruiterJourneysApi";
 import { Button } from "@/components/ui/button";
 import { appendStage } from "@/lib/stageColumns";
 import { PageSkeleton } from "@/components/ui/shimmer";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "@/hooks/use-toast";
-import { Users, Target, LayoutGrid, Table as TableIcon } from "lucide-react";
+import { Users, Target, LayoutGrid, Table as TableIcon, Workflow } from "lucide-react";
 
 export default function RoleContainer() {
   const { programId } = useParams<{ programId: string }>();
@@ -39,6 +41,7 @@ export default function RoleContainer() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showTarget, setShowTarget] = useState(false);
+  const [showPipeline, setShowPipeline] = useState(false);
   const [view, setView] = useState<"board" | "table">("board");
 
   const handleAddCandidates = async (emails: string[]) => {
@@ -175,6 +178,16 @@ export default function RoleContainer() {
             <Target className="mr-2 h-4 w-4 text-gold-ink" />
             {showTarget ? "Hide target" : "Set skill target"}
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPipeline((s) => !s)}
+            aria-expanded={showPipeline}
+          >
+            <Workflow className="mr-2 h-4 w-4 text-gold-ink" />
+            {showPipeline ? "Hide pipeline" : "Edit pipeline"}
+          </Button>
           <AddCandidatesToRole onSubmit={handleAddCandidates} />
           <AddStageMenu onAdd={handleAddStage} disabled={saving} />
         </div>
@@ -188,6 +201,22 @@ export default function RoleContainer() {
           initial={program.target_competencies ?? []}
           onSaved={(competencies) =>
             setProgram((p) => (p ? { ...p, target_competencies: competencies } : p))
+          }
+        />
+      )}
+
+      {/* P5 — full pipeline builder: typed stages + score-gating rules. */}
+      {showPipeline && ws && programId && (
+        <PipelineBuilder
+          ws={ws}
+          programId={programId}
+          initialStages={program.stages ?? []}
+          initialRules={(program as { rules?: GatingRule[] }).rules ?? []}
+          initialVersion={(program as { template_version?: number }).template_version ?? 1}
+          onSaved={(nextStages, nextRules, nextVersion) =>
+            setProgram((p) =>
+              p ? { ...p, stages: nextStages, rules: nextRules, template_version: nextVersion } : p,
+            )
           }
         />
       )}
