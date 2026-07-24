@@ -40,6 +40,7 @@ const Candidate360 = lazy(() => import("./pages/Candidate360"));
 const PilotDashboard = lazy(() => import("./pages/PilotDashboard"));
 const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
+const InterviewMonitor = lazy(() => import("./pages/InterviewMonitor"));
 const Lists = lazy(() => import("./pages/Lists"));
 const ListDetail = lazy(() => import("./pages/ListDetail"));
 const QuickTour = lazy(() => import("./pages/QuickTour"));
@@ -244,6 +245,15 @@ const App = () => (
               <ProtectedRoute>
                 <MainLayout>
                   <InterviewDetails />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* Phase 3: recruiter-only live monitor for a defense interview. */}
+            <Route path="/interviews/:interviewId/monitor" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <InterviewMonitor />
                 </MainLayout>
               </ProtectedRoute>
             } />

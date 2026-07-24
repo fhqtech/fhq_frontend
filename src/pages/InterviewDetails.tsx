@@ -2092,7 +2092,15 @@ function WorkSamplePanel({
               the interview.
             </CardDescription>
           </div>
-          <WorkSampleStatusBadge status={status} />
+          <div className="flex items-center gap-3">
+            <a
+              href={`/interviews/${interviewId}/monitor`}
+              className="text-xs text-gold-ink hover:underline"
+            >
+              Live monitor
+            </a>
+            <WorkSampleStatusBadge status={status} />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
