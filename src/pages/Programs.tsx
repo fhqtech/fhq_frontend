@@ -1,7 +1,7 @@
 /**
- * Programs — route /programs. The recruiter front door to evaluation journeys:
- * lists every program (hiring or skill-analysis) and links into its pipeline.
- * "Build a program" opens the JourneyBuilder. Reuses recruiterJourneysApi.
+ * Roles — route /roles. The recruiter front door: lists every role and links
+ * into its pipeline. "Open a role" opens the create-role flow. Reuses
+ * recruiterJourneysApi.
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +25,12 @@ const STATUS_TONE: Record<string, string> = {
   archived: "bg-paper-3 text-muted border-rule",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  active: "Active",
+  draft: "Draft",
+  archived: "Archived",
+};
+
 export default function Programs() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -45,7 +51,7 @@ export default function Programs() {
     try {
       setPrograms(await recruiterJourneysApi.listPrograms(ws));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load programs.");
+      setError(err instanceof Error ? err.message : "Could not load roles.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -62,20 +68,20 @@ export default function Programs() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <span className="font-mono uppercase tracking-[0.18em] text-[11px] text-gold-ink">
-            Evaluation
+            Hiring
           </span>
           <h1 className="text-2xl font-semibold tracking-tight text-ink flex items-center gap-2">
             <GitBranch className="w-5 h-5 text-gold-ink" aria-hidden />
-            Programs
+            Roles
           </h1>
           <p className="text-xs text-muted mt-1">
             One journey per role — screen, assignment, interview, decision — with a fused profile.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="gold" size="sm" onClick={() => navigate("/journeys/new")} disabled={!ws}>
+          <Button variant="gold" size="sm" onClick={() => navigate("/roles/new")} disabled={!ws}>
             <Plus className="w-4 h-4" />
-            Build a program
+            Open a role
           </Button>
           <Button
             variant="outline"
@@ -93,14 +99,14 @@ export default function Programs() {
         <ErrorBanner
           tone="warning"
           title="No active workspace"
-          description="Select a workspace to view its programs."
+          description="Select a workspace to view its roles."
         />
       )}
 
       {error && (
         <ErrorBanner
           tone="danger"
-          title="Could not load programs"
+          title="Could not load roles"
           description={error}
           retryLabel="Try again"
           onRetry={() => load("initial")}
@@ -112,9 +118,9 @@ export default function Programs() {
       ) : !error && programs.length === 0 ? (
         <EmptyState
           icon={GitBranch}
-          title="No programs yet"
-          description="Build a program to evaluate candidates through a staged journey."
-          primaryAction={{ label: "Build a program", onClick: () => navigate("/journeys/new") }}
+          title="No roles yet"
+          description="Open a role to evaluate candidates through a staged pipeline."
+          primaryAction={{ label: "Open a role", onClick: () => navigate("/roles/new") }}
         />
       ) : (
         <ul className="divide-y divide-rule rounded-md border border-rule bg-paper">
@@ -122,12 +128,12 @@ export default function Programs() {
             <li key={p.program_id}>
               <button
                 type="button"
-                onClick={() => navigate(`/programs/${p.program_id}`)}
+                onClick={() => navigate(`/roles/${p.program_id}`)}
                 className="flex w-full items-center gap-4 px-5 py-4 text-left hover:bg-paper-2"
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-ink">
-                    {p.title || "Untitled program"}
+                    {p.title || "Untitled role"}
                   </p>
                   <p className="mt-0.5 text-xs text-muted">
                     {PURPOSE_LABEL[p.purpose] ?? p.purpose}
