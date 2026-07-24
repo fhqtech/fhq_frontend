@@ -37,6 +37,7 @@ const RoleContainer = lazy(() => import("./pages/RoleContainer"));
 const OpenRoleFlow = lazy(() => import("./components/role/OpenRoleFlow"));
 const Talent = lazy(() => import("./pages/Talent"));
 const Candidate360 = lazy(() => import("./pages/Candidate360"));
+const ScorecardMatrix = lazy(() => import("./pages/ScorecardMatrix"));
 const PilotDashboard = lazy(() => import("./pages/PilotDashboard"));
 const PoolDashboard = lazy(() => import("./pages/PoolDashboard"));
 const InterviewDetails = lazy(() => import("./pages/InterviewDetails"));
@@ -204,6 +205,17 @@ const App = () => (
               <ProtectedRoute>
                 <MainLayout>
                   <RoleContainer />
+                </MainLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* P13: collaborative scorecards + same-role comparison matrix. Flag
+                gate is inside ScorecardMatrix (scorecard off -> renders nothing,
+                i.e. today's behaviour for this new URL). */}
+            <Route path="/roles/:programId/scorecards" element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <ScorecardMatrix />
                 </MainLayout>
               </ProtectedRoute>
             } />

@@ -43,7 +43,8 @@ export type FlagKey =
   // Phase 5 — expanded-value slices
   | "cohort_gap"
   | "blueprint_target_seed"
-  | "candidate_feedback";
+  | "candidate_feedback"
+  | "scorecard";
 
 export interface FlagDef {
   key: FlagKey;
@@ -91,4 +92,5 @@ export const FLAG_REGISTRY: Record<FlagKey, FlagDef> = {
     "candidate_feedback",
     "Candidate-facing per-skill feedback report with DPDP consent and retention",
   ),
+  scorecard: def("scorecard", "Collaborative per-skill scorecards and same-role comparison matrix"),
 };
