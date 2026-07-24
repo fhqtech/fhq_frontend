@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, Info, ArrowsClockwise, Users, Warning } from 'phosphor-react';
+import { CheckCircle2 as CheckCircle, Info, RefreshCw as ArrowsClockwise, Users, AlertTriangle as Warning } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';

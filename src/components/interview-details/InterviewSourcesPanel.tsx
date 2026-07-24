@@ -1,5 +1,5 @@
 import { AlertTriangle, CheckCircle, FileText, RefreshCw, Loader2 } from "lucide-react";
-import { CloudArrowDown } from "phosphor-react";
+import { CloudDownload as CloudArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shimmer } from "@/components/ui/shimmer";
@@ -45,7 +45,7 @@ export function InterviewSourcesPanel({
     <div className="rounded-sm bg-paper" style={{ boxShadow: 'var(--shadow-1)' }}>
       <div className="px-6 py-5 border-b">
         <div className="flex items-center gap-4">
-          <CloudArrowDown size={48} weight="thin" />
+          <CloudArrowDown size={48} />
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-ink">Applicant sources</h3>
             <p className="text-xs text-muted mt-1">Sync new applicants from updated Google Sheets</p>

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { CaretLeft } from "phosphor-react";
+import { ChevronLeft as CaretLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Shimmer } from "@/components/ui/shimmer";
 

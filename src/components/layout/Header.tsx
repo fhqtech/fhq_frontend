@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import { List as Menu } from "phosphor-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/ui/logo-mark";
 import { ProjectSelector } from "@/components/workspace/ProjectSelector";
@@ -75,7 +75,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           aria-label="Toggle navigation menu"
           className="h-8 w-8 p-0 text-muted hover:text-ink hover:bg-paper-3"
         >
-          <Menu className="w-5 h-5" weight="bold" />
+          <Menu className="w-5 h-5" />
         </Button>
 
         {/* Logo + Text */}

@@ -2,12 +2,12 @@ import { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Users,
-  Gear as Settings,
-  FlowArrow as ProgramsIcon,
-  Bookmarks as BookmarksIcon,
-  House as HomeIcon,
-  Power
-} from "phosphor-react";
+  Settings,
+  GitBranch as ProgramsIcon,
+  Bookmark as BookmarksIcon,
+  Home as HomeIcon,
+  Power,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SpinnerWithCopy } from "@/components/ui/spinner";

@@ -1,4 +1,4 @@
-import { Icon } from "phosphor-react";
+import type { LucideIcon as Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 

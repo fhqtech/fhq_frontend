@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, Play, Robot as Bot, Users, Target, ChartBar as BarChart3, CheckCircle, Clock, FileText, Phone, Envelope as Mail, ChatCircle as MessageSquare, X } from "phosphor-react";
+import { ArrowLeft, ArrowRight, Play, Bot, Users, Target, BarChart3, CheckCircle2 as CheckCircle, Clock, FileText, Phone, Mail, MessageSquare, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -62,28 +62,28 @@ const getTourSteps = (navigate: ReturnType<typeof useNavigate>) => [
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center gap-2 p-4 bg-success-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <CheckCircle className="w-5 h-5 text-success" weight="fill" />
+            <CheckCircle className="w-5 h-5 text-success" />
             <div>
               <h4 className="font-semibold text-sm text-foreground">Automated screening</h4>
               <p className="text-[10px] text-muted-foreground">AI conducts interviews automatically</p>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 bg-info-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <BarChart3 className="w-5 h-5 text-info" weight="fill" />
+            <BarChart3 className="w-5 h-5 text-info" />
             <div>
               <h4 className="font-semibold text-sm text-foreground">Smart analytics</h4>
               <p className="text-[10px] text-muted-foreground">Detailed insights and scoring</p>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 bg-warning-soft rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <Target className="w-5 h-5 text-warning" weight="fill" />
+            <Target className="w-5 h-5 text-warning" />
             <div>
               <h4 className="font-semibold text-sm text-foreground">Role-specific fitment</h4>
               <p className="text-[10px] text-muted-foreground">Assess for specific positions</p>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 bg-paper-3 rounded-sm shadow-1 hover:shadow-2 transition-shadow duration-200">
-            <Clock className="w-5 h-5 text-gold-ink" weight="fill" />
+            <Clock className="w-5 h-5 text-gold-ink" />
             <div>
               <h4 className="font-semibold text-sm text-foreground">Save time</h4>
               <p className="text-[10px] text-muted-foreground">80% less screening time</p>

@@ -4,7 +4,7 @@
  * Renders a big animated counter + label + body copy. Uses bento
  * footprint (cols=8 rows=2 on the BentoGrid). transform + opacity only.
  */
-import type { Icon } from "phosphor-react";
+import type { LucideIcon as Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 

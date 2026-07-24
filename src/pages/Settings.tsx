@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Envelope as Mail, SpeakerHigh as Volume2, CheckCircle, Play, Stop, FolderOpen as Folder, MagnifyingGlass as Search, Star } from "phosphor-react";
+import { User, Mail, Volume2, CheckCircle2 as CheckCircle, Play, Square as Stop, FolderOpen as Folder, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -581,7 +581,7 @@ export default function Settings() {
                       >
                         {isSelected && !isDisabled && (
                           <div className="absolute -top-1 -right-1 w-4 h-4 bg-ink rounded-full flex items-center justify-center">
-                            <CheckCircle className="w-3 h-3 text-paper" weight="fill" />
+                            <CheckCircle className="w-3 h-3 text-paper" />
                           </div>
                         )}
 
@@ -691,7 +691,7 @@ export default function Settings() {
                             onClick={playAudioPreview}
                             className="flex items-center gap-1 px-3 py-1 text-xs border-ink text-ink hover:bg-ink hover:text-paper"
                           >
-                            <Play className="w-3 h-3" weight="fill" />
+                            <Play className="w-3 h-3" />
                             Preview
                           </Button>
                         ) : (
@@ -702,7 +702,7 @@ export default function Settings() {
                             onClick={stopAudioPreview}
                             className="flex items-center gap-1 px-3 py-1 text-xs border-danger/30 text-danger hover:bg-red-500 hover:text-paper"
                           >
-                            <Stop className="w-3 h-3" weight="fill" />
+                            <Stop className="w-3 h-3" />
                             Stop
                           </Button>
                         )}

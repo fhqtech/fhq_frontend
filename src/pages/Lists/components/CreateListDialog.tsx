@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, CheckCircle, Trash, X } from 'lucide-react';
-import { CircleNotch } from 'phosphor-react';
+import { Loader2 as CircleNotch } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { listsApi } from '@/services/listsApi';
