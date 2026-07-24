@@ -31,6 +31,30 @@ const STATUS_LABEL: Record<string, string> = {
   archived: "Archived",
 };
 
+/** Compact relative time ("3d ago") from an ISO string; null if unparseable. */
+function relTime(iso?: string): string | null {
+  if (!iso) return null;
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return null;
+  const diff = Date.now() - then;
+  const hour = 3_600_000;
+  const day = 86_400_000;
+  if (diff < hour) return "just now";
+  if (diff < day) return `${Math.floor(diff / hour)}h ago`;
+  if (diff < 30 * day) return `${Math.floor(diff / day)}d ago`;
+  return `${Math.floor(diff / (30 * day))}mo ago`;
+}
+
+/** Config readiness a recruiter can act on, derived from the program doc alone
+ * (no per-role aggregate exists server-side): a role needs a saved journey
+ * pipeline before it can screen anyone. */
+function readiness(p: Program): { label: string; ready: boolean } {
+  const hasJourney = Boolean(p.journey_template_id);
+  return hasJourney
+    ? { label: "Journey ready", ready: true }
+    : { label: "Setup pending", ready: false };
+}
+
 export default function Programs() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -139,6 +163,28 @@ export default function Programs() {
                     {PURPOSE_LABEL[p.purpose] ?? p.purpose}
                     {p.domain ? ` · ${p.domain}` : ""}
                   </p>
+                </div>
+                <div className="hidden shrink-0 flex-col items-end gap-0.5 text-right sm:flex">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 text-[11px] font-medium",
+                      readiness(p).ready ? "text-success" : "text-muted",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        readiness(p).ready ? "bg-success" : "bg-rule-strong",
+                      )}
+                      aria-hidden
+                    />
+                    {readiness(p).label}
+                  </span>
+                  {relTime(p.updatedAt) ? (
+                    <span className="font-mono text-[11px] tabular-nums text-muted">
+                      Updated {relTime(p.updatedAt)}
+                    </span>
+                  ) : null}
                 </div>
                 {p.status ? (
                   <span
