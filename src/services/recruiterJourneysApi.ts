@@ -379,6 +379,26 @@ export const recruiterJourneysApi = {
   },
 
   /**
+   * Suggest a competency target from the role's own blueprint required
+   * proficiencies (read-only; the recruiter reviews then saves). Fail-soft: any
+   * error yields an empty suggestion so the editor falls back to its flat default.
+   */
+  async suggestTarget(
+    ws: string,
+    programId: string,
+  ): Promise<{ competencies: Competency[]; source?: string | null; blueprint_id?: string }> {
+    try {
+      const r = await fetch(`${programsBase(ws)}/${programId}/target/suggestion`, {
+        headers: authHeaders(),
+      });
+      if (!r.ok) return { competencies: [] };
+      return r.json();
+    } catch {
+      return { competencies: [] };
+    }
+  },
+
+  /**
    * Gap-vs-target read for one candidate. The backend returns 404 when the
    * candidate has no fused role tag yet — callers catch the thrown error to
    * show a "no evidence yet" empty state.

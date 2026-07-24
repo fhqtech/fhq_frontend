@@ -22,7 +22,7 @@ import { TargetEditor } from "@/components/journey/TargetEditor";
 import { PipelineBuilder } from "@/components/journey/PipelineBuilder";
 import { RoleCohortGap } from "@/components/role/RoleCohortGap";
 import { useFlag } from "@/lib/flags/FlagProvider";
-import type { GatingRule } from "@/services/recruiterJourneysApi";
+import type { GatingRule, Competency } from "@/services/recruiterJourneysApi";
 import { Button } from "@/components/ui/button";
 import { appendStage } from "@/lib/stageColumns";
 import { PageSkeleton } from "@/components/ui/shimmer";
@@ -46,6 +46,24 @@ export default function RoleContainer() {
   const [showPipeline, setShowPipeline] = useState(false);
   const [view, setView] = useState<"board" | "table">("board");
   const cohortGapOn = useFlag("cohort_gap");
+  const blueprintSeedOn = useFlag("blueprint_target_seed");
+  const [seed, setSeed] = useState<Competency[] | null>(null);
+  const [seedLoading, setSeedLoading] = useState(false);
+
+  // P7 — when the seed flag is on and the role has no target yet, fetch a
+  // suggestion from the role blueprint before mounting the editor (read-only;
+  // the recruiter still reviews + saves). Fail-soft to the flat default.
+  useEffect(() => {
+    if (!showTarget || !ws || !programId || !blueprintSeedOn) return;
+    if ((program?.target_competencies?.length ?? 0) > 0) return;
+    if (seed !== null) return;
+    setSeedLoading(true);
+    recruiterJourneysApi
+      .suggestTarget(ws, programId)
+      .then((s) => setSeed(s.competencies ?? []))
+      .catch(() => setSeed([]))
+      .finally(() => setSeedLoading(false));
+  }, [showTarget, ws, programId, blueprintSeedOn, program?.target_competencies, seed]);
 
   const handleAddCandidates = async (emails: string[]) => {
     if (!ws || !programId) return;
@@ -197,11 +215,21 @@ export default function RoleContainer() {
       </header>
 
       {/* B2 — author the role's skill target bars (feeds the gap-vs-target read). */}
-      {showTarget && ws && programId && (
+      {showTarget && ws && programId && !seedLoading && (
         <TargetEditor
+          key={`target-${seed ? seed.length : "none"}`}
           ws={ws}
           programId={programId}
-          initial={program.target_competencies ?? []}
+          initial={
+            (program.target_competencies?.length ?? 0) > 0
+              ? program.target_competencies ?? []
+              : seed ?? []
+          }
+          seededFromBlueprint={
+            blueprintSeedOn &&
+            (program.target_competencies?.length ?? 0) === 0 &&
+            (seed?.length ?? 0) > 0
+          }
           onSaved={(competencies) =>
             setProgram((p) => (p ? { ...p, target_competencies: competencies } : p))
           }

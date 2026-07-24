@@ -41,7 +41,8 @@ export type FlagKey =
   | "stage_results"
   | "candidate_write"
   // Phase 5 — expanded-value slices
-  | "cohort_gap";
+  | "cohort_gap"
+  | "blueprint_target_seed";
 
 export interface FlagDef {
   key: FlagKey;
@@ -81,4 +82,8 @@ export const FLAG_REGISTRY: Record<FlagKey, FlagDef> = {
   stage_results: def("stage_results", "Consolidated stage-results surface"),
   candidate_write: def("candidate_write", "Write-side candidate-record consolidation"),
   cohort_gap: def("cohort_gap", "Cohort gap-vs-target summary on the role pipeline"),
+  blueprint_target_seed: def(
+    "blueprint_target_seed",
+    "Seed the role skill target from the role blueprint's required proficiencies",
+  ),
 };

@@ -54,6 +54,8 @@ export interface TargetEditorProps {
   programId: string;
   initial: Competency[];
   onSaved?: (competencies: Competency[]) => void;
+  /** When the rows were pre-filled from the role blueprint, show a short note. */
+  seededFromBlueprint?: boolean;
   className?: string;
 }
 
@@ -62,6 +64,7 @@ export function TargetEditor({
   programId,
   initial,
   onSaved,
+  seededFromBlueprint,
   className,
 }: TargetEditorProps) {
   const { toast } = useToast();
@@ -133,6 +136,11 @@ export function TargetEditor({
           <p className="text-xs text-muted mt-0.5">
             Set the bar each candidate's demonstrated skill is measured against.
           </p>
+          {seededFromBlueprint ? (
+            <p className="mt-1 text-xs text-muted">
+              Seeded from the role blueprint — adjust the bars, then save.
+            </p>
+          ) : null}
         </div>
         <Button variant="gold" size="sm" disabled={saving} onClick={save}>
           {saving ? "Saving…" : "Save target"}
