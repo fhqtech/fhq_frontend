@@ -9,6 +9,7 @@
  */
 import { cn } from "@/lib/utils";
 import { journeyAction } from "@/lib/journeyAction";
+import { currentScore } from "@/lib/journeyScore";
 import { ScoreChip } from "@/components/ui/score-chip";
 import type { JourneyStage, JourneyInstance } from "@/services/recruiterJourneysApi";
 
@@ -17,16 +18,6 @@ export interface PipelineTableProps {
   journeys: JourneyInstance[];
   onOpenCandidate?: (journey: JourneyInstance) => void;
   onStart?: (journey: JourneyInstance) => void;
-}
-
-/** Best available score for a journey: the current stage's recorded score,
- * else the highest score across completed stages, else null (not assessed). */
-function currentScore(j: JourneyInstance): number | null {
-  const sp = j.stage_progress ?? [];
-  const cur = sp.find((s) => s.stage_id === j.current_stage_id && s.score != null);
-  if (cur?.score != null) return cur.score;
-  const scored = sp.filter((s) => s.score != null).map((s) => s.score as number);
-  return scored.length ? Math.max(...scored) : null;
 }
 
 export function PipelineTable({ stages, journeys, onOpenCandidate, onStart }: PipelineTableProps) {

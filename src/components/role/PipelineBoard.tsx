@@ -11,6 +11,8 @@
 import { cn } from "@/lib/utils";
 import { groupJourneysByStage } from "@/lib/stageColumns";
 import { journeyAction } from "@/lib/journeyAction";
+import { currentScore } from "@/lib/journeyScore";
+import { ScoreChip } from "@/components/ui/score-chip";
 import type { JourneyStage, JourneyInstance } from "@/services/recruiterJourneysApi";
 
 export interface PipelineBoardProps {
@@ -47,13 +49,19 @@ export function PipelineBoard({ stages, journeys, onOpenCandidate, onStart }: Pi
                     key={j.journey_instance_id}
                     className="w-full rounded-md border border-rule bg-paper px-3 py-2 transition-colors hover:border-gold-ink"
                   >
-                    <button
-                      type="button"
-                      onClick={() => onOpenCandidate?.(j)}
-                      className="block w-full truncate text-left text-sm font-medium text-ink"
-                    >
-                      {j.candidate_name || j.candidate_id}
-                    </button>
+                    <div className="flex items-start justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onOpenCandidate?.(j)}
+                        className="min-w-0 flex-1 truncate text-left text-sm font-medium text-ink hover:text-gold-ink"
+                      >
+                        {j.candidate_name || j.candidate_id}
+                      </button>
+                      <ScoreChip score={currentScore(j)} size="sm" className="shrink-0" />
+                    </div>
+                    {j.candidate_email ? (
+                      <p className="mt-0.5 truncate text-[11px] text-muted">{j.candidate_email}</p>
+                    ) : null}
                     {action.kind === "start" ? (
                       <button
                         type="button"
