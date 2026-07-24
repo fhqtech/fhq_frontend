@@ -26,6 +26,8 @@ import { ThroughputChart } from "@/components/dashboard/ThroughputChart";
 import { DomainSplit } from "@/components/dashboard/DomainSplit";
 import { InterviewRollupTable } from "@/components/dashboard/InterviewRollupTable";
 import { TopCandidatesStrip } from "@/components/dashboard/TopCandidatesStrip";
+import { SkillHeatmap } from "@/components/dashboard/SkillHeatmap";
+import { ServiceStatusWidget } from "@/components/dashboard/ServiceStatusWidget";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { PageSkeleton } from "@/components/ui/shimmer";
@@ -104,6 +106,8 @@ export default function Home() {
         </p>
       </header>
 
+      <ServiceStatusWidget />
+
       {loading ? (
         <PageSkeleton header={false} cards={0} rows={5} cols={2} message="Loading your workspace…" />
       ) : error ? (
@@ -158,6 +162,9 @@ export default function Home() {
                 </BentoCell>
                 <BentoCell cols={5}>
                   <TopCandidatesStrip className="h-full" candidates={dashboardData.top_candidates} />
+                </BentoCell>
+                <BentoCell cols={12}>
+                  <SkillHeatmap className="h-full" refreshKey={liveRevision} />
                 </BentoCell>
               </BentoGrid>
             </section>
