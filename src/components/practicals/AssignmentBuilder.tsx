@@ -37,6 +37,9 @@ export function AssignmentBuilder({ ws, pr, practicalId }: AssignmentBuilderProp
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [draftBrief, setDraftBrief] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attempts = useRef(0);
   const mounted = useRef(true);
@@ -129,6 +132,21 @@ export function AssignmentBuilder({ ws, pr, practicalId }: AssignmentBuilderProp
     }
   }
 
+  async function saveEdit() {
+    if (!brief) return;
+    setSavingEdit(true);
+    setError(null);
+    try {
+      await practicalsApi.updateAssignment(ws, pr, practicalId, { task_brief: draftBrief });
+      setBrief({ ...brief, task_brief: draftBrief });
+      setEditing(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save the brief.");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
   return (
     <section className="space-y-4 rounded-md border border-rule bg-paper p-4">
       <header>
@@ -168,19 +186,54 @@ export function AssignmentBuilder({ ws, pr, practicalId }: AssignmentBuilderProp
       {(phase === "ready" || phase === "inviting" || phase === "invited") && brief && (
         <div className="space-y-4">
           <div className="rounded-md border border-rule bg-paper-2 p-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-ink">Preview</p>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{brief.task_brief}</p>
-            {brief.expected_artifacts?.length ? (
-              <ul className="mt-3 list-disc pl-5 text-sm text-ink-soft">
-                {brief.expected_artifacts.map((a, i) => (
-                  <li key={i}>{a}</li>
-                ))}
-              </ul>
-            ) : null}
-            {typeof brief.estimated_effort_min === "number" && (
-              <p className="mt-2 text-xs text-muted">
-                Estimated effort: <span className="font-mono tabular-nums">{brief.estimated_effort_min}</span> minutes.
-              </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-ink">Preview</p>
+              {phase !== "invited" && !editing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraftBrief(brief.task_brief || "");
+                    setEditing(true);
+                  }}
+                  className="text-[11px] text-gold-ink hover:underline"
+                >
+                  Edit brief
+                </button>
+              )}
+            </div>
+            {editing ? (
+              <div className="mt-2 space-y-2">
+                <textarea
+                  aria-label="Edit brief"
+                  value={draftBrief}
+                  onChange={(e) => setDraftBrief(e.target.value)}
+                  className="min-h-40 w-full rounded-md border border-rule bg-paper p-2 text-sm text-ink focus:border-gold-ink focus:outline-none"
+                />
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setEditing(false)} disabled={savingEdit}>
+                    Cancel
+                  </Button>
+                  <Button type="button" size="sm" onClick={saveEdit} disabled={savingEdit}>
+                    {savingEdit ? "Saving…" : "Save"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{brief.task_brief}</p>
+                {brief.expected_artifacts?.length ? (
+                  <ul className="mt-3 list-disc pl-5 text-sm text-ink-soft">
+                    {brief.expected_artifacts.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {typeof brief.estimated_effort_min === "number" && (
+                  <p className="mt-2 text-xs text-muted">
+                    Estimated effort: <span className="font-mono tabular-nums">{brief.estimated_effort_min}</span> minutes.
+                  </p>
+                )}
+              </>
             )}
           </div>
 

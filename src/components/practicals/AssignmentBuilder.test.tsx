@@ -10,6 +10,7 @@ vi.mock("@/services/practicalsApi", () => ({
     getPractical: vi.fn(),
     getAssignment: vi.fn(),
     inviteCandidates: vi.fn(),
+    updateAssignment: vi.fn(),
   },
 }));
 
@@ -18,6 +19,7 @@ const mocked = practicalsApi as unknown as {
   getPractical: ReturnType<typeof vi.fn>;
   getAssignment: ReturnType<typeof vi.fn>;
   inviteCandidates: ReturnType<typeof vi.fn>;
+  updateAssignment: ReturnType<typeof vi.fn>;
 };
 
 const READY_BRIEF = {
@@ -34,6 +36,7 @@ beforeEach(() => {
   // Default: no assignment yet on mount, so the builder starts idle (generate).
   mocked.getAssignment.mockRejectedValue(new Error("not found"));
   mocked.inviteCandidates.mockResolvedValue({ invitations: [], count: 1 });
+  mocked.updateAssignment.mockResolvedValue({ updated: true, task_brief: "edited case" });
 });
 
 describe("AssignmentBuilder", () => {
@@ -66,6 +69,23 @@ describe("AssignmentBuilder", () => {
       { name: "arjun", email: "arjun@example.com" },
     ]);
     expect(await screen.findByText(/invitation sent/i)).toBeInTheDocument();
+  });
+
+  it("lets the recruiter edit the brief before inviting", async () => {
+    mocked.getAssignment.mockReset();
+    mocked.getAssignment.mockResolvedValue(READY_BRIEF);
+    const user = userEvent.setup();
+    render(<AssignmentBuilder ws="w1" pr="pr1" practicalId="p1" />);
+    await screen.findByText(/reconcile itc in the attached workings/i);
+
+    await user.click(screen.getByRole("button", { name: /edit brief/i }));
+    const box = screen.getByLabelText("Edit brief");
+    await user.clear(box);
+    await user.type(box, "edited case");
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
+
+    expect(mocked.updateAssignment).toHaveBeenCalledWith("w1", "pr1", "p1", { task_brief: "edited case" });
+    expect(await screen.findByText("edited case")).toBeInTheDocument();
   });
 
   it("surfaces a generation failure", async () => {

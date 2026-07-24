@@ -171,6 +171,22 @@ export const practicalsApi = {
     return r.json();
   },
 
+  /** Edit the generated brief's candidate-facing prose before inviting. */
+  async updateAssignment(
+    ws: string,
+    pr: string,
+    practicalId: string,
+    body: { task_brief?: string; expected_artifacts?: string[] },
+  ): Promise<{ updated: boolean; task_brief?: string; expected_artifacts?: string[] }> {
+    const r = await fetch(`${scope(ws, pr)}/${practicalId}/assignment`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error(await detailFrom(r, "Could not save the brief"));
+    return r.json();
+  },
+
   async inviteCandidates(
     ws: string,
     pr: string,
