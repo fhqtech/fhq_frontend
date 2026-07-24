@@ -20,6 +20,8 @@ import { AddStageMenu } from "@/components/role/AddStageMenu";
 import { AddCandidatesToRole } from "@/components/role/AddCandidatesToRole";
 import { TargetEditor } from "@/components/journey/TargetEditor";
 import { PipelineBuilder } from "@/components/journey/PipelineBuilder";
+import { RoleCohortGap } from "@/components/role/RoleCohortGap";
+import { useFlag } from "@/lib/flags/FlagProvider";
 import type { GatingRule } from "@/services/recruiterJourneysApi";
 import { Button } from "@/components/ui/button";
 import { appendStage } from "@/lib/stageColumns";
@@ -43,6 +45,7 @@ export default function RoleContainer() {
   const [showTarget, setShowTarget] = useState(false);
   const [showPipeline, setShowPipeline] = useState(false);
   const [view, setView] = useState<"board" | "table">("board");
+  const cohortGapOn = useFlag("cohort_gap");
 
   const handleAddCandidates = async (emails: string[]) => {
     if (!ws || !programId) return;
@@ -218,6 +221,15 @@ export default function RoleContainer() {
               p ? { ...p, stages: nextStages, rules: nextRules, template_version: nextVersion } : p,
             )
           }
+        />
+      )}
+
+      {/* P6 — cohort gap vs the authored target (flag-gated, honest empty states). */}
+      {cohortGapOn && ws && programId && (
+        <RoleCohortGap
+          ws={ws}
+          programId={programId}
+          hasTarget={(program.target_competencies?.length ?? 0) > 0}
         />
       )}
 

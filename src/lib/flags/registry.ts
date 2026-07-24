@@ -39,7 +39,9 @@ export type FlagKey =
   | "canonical_id"
   | "candidate_360"
   | "stage_results"
-  | "candidate_write";
+  | "candidate_write"
+  // Phase 5 — expanded-value slices
+  | "cohort_gap";
 
 export interface FlagDef {
   key: FlagKey;
@@ -78,4 +80,5 @@ export const FLAG_REGISTRY: Record<FlagKey, FlagDef> = {
   candidate_360: def("candidate_360", "Read-time candidate-360 fan-in view"),
   stage_results: def("stage_results", "Consolidated stage-results surface"),
   candidate_write: def("candidate_write", "Write-side candidate-record consolidation"),
+  cohort_gap: def("cohort_gap", "Cohort gap-vs-target summary on the role pipeline"),
 };
