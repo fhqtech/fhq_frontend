@@ -14,6 +14,8 @@ import {
   type StageType,
 } from "@/services/recruiterJourneysApi";
 import { PipelineBoard } from "@/components/role/PipelineBoard";
+import { PipelineTable } from "@/components/role/PipelineTable";
+import { cn } from "@/lib/utils";
 import { AddStageMenu } from "@/components/role/AddStageMenu";
 import { AddCandidatesToRole } from "@/components/role/AddCandidatesToRole";
 import { TargetEditor } from "@/components/journey/TargetEditor";
@@ -23,7 +25,7 @@ import { PageSkeleton } from "@/components/ui/shimmer";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "@/hooks/use-toast";
-import { Users, Target } from "lucide-react";
+import { Users, Target, LayoutGrid, Table as TableIcon } from "lucide-react";
 
 export default function RoleContainer() {
   const { programId } = useParams<{ programId: string }>();
@@ -37,6 +39,7 @@ export default function RoleContainer() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showTarget, setShowTarget] = useState(false);
+  const [view, setView] = useState<"board" | "table">("board");
 
   const handleAddCandidates = async (emails: string[]) => {
     if (!ws || !programId) return;
@@ -196,12 +199,51 @@ export default function RoleContainer() {
           description="Add a stage to start screening candidates for this role."
         />
       ) : (
-        <PipelineBoard
-          stages={stages}
-          journeys={journeys}
-          onOpenCandidate={(j) => navigate(`/roles/${programId}/candidates/${j.candidate_id}`)}
-          onStart={handleStart}
-        />
+        <div className="space-y-3">
+          <div className="flex items-center justify-end">
+            <div className="inline-flex rounded-md border border-rule bg-paper-2 p-0.5" role="group" aria-label="Pipeline view">
+              <button
+                type="button"
+                onClick={() => setView("board")}
+                aria-pressed={view === "board"}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium transition-colors",
+                  view === "board" ? "bg-paper text-ink shadow-1" : "text-muted hover:text-ink",
+                )}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" aria-hidden />
+                Board
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("table")}
+                aria-pressed={view === "table"}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium transition-colors",
+                  view === "table" ? "bg-paper text-ink shadow-1" : "text-muted hover:text-ink",
+                )}
+              >
+                <TableIcon className="h-3.5 w-3.5" aria-hidden />
+                Table
+              </button>
+            </div>
+          </div>
+          {view === "board" ? (
+            <PipelineBoard
+              stages={stages}
+              journeys={journeys}
+              onOpenCandidate={(j) => navigate(`/roles/${programId}/candidates/${j.candidate_id}`)}
+              onStart={handleStart}
+            />
+          ) : (
+            <PipelineTable
+              stages={stages}
+              journeys={journeys}
+              onOpenCandidate={(j) => navigate(`/roles/${programId}/candidates/${j.candidate_id}`)}
+              onStart={handleStart}
+            />
+          )}
+        </div>
       )}
     </div>
   );
