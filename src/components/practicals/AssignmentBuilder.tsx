@@ -50,6 +50,27 @@ export function AssignmentBuilder({ ws, pr, practicalId }: AssignmentBuilderProp
     };
   }, []);
 
+  // Preview an already-generated assignment (e.g. one the journey provisioned)
+  // instead of blindly offering to regenerate over a live case. Stays idle
+  // (generate) when there's no assignment yet.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const a = await practicalsApi.getAssignment(ws, pr, practicalId);
+        if (!cancelled && a?.ready && a.task_brief) {
+          setBrief(a);
+          setPhase("ready");
+        }
+      } catch {
+        /* no assignment yet — stay idle so the recruiter can generate one */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ws, pr, practicalId]);
+
   // ~60s cap so a stuck/dead generation job doesn't poll forever.
   const MAX_POLLS = 40;
 

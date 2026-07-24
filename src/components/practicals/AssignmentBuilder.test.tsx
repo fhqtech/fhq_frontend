@@ -20,21 +20,36 @@ const mocked = practicalsApi as unknown as {
   inviteCandidates: ReturnType<typeof vi.fn>;
 };
 
+const READY_BRIEF = {
+  ready: true,
+  task_brief: "Reconcile ITC in the attached workings.",
+  expected_artifacts: ["A 1-page memo"],
+  estimated_effort_min: 90,
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocked.generateAssignment.mockResolvedValue({ success: true, status: "generating", practicalId: "p1" });
   mocked.getPractical.mockResolvedValue({ id: "p1", title: "Tax Analyst", assignmentStatus: "ready" });
-  mocked.getAssignment.mockResolvedValue({
-    ready: true,
-    task_brief: "Reconcile ITC in the attached workings.",
-    expected_artifacts: ["A 1-page memo"],
-    estimated_effort_min: 90,
-  });
+  // Default: no assignment yet on mount, so the builder starts idle (generate).
+  mocked.getAssignment.mockRejectedValue(new Error("not found"));
   mocked.inviteCandidates.mockResolvedValue({ invitations: [], count: 1 });
 });
 
 describe("AssignmentBuilder", () => {
+  it("previews an already-generated assignment on mount", async () => {
+    mocked.getAssignment.mockReset();
+    mocked.getAssignment.mockResolvedValue(READY_BRIEF);
+    render(<AssignmentBuilder ws="w1" pr="pr1" practicalId="p1" />);
+    // no generate click — the existing brief shows straight away for review
+    expect(await screen.findByText(/reconcile itc in the attached workings/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /generate assignment/i })).not.toBeInTheDocument();
+  });
+
   it("generates, previews the brief, then invites", async () => {
+    // reject on mount (no assignment), then resolve once generated
+    mocked.getAssignment.mockReset();
+    mocked.getAssignment.mockRejectedValueOnce(new Error("not found")).mockResolvedValue(READY_BRIEF);
     const user = userEvent.setup();
     render(<AssignmentBuilder ws="w1" pr="pr1" practicalId="p1" />);
 

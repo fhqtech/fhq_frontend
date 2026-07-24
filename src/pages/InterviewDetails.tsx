@@ -76,6 +76,7 @@ import { InterviewSourcesPanel } from "@/components/interview-details/InterviewS
 import { TopMatchesCard } from "@/components/interview-details/TopMatchesCard";
 import { StartInterviewModal } from "@/components/interview-details/StartInterviewModal";
 import { WorkSampleSubmissions } from "@/components/practicals/WorkSampleSubmissions";
+import { AssignmentBuilder } from "@/components/practicals/AssignmentBuilder";
 
 
 // Data layer lives in src/queries/interviewDetailsQueries.ts (F29.1).
@@ -2105,7 +2106,10 @@ function WorkSamplePanel({
             is resolved.
           </p>
         ) : (
-          <WorkSampleSubmissions ws={ws} pr={pr} practicalId={interviewId} />
+          <div className="space-y-4">
+            <AssignmentBuilder ws={ws} pr={pr} practicalId={interviewId} />
+            <WorkSampleSubmissions ws={ws} pr={pr} practicalId={interviewId} />
+          </div>
         )}
       </CardContent>
     </Card>
