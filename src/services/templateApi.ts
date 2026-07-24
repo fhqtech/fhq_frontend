@@ -6,6 +6,8 @@ export interface ProficiencyLevel {
   description: string;
 }
 
+export type SkillType = 'technical' | 'behavioral' | 'cultural';
+
 export interface BlueprintSkill {
   skill_id: string;
   name: string;
@@ -13,6 +15,13 @@ export interface BlueprintSkill {
   description: string;
   expected_proficiency: number;
   proficiency_levels: ProficiencyLevel[];
+  // Widened to the backend Skill contract (blueprint/schema.py::Skill). All
+  // optional so older persisted blueprints keep parsing; the L1-L5 rubric
+  // table reads these when present.
+  skill_type?: SkillType;
+  is_critical?: boolean;
+  target_probes?: number;
+  canonical_id?: string | null;
 }
 
 export interface DerivedSkill {
@@ -48,6 +57,20 @@ export interface Tool {
   category: string;
 }
 
+export interface NonNegotiable {
+  question: string;
+  importance: string;
+  category?: string;
+}
+
+export interface InterviewBudget {
+  expected_duration_min?: number;
+  max_duration_min?: number;
+  min_duration_min?: number;
+  min_critical_coverage?: number;
+  min_total_coverage?: number;
+}
+
 export interface FullBlueprintData {
   id: string;
   title: string;
@@ -61,10 +84,14 @@ export interface FullBlueprintData {
   scope: 'global' | 'private';
   source: 'control_tower' | 'project';
   blueprintStatus: 'pending' | 'generating' | 'ready' | 'error';
+  domain?: string;
+  template_type?: 'screening' | 'fitment';
   skills?: BlueprintSkill[];
   skill_layout?: SkillLayout;
   tools?: Tool[];
   certifications_recommended?: string[];
+  non_negotiables?: NonNegotiable[];
+  budget?: InterviewBudget;
   interview_notes?: string;
   evaluation_pillars?: EvaluationPillar[];
   ideal_candidate_profile?: string;
